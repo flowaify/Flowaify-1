@@ -1,904 +1,1140 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>flowaify — Automate. Flow. Amplify.</title>
-  <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 
   <style>
-    /* ─── Reset & base ─── */
+    :root {
+      --bg:          #000000;
+      --bg-surface:  #07071a;
+      --bg-card:     #0e0e22;
+      --text:        #ffffff;
+      --text-muted:  rgba(255,255,255,0.45);
+      --text-soft:   rgba(255,255,255,0.72);
+      --blue:        #0057FF;
+      --blue-mid:    #1A6BFF;
+      --blue-soft:   #3D82FF;
+      --blue-glow:   rgba(0,87,255,0.35);
+      --blue-dim:    rgba(0,87,255,0.12);
+      --border:      rgba(255,255,255,0.09);
+      --border-blue: rgba(0,87,255,0.38);
+      --grid:        rgba(255,255,255,0.042);
+    }
+    [data-theme="light"] {
+      --bg:          #F8F9FA;
+      --bg-surface:  #EFF1F5;
+      --bg-card:     #ffffff;
+      --text:        #09090f;
+      --text-muted:  rgba(0,0,0,0.42);
+      --text-soft:   rgba(0,0,0,0.65);
+      --blue:        #0057FF;
+      --blue-mid:    #1A6BFF;
+      --blue-soft:   #3D82FF;
+      --blue-glow:   rgba(0,87,255,0.18);
+      --blue-dim:    rgba(0,87,255,0.07);
+      --border:      rgba(0,0,0,0.08);
+      --border-blue: rgba(0,87,255,0.22);
+      --grid:        rgba(0,0,0,0.045);
+    }
+
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; }
+
     body {
       font-family: 'Rubik', sans-serif;
-      background: #080810;
-      color: #fff;
+      background: var(--bg);
+      color: var(--text);
       -webkit-font-smoothing: antialiased;
       overflow-x: hidden;
+      transition: background 0.45s ease, color 0.45s ease;
     }
 
-    /* ─── Brand tokens ─── */
-    :root {
-      --blue:       #0057FF;
-      --blue-mid:   #1A6BFF;
-      --blue-soft:  #3D82FF;
-      --blue-dim:   rgba(0, 87, 255, 0.15);
-      --blue-glow:  rgba(0, 87, 255, 0.35);
-      --navy:       #00102E;
-      --surface:    #0F0F1A;
-      --card:       #12121E;
-      --border:     rgba(255,255,255,0.07);
-      --border-blue:rgba(0, 87, 255, 0.22);
-      --text-muted: rgba(255,255,255,0.45);
-      --text-soft:  rgba(255,255,255,0.65);
-    }
-
-    /* ─── Noise grain overlay ─── */
+    /* Grain */
     body::after {
       content: '';
       position: fixed; inset: 0;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
-      pointer-events: none;
-      z-index: 9999;
-      opacity: 1;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.028'/%3E%3C/svg%3E");
+      pointer-events: none; z-index: 9998;
     }
 
-    /* ─── Keyframes ─── */
-    @keyframes float {
-      0%, 100% { transform: translateY(0px) rotate(0deg); }
-      33%       { transform: translateY(-14px) rotate(1.5deg); }
-      66%       { transform: translateY(-7px) rotate(-1deg); }
-    }
-    @keyframes pulse-ring {
-      0%, 100% { opacity: 0.35; transform: scale(1); }
-      50%       { opacity: 0.7;  transform: scale(1.04); }
-    }
-    @keyframes pulse-ring-slow {
-      0%, 100% { opacity: 0.15; transform: scale(1); }
-      50%       { opacity: 0.4;  transform: scale(1.06); }
-    }
-    @keyframes fade-up {
-      from { opacity: 0; transform: translateY(28px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-    @keyframes fade-in {
-      from { opacity: 0; }
-      to   { opacity: 1; }
-    }
-    @keyframes slide-in-right {
-      from { opacity: 0; transform: translateX(30px); }
-      to   { opacity: 1; transform: translateX(0); }
-    }
-    @keyframes dot-blink {
-      0%, 100% { opacity: 1; }
-      50%       { opacity: 0.3; }
+    /* Grid bg */
+    .grid-bg {
+      background-image:
+        linear-gradient(var(--grid) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+      background-size: 64px 64px;
     }
 
-    /* ─── Utility animations ─── */
-    /* Hero animates immediately on load */
-    .anim-fade-up {
-      animation: fade-up 0.9s cubic-bezier(0.16,1,0.3,1) both;
-    }
-    .anim-slide-r {
-      animation: slide-in-right 0.9s cubic-bezier(0.16,1,0.3,1) both;
-    }
-    .anim-fade-in { animation: fade-in 0.7s ease both; }
-    .delay-100 { animation-delay: 0.12s; }
-    .delay-200 { animation-delay: 0.24s; }
-    .delay-300 { animation-delay: 0.36s; }
-    .delay-400 { animation-delay: 0.48s; }
-    .delay-500 { animation-delay: 0.60s; }
-    .delay-600 { animation-delay: 0.72s; }
-
-    /* Scroll-reveal: start hidden, JS adds .revealed */
-    .reveal {
-      opacity: 0;
-      transform: translateY(24px);
-      transition: opacity 0.7s cubic-bezier(0.16,1,0.3,1),
-                  transform 0.7s cubic-bezier(0.16,1,0.3,1);
-    }
-    .reveal.revealed { opacity: 1; transform: none; }
-
-    /* ─── Nav ─── */
-    .nav {
-      position: fixed; top: 0; left: 0; right: 0; z-index: 500;
-      padding: 18px 0;
-      background: rgba(8, 8, 16, 0.75);
-      backdrop-filter: blur(22px) saturate(1.5);
-      -webkit-backdrop-filter: blur(22px) saturate(1.5);
-      border-bottom: 1px solid var(--border);
-      transition: background 0.3s;
-    }
-    .nav-inner {
-      max-width: 1180px; margin: 0 auto; padding: 0 28px;
-      display: flex; align-items: center; justify-content: space-between; gap: 24px;
-    }
-    .logo {
-      display: flex; align-items: center; gap: 10px;
-      text-decoration: none; flex-shrink: 0;
-    }
-    .logo-wordmark {
-      font-size: 21px; font-weight: 800; letter-spacing: -0.035em; color: #fff;
-    }
-    .logo-wordmark .ai { color: var(--blue); }
-    .nav-links { display: flex; align-items: center; gap: 30px; }
-    .nav-link {
-      font-size: 14px; font-weight: 500; color: var(--text-muted);
-      text-decoration: none; letter-spacing: -0.01em;
-      transition: color 0.2s;
-    }
-    .nav-link:hover { color: #fff; }
-    .nav-link:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; border-radius: 3px; }
-
-    /* ─── Buttons ─── */
-    .btn-primary {
-      display: inline-flex; align-items: center; gap: 8px;
-      background: var(--blue);
-      color: #fff; font-family: 'Rubik', sans-serif;
-      font-size: 14px; font-weight: 600; letter-spacing: -0.01em;
-      padding: 11px 24px; border-radius: 9px; text-decoration: none;
-      border: none; cursor: pointer;
-      transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1),
-                  box-shadow 0.25s ease, background 0.2s;
-      box-shadow: 0 0 0 0 transparent;
-    }
-    .btn-primary:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 32px var(--blue-glow), 0 2px 8px rgba(0,87,255,0.2);
-      background: var(--blue-mid);
-    }
-    .btn-primary:active { transform: translateY(0); }
-    .btn-primary:focus-visible { outline: 2px solid var(--blue-soft); outline-offset: 2px; }
-
-    .btn-primary-lg {
-      font-size: 16px; padding: 15px 36px; border-radius: 10px; gap: 10px;
-    }
-    .btn-ghost {
-      display: inline-flex; align-items: center; gap: 8px;
-      background: transparent; color: var(--text-soft);
-      font-family: 'Rubik', sans-serif;
-      font-size: 16px; font-weight: 500; letter-spacing: -0.01em;
-      padding: 15px 32px; border-radius: 10px; text-decoration: none;
-      border: 1px solid rgba(255,255,255,0.12); cursor: pointer;
-      transition: color 0.2s, border-color 0.2s, background 0.2s;
-    }
-    .btn-ghost:hover {
-      color: #fff; border-color: rgba(255,255,255,0.28);
-      background: rgba(255,255,255,0.05);
-    }
-    .btn-ghost:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; border-radius: 10px; }
-
-    /* ─── Section label pill ─── */
-    .label-pill {
-      display: inline-flex; align-items: center; gap: 7px;
-      background: var(--blue-dim); border: 1px solid var(--border-blue);
-      color: var(--blue-soft); padding: 5px 14px; border-radius: 100px;
-      font-size: 11.5px; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase;
-    }
-    .label-pill-dot {
-      width: 6px; height: 6px; border-radius: 50%;
-      background: var(--blue-soft);
-      animation: dot-blink 2s ease-in-out infinite;
-    }
-
-    /* ─── Gradient text ─── */
-    .grad-text {
-      background: linear-gradient(130deg, #fff 0%, #c8d8ff 55%, var(--blue-soft) 100%);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
-    /* ─── Ambient glows ─── */
-    .glow {
-      position: absolute; border-radius: 50%;
-      filter: blur(110px); pointer-events: none;
-    }
-
-    /* ─── Hero ─── */
-    .hero {
-      min-height: 100vh; padding-top: 90px;
-      display: grid; grid-template-columns: 1fr 1fr;
-      align-items: center; gap: 60px;
-      max-width: 1180px; margin: 0 auto; padding-left: 28px; padding-right: 28px;
-      position: relative;
-    }
-    .hero-headline {
-      font-size: 66px; font-weight: 900;
-      line-height: 1.03; letter-spacing: -0.05em;
-      margin-bottom: 22px;
-    }
-    .hero-sub {
-      font-size: 17px; color: var(--text-muted);
-      line-height: 1.75; max-width: 430px; margin-bottom: 40px;
-    }
-    .hero-ctas { display: flex; gap: 14px; flex-wrap: wrap; align-items: center; margin-bottom: 52px; }
-    .hero-social-proof {
-      display: flex; align-items: center; gap: 14px;
-    }
-    .avatars { display: flex; }
-    .avatar {
-      width: 36px; height: 36px; border-radius: 50%;
-      border: 2px solid #080810;
+    /* Boot */
+    #boot {
+      position: fixed; inset: 0; z-index: 1000;
+      background: #000;
       display: flex; align-items: center; justify-content: center;
-      font-size: 11px; font-weight: 700; flex-shrink: 0;
     }
-    .avatar + .avatar { margin-left: -10px; }
+    #boot-canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
 
-    /* ─── Orb ─── */
-    .orb-wrap {
-      position: relative; display: flex;
-      justify-content: center; align-items: center;
+    /* Navbar */
+    #navbar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      height: 72px; padding: 0 60px;
+      display: flex; align-items: center; justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(22px) saturate(180%);
+      -webkit-backdrop-filter: blur(22px) saturate(180%);
+      background: rgba(0,0,0,0.72);
+      transition: background 0.45s, border-color 0.3s;
     }
-    .orb-float { animation: float 7s ease-in-out infinite; }
-    .orb-ring-1 {
-      position: absolute; inset: -42px; border-radius: 50%;
-      border: 1px solid rgba(0, 87, 255, 0.18);
-      animation: pulse-ring 4.5s ease-in-out infinite;
-    }
-    .orb-ring-2 {
-      position: absolute; inset: -88px; border-radius: 50%;
-      border: 1px solid rgba(0, 87, 255, 0.09);
-      animation: pulse-ring-slow 6s ease-in-out infinite;
-    }
+    [data-theme="light"] #navbar { background: rgba(248,249,250,0.85); }
 
-    /* ─── Floating data chips ─── */
-    .data-chip {
-      position: absolute;
-      background: rgba(18, 18, 30, 0.92);
+    .nav-link {
+      color: var(--text-soft); font-size: 14px; font-weight: 500;
+      text-decoration: none; letter-spacing: -0.01em;
+      transition: color 0.18s;
+    }
+    .nav-link:hover { color: var(--text); }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-family: 'Rubik', sans-serif; font-weight: 600;
+      font-size: 14px; letter-spacing: -0.01em;
+      text-decoration: none; cursor: pointer; border: none;
+      border-radius: 9px; padding: 10px 20px;
+      transition: transform 0.22s cubic-bezier(.34,1.56,.64,1), box-shadow 0.22s;
+    }
+    .btn-primary { background: var(--blue); color: #fff; }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 28px var(--blue-glow); }
+    .btn-primary:active { transform: translateY(0); }
+    .btn-lg { font-size: 16px; padding: 14px 32px; border-radius: 11px; }
+
+    /* Theme toggle */
+    #theme-btn {
+      width: 36px; height: 36px; border-radius: 50%;
+      border: 1px solid var(--border); background: var(--bg-card);
+      color: var(--text); cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+    #theme-btn:hover { border-color: var(--border-blue); transform: scale(1.06); }
+
+    /* Glass card */
+    .glass {
+      background: rgba(255,255,255,0.048);
       border: 1px solid var(--border-blue);
-      border-radius: 12px; padding: 11px 15px;
+      border-radius: 18px;
       backdrop-filter: blur(14px);
       -webkit-backdrop-filter: blur(14px);
+      box-shadow: 0 2px 24px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.06);
+      transition: transform 0.3s cubic-bezier(.34,1.56,.64,1), box-shadow 0.3s, border-color 0.3s;
     }
-    .chip-label { font-size: 10.5px; color: var(--text-muted); margin-bottom: 3px; font-weight: 500; }
-    .chip-value { font-size: 19px; font-weight: 800; letter-spacing: -0.03em; }
+    .glass:hover { transform: translateY(-5px); box-shadow: 0 24px 64px var(--blue-glow), inset 0 1px 0 rgba(255,255,255,0.08); border-color: rgba(0,87,255,0.6); }
+    [data-theme="light"] .glass { background: rgba(255,255,255,0.85); box-shadow: 0 2px 24px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.9); }
 
-    /* ─── Divider ─── */
-    .hr { height: 1px; background: linear-gradient(90deg, transparent, var(--border), transparent); }
-
-    /* ─── Trusted by ─── */
-    .trusted-section { padding: 44px 0; }
-    .trusted-inner { max-width: 1180px; margin: 0 auto; padding: 0 28px; }
-    .trusted-label {
-      text-align: center; font-size: 11.5px; font-weight: 700;
-      letter-spacing: 0.1em; text-transform: uppercase;
-      color: rgba(255,255,255,0.22); margin-bottom: 26px;
-    }
-    .trusted-logos { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
-    .trust-chip {
-      padding: 10px 22px; background: rgba(255,255,255,0.03);
-      border: 1px solid rgba(255,255,255,0.07); border-radius: 8px;
-      font-size: 13px; font-weight: 600; letter-spacing: 0.01em;
-      color: rgba(255,255,255,0.32);
-      transition: color 0.2s, border-color 0.2s;
-    }
-    .trust-chip:hover { color: rgba(255,255,255,0.65); border-color: rgba(255,255,255,0.15); }
-
-    /* ─── Sections shared ─── */
-    .section { padding: 116px 0; position: relative; overflow: hidden; }
-    .section-inner { max-width: 1180px; margin: 0 auto; padding: 0 28px; }
-    .section-head { text-align: center; margin-bottom: 68px; }
-    .section-title {
-      font-size: 46px; font-weight: 900;
-      letter-spacing: -0.045em; line-height: 1.1;
-      margin-bottom: 16px;
-    }
-    .section-sub {
-      font-size: 16.5px; color: var(--text-muted);
-      max-width: 480px; margin: 0 auto; line-height: 1.75;
-    }
-
-    /* ─── Service cards ─── */
-    .services-grid {
-      display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px;
-    }
-    .svc-card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 16px; padding: 30px;
-      transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1),
-                  border-color 0.3s, box-shadow 0.3s;
+    /* Plan card */
+    .plan {
+      border-radius: 18px; border: 1px solid rgba(255,255,255,0.10);
+      padding: 36px; background: var(--bg-card);
+      box-shadow: 0 2px 20px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.05);
+      transition: transform 0.3s cubic-bezier(.34,1.56,.64,1), box-shadow 0.3s, border-color 0.3s;
       cursor: default;
     }
-    .svc-card:hover {
-      transform: translateY(-5px);
-      border-color: var(--border-blue);
-      box-shadow: 0 20px 56px rgba(0,87,255,0.1), 0 4px 16px rgba(0,0,0,0.5);
+    .plan:hover { transform: translateY(-5px); box-shadow: 0 20px 56px var(--blue-glow), inset 0 1px 0 rgba(255,255,255,0.08); border-color: var(--border-blue); }
+    .plan.featured { border-color: rgba(0,87,255,0.65); background: linear-gradient(145deg, rgba(0,87,255,0.12), rgba(0,87,255,0.03)); box-shadow: 0 4px 32px rgba(0,87,255,0.18), inset 0 1px 0 rgba(0,87,255,0.15); }
+    [data-theme="light"] .plan { background: #fff; border-color: rgba(0,0,0,0.09); }
+
+    /* Form */
+    .field {
+      width: 100%; background: var(--bg-card);
+      border: 1px solid var(--border); border-radius: 10px;
+      padding: 12px 16px; font-family: 'Rubik', sans-serif; font-size: 14px;
+      color: var(--text); outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      appearance: none;
     }
-    .svc-icon {
-      width: 46px; height: 46px; border-radius: 11px;
+    .field:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(0,87,255,0.14); }
+    .field::placeholder { color: var(--text-muted); }
+    [data-theme="light"] .field { background: #fff; }
+
+    /* Service icon */
+    .s-icon {
+      width: 48px; height: 48px; border-radius: 13px;
       background: var(--blue-dim); border: 1px solid var(--border-blue);
-      display: flex; align-items: center; justify-content: center;
-      margin-bottom: 20px; flex-shrink: 0;
-    }
-    .svc-title { font-size: 17px; font-weight: 700; letter-spacing: -0.025em; margin-bottom: 9px; }
-    .svc-desc { font-size: 14px; color: var(--text-muted); line-height: 1.72; }
-
-    /* ─── Process ─── */
-    .process-section { background: linear-gradient(180deg, #080810 0%, #06060F 50%, #080810 100%); }
-    .steps-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; position: relative; }
-    .steps-connector {
-      position: absolute; top: 31px;
-      left: calc(16.66% + 12px); right: calc(16.66% + 12px);
-      height: 1px;
-      background: linear-gradient(90deg, rgba(0,87,255,0.5) 0%, rgba(0,87,255,0.08) 100%);
-    }
-    .step { text-align: center; position: relative; z-index: 1; }
-    .step-num {
-      width: 62px; height: 62px; border-radius: 50%;
-      background: linear-gradient(135deg, var(--blue) 0%, var(--navy) 100%);
-      border: 1px solid rgba(0,87,255,0.5);
-      display: flex; align-items: center; justify-content: center;
-      margin: 0 auto 24px;
-      font-size: 22px; font-weight: 900;
-      box-shadow: 0 0 28px rgba(0,87,255,0.4);
-    }
-    .step-title { font-size: 19px; font-weight: 800; letter-spacing: -0.025em; margin-bottom: 11px; }
-    .step-desc { font-size: 14px; color: var(--text-muted); line-height: 1.72; max-width: 240px; margin: 0 auto; }
-
-    /* ─── Stats band ─── */
-    .stats-band {
-      background: linear-gradient(135deg, #0a0a1a 0%, #06060F 100%);
-      border: 1px solid var(--border-blue);
-      border-radius: 24px; padding: 60px 64px;
-      display: grid; grid-template-columns: repeat(4, 1fr); gap: 32px;
-      position: relative; overflow: hidden;
-    }
-    .stat { text-align: center; position: relative; z-index: 1; }
-    .stat-num {
-      font-size: 52px; font-weight: 900; letter-spacing: -0.05em; line-height: 1;
-      background: linear-gradient(135deg, #fff 0%, #c8d8ff 100%);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-      background-clip: text; margin-bottom: 10px;
-    }
-    .stat-label { font-size: 13.5px; color: var(--text-muted); line-height: 1.55; }
-
-    /* ─── Testimonials ─── */
-    .testi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
-    .testi-card {
-      background: #0D0D1B; border: 1px solid var(--border);
-      border-radius: 16px; padding: 28px;
-      display: flex; flex-direction: column; gap: 18px;
-    }
-    .stars { color: #F59E0B; font-size: 13px; letter-spacing: 2px; }
-    .testi-quote { font-size: 14.5px; color: var(--text-soft); line-height: 1.75; flex: 1; }
-    .testi-author { display: flex; align-items: center; gap: 12px; }
-    .testi-av {
-      width: 40px; height: 40px; border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 13px; font-weight: 700; flex-shrink: 0;
-    }
-    .testi-name { font-size: 13.5px; font-weight: 700; }
-    .testi-role { font-size: 12px; color: var(--text-muted); margin-top: 1px; }
-
-    /* ─── CTA section ─── */
-    .cta-box {
-      background: linear-gradient(135deg, #06102A 0%, #080810 100%);
-      border: 1px solid var(--border-blue);
-      border-radius: 26px; padding: 88px 64px;
-      text-align: center; position: relative; overflow: hidden;
-    }
-    .cta-title {
-      font-size: 54px; font-weight: 900;
-      letter-spacing: -0.05em; line-height: 1.08;
-      margin-bottom: 18px; position: relative; z-index: 1;
-    }
-    .cta-sub {
-      font-size: 17px; color: var(--text-muted);
-      max-width: 480px; margin: 0 auto 40px;
-      line-height: 1.75; position: relative; z-index: 1;
+      display: flex; align-items: center; justify-content: center; margin-bottom: 22px;
     }
 
-    /* ─── Footer ─── */
-    .footer {
-      padding: 44px 0;
-      border-top: 1px solid var(--border);
+    /* Marquee */
+    .marquee-wrap { display: flex; overflow: hidden; }
+    .marquee-track {
+      display: flex; align-items: center; gap: 72px;
+      animation: marquee 28s linear infinite; width: max-content;
+      will-change: transform;
     }
-    .footer-inner {
-      max-width: 1180px; margin: 0 auto; padding: 0 28px;
-      display: flex; align-items: center; justify-content: space-between;
-      flex-wrap: wrap; gap: 20px;
+    .marquee-wrap:hover .marquee-track { animation-play-state: paused; }
+    @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+    /* Reveal */
+    .reveal {
+      opacity: 0; transform: translateY(28px);
+      transition: opacity 0.65s ease, transform 0.65s cubic-bezier(.34,1.56,.64,1);
     }
-    .footer-copy { font-size: 13px; color: rgba(255,255,255,0.2); }
+    .reveal.in { opacity: 1; transform: translateY(0); }
+
+    /* Float badge */
+    .badge {
+      position: absolute; border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(20,20,40,0.72); backdrop-filter: blur(20px);
+      padding: 13px 18px;
+    }
+    .badge.left  { left: -200px; top: 80px;  animation: floaty 3.2s ease-in-out infinite; }
+    .badge.right { right: -210px; bottom: 110px; animation: floaty 3.2s ease-in-out infinite 1.6s; }
+    @keyframes floaty { 0%,100%{ transform:translateY(0);} 50%{ transform:translateY(-10px);} }
+
+    @keyframes pulse-dot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.7)} }
+    .pulse { animation: pulse-dot 2s ease-in-out infinite; }
+
+    /* Diagonal clip */
+    .clip-b { clip-path: polygon(0 0,100% 0,100% 90%,0 100%); }
+    .clip-t { clip-path: polygon(0 4%,100% 0,100% 100%,0 100%); margin-top: -4%; }
+
+    /* Step connector */
+    .step-line {
+      position: absolute; top: 27px;
+      left: calc(50% + 36px); width: calc(100% - 72px); height: 1px;
+      background: linear-gradient(90deg, var(--blue), rgba(0,87,255,0.15));
+    }
+
+    /* Scroll-locked during boot */
+    .no-scroll { overflow: hidden; }
   </style>
 </head>
-<body>
+<body class="no-scroll">
 
-<!-- ═══════════════════════════════ NAV ═══════════════════════════════ -->
-<nav class="nav">
-  <div class="nav-inner">
-    <!-- Logo -->
-    <a href="#" class="logo">
-      <svg width="30" height="30" viewBox="0 0 30 30" fill="none">
-        <defs>
-          <radialGradient id="lg1" cx="38%" cy="32%" r="64%">
-            <stop offset="0%" stop-color="#6AA3FF" stop-opacity=".95"/>
-            <stop offset="42%" stop-color="#0057FF" stop-opacity=".88"/>
-            <stop offset="78%" stop-color="#003AAD" stop-opacity=".7"/>
-            <stop offset="100%" stop-color="#00102E" stop-opacity=".4"/>
-          </radialGradient>
-        </defs>
-        <path d="M15 2C20.2 1.6 25.5 4.8 27.8 9.6C30.1 14.4 29.4 20.6 26.2 24.8C23 29 17.2 31 11.8 29.6C6.4 28.2 2.2 23.4 1.2 17.9C0.2 12.4 2.4 6.4 6.6 3.4C9.2 1.6 12.1 2.2 15 2Z" fill="url(#lg1)"/>
-        <ellipse cx="11.5" cy="11" rx="5" ry="3.8" fill="rgba(160,200,255,.28)" style="filter:blur(3px)"/>
-        <path d="M15 2C20.2 1.6 25.5 4.8 27.8 9.6C30.1 14.4 29.4 20.6 26.2 24.8C23 29 17.2 31 11.8 29.6C6.4 28.2 2.2 23.4 1.2 17.9C0.2 12.4 2.4 6.4 6.6 3.4C9.2 1.6 12.1 2.2 15 2Z" fill="none" stroke="rgba(61,130,255,.45)" stroke-width="1"/>
-      </svg>
-      <span class="logo-wordmark">flow<span class="ai">ai</span>fy</span>
-    </a>
-
-    <!-- Links -->
-    <div class="nav-links">
-      <a href="#services" class="nav-link">Services</a>
-      <a href="#process"  class="nav-link">How It Works</a>
-      <a href="#results"  class="nav-link">Results</a>
-      <a href="#contact"  class="nav-link">Contact</a>
-    </div>
-
-    <!-- CTA -->
-    <a href="#contact" class="btn-primary">
-      Book a Call
-      <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-        <path d="M2.5 7h9M8 3.5l3.5 3.5L8 10.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-    </a>
-  </div>
-</nav>
-
-
-<!-- ═══════════════════════════════ HERO ═══════════════════════════════ -->
-<section style="position:relative; overflow:hidden; min-height:100vh; display:flex; align-items:center;">
-
-  <!-- Ambient glows -->
-  <div class="glow" style="width:680px;height:680px;background:rgba(0,87,255,.11);top:-180px;right:-120px;"></div>
-  <div class="glow" style="width:320px;height:320px;background:rgba(0,87,255,.07);bottom:60px;left:-60px;"></div>
-
-  <div class="hero" style="padding-top:110px; padding-bottom:80px;">
-    <!-- ── Left copy ── -->
-    <div>
-      <div class="label-pill anim-fade-up" style="margin-bottom:26px;">
-        <span class="label-pill-dot"></span>
-        AI Workflow Automation
-      </div>
-
-      <h1 class="hero-headline anim-fade-up delay-100">
-        The future of<br>
-        <span class="grad-text">workflow</span><br>
-        automation
-      </h1>
-
-      <p class="hero-sub anim-fade-up delay-200">
-        flowaify empowers teams to automate, orchestrate, and amplify their workflows with intelligent AI systems — so you can focus on what actually matters.
-      </p>
-
-      <div class="hero-ctas anim-fade-up delay-300">
-        <a href="#contact" class="btn-primary btn-primary-lg">
-          Start Automating
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-            <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </a>
-        <a href="#process" class="btn-ghost">See How It Works</a>
-      </div>
-
-      <!-- Social proof -->
-      <div class="hero-social-proof anim-fade-up delay-400">
-        <div class="avatars">
-          <div class="avatar" style="background:linear-gradient(135deg,#3D82FF,#0040CC);">SA</div>
-          <div class="avatar" style="background:linear-gradient(135deg,#6B4FFF,#3D82FF);">MR</div>
-          <div class="avatar" style="background:linear-gradient(135deg,#0057FF,#001A66);">TK</div>
-          <div class="avatar" style="background:linear-gradient(135deg,#1A6BFF,#003399);">JL</div>
-        </div>
-        <div>
-          <div style="font-size:13.5px;font-weight:700;letter-spacing:-0.01em;">50+ businesses automated</div>
-          <div style="font-size:12px;color:var(--text-muted);margin-top:2px;">
-            <span style="color:#F59E0B;">★★★★★</span>&nbsp; 5.0 avg across all clients
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ── Right: orb visual ── -->
-    <div class="orb-wrap anim-slide-r delay-200">
-      <div class="orb-float" style="position:relative;width:440px;height:440px;">
-        <div class="orb-ring-1"></div>
-        <div class="orb-ring-2"></div>
-
-        <!-- Main SVG orb -->
-        <svg width="440" height="440" viewBox="0 0 440 440" fill="none" style="position:relative;z-index:1;">
-          <defs>
-            <!-- Outer glow bloom -->
-            <radialGradient id="bloom" cx="50%" cy="50%" r="50%">
-              <stop offset="0%"   stop-color="#0057FF" stop-opacity=".22"/>
-              <stop offset="100%" stop-color="#0057FF" stop-opacity="0"/>
-            </radialGradient>
-            <!-- Main orb fill -->
-            <radialGradient id="orbFill" cx="37%" cy="31%" r="66%">
-              <stop offset="0%"   stop-color="#7AB0FF" stop-opacity=".96"/>
-              <stop offset="28%"  stop-color="#2C6DFF" stop-opacity=".9"/>
-              <stop offset="55%"  stop-color="#0046CC" stop-opacity=".78"/>
-              <stop offset="78%"  stop-color="#001B66" stop-opacity=".55"/>
-              <stop offset="100%" stop-color="#00051A" stop-opacity=".25"/>
-            </radialGradient>
-            <!-- Dot grid -->
-            <pattern id="dotGrid" x="0" y="0" width="11" height="11" patternUnits="userSpaceOnUse">
-              <circle cx="5.5" cy="5.5" r="1.1" fill="rgba(120,175,255,.55)"/>
-            </pattern>
-            <!-- Inner glow -->
-            <radialGradient id="hiGlow" cx="39%" cy="35%" r="38%">
-              <stop offset="0%"   stop-color="#B8D4FF" stop-opacity=".7"/>
-              <stop offset="100%" stop-color="#0057FF" stop-opacity="0"/>
-            </radialGradient>
-            <!-- Clip to blob shape -->
-            <clipPath id="blobClip">
-              <path d="M220 44 C296 40 364 78 394 138 C424 198 422 278 386 336 C350 394 280 426 210 420 C140 414 78 374 52 312 C26 250 38 170 78 118 C118 66 144 48 220 44 Z"/>
-            </clipPath>
-            <filter id="softBlur"><feGaussianBlur stdDeviation="2.5"/></filter>
-            <filter id="bigBlur"><feGaussianBlur stdDeviation="22"/></filter>
-          </defs>
-
-          <!-- Background bloom -->
-          <ellipse cx="220" cy="232" rx="210" ry="205" fill="url(#bloom)" filter="url(#bigBlur)"/>
-
-          <!-- Blob shape -->
-          <path d="M220 44 C296 40 364 78 394 138 C424 198 422 278 386 336 C350 394 280 426 210 420 C140 414 78 374 52 312 C26 250 38 170 78 118 C118 66 144 48 220 44 Z" fill="url(#orbFill)"/>
-
-          <!-- Dot texture -->
-          <path d="M220 44 C296 40 364 78 394 138 C424 198 422 278 386 336 C350 394 280 426 210 420 C140 414 78 374 52 312 C26 250 38 170 78 118 C118 66 144 48 220 44 Z" fill="url(#dotGrid)" opacity=".45"/>
-
-          <!-- Inner highlight -->
-          <path d="M220 44 C296 40 364 78 394 138 C424 198 422 278 386 336 C350 394 280 426 210 420 C140 414 78 374 52 312 C26 250 38 170 78 118 C118 66 144 48 220 44 Z" fill="url(#hiGlow)"/>
-
-          <!-- Specular highlight -->
-          <ellipse cx="162" cy="152" rx="52" ry="38" fill="rgba(185,215,255,.22)" filter="url(#softBlur)"/>
-          <ellipse cx="148" cy="140" rx="22" ry="15" fill="rgba(220,235,255,.35)" filter="url(#softBlur)"/>
-
-          <!-- Edge rim -->
-          <path d="M220 44 C296 40 364 78 394 138 C424 198 422 278 386 336 C350 394 280 426 210 420 C140 414 78 374 52 312 C26 250 38 170 78 118 C118 66 144 48 220 44 Z" fill="none" stroke="rgba(61,130,255,.38)" stroke-width="1.5"/>
-        </svg>
-
-        <!-- Floating chips -->
-        <div class="data-chip" style="top:32px;right:-12px;">
-          <div class="chip-label">Time Saved</div>
-          <div class="chip-value" style="color:var(--blue-soft);">12h/wk</div>
-        </div>
-        <div class="data-chip" style="bottom:96px;right:-36px;">
-          <div class="chip-label">Active Workflows</div>
-          <div class="chip-value" style="color:#fff;">248 <span style="color:#22c55e;font-size:13px;font-weight:700;">↑</span></div>
-        </div>
-        <div class="data-chip" style="bottom:72px;left:-28px;">
-          <div class="chip-label">Accuracy</div>
-          <div class="chip-value" style="color:#fff;">99.2%</div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-
-<!-- ═══════════════════════════ TRUSTED BY ═══════════════════════════ -->
-<div class="hr"></div>
-<div class="trusted-section">
-  <div class="trusted-inner">
-    <p class="trusted-label">Trusted by forward-thinking teams</p>
-    <div class="trusted-logos">
-      <div class="trust-chip">Acme Corp</div>
-      <div class="trust-chip">NovaSys</div>
-      <div class="trust-chip">Meridian AI</div>
-      <div class="trust-chip">Stackr</div>
-      <div class="trust-chip">Luminary</div>
-      <div class="trust-chip">BuildForge</div>
-      <div class="trust-chip">VectorOps</div>
-    </div>
-  </div>
+<!-- ─── BOOT ─────────────────────────────────────────────────────────────── -->
+<div id="boot">
+  <canvas id="boot-canvas"></canvas>
 </div>
-<div class="hr"></div>
 
+<!-- ─── PAGE ─────────────────────────────────────────────────────────────── -->
+<div id="page" style="opacity:0;">
 
-<!-- ═══════════════════════════ SERVICES ═══════════════════════════ -->
-<section class="section" id="services">
-  <div class="glow" style="width:440px;height:440px;background:rgba(0,87,255,.07);top:50%;left:-120px;transform:translateY(-50%);"></div>
-
-  <div class="section-inner">
-    <div class="section-head reveal">
-      <div class="label-pill" style="margin-bottom:18px;">What We Build</div>
-      <h2 class="section-title">
-        Intelligent systems for<br>every layer of your business
-      </h2>
-      <p class="section-sub">
-        We design, build, and deploy custom AI workflows that eliminate bottlenecks and scale with you.
-      </p>
-    </div>
-
-    <div class="services-grid">
-
-      <!-- 1 -->
-      <div class="svc-card reveal" style="transition-delay:0s">
-        <div class="svc-icon">
-          <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
-            <path d="M4 11h14M11 4l7 7-7 7" stroke="#3D82FF" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </div>
-        <div class="svc-title">Workflow Automation</div>
-        <div class="svc-desc">End-to-end automation of repetitive processes — data entry, approvals, notifications, and cross-platform sync done without human touch.</div>
-      </div>
-
-      <!-- 2 -->
-      <div class="svc-card reveal" style="transition-delay:0.08s">
-        <div class="svc-icon">
-          <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
-            <circle cx="5" cy="5" r="2.2" stroke="#3D82FF" stroke-width="1.9"/>
-            <circle cx="17" cy="5" r="2.2" stroke="#3D82FF" stroke-width="1.9"/>
-            <circle cx="5" cy="17" r="2.2" stroke="#3D82FF" stroke-width="1.9"/>
-            <circle cx="17" cy="17" r="2.2" stroke="#3D82FF" stroke-width="1.9"/>
-            <path d="M7.2 5h7.6M5 7.2v7.6M17 7.2v7.6M7.2 17h7.6" stroke="#3D82FF" stroke-width="1.9" stroke-linecap="round"/>
-          </svg>
-        </div>
-        <div class="svc-title">AI Agent Systems</div>
-        <div class="svc-desc">Custom AI agents that work autonomously — handling research, outreach, reporting, and decision-making around the clock.</div>
-      </div>
-
-      <!-- 3 -->
-      <div class="svc-card reveal" style="transition-delay:0.16s">
-        <div class="svc-icon">
-          <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
-            <path d="M11 3v3M11 16v3M3 11h3M16 11h3M5.6 5.6l2.1 2.1M14.3 14.3l2.1 2.1M5.6 16.4l2.1-2.1M14.3 7.7l2.1-2.1" stroke="#3D82FF" stroke-width="1.9" stroke-linecap="round"/>
-          </svg>
-        </div>
-        <div class="svc-title">System Integrations</div>
-        <div class="svc-desc">Connect your CRM, ERP, and SaaS tools into one seamless, intelligent pipeline — no more manual data wrangling between platforms.</div>
-      </div>
-
-      <!-- 4 -->
-      <div class="svc-card reveal" style="transition-delay:0.04s">
-        <div class="svc-icon">
-          <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
-            <rect x="3" y="4" width="16" height="14" rx="2" stroke="#3D82FF" stroke-width="1.9"/>
-            <path d="M7 9h8M7 13h5" stroke="#3D82FF" stroke-width="1.9" stroke-linecap="round"/>
-          </svg>
-        </div>
-        <div class="svc-title">Document Processing</div>
-        <div class="svc-desc">AI-powered extraction, classification, and routing for invoices, contracts, forms — turning document chaos into structured, actionable data.</div>
-      </div>
-
-      <!-- 5 -->
-      <div class="svc-card reveal" style="transition-delay:0.12s">
-        <div class="svc-icon">
-          <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
-            <path d="M4 15l4-4 3 3 4-5 3 3" stroke="#3D82FF" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
-            <rect x="3" y="3" width="16" height="16" rx="2.5" stroke="#3D82FF" stroke-width="1.9"/>
-          </svg>
-        </div>
-        <div class="svc-title">Real-Time Reporting</div>
-        <div class="svc-desc">Automated dashboards and alerts that surface insights the moment they're relevant — no spreadsheets, no lag.</div>
-      </div>
-
-      <!-- 6 -->
-      <div class="svc-card reveal" style="transition-delay:0.20s">
-        <div class="svc-icon">
-          <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
-            <path d="M7.5 11l3 3 4.5-5" stroke="#3D82FF" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M11 3C6.6 3 3 6.6 3 11s3.6 8 8 8 8-3.6 8-8-3.6-8-8-8z" stroke="#3D82FF" stroke-width="1.9"/>
-          </svg>
-        </div>
-        <div class="svc-title">Quality Assurance</div>
-        <div class="svc-desc">AI-driven validation that flags anomalies, checks outputs, and guarantees process integrity at any scale.</div>
-      </div>
-
-    </div>
-  </div>
-</section>
-
-
-<!-- ═══════════════════════════ HOW IT WORKS ═══════════════════════════ -->
-<section class="section process-section" id="process">
-  <div class="glow" style="width:500px;height:500px;background:rgba(0,87,255,.07);top:50%;right:-140px;transform:translateY(-50%);"></div>
-
-  <div class="section-inner">
-    <div class="section-head reveal">
-      <div class="label-pill" style="margin-bottom:18px;">How It Works</div>
-      <h2 class="section-title">
-        From discovery to live —<br>in weeks, not months
-      </h2>
-      <p class="section-sub">
-        Our proven process gets your automations deployed fast, with zero disruption to what's already working.
-      </p>
-    </div>
-
-    <div class="steps-grid">
-      <div class="steps-connector"></div>
-
-      <div class="step reveal" style="transition-delay:0s">
-        <div class="step-num">1</div>
-        <div class="step-title">Discover</div>
-        <p class="step-desc">We audit your current processes, identify every bottleneck, and map out all automation opportunities with clear ROI estimates.</p>
-      </div>
-
-      <div class="step reveal" style="transition-delay:0.12s">
-        <div class="step-num">2</div>
-        <div class="step-title">Build</div>
-        <p class="step-desc">Our engineers craft custom AI workflows and integrations tailored precisely to your tech stack and team structure.</p>
-      </div>
-
-      <div class="step reveal" style="transition-delay:0.24s">
-        <div class="step-num">3</div>
-        <div class="step-title">Amplify</div>
-        <p class="step-desc">We deploy, monitor, and continuously optimize — so your systems compound in value and grow smarter over time.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-
-<!-- ═══════════════════════════ STATS ═══════════════════════════ -->
-<section class="section" id="results" style="padding-top:0;">
-  <div class="section-inner">
-    <div class="stats-band">
-      <!-- Inner glow -->
-      <div class="glow" style="width:500px;height:300px;background:rgba(0,87,255,.1);top:-100px;left:50%;transform:translateX(-50%);filter:blur(90px);z-index:0;"></div>
-
-      <div class="stat reveal" style="transition-delay:0s">
-        <div class="stat-num">10×</div>
-        <div class="stat-label">Average ROI within<br>the first 90 days</div>
-      </div>
-      <div class="stat reveal" style="transition-delay:0.1s">
-        <div class="stat-num">12h</div>
-        <div class="stat-label">Hours saved per<br>employee each week</div>
-      </div>
-      <div class="stat reveal" style="transition-delay:0.2s">
-        <div class="stat-num">99%</div>
-        <div class="stat-label">Process accuracy<br>after automation</div>
-      </div>
-      <div class="stat reveal" style="transition-delay:0.3s">
-        <div class="stat-num">2wk</div>
-        <div class="stat-label">Average time to first<br>live workflow</div>
-      </div>
-    </div>
-  </div>
-</section>
-
-
-<!-- ═══════════════════════════ TESTIMONIALS ═══════════════════════════ -->
-<section class="section" style="padding-top:60px;">
-  <div class="glow" style="width:500px;height:500px;background:rgba(0,87,255,.07);top:50%;left:50%;transform:translate(-50%,-50%);"></div>
-
-  <div class="section-inner">
-    <div class="section-head">
-      <div class="label-pill" style="margin-bottom:18px;">Testimonials</div>
-      <h2 class="section-title">What our clients say</h2>
-    </div>
-
-    <div class="testi-grid">
-
-      <div class="testi-card">
-        <div class="stars">★★★★★</div>
-        <p class="testi-quote">"flowaify cut our onboarding time by 70%. What used to take our team three days now happens in hours — completely automatically."</p>
-        <div class="testi-author">
-          <div class="testi-av" style="background:linear-gradient(135deg,#3D82FF,#0040CC);">SA</div>
-          <div>
-            <div class="testi-name">Sarah A.</div>
-            <div class="testi-role">Head of Operations, NovaSys</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="testi-card">
-        <div class="stars">★★★★★</div>
-        <p class="testi-quote">"The AI agent they built for our sales team is game-changing. It handles research, drafts outreach, and logs everything in our CRM without us lifting a finger."</p>
-        <div class="testi-author">
-          <div class="testi-av" style="background:linear-gradient(135deg,#6B4FFF,#3D82FF);">MR</div>
-          <div>
-            <div class="testi-name">Marcus R.</div>
-            <div class="testi-role">VP of Sales, Meridian AI</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="testi-card">
-        <div class="stars">★★★★★</div>
-        <p class="testi-quote">"Discovery call to live automation in under two weeks. The team knew exactly what to build — it felt like an extension of our own engineering org."</p>
-        <div class="testi-author">
-          <div class="testi-av" style="background:linear-gradient(135deg,#0057FF,#001A66);">TK</div>
-          <div>
-            <div class="testi-name">Tania K.</div>
-            <div class="testi-role">CTO, Stackr</div>
-          </div>
-        </div>
-      </div>
-
-    </div>
-  </div>
-</section>
-
-
-<!-- ═══════════════════════════ CTA ═══════════════════════════ -->
-<section class="section" id="contact" style="padding-bottom:140px;">
-  <div class="section-inner">
-    <div class="cta-box">
-      <!-- Inner ambient -->
-      <div class="glow" style="width:600px;height:360px;background:rgba(0,87,255,.14);top:-120px;left:50%;transform:translateX(-50%);filter:blur(100px);z-index:0;"></div>
-
-      <div class="label-pill" style="margin:0 auto 24px;display:inline-flex;position:relative;z-index:1;">
-        Intelligent automation built for the future
-      </div>
-
-      <h2 class="cta-title">
-        Ready to build your<br>
-        <span style="color:var(--blue-soft);">AI-powered workflows?</span>
-      </h2>
-
-      <p class="cta-sub">
-        Book a free discovery call and we'll map out exactly how flowaify can transform your operations — no commitment needed.
-      </p>
-
-      <div style="display:flex;gap:14px;justify-content:center;position:relative;z-index:1;">
-        <a href="mailto:autofi.company@gmail.com" class="btn-primary btn-primary-lg">
-          Book a Free Call
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-            <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </a>
-      </div>
-    </div>
-  </div>
-</section>
-
-
-<!-- ═══════════════════════════ FOOTER ═══════════════════════════ -->
-<footer class="footer">
-  <div class="footer-inner">
-    <!-- Logo -->
-    <a href="#" class="logo">
-      <svg width="26" height="26" viewBox="0 0 30 30" fill="none">
-        <defs>
-          <radialGradient id="lg2" cx="38%" cy="32%" r="64%">
-            <stop offset="0%" stop-color="#6AA3FF" stop-opacity=".95"/>
-            <stop offset="42%" stop-color="#0057FF" stop-opacity=".88"/>
-            <stop offset="78%" stop-color="#003AAD" stop-opacity=".7"/>
-            <stop offset="100%" stop-color="#00102E" stop-opacity=".4"/>
-          </radialGradient>
-        </defs>
-        <path d="M15 2C20.2 1.6 25.5 4.8 27.8 9.6C30.1 14.4 29.4 20.6 26.2 24.8C23 29 17.2 31 11.8 29.6C6.4 28.2 2.2 23.4 1.2 17.9C0.2 12.4 2.4 6.4 6.6 3.4C9.2 1.6 12.1 2.2 15 2Z" fill="url(#lg2)"/>
-        <path d="M15 2C20.2 1.6 25.5 4.8 27.8 9.6C30.1 14.4 29.4 20.6 26.2 24.8C23 29 17.2 31 11.8 29.6C6.4 28.2 2.2 23.4 1.2 17.9C0.2 12.4 2.4 6.4 6.6 3.4C9.2 1.6 12.1 2.2 15 2Z" fill="none" stroke="rgba(61,130,255,.45)" stroke-width="1"/>
-      </svg>
-      <span class="logo-wordmark" style="font-size:18px;">flow<span class="ai">ai</span>fy</span>
+  <!-- NAVBAR -->
+  <nav id="navbar">
+    <a href="#" style="display:flex;align-items:center;gap:11px;text-decoration:none;">
+      <img src="brand_assets/ChatGPT Image Apr 23, 2026, 10_57_59 PM.png"
+           alt="flowaify blob" style="width:32px;height:32px;object-fit:contain;border-radius:8px;" />
+      <span style="font-size:18px;font-weight:700;letter-spacing:-0.03em;color:var(--text);">
+        flow<span style="color:var(--blue);">ai</span>fy
+      </span>
     </a>
 
-    <!-- Nav -->
-    <div class="nav-links">
-      <a href="#services" class="nav-link">Services</a>
-      <a href="#process"  class="nav-link">Process</a>
-      <a href="#results"  class="nav-link">Results</a>
-      <a href="mailto:autofi.company@gmail.com" class="nav-link">Contact</a>
+    <div style="display:flex;align-items:center;gap:36px;">
+      <a href="#problem"       class="nav-link">Why Flowaify</a>
+      <a href="#how-it-works"  class="nav-link">How It Works</a>
+      <a href="#plans"         class="nav-link">Plans</a>
     </div>
 
-    <p class="footer-copy">© 2026 flowaify — Automate. Flow. Amplify.</p>
-  </div>
-</footer>
+    <div style="display:flex;align-items:center;gap:14px;">
+      <button id="theme-btn" aria-label="Toggle theme">
+        <!-- sun icon default (dark mode) -->
+        <svg id="theme-icon" width="15" height="15" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="5"/>
+          <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+          <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+        </svg>
+      </button>
+      <a href="#contact" class="btn btn-primary">Build My System</a>
+    </div>
+  </nav>
 
+  <!-- ─── HERO ───────────────────────────────────────────────────────────── -->
+  <section class="grid-bg" style="min-height:100vh;padding-top:72px;display:flex;align-items:center;position:relative;overflow:hidden;">
 
+    <!-- Ambient glow -->
+    <div style="position:absolute;top:30%;right:5%;width:560px;height:560px;border-radius:50%;
+                background:radial-gradient(circle,rgba(0,87,255,0.18) 0%,transparent 68%);
+                pointer-events:none;filter:blur(32px);"></div>
+
+    <div style="max-width:1440px;margin:0 auto;padding:0 60px;width:100%;
+                display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center;">
+
+      <!-- Left copy -->
+      <div id="hero-copy" style="opacity:0;transform:translateY(20px);">
+        <div style="display:inline-flex;align-items:center;gap:8px;
+                    background:var(--blue-dim);border:1px solid var(--border-blue);
+                    border-radius:100px;padding:6px 14px;margin-bottom:32px;">
+          <span class="pulse" style="width:6px;height:6px;border-radius:50%;background:var(--blue);display:inline-block;"></span>
+          <span style="font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--blue);">AI Automation Systems</span>
+        </div>
+
+        <h1 style="font-size:76px;font-weight:800;line-height:1.0;letter-spacing:-0.045em;margin-bottom:24px;color:var(--text);">
+          Every lead<br/>handled <span style="color:var(--blue);text-shadow:0 0 40px rgba(0,87,255,0.5);">instantly.</span>
+        </h1>
+
+        <p style="font-size:18px;line-height:1.72;color:var(--text-soft);max-width:460px;margin-bottom:40px;">
+          Flowaify captures, responds, and follows up with every lead automatically so no opportunity is lost.
+        </p>
+
+        <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-bottom:48px;">
+          <a href="#contact" class="btn btn-primary btn-lg">
+            Build My System
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+            </svg>
+          </a>
+          <a href="#how-it-works" style="font-size:14px;font-weight:500;color:var(--text-muted);text-decoration:none;
+                                         display:flex;align-items:center;gap:5px;transition:color .2s;"
+             onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--text-muted)'">
+            See how it works
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+            </svg>
+          </a>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap;">
+          <span style="font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);">Built for</span>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <span style="font-size:11px;font-weight:500;padding:4px 11px;border-radius:100px;border:1px solid var(--border);color:var(--text-muted);">Real Estate</span>
+            <span style="font-size:11px;font-weight:500;padding:4px 11px;border-radius:100px;border:1px solid var(--border);color:var(--text-muted);">Mortgage</span>
+            <span style="font-size:11px;font-weight:500;padding:4px 11px;border-radius:100px;border:1px solid var(--border);color:var(--text-muted);">Insurance</span>
+            <span style="font-size:11px;font-weight:500;padding:4px 11px;border-radius:100px;border:1px solid var(--border);color:var(--text-muted);">Med Spas</span>
+            <span style="font-size:11px;font-weight:500;padding:4px 11px;border-radius:100px;border:1px solid var(--border);color:var(--text-muted);">Clinics</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right sphere -->
+      <div style="display:flex;align-items:center;justify-content:center;height:580px;position:relative;">
+        <div style="position:absolute;width:420px;height:420px;border-radius:50%;
+                    background:radial-gradient(circle,rgba(0,87,255,0.22) 0%,transparent 68%);
+                    filter:blur(48px);pointer-events:none;"></div>
+        <canvas id="hero-sphere" style="position:relative;z-index:1;opacity:0;"></canvas>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─── INTEGRATION STRIP ─────────────────────────────────────────────── -->
+  <section style="padding:44px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);overflow:hidden;position:relative;background:var(--bg);">
+    <!-- Edge fades -->
+    <div style="position:absolute;left:0;top:0;bottom:0;width:140px;background:linear-gradient(90deg,var(--bg),transparent);z-index:2;pointer-events:none;"></div>
+    <div style="position:absolute;right:0;top:0;bottom:0;width:140px;background:linear-gradient(270deg,var(--bg),transparent);z-index:2;pointer-events:none;"></div>
+
+    <p style="text-align:center;font-size:11px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-muted);margin-bottom:24px;">Powered by</p>
+
+    <div class="marquee-wrap">
+      <div class="marquee-track">
+        <!-- Set 1 -->
+        <div style="display:flex;align-items:center;gap:11px;">
+          <!-- Zapier -->
+          <svg width="26" height="26" viewBox="0 0 100 100"><circle cx="50" cy="50" r="50" fill="#FF4A00"/><text x="50" y="67" text-anchor="middle" font-family="Arial,sans-serif" font-size="52" font-weight="900" fill="white">Z</text></svg>
+          <span style="font-size:15px;font-weight:600;color:var(--text-soft);">Zapier</span>
+        </div>
+        <div style="width:1px;height:24px;background:var(--border);"></div>
+        <div style="display:flex;align-items:center;gap:11px;">
+          <!-- HubSpot -->
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="#FF7A59"><path d="M18.16 8.75V6.57a1.69 1.69 0 001.01-1.54v-.05A1.69 1.69 0 0017.49 3.3h-.05a1.69 1.69 0 00-1.69 1.68v.05a1.69 1.69 0 001.01 1.54v2.18A4.8 4.8 0 0014.2 10L8.38 5.63a2.41 2.41 0 10-.89 1.17l5.59 4.18a4.84 4.84 0 000 2.99l-1.64 1.16a2 2 0 101.03 1.5l1.76-1.25a4.81 4.81 0 107.93-6.63z"/></svg>
+          <span style="font-size:15px;font-weight:600;color:var(--text-soft);">HubSpot</span>
+        </div>
+        <div style="width:1px;height:24px;background:var(--border);"></div>
+        <div style="display:flex;align-items:center;gap:11px;">
+          <!-- Claude (Anthropic mark) -->
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="#D97757"><path d="M13.2 3L7 14.4h3.4L16.6 3zM10.8 9.6L17 21H13.6L7.4 9.6z"/></svg>
+          <span style="font-size:15px;font-weight:600;color:var(--text-soft);">Claude</span>
+        </div>
+        <div style="width:1px;height:24px;background:var(--border);"></div>
+        <div style="display:flex;align-items:center;gap:11px;">
+          <!-- Twilio -->
+          <svg width="26" height="26" viewBox="0 0 24 24"><circle cx="12" cy="12" r="12" fill="#F22F46"/>
+            <circle cx="12" cy="12" r="3.2" fill="white"/>
+            <circle cx="7.2" cy="7.2" r="1.8" fill="white"/>
+            <circle cx="16.8" cy="7.2" r="1.8" fill="white"/>
+            <circle cx="7.2" cy="16.8" r="1.8" fill="white"/>
+            <circle cx="16.8" cy="16.8" r="1.8" fill="white"/>
+          </svg>
+          <span style="font-size:15px;font-weight:600;color:var(--text-soft);">Twilio</span>
+        </div>
+        <div style="width:1px;height:24px;background:var(--border);"></div>
+        <div style="display:flex;align-items:center;gap:11px;">
+          <!-- Stripe -->
+          <svg width="26" height="26" viewBox="0 0 24 24"><rect width="24" height="24" rx="5" fill="#635BFF"/>
+            <path fill="white" d="M11.3 9.1c0-.6.5-.9 1.3-.9 1.2 0 2.7.4 3.7.9l.5-3.3A11 11 0 0012.6 5C9 5 6.6 6.8 6.6 9.5c0 4.3 5.6 3.6 5.6 5.4 0 .7-.6 1-1.5 1-1.3 0-3.1-.6-4.4-1.4l-.5 3.4c1.2.6 3 1 4.8 1C13.8 19 16 17.2 16 14.4c0-4.5-4.7-3.8-4.7-5.3z"/>
+          </svg>
+          <span style="font-size:15px;font-weight:600;color:var(--text-soft);">Stripe</span>
+        </div>
+        <!-- Separator -->
+        <div style="width:1px;height:24px;background:var(--border);"></div>
+
+        <!-- Set 2 (duplicate for infinite scroll) -->
+        <div style="display:flex;align-items:center;gap:11px;">
+          <svg width="26" height="26" viewBox="0 0 100 100"><circle cx="50" cy="50" r="50" fill="#FF4A00"/><text x="50" y="67" text-anchor="middle" font-family="Arial,sans-serif" font-size="52" font-weight="900" fill="white">Z</text></svg>
+          <span style="font-size:15px;font-weight:600;color:var(--text-soft);">Zapier</span>
+        </div>
+        <div style="width:1px;height:24px;background:var(--border);"></div>
+        <div style="display:flex;align-items:center;gap:11px;">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="#FF7A59"><path d="M18.16 8.75V6.57a1.69 1.69 0 001.01-1.54v-.05A1.69 1.69 0 0017.49 3.3h-.05a1.69 1.69 0 00-1.69 1.68v.05a1.69 1.69 0 001.01 1.54v2.18A4.8 4.8 0 0014.2 10L8.38 5.63a2.41 2.41 0 10-.89 1.17l5.59 4.18a4.84 4.84 0 000 2.99l-1.64 1.16a2 2 0 101.03 1.5l1.76-1.25a4.81 4.81 0 107.93-6.63z"/></svg>
+          <span style="font-size:15px;font-weight:600;color:var(--text-soft);">HubSpot</span>
+        </div>
+        <div style="width:1px;height:24px;background:var(--border);"></div>
+        <div style="display:flex;align-items:center;gap:11px;">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="#D97757"><path d="M13.2 3L7 14.4h3.4L16.6 3zM10.8 9.6L17 21H13.6L7.4 9.6z"/></svg>
+          <span style="font-size:15px;font-weight:600;color:var(--text-soft);">Claude</span>
+        </div>
+        <div style="width:1px;height:24px;background:var(--border);"></div>
+        <div style="display:flex;align-items:center;gap:11px;">
+          <svg width="26" height="26" viewBox="0 0 24 24"><circle cx="12" cy="12" r="12" fill="#F22F46"/>
+            <circle cx="12" cy="12" r="3.2" fill="white"/>
+            <circle cx="7.2" cy="7.2" r="1.8" fill="white"/>
+            <circle cx="16.8" cy="7.2" r="1.8" fill="white"/>
+            <circle cx="7.2" cy="16.8" r="1.8" fill="white"/>
+            <circle cx="16.8" cy="16.8" r="1.8" fill="white"/>
+          </svg>
+          <span style="font-size:15px;font-weight:600;color:var(--text-soft);">Twilio</span>
+        </div>
+        <div style="width:1px;height:24px;background:var(--border);"></div>
+        <div style="display:flex;align-items:center;gap:11px;">
+          <svg width="26" height="26" viewBox="0 0 24 24"><rect width="24" height="24" rx="5" fill="#635BFF"/>
+            <path fill="white" d="M11.3 9.1c0-.6.5-.9 1.3-.9 1.2 0 2.7.4 3.7.9l.5-3.3A11 11 0 0012.6 5C9 5 6.6 6.8 6.6 9.5c0 4.3 5.6 3.6 5.6 5.4 0 .7-.6 1-1.5 1-1.3 0-3.1-.6-4.4-1.4l-.5 3.4c1.2.6 3 1 4.8 1C13.8 19 16 17.2 16 14.4c0-4.5-4.7-3.8-4.7-5.3z"/>
+          </svg>
+          <span style="font-size:15px;font-weight:600;color:var(--text-soft);">Stripe</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── PROBLEM → SOLUTION ────────────────────────────────────────────── -->
+  <section id="problem" style="padding:130px 60px;">
+    <div style="max-width:1440px;margin:0 auto;">
+
+      <div class="reveal" style="text-align:center;margin-bottom:72px;">
+        <span style="font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--blue);">The Real Problem</span>
+        <h2 style="font-size:52px;font-weight:800;letter-spacing:-0.04em;color:var(--text);margin-top:14px;margin-bottom:16px;">
+          The problem is never<br/>the leads.
+        </h2>
+        <p style="font-size:17px;color:var(--text-muted);max-width:460px;margin:0 auto;line-height:1.72;">
+          You're already generating inbound. The revenue is leaking on the other side — in the gap between lead and response.
+        </p>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:28px;max-width:1000px;margin:0 auto;">
+        <!-- Before -->
+        <div class="glass reveal" style="padding:44px;border-color:rgba(255,55,55,0.32);background:rgba(255,40,40,0.04);box-shadow:0 2px 24px rgba(0,0,0,0.3),inset 0 1px 0 rgba(255,60,60,0.08);">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:36px;">
+            <div style="width:8px;height:8px;border-radius:50%;background:#FF3C3C;box-shadow:0 0 8px rgba(255,60,60,0.6);"></div>
+            <span style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,80,80,0.85);">Without Flowaify</span>
+          </div>
+          <ul style="list-style:none;display:flex;flex-direction:column;gap:20px;">
+            <li style="display:flex;align-items:flex-start;gap:13px;font-size:15px;color:var(--text-soft);line-height:1.6;">
+              <span style="color:rgba(255,60,60,0.65);font-size:17px;line-height:1.2;flex-shrink:0;">✕</span>
+              Lead fills out a form. Nobody responds for hours.
+            </li>
+            <li style="display:flex;align-items:flex-start;gap:13px;font-size:15px;color:var(--text-soft);line-height:1.6;">
+              <span style="color:rgba(255,60,60,0.65);font-size:17px;line-height:1.2;flex-shrink:0;">✕</span>
+              Follow-up depends on whoever remembers to send it.
+            </li>
+            <li style="display:flex;align-items:flex-start;gap:13px;font-size:15px;color:var(--text-soft);line-height:1.6;">
+              <span style="color:rgba(255,60,60,0.65);font-size:17px;line-height:1.2;flex-shrink:0;">✕</span>
+              Half the contacts never make it into the CRM.
+            </li>
+            <li style="display:flex;align-items:flex-start;gap:13px;font-size:15px;color:var(--text-soft);line-height:1.6;">
+              <span style="color:rgba(255,60,60,0.65);font-size:17px;line-height:1.2;flex-shrink:0;">✕</span>
+              Hot leads go cold while your team handles everything manually.
+            </li>
+          </ul>
+        </div>
+
+        <!-- After -->
+        <div class="glass reveal" style="padding:44px;border-color:rgba(0,87,255,0.5);background:linear-gradient(140deg,rgba(0,87,255,0.09),rgba(0,87,255,0.02));box-shadow:0 4px 32px rgba(0,87,255,0.12),inset 0 1px 0 rgba(0,87,255,0.15);">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:36px;">
+            <div style="width:8px;height:8px;border-radius:50%;background:var(--blue);box-shadow:0 0 12px var(--blue);"></div>
+            <span style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--blue);">With Flowaify</span>
+          </div>
+          <ul style="list-style:none;display:flex;flex-direction:column;gap:20px;">
+            <li style="display:flex;align-items:flex-start;gap:13px;font-size:15px;color:var(--text-soft);line-height:1.6;">
+              <span style="color:var(--blue);font-size:17px;line-height:1.2;flex-shrink:0;">✓</span>
+              Every lead gets an intelligent response within seconds — automatically.
+            </li>
+            <li style="display:flex;align-items:flex-start;gap:13px;font-size:15px;color:var(--text-soft);line-height:1.6;">
+              <span style="color:var(--blue);font-size:17px;line-height:1.2;flex-shrink:0;">✓</span>
+              Follow-up sequences run on their own until the lead converts or opts out.
+            </li>
+            <li style="display:flex;align-items:flex-start;gap:13px;font-size:15px;color:var(--text-soft);line-height:1.6;">
+              <span style="color:var(--blue);font-size:17px;line-height:1.2;flex-shrink:0;">✓</span>
+              Every contact routed, tagged, and organized in your CRM in real time.
+            </li>
+            <li style="display:flex;align-items:flex-start;gap:13px;font-size:15px;color:var(--text-soft);line-height:1.6;">
+              <span style="color:var(--blue);font-size:17px;line-height:1.2;flex-shrink:0;">✓</span>
+              Your team focuses on closing. The system handles everything before the call.
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── SERVICES ──────────────────────────────────────────────────────── -->
+  <section id="services" style="padding:130px 60px;background:var(--bg-surface);border-top:1px solid var(--border);">
+    <div style="max-width:1440px;margin:0 auto;">
+
+      <div class="reveal" style="margin-bottom:72px;">
+        <span style="font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--blue);">What We Build</span>
+        <h2 style="font-size:52px;font-weight:800;letter-spacing:-0.04em;color:var(--text);margin-top:14px;margin-bottom:16px;">
+          One system.<br/>Every touchpoint covered.
+        </h2>
+        <p style="font-size:17px;color:var(--text-muted);max-width:460px;line-height:1.72;">
+          We build and manage the infrastructure that handles your lead pipeline from first contact to booked call.
+        </p>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:22px;">
+
+        <div class="glass reveal" style="padding:34px;">
+          <div class="s-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81a19.79 19.79 0 01-3.07-8.68A2 2 0 012 .97h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 8.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/>
+            </svg>
+          </div>
+          <h3 style="font-size:18px;font-weight:700;letter-spacing:-0.025em;color:var(--text);margin-bottom:11px;">Lead Capture & Routing</h3>
+          <p style="font-size:14px;color:var(--text-muted);line-height:1.72;">Every inbound lead from every channel — website, ads, referrals — is captured and routed to the right place instantly.</p>
+        </div>
+
+        <div class="glass reveal" style="padding:34px;">
+          <div class="s-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+            </svg>
+          </div>
+          <h3 style="font-size:18px;font-weight:700;letter-spacing:-0.025em;color:var(--text);margin-bottom:11px;">AI Response System</h3>
+          <p style="font-size:14px;color:var(--text-muted);line-height:1.72;">AI-powered responses go out within seconds of a lead coming in — personalized, on-brand, and ready to qualify.</p>
+        </div>
+
+        <div class="glass reveal" style="padding:34px;">
+          <div class="s-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/>
+              <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
+            </svg>
+          </div>
+          <h3 style="font-size:18px;font-weight:700;letter-spacing:-0.025em;color:var(--text);margin-bottom:11px;">Automated Follow-Ups</h3>
+          <p style="font-size:14px;color:var(--text-muted);line-height:1.72;">Multi-step follow-up sequences run automatically across SMS, email, and DMs — until the lead books or opts out.</p>
+        </div>
+
+        <div class="glass reveal" style="padding:34px;">
+          <div class="s-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
+            </svg>
+          </div>
+          <h3 style="font-size:18px;font-weight:700;letter-spacing:-0.025em;color:var(--text);margin-bottom:11px;">CRM Organization</h3>
+          <p style="font-size:14px;color:var(--text-muted);line-height:1.72;">Leads are tagged, categorized, and added to your CRM automatically — no manual entry, no missed contacts.</p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── IPHONE MOCKUP ─────────────────────────────────────────────────── -->
+  <section style="padding:140px 60px;background:var(--bg);text-align:center;position:relative;overflow:hidden;border-top:1px solid var(--border);">
+    <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+                width:800px;height:800px;border-radius:50%;
+                background:radial-gradient(circle,rgba(0,87,255,0.16) 0%,rgba(0,87,255,0.04) 45%,transparent 70%);
+                pointer-events:none;filter:blur(8px);"></div>
+
+    <div class="reveal" style="margin-bottom:72px;">
+      <span style="font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--blue);">Always On</span>
+      <h2 style="font-size:52px;font-weight:800;letter-spacing:-0.04em;color:var(--text);margin-top:14px;">
+        Your system runs<br/>while you don't.
+      </h2>
+    </div>
+
+    <!-- Phone + badges wrapper -->
+    <div style="display:inline-block;position:relative;" class="reveal">
+
+      <!-- Left badge -->
+      <div class="badge left">
+        <p style="font-size:13px;font-weight:700;color:white;">Lead captured</p>
+        <p style="font-size:11px;color:rgba(147,197,253,0.65);margin-top:2px;">2 seconds ago</p>
+      </div>
+
+      <!-- Right badge -->
+      <div class="badge right">
+        <p style="font-size:13px;font-weight:700;color:white;">Follow-up active</p>
+        <p style="font-size:11px;color:rgba(147,197,253,0.65);margin-top:2px;">Sequence running</p>
+      </div>
+
+      <div id="iphone-wrapper" style="perspective:1000px;display:inline-block;">
+        <div id="iphone-phone" style="width:280px;height:580px;border-radius:48px;background:#0a0a0a;position:relative;
+                                       box-shadow:0 40px 90px rgba(0,0,0,0.85),inset 0 0 0 2px #52525b,inset 0 0 0 7px #000;">
+
+          <!-- Hardware buttons -->
+          <div style="position:absolute;top:118px;left:-3px;width:3px;height:26px;border-radius:2px 0 0 2px;background:#3a3a3a;"></div>
+          <div style="position:absolute;top:158px;left:-3px;width:3px;height:46px;border-radius:2px 0 0 2px;background:#3a3a3a;"></div>
+          <div style="position:absolute;top:218px;left:-3px;width:3px;height:46px;border-radius:2px 0 0 2px;background:#3a3a3a;"></div>
+          <div style="position:absolute;top:168px;right:-3px;width:3px;height:72px;border-radius:0 2px 2px 0;background:#3a3a3a;"></div>
+
+          <!-- Screen -->
+          <div style="position:absolute;inset:7px;border-radius:42px;background:#050914;overflow:hidden;color:white;
+                      box-shadow:inset 0 0 20px rgba(0,0,0,1);">
+            <!-- Glare -->
+            <div style="position:absolute;inset:0;background:linear-gradient(112deg,rgba(255,255,255,0.07),rgba(255,255,255,0) 46%);pointer-events:none;z-index:30;"></div>
+            <!-- Dynamic island -->
+            <div style="position:absolute;top:7px;left:50%;transform:translateX(-50%);width:100px;height:28px;
+                        background:black;border-radius:100px;z-index:40;display:flex;align-items:center;justify-content:flex-end;padding-right:12px;">
+              <div class="pulse" style="width:6px;height:6px;border-radius:50%;background:#3b82f6;box-shadow:0 0 8px rgba(59,130,246,.9);"></div>
+            </div>
+
+            <!-- App UI -->
+            <div style="padding:56px 20px 28px;height:100%;display:flex;flex-direction:column;font-family:'Rubik',sans-serif;">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
+                <div>
+                  <p style="font-size:9px;text-transform:uppercase;letter-spacing:.2em;color:rgba(147,197,253,.6);font-weight:700;">Flowaify</p>
+                  <h3 style="font-size:19px;font-weight:800;letter-spacing:-.035em;margin-top:2px;">Lead System</h3>
+                </div>
+                <div style="width:36px;height:36px;border-radius:50%;background:rgba(59,130,246,.15);border:1px solid rgba(59,130,246,.25);
+                            display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#93c5fd;">AI</div>
+              </div>
+
+              <div style="border-radius:20px;border:1px solid rgba(59,130,246,.15);background:rgba(255,255,255,.04);padding:18px;margin-bottom:12px;">
+                <p style="font-size:9px;color:rgba(255,255,255,.45);margin-bottom:5px;">New leads today</p>
+                <div style="display:flex;align-items:flex-end;gap:7px;">
+                  <span style="font-size:44px;font-weight:900;letter-spacing:-.04em;line-height:1;">24</span>
+                  <span style="font-size:12px;color:#93c5fd;margin-bottom:5px;">+18%</span>
+                </div>
+              </div>
+
+              <div style="display:flex;flex-direction:column;gap:9px;">
+                <div style="border-radius:14px;border:1px solid rgba(255,255,255,.07);background:rgba(255,255,255,.03);
+                            padding:12px 14px;display:flex;align-items:center;gap:11px;">
+                  <div style="width:34px;height:34px;border-radius:10px;background:rgba(59,130,246,.14);border:1px solid rgba(59,130,246,.2);
+                              display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;">⚡</div>
+                  <div>
+                    <p style="font-size:11px;font-weight:600;line-height:1.3;">Instant response sent</p>
+                    <p style="font-size:9px;color:rgba(255,255,255,.42);margin-top:2px;">Website lead captured</p>
+                  </div>
+                </div>
+                <div style="border-radius:14px;border:1px solid rgba(255,255,255,.07);background:rgba(255,255,255,.03);
+                            padding:12px 14px;display:flex;align-items:center;gap:11px;">
+                  <div style="width:34px;height:34px;border-radius:10px;background:rgba(59,130,246,.14);border:1px solid rgba(59,130,246,.2);
+                              display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;">↪</div>
+                  <div>
+                    <p style="font-size:11px;font-weight:600;line-height:1.3;">Lead routed to CRM</p>
+                    <p style="font-size:9px;color:rgba(255,255,255,.42);margin-top:2px;">Pipeline updated</p>
+                  </div>
+                </div>
+                <div style="border-radius:14px;border:1px solid rgba(255,255,255,.07);background:rgba(255,255,255,.03);
+                            padding:12px 14px;display:flex;align-items:center;gap:11px;">
+                  <div style="width:34px;height:34px;border-radius:10px;background:rgba(59,130,246,.14);border:1px solid rgba(59,130,246,.2);
+                              display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;">✓</div>
+                  <div>
+                    <p style="font-size:11px;font-weight:600;line-height:1.3;">Follow-up scheduled</p>
+                    <p style="font-size:9px;color:rgba(255,255,255,.42);margin-top:2px;">No lead left behind</p>
+                  </div>
+                </div>
+              </div>
+
+              <div style="margin-top:auto;padding-top:14px;">
+                <div style="border-radius:14px;background:#0057FF;text-align:center;padding:11px;font-weight:700;font-size:12px;
+                            box-shadow:0 0 28px rgba(0,87,255,.45);">View Pipeline</div>
+              </div>
+
+              <div style="position:absolute;bottom:8px;left:50%;transform:translateX(-50%);
+                          width:100px;height:4px;background:rgba(255,255,255,.2);border-radius:100px;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─── HOW IT WORKS ──────────────────────────────────────────────────── -->
+  <section id="how-it-works" style="padding:130px 60px;background:var(--bg-surface);border-top:1px solid var(--border);">
+    <div style="max-width:1440px;margin:0 auto;">
+
+      <div class="reveal" style="margin-bottom:88px;">
+        <span style="font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--blue);">The Process</span>
+        <h2 style="font-size:52px;font-weight:800;letter-spacing:-0.04em;color:var(--text);margin-top:14px;">
+          From lead to follow-up.<br/>No manual work.
+        </h2>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:56px;position:relative;">
+        <!-- Connector lines -->
+        <div style="position:absolute;top:27px;left:calc(16.67% + 36px);width:calc(66.67% - 72px);height:1px;
+                    background:linear-gradient(90deg,var(--blue),rgba(0,87,255,0.4),var(--blue));z-index:0;
+                    box-shadow:0 0 8px var(--blue-glow);"></div>
+
+        <div class="reveal" style="position:relative;z-index:1;">
+          <div style="width:54px;height:54px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;
+                      font-size:18px;font-weight:800;color:white;margin-bottom:28px;box-shadow:0 0 28px var(--blue-glow);">1</div>
+          <h3 style="font-size:22px;font-weight:700;letter-spacing:-0.025em;color:var(--text);margin-bottom:13px;">Lead comes in</h3>
+          <p style="font-size:15px;color:var(--text-muted);line-height:1.72;">A prospect fills out a form, clicks an ad, sends a DM, or calls your number. The system sees it the moment it happens.</p>
+        </div>
+
+        <div class="reveal" style="position:relative;z-index:1;">
+          <div style="width:54px;height:54px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;
+                      font-size:18px;font-weight:800;color:white;margin-bottom:28px;box-shadow:0 0 28px var(--blue-glow);">2</div>
+          <h3 style="font-size:22px;font-weight:700;letter-spacing:-0.025em;color:var(--text);margin-bottom:13px;">System captures & responds</h3>
+          <p style="font-size:15px;color:var(--text-muted);line-height:1.72;">The lead is captured, routed, and receives an AI-powered response within seconds — before your team knows it happened.</p>
+        </div>
+
+        <div class="reveal" style="position:relative;z-index:1;">
+          <div style="width:54px;height:54px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;
+                      font-size:18px;font-weight:800;color:white;margin-bottom:28px;box-shadow:0 0 28px var(--blue-glow);">3</div>
+          <h3 style="font-size:22px;font-weight:700;letter-spacing:-0.025em;color:var(--text);margin-bottom:13px;">Follow-up runs automatically</h3>
+          <p style="font-size:15px;color:var(--text-muted);line-height:1.72;">Sequences run across SMS, email, and DMs automatically until the lead books a call, converts, or opts out.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── PLANS ─────────────────────────────────────────────────────────── -->
+  <section id="plans" style="padding:130px 60px;background:var(--bg);">
+    <div style="max-width:1440px;margin:0 auto;">
+
+      <div class="reveal" style="margin-bottom:64px;">
+        <span style="font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--blue);">Plans</span>
+        <h2 style="font-size:52px;font-weight:800;letter-spacing:-0.04em;color:var(--text);margin-top:14px;margin-bottom:16px;">
+          Built for your<br/>lead volume.
+        </h2>
+        <p style="font-size:17px;color:var(--text-muted);max-width:440px;line-height:1.72;">
+          Every plan includes a fully custom-built system. No templates. No copy-paste automation.
+        </p>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:22px;">
+
+        <!-- Essential -->
+        <div class="plan reveal">
+          <div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);margin-bottom:18px;">Essential</div>
+          <div style="font-size:26px;font-weight:800;letter-spacing:-.03em;color:var(--text);margin-bottom:7px;">0–120 <span style="font-size:13px;font-weight:500;color:var(--text-muted);">leads/mo</span></div>
+          <p style="font-size:13px;color:var(--text-muted);line-height:1.65;margin-bottom:28px;">For businesses just getting consistent inbound and ready to stop missing replies.</p>
+          <ul style="list-style:none;display:flex;flex-direction:column;gap:11px;margin-bottom:32px;">
+            <li style="font-size:13px;color:var(--text-soft);display:flex;gap:9px;align-items:flex-start;"><span style="color:var(--blue);flex-shrink:0;">✓</span>Lead capture & routing</li>
+            <li style="font-size:13px;color:var(--text-soft);display:flex;gap:9px;align-items:flex-start;"><span style="color:var(--blue);flex-shrink:0;">✓</span>AI response system</li>
+            <li style="font-size:13px;color:var(--text-soft);display:flex;gap:9px;align-items:flex-start;"><span style="color:var(--blue);flex-shrink:0;">✓</span>Automated follow-ups</li>
+            <li style="font-size:13px;color:var(--text-soft);display:flex;gap:9px;align-items:flex-start;"><span style="color:var(--blue);flex-shrink:0;">✓</span>CRM organization</li>
+          </ul>
+          <a href="#contact" class="btn btn-primary" style="width:100%;justify-content:center;">Get Started</a>
+        </div>
+
+        <!-- Growth -->
+        <div class="plan featured reveal">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
+            <div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--blue);">Growth</div>
+            <span style="font-size:9px;font-weight:700;padding:3px 10px;border-radius:100px;background:var(--blue);color:white;letter-spacing:.06em;">POPULAR</span>
+          </div>
+          <div style="font-size:26px;font-weight:800;letter-spacing:-.03em;color:var(--text);margin-bottom:7px;">120–400 <span style="font-size:13px;font-weight:500;color:var(--text-muted);">leads/mo</span></div>
+          <p style="font-size:13px;color:var(--text-muted);line-height:1.65;margin-bottom:28px;">For teams scaling fast and needing reliable automation without adding headcount.</p>
+          <ul style="list-style:none;display:flex;flex-direction:column;gap:11px;margin-bottom:32px;">
+            <li style="font-size:13px;color:var(--text-soft);display:flex;gap:9px;align-items:flex-start;"><span style="color:var(--blue);flex-shrink:0;">✓</span>Everything in Essential</li>
+            <li style="font-size:13px;color:var(--text-soft);display:flex;gap:9px;align-items:flex-start;"><span style="color:var(--blue);flex-shrink:0;">✓</span>Multi-channel sequences</li>
+            <li style="font-size:13px;color:var(--text-soft);display:flex;gap:9px;align-items:flex-start;"><span style="color:var(--blue);flex-shrink:0;">✓</span>Lead qualification logic</li>
+            <li style="font-size:13px;color:var(--text-soft);display:flex;gap:9px;align-items:flex-start;"><span style="color:var(--blue);flex-shrink:0;">✓</span>Monthly optimization</li>
+          </ul>
+          <a href="#contact" class="btn btn-primary" style="width:100%;justify-content:center;">Get Started</a>
+        </div>
+
+        <!-- Scale -->
+        <div class="plan reveal">
+          <div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);margin-bottom:18px;">Scale</div>
+          <div style="font-size:26px;font-weight:800;letter-spacing:-.03em;color:var(--text);margin-bottom:7px;">500–1,500 <span style="font-size:13px;font-weight:500;color:var(--text-muted);">leads/mo</span></div>
+          <p style="font-size:13px;color:var(--text-muted);line-height:1.65;margin-bottom:28px;">For high-volume operations that need a full infrastructure built around their pipeline.</p>
+          <ul style="list-style:none;display:flex;flex-direction:column;gap:11px;margin-bottom:32px;">
+            <li style="font-size:13px;color:var(--text-soft);display:flex;gap:9px;align-items:flex-start;"><span style="color:var(--blue);flex-shrink:0;">✓</span>Everything in Growth</li>
+            <li style="font-size:13px;color:var(--text-soft);display:flex;gap:9px;align-items:flex-start;"><span style="color:var(--blue);flex-shrink:0;">✓</span>Advanced AI decision logic</li>
+            <li style="font-size:13px;color:var(--text-soft);display:flex;gap:9px;align-items:flex-start;"><span style="color:var(--blue);flex-shrink:0;">✓</span>Custom integrations</li>
+            <li style="font-size:13px;color:var(--text-soft);display:flex;gap:9px;align-items:flex-start;"><span style="color:var(--blue);flex-shrink:0;">✓</span>Dedicated system manager</li>
+          </ul>
+          <a href="#contact" class="btn btn-primary" style="width:100%;justify-content:center;">Get Started</a>
+        </div>
+
+        <!-- Enterprise -->
+        <div class="plan reveal">
+          <div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);margin-bottom:18px;">Enterprise</div>
+          <div style="font-size:26px;font-weight:800;letter-spacing:-.03em;color:var(--text);margin-bottom:7px;">1,500–3,000 <span style="font-size:13px;font-weight:500;color:var(--text-muted);">leads/mo</span></div>
+          <p style="font-size:13px;color:var(--text-muted);line-height:1.65;margin-bottom:28px;">For large teams with complex routing, multi-location, or high-touch requirements.</p>
+          <ul style="list-style:none;display:flex;flex-direction:column;gap:11px;margin-bottom:32px;">
+            <li style="font-size:13px;color:var(--text-soft);display:flex;gap:9px;align-items:flex-start;"><span style="color:var(--blue);flex-shrink:0;">✓</span>Everything in Scale</li>
+            <li style="font-size:13px;color:var(--text-soft);display:flex;gap:9px;align-items:flex-start;"><span style="color:var(--blue);flex-shrink:0;">✓</span>Multi-location routing</li>
+            <li style="font-size:13px;color:var(--text-soft);display:flex;gap:9px;align-items:flex-start;"><span style="color:var(--blue);flex-shrink:0;">✓</span>White-glove onboarding</li>
+            <li style="font-size:13px;color:var(--text-soft);display:flex;gap:9px;align-items:flex-start;"><span style="color:var(--blue);flex-shrink:0;">✓</span>SLA & priority support</li>
+          </ul>
+          <a href="#contact" class="btn btn-primary" style="width:100%;justify-content:center;">Get Started</a>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── CTA + FORM ────────────────────────────────────────────────────── -->
+  <section id="contact" style="padding:130px 60px;background:var(--bg-surface);border-top:1px solid var(--border);">
+    <div style="max-width:680px;margin:0 auto;">
+
+      <div class="reveal" style="text-align:center;margin-bottom:64px;">
+        <h2 style="font-size:60px;font-weight:800;letter-spacing:-0.045em;color:var(--text);margin-bottom:18px;">
+          Let's build your<br/><span style="color:var(--blue);">system.</span>
+        </h2>
+        <p style="font-size:17px;color:var(--text-muted);line-height:1.72;">Tell us about your business. If it's a good fit, we'll book a call and get started.</p>
+      </div>
+
+      <form class="reveal" id="contact-form" onsubmit="handleSubmit(event)" style="display:flex;flex-direction:column;gap:20px;">
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+          <div>
+            <label style="display:block;font-size:11px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px;">Name</label>
+            <input class="field" type="text" placeholder="Your name" required />
+          </div>
+          <div>
+            <label style="display:block;font-size:11px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px;">Email</label>
+            <input class="field" type="email" placeholder="you@company.com" required />
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+          <div>
+            <label style="display:block;font-size:11px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px;">Business Name</label>
+            <input class="field" type="text" placeholder="Your business" required />
+          </div>
+          <div>
+            <label style="display:block;font-size:11px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px;">Website or Instagram</label>
+            <input class="field" type="text" placeholder="yoursite.com or @handle" />
+          </div>
+        </div>
+
+        <div>
+          <label style="display:block;font-size:11px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px;">Business Type</label>
+          <select class="field" required style="cursor:pointer;">
+            <option value="" disabled selected>Select your industry</option>
+            <option>Real Estate</option>
+            <option>Mortgage</option>
+            <option>Insurance</option>
+            <option>Med Spa</option>
+            <option>Clinic / Healthcare</option>
+            <option>Other</option>
+          </select>
+        </div>
+
+        <div>
+          <label style="display:block;font-size:11px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px;">Monthly Revenue Range</label>
+          <select class="field" required style="cursor:pointer;">
+            <option value="" disabled selected>Select a range</option>
+            <option>Under $10k/mo</option>
+            <option>$10k – $30k/mo</option>
+            <option>$30k – $100k/mo</option>
+            <option>$100k+/mo</option>
+          </select>
+        </div>
+
+        <div>
+          <label style="display:block;font-size:11px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px;">How do you currently get clients?</label>
+          <input class="field" type="text" placeholder="e.g. Instagram ads, referrals, website…" required />
+        </div>
+
+        <div>
+          <label style="display:block;font-size:11px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px;">Biggest challenge right now</label>
+          <textarea class="field" rows="3" placeholder="What's the main thing holding your lead pipeline back?" required style="resize:vertical;min-height:88px;"></textarea>
+        </div>
+
+        <div>
+          <label style="display:block;font-size:11px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--text-muted);margin-bottom:13px;">Ready to book a call if qualified?</label>
+          <div style="display:flex;gap:20px;">
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:14px;color:var(--text-soft);">
+              <input type="radio" name="ready" value="yes" style="accent-color:var(--blue);" required /> Yes, I'm ready
+            </label>
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:14px;color:var(--text-soft);">
+              <input type="radio" name="ready" value="no" style="accent-color:var(--blue);" /> Not yet
+            </label>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-lg" style="margin-top:10px;justify-content:center;width:100%;font-size:16px;">
+          Build My System
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+          </svg>
+        </button>
+      </form>
+    </div>
+  </section>
+
+  <!-- ─── FOOTER ────────────────────────────────────────────────────────── -->
+  <footer style="padding:56px 60px;border-top:1px solid var(--border);background:var(--bg);">
+    <div style="max-width:1440px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;">
+      <div>
+        <a href="#" style="display:flex;align-items:center;gap:10px;text-decoration:none;margin-bottom:8px;">
+          <img src="brand_assets/ChatGPT Image Apr 23, 2026, 10_57_59 PM.png" alt="" style="width:28px;height:28px;object-fit:contain;border-radius:7px;" />
+          <span style="font-size:18px;font-weight:700;letter-spacing:-.03em;color:var(--text);">flow<span style="color:var(--blue);">ai</span>fy</span>
+        </a>
+        <p style="font-size:12px;color:var(--text-muted);letter-spacing:.04em;">Automate · Flow · Amplify</p>
+      </div>
+
+      <div style="display:flex;gap:36px;">
+        <a href="#problem"      class="nav-link">Why Flowaify</a>
+        <a href="#how-it-works" class="nav-link">How It Works</a>
+        <a href="#plans"        class="nav-link">Plans</a>
+        <a href="#contact"      class="nav-link">Build My System</a>
+      </div>
+
+      <div style="text-align:right;">
+        <a href="mailto:autofi.company@gmail.com" style="font-size:14px;color:var(--blue);text-decoration:none;font-weight:500;display:block;margin-bottom:6px;">autofi.company@gmail.com</a>
+        <p style="font-size:12px;color:var(--text-muted);">© 2026 Flowaify. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+</div><!-- /#page -->
+
+<!-- ─── SCRIPTS ───────────────────────────────────────────────────────────── -->
 <script>
-  // Scroll-reveal via IntersectionObserver
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(e => {
-      if (e.isIntersecting) {
-        e.target.classList.add('revealed');
-        observer.unobserve(e.target);
+// ─── THEME TOGGLE ────────────────────────────────────────────────────────────
+const html   = document.documentElement;
+const themeBtn = document.getElementById('theme-btn');
+const themeIcon = document.getElementById('theme-icon');
+let isDark = true;
+
+const SUN = `<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>`;
+const MOON = `<path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>`;
+
+themeBtn.addEventListener('click', () => {
+  isDark = !isDark;
+  html.setAttribute('data-theme', isDark ? 'dark' : 'light');
+  themeIcon.innerHTML = isDark ? SUN : MOON;
+  document.getElementById('navbar').style.background = isDark ? 'rgba(0,0,0,0.72)' : 'rgba(248,249,250,0.88)';
+});
+
+// ─── BOOT ANIMATION ──────────────────────────────────────────────────────────
+const bootEl    = document.getElementById('boot');
+const bootCvs   = document.getElementById('boot-canvas');
+const bctx      = bootCvs.getContext('2d');
+let   bootStart = null;
+const BOOT_DUR  = 2400;
+
+function resizeBoot() {
+  bootCvs.width  = window.innerWidth;
+  bootCvs.height = window.innerHeight;
+}
+resizeBoot();
+
+const DOT_SPACING = 42;
+const diag = () => Math.hypot(bootCvs.width, bootCvs.height) / 2 + 100;
+
+function drawBootFrame(ts) {
+  if (!bootStart) bootStart = ts;
+  const p = Math.min((ts - bootStart) / BOOT_DUR, 1);
+  const eased = 1 - Math.pow(1 - p, 3.5);
+  const r = eased * diag();
+
+  const W = bootCvs.width, H = bootCvs.height;
+  const cx = W / 2, cy = H / 2;
+
+  bctx.clearRect(0, 0, W, H);
+
+  const cols = Math.ceil(W / DOT_SPACING) + 2;
+  const rows = Math.ceil(H / DOT_SPACING) + 2;
+  const ox   = ((W % DOT_SPACING) / 2);
+  const oy   = ((H % DOT_SPACING) / 2);
+
+  for (let row = 0; row < rows; row++) {
+    for (let col = 0; col < cols; col++) {
+      const x = ox + col * DOT_SPACING;
+      const y = oy + row * DOT_SPACING;
+      const d = Math.hypot(x - cx, y - cy);
+      if (d > r) continue;
+
+      const fade = Math.min(1, (r - d) / (DOT_SPACING * 3));
+      const isBlue = ((col * 3 + row * 5) % 7) < 3;
+      bctx.beginPath();
+      bctx.arc(x, y, 1.8, 0, Math.PI * 2);
+      bctx.fillStyle = isBlue
+        ? `rgba(0,87,255,${(fade * 0.65).toFixed(2)})`
+        : `rgba(255,255,255,${(fade * 0.22).toFixed(2)})`;
+      bctx.fill();
+    }
+  }
+
+  if (p < 1) {
+    requestAnimationFrame(drawBootFrame);
+  } else {
+    // Hold briefly then transition
+    setTimeout(finishBoot, 300);
+  }
+}
+
+function finishBoot() {
+  // Fade out dot grid
+  gsap.to(bootCvs, { opacity: 0, duration: 0.7, ease: 'power2.out' });
+
+  // Init sphere
+  initSphere();
+
+  // Reveal page after sphere init
+  setTimeout(() => {
+    gsap.to(bootEl, {
+      opacity: 0, duration: 0.55, ease: 'power2.inOut',
+      onComplete: () => {
+        bootEl.style.display = 'none';
+        document.body.classList.remove('no-scroll');
+        gsap.to('#page', { opacity: 1, duration: 0.3 });
+        // Hero text entrance
+        gsap.to('#hero-copy',   { opacity: 1, y: 0, duration: 0.9, ease: 'power3.out', delay: 0.15 });
+        gsap.to('#hero-sphere', { opacity: 1, duration: 0.8, delay: 0.05 });
+        // Init other features
+        initScrollReveal();
+        initIphoneTilt();
       }
     });
-  }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+  }, 750);
+}
 
-  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+requestAnimationFrame(drawBootFrame);
 
-  // Sticky nav background on scroll
-  const nav = document.querySelector('.nav');
-  window.addEventListener('scroll', () => {
-    nav.style.background = window.scrollY > 40
-      ? 'rgba(8,8,16,0.92)'
-      : 'rgba(8,8,16,0.75)';
-  }, { passive: true });
+// ─── THREE.JS SPHERE ─────────────────────────────────────────────────────────
+let renderer, scene, camera, wireMesh;
+let mX = 0, mY = 0;
+
+function initSphere() {
+  const canvas = document.getElementById('hero-sphere');
+  const W = 500, H = 500;
+  canvas.width  = W;
+  canvas.height = H;
+  canvas.style.width  = W + 'px';
+  canvas.style.height = H + 'px';
+
+  renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+  renderer.setSize(W, H);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+  scene  = new THREE.Scene();
+  camera = new THREE.PerspectiveCamera(42, 1, 0.1, 100);
+  camera.position.z = 3.0;
+
+  // Geometry — store original positions for deformation
+  const geo  = new THREE.SphereGeometry(1, 36, 36);
+  const orig = new Float32Array(geo.attributes.position.array);
+  geo.userData.orig = orig;
+
+  // Wireframe layer
+  const wireMat = new THREE.MeshBasicMaterial({
+    color: 0x1466FF, wireframe: true, transparent: true, opacity: 0.38
+  });
+  wireMesh = new THREE.Mesh(geo, wireMat);
+
+  // Solid inner glow
+  const solidMat = new THREE.MeshPhongMaterial({
+    color: 0x0028aa, emissive: 0x000d55, transparent: true, opacity: 0.14, shininess: 80
+  });
+  const solidMesh = new THREE.Mesh(new THREE.SphereGeometry(0.96, 36, 36), solidMat);
+
+  // Outer glow shell
+  const outerMat = new THREE.MeshBasicMaterial({
+    color: 0x0057FF, transparent: true, opacity: 0.045, side: THREE.BackSide
+  });
+  const outerMesh = new THREE.Mesh(new THREE.SphereGeometry(1.18, 36, 36), outerMat);
+
+  // Lights
+  const keyLight  = new THREE.PointLight(0x1466FF, 4.0, 6);
+  keyLight.position.set(2.5, 2, 2);
+  const fillLight = new THREE.PointLight(0x3D82FF, 1.8, 5);
+  fillLight.position.set(-2, -1, 1.2);
+  const ambient   = new THREE.AmbientLight(0x001144, 2.5);
+
+  scene.add(solidMesh, wireMesh, outerMesh, keyLight, fillLight, ambient);
+
+  // Cursor → light movement
+  window.addEventListener('mousemove', e => {
+    mX = (e.clientX / window.innerWidth  - 0.5) * 2;
+    mY = (e.clientY / window.innerHeight - 0.5) * 2;
+    keyLight.position.x = 2.5 + mX * 1.8;
+    keyLight.position.y = 2.0 + mY * 1.8;
+  });
+
+  animateSphere();
+}
+
+function animateSphere() {
+  requestAnimationFrame(animateSphere);
+  const t = Date.now() * 0.001;
+
+  // Rotation
+  wireMesh.rotation.y = t * 0.16;
+  wireMesh.rotation.x = Math.sin(t * 0.065) * 0.14 + mY * 0.025;
+  wireMesh.rotation.z = Math.cos(t * 0.04)  * 0.04;
+
+  // Vertex deformation (breathing + warp)
+  const pos  = wireMesh.geometry.attributes.position;
+  const orig = wireMesh.geometry.userData.orig;
+
+  for (let i = 0; i < pos.count; i++) {
+    const ox = orig[i * 3], oy = orig[i * 3 + 1], oz = orig[i * 3 + 2];
+    const noise   = Math.sin(ox * 3.2 + t * 0.85) * Math.cos(oy * 3.1 + t * 0.6) * Math.sin(oz * 2.2 + t * 0.5);
+    const breath  = Math.sin(t * 0.95) * 0.052;
+    const forward = oz * 0.022 * Math.sin(t * 0.4); // subtle warp toward viewer
+    const scale   = 1 + noise * 0.09 + breath + forward;
+    pos.setXYZ(i, ox * scale, oy * scale, oz * scale);
+  }
+  pos.needsUpdate = true;
+  wireMesh.geometry.computeVertexNormals();
+
+  renderer.render(scene, camera);
+}
+
+// ─── IPHONE TILT ─────────────────────────────────────────────────────────────
+function initIphoneTilt() {
+  const phone = document.getElementById('iphone-phone');
+  if (!phone || typeof gsap === 'undefined') return;
+  window.addEventListener('mousemove', e => {
+    const rx = (e.clientX / window.innerWidth  - 0.5) * 2;
+    const ry = (e.clientY / window.innerHeight - 0.5) * 2;
+    gsap.to(phone, {
+      rotationY: rx * 13, rotationX: -ry * 13,
+      duration: 1.3, ease: 'power3.out',
+      transformPerspective: 1000,
+    });
+  });
+}
+
+// ─── SCROLL REVEAL ───────────────────────────────────────────────────────────
+function initScrollReveal() {
+  const els = document.querySelectorAll('.reveal');
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach((entry, i) => {
+      if (!entry.isIntersecting) return;
+      setTimeout(() => entry.target.classList.add('in'), i * 90);
+      obs.unobserve(entry.target);
+    });
+  }, { threshold: 0.12 });
+  els.forEach(el => obs.observe(el));
+}
+
+// ─── FORM ────────────────────────────────────────────────────────────────────
+function handleSubmit(e) {
+  e.preventDefault();
+  const btn = e.target.querySelector('button[type=submit]');
+  btn.innerHTML = 'Submitted ✓';
+  btn.style.background = '#083d08';
+  btn.disabled = true;
+}
+
+// ─── NAVBAR SCROLL ───────────────────────────────────────────────────────────
+window.addEventListener('scroll', () => {
+  document.getElementById('navbar').style.borderBottomColor =
+    window.scrollY > 10 ? 'var(--border)' : 'transparent';
+}, { passive: true });
 </script>
 </body>
 </html>
