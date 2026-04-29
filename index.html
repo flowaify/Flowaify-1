@@ -1,68 +1,70 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>flowaify — Automate. Flow. Amplify.</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 
   <style>
+    /* ── Design Tokens ── */
     :root {
-      --bg:          #000000;
-      --bg-surface:  #07071a;
-      --bg-card:     #0e0e22;
-      --text:        #ffffff;
-      --text-muted:  rgba(255,255,255,0.45);
-      --text-soft:   rgba(255,255,255,0.72);
+      --bg:          #FFFFFF;
+      --bg-surface:  #F8FAFC;
+      --bg-card:     #FFFFFF;
+      --text:        #0F172A;
+      --text-muted:  #64748B;
+      --text-soft:   #475569;
+      --blue:        #0057FF;
+      --blue-mid:    #1A6BFF;
+      --blue-soft:   #3D82FF;
+      --blue-glow:   rgba(0,87,255,0.14);
+      --blue-dim:    rgba(0,87,255,0.07);
+      --border:      #E2E8F0;
+      --border-blue: rgba(0,87,255,0.25);
+      --grid:        rgba(0,0,0,0.032);
+      --shadow-sm:   0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+      --shadow-md:   0 4px 16px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.04);
+      --shadow-lg:   0 12px 40px rgba(0,0,0,0.10), 0 4px 8px rgba(0,0,0,0.05);
+      --shadow-blue: 0 8px 28px rgba(0,87,255,0.22);
+    }
+
+    [data-theme="dark"] {
+      --bg:          #060612;
+      --bg-surface:  #0a0a1a;
+      --bg-card:     #10102a;
+      --text:        #f1f5f9;
+      --text-muted:  rgba(241,245,249,0.42);
+      --text-soft:   rgba(241,245,249,0.68);
       --blue:        #0057FF;
       --blue-mid:    #1A6BFF;
       --blue-soft:   #3D82FF;
       --blue-glow:   rgba(0,87,255,0.35);
       --blue-dim:    rgba(0,87,255,0.12);
-      --border:      rgba(255,255,255,0.09);
+      --border:      rgba(255,255,255,0.08);
       --border-blue: rgba(0,87,255,0.38);
-      --grid:        rgba(255,255,255,0.042);
-    }
-    [data-theme="light"] {
-      --bg:          #F8F9FA;
-      --bg-surface:  #EFF1F5;
-      --bg-card:     #ffffff;
-      --text:        #09090f;
-      --text-muted:  rgba(0,0,0,0.42);
-      --text-soft:   rgba(0,0,0,0.65);
-      --blue:        #0057FF;
-      --blue-mid:    #1A6BFF;
-      --blue-soft:   #3D82FF;
-      --blue-glow:   rgba(0,87,255,0.18);
-      --blue-dim:    rgba(0,87,255,0.07);
-      --border:      rgba(0,0,0,0.08);
-      --border-blue: rgba(0,87,255,0.22);
-      --grid:        rgba(0,0,0,0.045);
+      --grid:        rgba(255,255,255,0.04);
+      --shadow-sm:   0 1px 3px rgba(0,0,0,0.4);
+      --shadow-md:   0 4px 16px rgba(0,0,0,0.5);
+      --shadow-lg:   0 12px 40px rgba(0,0,0,0.6);
+      --shadow-blue: 0 8px 28px rgba(0,87,255,0.4);
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; }
 
     body {
-      font-family: 'Rubik', sans-serif;
+      font-family: 'Plus Jakarta Sans', sans-serif;
       background: var(--bg);
       color: var(--text);
       -webkit-font-smoothing: antialiased;
       overflow-x: hidden;
-      transition: background 0.45s ease, color 0.45s ease;
-    }
-
-    /* Grain */
-    body::after {
-      content: '';
-      position: fixed; inset: 0;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.028'/%3E%3C/svg%3E");
-      pointer-events: none; z-index: 9998;
+      transition: background 0.4s ease, color 0.4s ease;
     }
 
     /* Grid bg */
@@ -76,23 +78,24 @@
     /* Boot */
     #boot {
       position: fixed; inset: 0; z-index: 1000;
-      background: #000;
+      background: #FFFFFF;
       display: flex; align-items: center; justify-content: center;
     }
+    [data-theme="dark"] #boot { background: #060612; }
     #boot-canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
 
     /* Navbar */
     #navbar {
       position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-      height: 72px; padding: 0 60px;
+      height: 68px; padding: 0 60px;
       display: flex; align-items: center; justify-content: space-between;
       border-bottom: 1px solid var(--border);
-      backdrop-filter: blur(22px) saturate(180%);
-      -webkit-backdrop-filter: blur(22px) saturate(180%);
-      background: rgba(0,0,0,0.72);
-      transition: background 0.45s, border-color 0.3s;
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      background: rgba(255,255,255,0.92);
+      transition: background 0.4s, border-color 0.3s;
     }
-    [data-theme="light"] #navbar { background: rgba(248,249,250,0.85); }
+    [data-theme="dark"] #navbar { background: rgba(6,6,18,0.90); }
 
     .nav-link {
       color: var(--text-soft); font-size: 14px; font-weight: 500;
@@ -103,71 +106,81 @@
 
     /* Buttons */
     .btn {
-      display: inline-flex; align-items: center; gap: 6px;
-      font-family: 'Rubik', sans-serif; font-weight: 600;
+      display: inline-flex; align-items: center; gap: 7px;
+      font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 600;
       font-size: 14px; letter-spacing: -0.01em;
       text-decoration: none; cursor: pointer; border: none;
-      border-radius: 9px; padding: 10px 20px;
+      border-radius: 10px; padding: 10px 20px;
       transition: transform 0.22s cubic-bezier(.34,1.56,.64,1), box-shadow 0.22s;
     }
     .btn-primary { background: var(--blue); color: #fff; }
-    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 28px var(--blue-glow); }
-    .btn-primary:active { transform: translateY(0); }
-    .btn-lg { font-size: 16px; padding: 14px 32px; border-radius: 11px; }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: var(--shadow-blue); }
+    .btn-primary:active { transform: translateY(0); box-shadow: none; }
+    .btn-lg { font-size: 16px; padding: 14px 32px; border-radius: 12px; }
 
     /* Theme toggle */
     #theme-btn {
       width: 36px; height: 36px; border-radius: 50%;
-      border: 1px solid var(--border); background: var(--bg-card);
+      border: 1.5px solid var(--border); background: var(--bg-card);
       color: var(--text); cursor: pointer;
       display: flex; align-items: center; justify-content: center;
-      transition: border-color 0.2s, transform 0.2s;
+      transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
     }
-    #theme-btn:hover { border-color: var(--border-blue); transform: scale(1.06); }
+    #theme-btn:hover { border-color: var(--border-blue); transform: scale(1.06); box-shadow: var(--shadow-sm); }
 
-    /* Glass card */
-    .glass {
-      background: rgba(255,255,255,0.048);
-      border: 1px solid var(--border-blue);
-      border-radius: 18px;
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
-      box-shadow: 0 2px 24px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.06);
-      transition: transform 0.3s cubic-bezier(.34,1.56,.64,1), box-shadow 0.3s, border-color 0.3s;
+    /* Card — clean professional */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: var(--shadow-sm);
+      transition: transform 0.25s cubic-bezier(.34,1.56,.64,1), box-shadow 0.25s, border-color 0.25s;
     }
-    .glass:hover { transform: translateY(-5px); box-shadow: 0 24px 64px var(--blue-glow), inset 0 1px 0 rgba(255,255,255,0.08); border-color: rgba(0,87,255,0.6); }
-    [data-theme="light"] .glass { background: rgba(255,255,255,0.85); box-shadow: 0 2px 24px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.9); }
+    .card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); border-color: var(--border-blue); }
+
+    /* Keep .glass as alias for .card */
+    .glass {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: var(--shadow-sm);
+      transition: transform 0.25s cubic-bezier(.34,1.56,.64,1), box-shadow 0.25s, border-color 0.25s;
+    }
+    .glass:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); border-color: var(--border-blue); }
 
     /* Plan card */
     .plan {
-      border-radius: 18px; border: 1px solid rgba(255,255,255,0.10);
+      border-radius: 16px; border: 1.5px solid var(--border);
       padding: 36px; background: var(--bg-card);
-      box-shadow: 0 2px 20px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.05);
-      transition: transform 0.3s cubic-bezier(.34,1.56,.64,1), box-shadow 0.3s, border-color 0.3s;
+      box-shadow: var(--shadow-sm);
+      transition: transform 0.25s cubic-bezier(.34,1.56,.64,1), box-shadow 0.25s, border-color 0.25s;
       cursor: default;
     }
-    .plan:hover { transform: translateY(-5px); box-shadow: 0 20px 56px var(--blue-glow), inset 0 1px 0 rgba(255,255,255,0.08); border-color: var(--border-blue); }
-    .plan.featured { border-color: rgba(0,87,255,0.65); background: linear-gradient(145deg, rgba(0,87,255,0.12), rgba(0,87,255,0.03)); box-shadow: 0 4px 32px rgba(0,87,255,0.18), inset 0 1px 0 rgba(0,87,255,0.15); }
-    [data-theme="light"] .plan { background: #fff; border-color: rgba(0,0,0,0.09); }
+    .plan:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); border-color: var(--border-blue); }
+    .plan.featured {
+      border-color: var(--blue);
+      background: linear-gradient(145deg, rgba(0,87,255,0.04), rgba(0,87,255,0.01));
+      box-shadow: 0 0 0 1px rgba(0,87,255,0.15), var(--shadow-md);
+    }
+    .plan.featured:hover { box-shadow: 0 0 0 1px var(--blue), var(--shadow-blue); }
 
-    /* Form */
+    /* Form fields */
     .field {
       width: 100%; background: var(--bg-card);
-      border: 1px solid var(--border); border-radius: 10px;
-      padding: 12px 16px; font-family: 'Rubik', sans-serif; font-size: 14px;
+      border: 1.5px solid var(--border); border-radius: 10px;
+      padding: 12px 16px; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 14px;
       color: var(--text); outline: none;
       transition: border-color 0.2s, box-shadow 0.2s;
       appearance: none;
     }
-    .field:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(0,87,255,0.14); }
+    .field:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(0,87,255,0.10); }
     .field::placeholder { color: var(--text-muted); }
-    [data-theme="light"] .field { background: #fff; }
 
     /* Service icon */
     .s-icon {
-      width: 48px; height: 48px; border-radius: 13px;
+      width: 48px; height: 48px; border-radius: 12px;
       background: var(--blue-dim); border: 1px solid var(--border-blue);
-      display: flex; align-items: center; justify-content: center; margin-bottom: 22px;
+      display: flex; align-items: center; justify-content: center; margin-bottom: 20px;
     }
 
     /* Marquee */
@@ -182,28 +195,26 @@
 
     /* Reveal */
     .reveal {
-      opacity: 0; transform: translateY(28px);
-      transition: opacity 0.65s ease, transform 0.65s cubic-bezier(.34,1.56,.64,1);
+      opacity: 0; transform: translateY(24px);
+      transition: opacity 0.6s ease, transform 0.6s cubic-bezier(.34,1.56,.64,1);
     }
     .reveal.in { opacity: 1; transform: translateY(0); }
 
     /* Float badge */
     .badge {
-      position: absolute; border-radius: 16px;
-      border: 1px solid rgba(255,255,255,0.1);
-      background: rgba(20,20,40,0.72); backdrop-filter: blur(20px);
+      position: absolute; border-radius: 14px;
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      box-shadow: var(--shadow-md);
       padding: 13px 18px;
     }
     .badge.left  { left: -200px; top: 80px;  animation: floaty 3.2s ease-in-out infinite; }
     .badge.right { right: -210px; bottom: 110px; animation: floaty 3.2s ease-in-out infinite 1.6s; }
     @keyframes floaty { 0%,100%{ transform:translateY(0);} 50%{ transform:translateY(-10px);} }
+    @keyframes floatOrb { 0%,100%{ transform:translateY(0px) scale(1);} 50%{ transform:translateY(-16px) scale(1.015);} }
 
     @keyframes pulse-dot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.7)} }
     .pulse { animation: pulse-dot 2s ease-in-out infinite; }
-
-    /* Diagonal clip */
-    .clip-b { clip-path: polygon(0 0,100% 0,100% 90%,0 100%); }
-    .clip-t { clip-path: polygon(0 4%,100% 0,100% 100%,0 100%); margin-top: -4%; }
 
     /* Step connector */
     .step-line {
@@ -214,6 +225,19 @@
 
     /* Scroll-locked during boot */
     .no-scroll { overflow: hidden; }
+
+    /* Section label */
+    .section-label {
+      font-size: 11px; font-weight: 700; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--blue);
+    }
+
+    /* Divider pill tag */
+    .pill-tag {
+      display: inline-flex; align-items: center; gap: 7px;
+      background: var(--blue-dim); border: 1px solid var(--border-blue);
+      border-radius: 100px; padding: 6px 14px;
+    }
   </style>
 </head>
 <body class="no-scroll">
@@ -230,8 +254,8 @@
   <nav id="navbar">
     <a href="#" style="display:flex;align-items:center;gap:11px;text-decoration:none;">
       <img src="brand_assets/logo-transparent.png"
-           alt="flowaify logo" style="width:36px;height:36px;object-fit:contain;" />
-      <span style="font-size:18px;font-weight:700;letter-spacing:-0.03em;color:var(--text);">
+           alt="flowaify logo" style="width:34px;height:34px;object-fit:contain;" />
+      <span style="font-size:18px;font-weight:800;letter-spacing:-0.04em;color:var(--text);">
         flow<span style="color:var(--blue);">ai</span>fy
       </span>
     </a>
@@ -242,18 +266,12 @@
       <a href="#plans"         class="nav-link">Plans</a>
     </div>
 
-    <div style="display:flex;align-items:center;gap:14px;">
+    <div style="display:flex;align-items:center;gap:12px;">
       <button id="theme-btn" aria-label="Toggle theme">
-        <!-- sun icon default (dark mode) -->
+        <!-- moon icon default (light mode — click to go dark) -->
         <svg id="theme-icon" width="15" height="15" viewBox="0 0 24 24" fill="none"
              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="5"/>
-          <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
-          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
-          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-          <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
-          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
-          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+          <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>
         </svg>
       </button>
       <a href="#contact" class="btn btn-primary">Build My System</a>
@@ -261,34 +279,35 @@
   </nav>
 
   <!-- ─── HERO ───────────────────────────────────────────────────────────── -->
-  <section class="grid-bg" style="min-height:100vh;padding-top:72px;display:flex;align-items:center;position:relative;overflow:hidden;">
+  <section class="grid-bg" style="min-height:100vh;padding-top:68px;display:flex;align-items:center;position:relative;overflow:hidden;background:var(--bg);">
 
-    <!-- Ambient glow -->
-    <div style="position:absolute;top:30%;right:5%;width:560px;height:560px;border-radius:50%;
-                background:radial-gradient(circle,rgba(0,87,255,0.18) 0%,transparent 68%);
-                pointer-events:none;filter:blur(32px);"></div>
+    <!-- Subtle ambient glow -->
+    <div style="position:absolute;top:20%;right:4%;width:600px;height:600px;border-radius:50%;
+                background:radial-gradient(circle,rgba(0,87,255,0.07) 0%,transparent 65%);
+                pointer-events:none;filter:blur(40px);"></div>
+    <div style="position:absolute;bottom:10%;left:0%;width:400px;height:400px;border-radius:50%;
+                background:radial-gradient(circle,rgba(0,87,255,0.04) 0%,transparent 65%);
+                pointer-events:none;filter:blur(60px);"></div>
 
     <div style="max-width:1440px;margin:0 auto;padding:0 60px;width:100%;
                 display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center;">
 
       <!-- Left copy -->
       <div id="hero-copy" style="opacity:0;transform:translateY(20px);">
-        <div style="display:inline-flex;align-items:center;gap:8px;
-                    background:var(--blue-dim);border:1px solid var(--border-blue);
-                    border-radius:100px;padding:6px 14px;margin-bottom:32px;">
+        <div class="pill-tag" style="margin-bottom:32px;">
           <span class="pulse" style="width:6px;height:6px;border-radius:50%;background:var(--blue);display:inline-block;"></span>
-          <span style="font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--blue);">AI Workflow Systems</span>
+          <span style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--blue);">AI Workflow Systems</span>
         </div>
 
-        <h1 style="font-size:76px;font-weight:800;line-height:1.0;letter-spacing:-0.045em;margin-bottom:24px;color:var(--text);">
-          Stop juggling<br/>tools. <span style="color:var(--blue);text-shadow:0 0 40px rgba(0,87,255,0.5);">Start flowing.</span>
+        <h1 style="font-size:72px;font-weight:800;line-height:1.0;letter-spacing:-0.045em;margin-bottom:24px;color:var(--text);">
+          Stop juggling<br/>tools. <span style="color:var(--blue);">Start flowing.</span>
         </h1>
 
-        <p style="font-size:18px;line-height:1.72;color:var(--text-soft);max-width:460px;margin-bottom:40px;">
+        <p style="font-size:18px;line-height:1.75;color:var(--text-soft);max-width:460px;margin-bottom:40px;">
           Flowaify replaces the chaos of multiple platforms with one automated system — capturing leads, running follow-ups, and keeping your pipeline moving, automatically.
         </p>
 
-        <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-bottom:48px;">
+        <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:48px;">
           <a href="#contact" class="btn btn-primary btn-lg">
             Build My System
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
@@ -308,57 +327,60 @@
         <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap;">
           <span style="font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);">Built for</span>
           <div style="display:flex;gap:8px;flex-wrap:wrap;">
-            <span style="font-size:11px;font-weight:500;padding:4px 11px;border-radius:100px;border:1px solid var(--border);color:var(--text-muted);">Real Estate</span>
-            <span style="font-size:11px;font-weight:500;padding:4px 11px;border-radius:100px;border:1px solid var(--border);color:var(--text-muted);">Mortgage</span>
-            <span style="font-size:11px;font-weight:500;padding:4px 11px;border-radius:100px;border:1px solid var(--border);color:var(--text-muted);">Insurance</span>
-            <span style="font-size:11px;font-weight:500;padding:4px 11px;border-radius:100px;border:1px solid var(--border);color:var(--text-muted);">Med Spas</span>
-            <span style="font-size:11px;font-weight:500;padding:4px 11px;border-radius:100px;border:1px solid var(--border);color:var(--text-muted);">Clinics</span>
+            <span style="font-size:11px;font-weight:500;padding:4px 12px;border-radius:100px;border:1.5px solid var(--border);color:var(--text-soft);background:var(--bg-surface);">Real Estate</span>
+            <span style="font-size:11px;font-weight:500;padding:4px 12px;border-radius:100px;border:1.5px solid var(--border);color:var(--text-soft);background:var(--bg-surface);">Mortgage</span>
+            <span style="font-size:11px;font-weight:500;padding:4px 12px;border-radius:100px;border:1.5px solid var(--border);color:var(--text-soft);background:var(--bg-surface);">Insurance</span>
+            <span style="font-size:11px;font-weight:500;padding:4px 12px;border-radius:100px;border:1.5px solid var(--border);color:var(--text-soft);background:var(--bg-surface);">Med Spas</span>
+            <span style="font-size:11px;font-weight:500;padding:4px 12px;border-radius:100px;border:1.5px solid var(--border);color:var(--text-soft);background:var(--bg-surface);">Clinics</span>
           </div>
         </div>
       </div>
 
-      <!-- Right sphere -->
+      <!-- Right: logo orb -->
       <div style="display:flex;align-items:center;justify-content:center;height:580px;position:relative;">
-        <div style="position:absolute;width:420px;height:420px;border-radius:50%;
-                    background:radial-gradient(circle,rgba(0,87,255,0.22) 0%,transparent 68%);
-                    filter:blur(48px);pointer-events:none;"></div>
-        <canvas id="hero-sphere" style="position:relative;z-index:1;opacity:0;"></canvas>
+        <!-- Ambient glow -->
+        <div style="position:absolute;width:480px;height:480px;border-radius:50%;
+                    background:radial-gradient(circle,rgba(0,87,255,0.12) 0%,transparent 68%);
+                    filter:blur(56px);pointer-events:none;"></div>
+        <!-- Logo -->
+        <img id="hero-visual"
+             src="brand_assets/logo-transparent.png"
+             alt="Flowaify"
+             style="opacity:0;width:480px;height:480px;object-fit:contain;position:relative;z-index:1;
+                    animation:floatOrb 6s ease-in-out infinite;
+                    filter:drop-shadow(0 0 48px rgba(0,87,255,0.22)) drop-shadow(0 12px 32px rgba(0,87,255,0.12));" />
       </div>
 
     </div>
   </section>
 
   <!-- ─── INTEGRATION STRIP ─────────────────────────────────────────────── -->
-  <section style="padding:44px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);overflow:hidden;position:relative;background:var(--bg);">
+  <section style="padding:40px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);overflow:hidden;position:relative;background:var(--bg-surface);">
     <!-- Edge fades -->
-    <div style="position:absolute;left:0;top:0;bottom:0;width:140px;background:linear-gradient(90deg,var(--bg),transparent);z-index:2;pointer-events:none;"></div>
-    <div style="position:absolute;right:0;top:0;bottom:0;width:140px;background:linear-gradient(270deg,var(--bg),transparent);z-index:2;pointer-events:none;"></div>
+    <div style="position:absolute;left:0;top:0;bottom:0;width:140px;background:linear-gradient(90deg,var(--bg-surface),transparent);z-index:2;pointer-events:none;"></div>
+    <div style="position:absolute;right:0;top:0;bottom:0;width:140px;background:linear-gradient(270deg,var(--bg-surface),transparent);z-index:2;pointer-events:none;"></div>
 
-    <p style="text-align:center;font-size:11px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-muted);margin-bottom:24px;">Powered by</p>
+    <p style="text-align:center;font-size:11px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-muted);margin-bottom:22px;">Powered by</p>
 
     <div class="marquee-wrap">
       <div class="marquee-track">
         <!-- Set 1 -->
         <div style="display:flex;align-items:center;gap:11px;">
-          <!-- Zapier -->
           <svg width="26" height="26" viewBox="0 0 100 100"><circle cx="50" cy="50" r="50" fill="#FF4A00"/><text x="50" y="67" text-anchor="middle" font-family="Arial,sans-serif" font-size="52" font-weight="900" fill="white">Z</text></svg>
           <span style="font-size:15px;font-weight:600;color:var(--text-soft);">Zapier</span>
         </div>
         <div style="width:1px;height:24px;background:var(--border);"></div>
         <div style="display:flex;align-items:center;gap:11px;">
-          <!-- HubSpot -->
           <svg width="26" height="26" viewBox="0 0 24 24" fill="#FF7A59"><path d="M18.16 8.75V6.57a1.69 1.69 0 001.01-1.54v-.05A1.69 1.69 0 0017.49 3.3h-.05a1.69 1.69 0 00-1.69 1.68v.05a1.69 1.69 0 001.01 1.54v2.18A4.8 4.8 0 0014.2 10L8.38 5.63a2.41 2.41 0 10-.89 1.17l5.59 4.18a4.84 4.84 0 000 2.99l-1.64 1.16a2 2 0 101.03 1.5l1.76-1.25a4.81 4.81 0 107.93-6.63z"/></svg>
           <span style="font-size:15px;font-weight:600;color:var(--text-soft);">HubSpot</span>
         </div>
         <div style="width:1px;height:24px;background:var(--border);"></div>
         <div style="display:flex;align-items:center;gap:11px;">
-          <!-- Claude (Anthropic mark) -->
           <svg width="26" height="26" viewBox="0 0 24 24" fill="#D97757"><path d="M13.2 3L7 14.4h3.4L16.6 3zM10.8 9.6L17 21H13.6L7.4 9.6z"/></svg>
           <span style="font-size:15px;font-weight:600;color:var(--text-soft);">Claude</span>
         </div>
         <div style="width:1px;height:24px;background:var(--border);"></div>
         <div style="display:flex;align-items:center;gap:11px;">
-          <!-- Twilio -->
           <svg width="26" height="26" viewBox="0 0 24 24"><circle cx="12" cy="12" r="12" fill="#F22F46"/>
             <circle cx="12" cy="12" r="3.2" fill="white"/>
             <circle cx="7.2" cy="7.2" r="1.8" fill="white"/>
@@ -370,13 +392,11 @@
         </div>
         <div style="width:1px;height:24px;background:var(--border);"></div>
         <div style="display:flex;align-items:center;gap:11px;">
-          <!-- Stripe -->
           <svg width="26" height="26" viewBox="0 0 24 24"><rect width="24" height="24" rx="5" fill="#635BFF"/>
             <path fill="white" d="M11.3 9.1c0-.6.5-.9 1.3-.9 1.2 0 2.7.4 3.7.9l.5-3.3A11 11 0 0012.6 5C9 5 6.6 6.8 6.6 9.5c0 4.3 5.6 3.6 5.6 5.4 0 .7-.6 1-1.5 1-1.3 0-3.1-.6-4.4-1.4l-.5 3.4c1.2.6 3 1 4.8 1C13.8 19 16 17.2 16 14.4c0-4.5-4.7-3.8-4.7-5.3z"/>
           </svg>
           <span style="font-size:15px;font-weight:600;color:var(--text-soft);">Stripe</span>
         </div>
-        <!-- Separator -->
         <div style="width:1px;height:24px;background:var(--border);"></div>
 
         <!-- Set 2 (duplicate for infinite scroll) -->
@@ -417,66 +437,66 @@
   </section>
 
   <!-- ─── PROBLEM → SOLUTION ────────────────────────────────────────────── -->
-  <section id="problem" style="padding:130px 60px;">
+  <section id="problem" style="padding:120px 60px;background:var(--bg);">
     <div style="max-width:1440px;margin:0 auto;">
 
       <div class="reveal" style="text-align:center;margin-bottom:72px;">
-        <span style="font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--blue);">The Real Problem</span>
-        <h2 style="font-size:52px;font-weight:800;letter-spacing:-0.04em;color:var(--text);margin-top:14px;margin-bottom:16px;">
+        <span class="section-label">The Real Problem</span>
+        <h2 style="font-size:48px;font-weight:800;letter-spacing:-0.04em;color:var(--text);margin-top:14px;margin-bottom:16px;">
           The problem is never<br/>the leads.
         </h2>
-        <p style="font-size:17px;color:var(--text-muted);max-width:460px;margin:0 auto;line-height:1.72;">
+        <p style="font-size:17px;color:var(--text-muted);max-width:460px;margin:0 auto;line-height:1.75;">
           You're already generating inbound. The revenue is leaking on the other side — scattered across tools, platforms, and manual work that nobody has time to fix.
         </p>
       </div>
 
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:28px;max-width:1000px;margin:0 auto;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;max-width:1000px;margin:0 auto;">
         <!-- Before -->
-        <div class="glass reveal" style="padding:44px;border-color:rgba(255,55,55,0.32);background:rgba(255,40,40,0.04);box-shadow:0 2px 24px rgba(0,0,0,0.3),inset 0 1px 0 rgba(255,60,60,0.08);">
+        <div class="glass reveal" style="padding:44px;border-color:rgba(239,68,68,0.22);background:rgba(239,68,68,0.02);">
           <div style="display:flex;align-items:center;gap:10px;margin-bottom:36px;">
-            <div style="width:8px;height:8px;border-radius:50%;background:#FF3C3C;box-shadow:0 0 8px rgba(255,60,60,0.6);"></div>
-            <span style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,80,80,0.85);">Without Flowaify</span>
+            <div style="width:8px;height:8px;border-radius:50%;background:#EF4444;box-shadow:0 0 6px rgba(239,68,68,0.5);"></div>
+            <span style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#EF4444;">Without Flowaify</span>
           </div>
           <ul style="list-style:none;display:flex;flex-direction:column;gap:20px;">
-            <li style="display:flex;align-items:flex-start;gap:13px;font-size:15px;color:var(--text-soft);line-height:1.6;">
-              <span style="color:rgba(255,60,60,0.65);font-size:17px;line-height:1.2;flex-shrink:0;">✕</span>
+            <li style="display:flex;align-items:flex-start;gap:13px;font-size:15px;color:var(--text-soft);line-height:1.65;">
+              <span style="color:#EF4444;font-size:17px;line-height:1.2;flex-shrink:0;">✕</span>
               Your team lives across 5 different apps — nothing talks to each other.
             </li>
-            <li style="display:flex;align-items:flex-start;gap:13px;font-size:15px;color:var(--text-soft);line-height:1.6;">
-              <span style="color:rgba(255,60,60,0.65);font-size:17px;line-height:1.2;flex-shrink:0;">✕</span>
+            <li style="display:flex;align-items:flex-start;gap:13px;font-size:15px;color:var(--text-soft);line-height:1.65;">
+              <span style="color:#EF4444;font-size:17px;line-height:1.2;flex-shrink:0;">✕</span>
               Lead fills out a form. Nobody responds for hours.
             </li>
-            <li style="display:flex;align-items:flex-start;gap:13px;font-size:15px;color:var(--text-soft);line-height:1.6;">
-              <span style="color:rgba(255,60,60,0.65);font-size:17px;line-height:1.2;flex-shrink:0;">✕</span>
+            <li style="display:flex;align-items:flex-start;gap:13px;font-size:15px;color:var(--text-soft);line-height:1.65;">
+              <span style="color:#EF4444;font-size:17px;line-height:1.2;flex-shrink:0;">✕</span>
               Follow-up depends on whoever remembers to send it.
             </li>
-            <li style="display:flex;align-items:flex-start;gap:13px;font-size:15px;color:var(--text-soft);line-height:1.6;">
-              <span style="color:rgba(255,60,60,0.65);font-size:17px;line-height:1.2;flex-shrink:0;">✕</span>
+            <li style="display:flex;align-items:flex-start;gap:13px;font-size:15px;color:var(--text-soft);line-height:1.65;">
+              <span style="color:#EF4444;font-size:17px;line-height:1.2;flex-shrink:0;">✕</span>
               Data scattered across tools no one has time to organize.
             </li>
           </ul>
         </div>
 
         <!-- After -->
-        <div class="glass reveal" style="padding:44px;border-color:rgba(0,87,255,0.5);background:linear-gradient(140deg,rgba(0,87,255,0.09),rgba(0,87,255,0.02));box-shadow:0 4px 32px rgba(0,87,255,0.12),inset 0 1px 0 rgba(0,87,255,0.15);">
+        <div class="glass reveal" style="padding:44px;border-color:rgba(0,87,255,0.3);background:rgba(0,87,255,0.03);">
           <div style="display:flex;align-items:center;gap:10px;margin-bottom:36px;">
-            <div style="width:8px;height:8px;border-radius:50%;background:var(--blue);box-shadow:0 0 12px var(--blue);"></div>
+            <div style="width:8px;height:8px;border-radius:50%;background:var(--blue);box-shadow:0 0 10px rgba(0,87,255,0.4);"></div>
             <span style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--blue);">With Flowaify</span>
           </div>
           <ul style="list-style:none;display:flex;flex-direction:column;gap:20px;">
-            <li style="display:flex;align-items:flex-start;gap:13px;font-size:15px;color:var(--text-soft);line-height:1.6;">
+            <li style="display:flex;align-items:flex-start;gap:13px;font-size:15px;color:var(--text-soft);line-height:1.65;">
               <span style="color:var(--blue);font-size:17px;line-height:1.2;flex-shrink:0;">✓</span>
               All your platforms — CRM, messaging, ads, forms — connected into one system.
             </li>
-            <li style="display:flex;align-items:flex-start;gap:13px;font-size:15px;color:var(--text-soft);line-height:1.6;">
+            <li style="display:flex;align-items:flex-start;gap:13px;font-size:15px;color:var(--text-soft);line-height:1.65;">
               <span style="color:var(--blue);font-size:17px;line-height:1.2;flex-shrink:0;">✓</span>
               Every lead gets an intelligent response within seconds — automatically.
             </li>
-            <li style="display:flex;align-items:flex-start;gap:13px;font-size:15px;color:var(--text-soft);line-height:1.6;">
+            <li style="display:flex;align-items:flex-start;gap:13px;font-size:15px;color:var(--text-soft);line-height:1.65;">
               <span style="color:var(--blue);font-size:17px;line-height:1.2;flex-shrink:0;">✓</span>
               Follow-up sequences run on their own until the lead converts or opts out.
             </li>
-            <li style="display:flex;align-items:flex-start;gap:13px;font-size:15px;color:var(--text-soft);line-height:1.6;">
+            <li style="display:flex;align-items:flex-start;gap:13px;font-size:15px;color:var(--text-soft);line-height:1.65;">
               <span style="color:var(--blue);font-size:17px;line-height:1.2;flex-shrink:0;">✓</span>
               Your team focuses on closing. The system handles everything before the call.
             </li>
@@ -487,59 +507,59 @@
   </section>
 
   <!-- ─── SERVICES ──────────────────────────────────────────────────────── -->
-  <section id="services" style="padding:130px 60px;background:var(--bg-surface);border-top:1px solid var(--border);">
+  <section id="services" style="padding:120px 60px;background:var(--bg-surface);border-top:1px solid var(--border);">
     <div style="max-width:1440px;margin:0 auto;">
 
       <div class="reveal" style="margin-bottom:72px;">
-        <span style="font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--blue);">What We Build</span>
-        <h2 style="font-size:52px;font-weight:800;letter-spacing:-0.04em;color:var(--text);margin-top:14px;margin-bottom:16px;">
+        <span class="section-label">What We Build</span>
+        <h2 style="font-size:48px;font-weight:800;letter-spacing:-0.04em;color:var(--text);margin-top:14px;margin-bottom:16px;">
           One system.<br/>Every platform, connected.
         </h2>
-        <p style="font-size:17px;color:var(--text-muted);max-width:460px;line-height:1.72;">
+        <p style="font-size:17px;color:var(--text-muted);max-width:460px;line-height:1.75;">
           We build and manage the infrastructure that connects your tools, automates your workflow, and handles your pipeline from first contact to booked call.
         </p>
       </div>
 
-      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:22px;">
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:20px;">
 
-        <div class="glass reveal" style="padding:34px;">
+        <div class="glass reveal" style="padding:32px;">
           <div class="s-icon">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81a19.79 19.79 0 01-3.07-8.68A2 2 0 012 .97h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 8.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/>
             </svg>
           </div>
-          <h3 style="font-size:18px;font-weight:700;letter-spacing:-0.025em;color:var(--text);margin-bottom:11px;">Lead Capture & Routing</h3>
+          <h3 style="font-size:17px;font-weight:700;letter-spacing:-0.02em;color:var(--text);margin-bottom:10px;">Lead Capture & Routing</h3>
           <p style="font-size:14px;color:var(--text-muted);line-height:1.72;">Every inbound lead from every channel — website, ads, referrals — is captured and routed to the right place instantly.</p>
         </div>
 
-        <div class="glass reveal" style="padding:34px;">
+        <div class="glass reveal" style="padding:32px;">
           <div class="s-icon">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
             </svg>
           </div>
-          <h3 style="font-size:18px;font-weight:700;letter-spacing:-0.025em;color:var(--text);margin-bottom:11px;">AI Response System</h3>
+          <h3 style="font-size:17px;font-weight:700;letter-spacing:-0.02em;color:var(--text);margin-bottom:10px;">AI Response System</h3>
           <p style="font-size:14px;color:var(--text-muted);line-height:1.72;">AI-powered responses go out within seconds of a lead coming in — personalized, on-brand, and ready to qualify.</p>
         </div>
 
-        <div class="glass reveal" style="padding:34px;">
+        <div class="glass reveal" style="padding:32px;">
           <div class="s-icon">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/>
               <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
             </svg>
           </div>
-          <h3 style="font-size:18px;font-weight:700;letter-spacing:-0.025em;color:var(--text);margin-bottom:11px;">Automated Follow-Ups</h3>
+          <h3 style="font-size:17px;font-weight:700;letter-spacing:-0.02em;color:var(--text);margin-bottom:10px;">Automated Follow-Ups</h3>
           <p style="font-size:14px;color:var(--text-muted);line-height:1.72;">Multi-step follow-up sequences run automatically across SMS, email, and DMs — until the lead books or opts out.</p>
         </div>
 
-        <div class="glass reveal" style="padding:34px;">
+        <div class="glass reveal" style="padding:32px;">
           <div class="s-icon">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
             </svg>
           </div>
-          <h3 style="font-size:18px;font-weight:700;letter-spacing:-0.025em;color:var(--text);margin-bottom:11px;">CRM Organization</h3>
+          <h3 style="font-size:17px;font-weight:700;letter-spacing:-0.02em;color:var(--text);margin-bottom:10px;">CRM Organization</h3>
           <p style="font-size:14px;color:var(--text-muted);line-height:1.72;">Leads are tagged, categorized, and added to your CRM automatically — no manual entry, no missed contacts.</p>
         </div>
 
@@ -548,15 +568,15 @@
   </section>
 
   <!-- ─── IPHONE MOCKUP ─────────────────────────────────────────────────── -->
-  <section style="padding:140px 60px;background:var(--bg);text-align:center;position:relative;overflow:hidden;border-top:1px solid var(--border);">
+  <section style="padding:130px 60px;background:var(--bg);text-align:center;position:relative;overflow:hidden;border-top:1px solid var(--border);">
     <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
-                width:800px;height:800px;border-radius:50%;
-                background:radial-gradient(circle,rgba(0,87,255,0.16) 0%,rgba(0,87,255,0.04) 45%,transparent 70%);
-                pointer-events:none;filter:blur(8px);"></div>
+                width:700px;height:700px;border-radius:50%;
+                background:radial-gradient(circle,rgba(0,87,255,0.07) 0%,rgba(0,87,255,0.02) 45%,transparent 70%);
+                pointer-events:none;filter:blur(12px);"></div>
 
-    <div class="reveal" style="margin-bottom:72px;">
-      <span style="font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--blue);">Always On</span>
-      <h2 style="font-size:52px;font-weight:800;letter-spacing:-0.04em;color:var(--text);margin-top:14px;">
+    <div class="reveal" style="margin-bottom:64px;">
+      <span class="section-label">Always On</span>
+      <h2 style="font-size:48px;font-weight:800;letter-spacing:-0.04em;color:var(--text);margin-top:14px;">
         Your system runs<br/>while you don't.
       </h2>
     </div>
@@ -566,19 +586,19 @@
 
       <!-- Left badge -->
       <div class="badge left">
-        <p style="font-size:13px;font-weight:700;color:white;">Lead captured</p>
-        <p style="font-size:11px;color:rgba(147,197,253,0.65);margin-top:2px;">2 seconds ago</p>
+        <p style="font-size:13px;font-weight:700;color:var(--text);">Lead captured</p>
+        <p style="font-size:11px;color:var(--text-muted);margin-top:2px;">2 seconds ago</p>
       </div>
 
       <!-- Right badge -->
       <div class="badge right">
-        <p style="font-size:13px;font-weight:700;color:white;">Follow-up active</p>
-        <p style="font-size:11px;color:rgba(147,197,253,0.65);margin-top:2px;">Sequence running</p>
+        <p style="font-size:13px;font-weight:700;color:var(--text);">Follow-up active</p>
+        <p style="font-size:11px;color:var(--text-muted);margin-top:2px;">Sequence running</p>
       </div>
 
       <div id="iphone-wrapper" style="perspective:1000px;display:inline-block;">
         <div id="iphone-phone" style="width:280px;height:580px;border-radius:48px;background:#0a0a0a;position:relative;
-                                       box-shadow:0 40px 90px rgba(0,0,0,0.85),inset 0 0 0 2px #52525b,inset 0 0 0 7px #000;">
+                                       box-shadow:0 40px 80px rgba(0,0,0,0.22),inset 0 0 0 2px #52525b,inset 0 0 0 7px #000;">
 
           <!-- Hardware buttons -->
           <div style="position:absolute;top:118px;left:-3px;width:3px;height:26px;border-radius:2px 0 0 2px;background:#3a3a3a;"></div>
@@ -598,7 +618,7 @@
             </div>
 
             <!-- App UI -->
-            <div style="padding:56px 20px 28px;height:100%;display:flex;flex-direction:column;font-family:'Rubik',sans-serif;">
+            <div style="padding:56px 20px 28px;height:100%;display:flex;flex-direction:column;font-family:'Plus Jakarta Sans',sans-serif;">
               <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
                 <div>
                   <p style="font-size:9px;text-transform:uppercase;letter-spacing:.2em;color:rgba(147,197,253,.6);font-weight:700;">Flowaify</p>
@@ -648,7 +668,7 @@
 
               <div style="margin-top:auto;padding-top:14px;">
                 <div style="border-radius:14px;background:#0057FF;text-align:center;padding:11px;font-weight:700;font-size:12px;
-                            box-shadow:0 0 28px rgba(0,87,255,.45);">View Pipeline</div>
+                            box-shadow:0 0 24px rgba(0,87,255,.5);">View Pipeline</div>
               </div>
 
               <div style="position:absolute;bottom:8px;left:50%;transform:translateX(-50%);
@@ -662,40 +682,39 @@
   </section>
 
   <!-- ─── HOW IT WORKS ──────────────────────────────────────────────────── -->
-  <section id="how-it-works" style="padding:130px 60px;background:var(--bg-surface);border-top:1px solid var(--border);">
+  <section id="how-it-works" style="padding:120px 60px;background:var(--bg-surface);border-top:1px solid var(--border);">
     <div style="max-width:1440px;margin:0 auto;">
 
-      <div class="reveal" style="margin-bottom:88px;">
-        <span style="font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--blue);">The Process</span>
-        <h2 style="font-size:52px;font-weight:800;letter-spacing:-0.04em;color:var(--text);margin-top:14px;">
+      <div class="reveal" style="margin-bottom:80px;">
+        <span class="section-label">The Process</span>
+        <h2 style="font-size:48px;font-weight:800;letter-spacing:-0.04em;color:var(--text);margin-top:14px;">
           From lead to follow-up.<br/>No manual work.
         </h2>
       </div>
 
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:56px;position:relative;">
-        <!-- Connector lines -->
+        <!-- Connector line -->
         <div style="position:absolute;top:27px;left:calc(16.67% + 36px);width:calc(66.67% - 72px);height:1px;
-                    background:linear-gradient(90deg,var(--blue),rgba(0,87,255,0.4),var(--blue));z-index:0;
-                    box-shadow:0 0 8px var(--blue-glow);"></div>
+                    background:linear-gradient(90deg,var(--blue),rgba(0,87,255,0.25));z-index:0;"></div>
 
         <div class="reveal" style="position:relative;z-index:1;">
           <div style="width:54px;height:54px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;
-                      font-size:18px;font-weight:800;color:white;margin-bottom:28px;box-shadow:0 0 28px var(--blue-glow);">1</div>
-          <h3 style="font-size:22px;font-weight:700;letter-spacing:-0.025em;color:var(--text);margin-bottom:13px;">Lead comes in</h3>
+                      font-size:18px;font-weight:800;color:white;margin-bottom:28px;box-shadow:var(--shadow-blue);">1</div>
+          <h3 style="font-size:21px;font-weight:700;letter-spacing:-0.02em;color:var(--text);margin-bottom:12px;">Lead comes in</h3>
           <p style="font-size:15px;color:var(--text-muted);line-height:1.72;">A prospect fills out a form, clicks an ad, sends a DM, or calls your number. The system sees it the moment it happens.</p>
         </div>
 
         <div class="reveal" style="position:relative;z-index:1;">
           <div style="width:54px;height:54px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;
-                      font-size:18px;font-weight:800;color:white;margin-bottom:28px;box-shadow:0 0 28px var(--blue-glow);">2</div>
-          <h3 style="font-size:22px;font-weight:700;letter-spacing:-0.025em;color:var(--text);margin-bottom:13px;">System captures & responds</h3>
+                      font-size:18px;font-weight:800;color:white;margin-bottom:28px;box-shadow:var(--shadow-blue);">2</div>
+          <h3 style="font-size:21px;font-weight:700;letter-spacing:-0.02em;color:var(--text);margin-bottom:12px;">System captures & responds</h3>
           <p style="font-size:15px;color:var(--text-muted);line-height:1.72;">The lead is captured, routed, and receives an AI-powered response within seconds — before your team knows it happened.</p>
         </div>
 
         <div class="reveal" style="position:relative;z-index:1;">
           <div style="width:54px;height:54px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;
-                      font-size:18px;font-weight:800;color:white;margin-bottom:28px;box-shadow:0 0 28px var(--blue-glow);">3</div>
-          <h3 style="font-size:22px;font-weight:700;letter-spacing:-0.025em;color:var(--text);margin-bottom:13px;">Follow-up runs automatically</h3>
+                      font-size:18px;font-weight:800;color:white;margin-bottom:28px;box-shadow:var(--shadow-blue);">3</div>
+          <h3 style="font-size:21px;font-weight:700;letter-spacing:-0.02em;color:var(--text);margin-bottom:12px;">Follow-up runs automatically</h3>
           <p style="font-size:15px;color:var(--text-muted);line-height:1.72;">Sequences run across SMS, email, and DMs automatically until the lead books a call, converts, or opts out.</p>
         </div>
       </div>
@@ -703,20 +722,20 @@
   </section>
 
   <!-- ─── PLANS ─────────────────────────────────────────────────────────── -->
-  <section id="plans" style="padding:130px 60px;background:var(--bg);">
+  <section id="plans" style="padding:120px 60px;background:var(--bg);border-top:1px solid var(--border);">
     <div style="max-width:1440px;margin:0 auto;">
 
-      <div class="reveal" style="margin-bottom:64px;">
-        <span style="font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--blue);">Plans</span>
-        <h2 style="font-size:52px;font-weight:800;letter-spacing:-0.04em;color:var(--text);margin-top:14px;margin-bottom:16px;">
+      <div class="reveal" style="margin-bottom:60px;">
+        <span class="section-label">Plans</span>
+        <h2 style="font-size:48px;font-weight:800;letter-spacing:-0.04em;color:var(--text);margin-top:14px;margin-bottom:16px;">
           Built around<br/>your workflow.
         </h2>
-        <p style="font-size:17px;color:var(--text-muted);max-width:440px;line-height:1.72;">
+        <p style="font-size:17px;color:var(--text-muted);max-width:440px;line-height:1.75;">
           Every plan includes a fully custom-built system built around your existing workflow. No templates. No copy-paste automation.
         </p>
       </div>
 
-      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:22px;">
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:20px;">
 
         <!-- Essential -->
         <div class="plan reveal">
@@ -782,14 +801,14 @@
   </section>
 
   <!-- ─── CTA + FORM ────────────────────────────────────────────────────── -->
-  <section id="contact" style="padding:130px 60px;background:var(--bg-surface);border-top:1px solid var(--border);">
+  <section id="contact" style="padding:120px 60px;background:var(--bg-surface);border-top:1px solid var(--border);">
     <div style="max-width:680px;margin:0 auto;">
 
-      <div class="reveal" style="text-align:center;margin-bottom:64px;">
-        <h2 style="font-size:60px;font-weight:800;letter-spacing:-0.045em;color:var(--text);margin-bottom:18px;">
+      <div class="reveal" style="text-align:center;margin-bottom:60px;">
+        <h2 style="font-size:56px;font-weight:800;letter-spacing:-0.045em;color:var(--text);margin-bottom:18px;">
           Let's build your<br/><span style="color:var(--blue);">system.</span>
         </h2>
-        <p style="font-size:17px;color:var(--text-muted);line-height:1.72;">Tell us about your business. If it's a good fit, we'll book a call and get started.</p>
+        <p style="font-size:17px;color:var(--text-muted);line-height:1.75;">Tell us about your business. If it's a good fit, we'll book a call and get started.</p>
       </div>
 
       <form class="reveal" id="contact-form" onsubmit="handleSubmit(event)" style="display:flex;flex-direction:column;gap:20px;">
@@ -873,12 +892,12 @@
   </section>
 
   <!-- ─── FOOTER ────────────────────────────────────────────────────────── -->
-  <footer style="padding:56px 60px;border-top:1px solid var(--border);background:var(--bg);">
+  <footer style="padding:52px 60px;border-top:1px solid var(--border);background:var(--bg);">
     <div style="max-width:1440px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;">
       <div>
         <a href="#" style="display:flex;align-items:center;gap:10px;text-decoration:none;margin-bottom:8px;">
-          <img src="brand_assets/logo-transparent.png" alt="" style="width:32px;height:32px;object-fit:contain;" />
-          <span style="font-size:18px;font-weight:700;letter-spacing:-.03em;color:var(--text);">flow<span style="color:var(--blue);">ai</span>fy</span>
+          <img src="brand_assets/logo-transparent.png" alt="" style="width:30px;height:30px;object-fit:contain;" />
+          <span style="font-size:17px;font-weight:800;letter-spacing:-.04em;color:var(--text);">flow<span style="color:var(--blue);">ai</span>fy</span>
         </a>
         <p style="font-size:12px;color:var(--text-muted);letter-spacing:.04em;">Automate · Flow · Amplify</p>
       </div>
@@ -891,7 +910,7 @@
       </div>
 
       <div style="text-align:right;">
-        <a href="mailto:autofi.company@gmail.com" style="font-size:14px;color:var(--blue);text-decoration:none;font-weight:500;display:block;margin-bottom:6px;">autofi.company@gmail.com</a>
+        <a href="mailto:autofi.company@gmail.com" style="font-size:14px;color:var(--blue);text-decoration:none;font-weight:600;display:block;margin-bottom:6px;">autofi.company@gmail.com</a>
         <p style="font-size:12px;color:var(--text-muted);">© 2026 Flowaify. All rights reserved.</p>
       </div>
     </div>
@@ -902,19 +921,21 @@
 <!-- ─── SCRIPTS ───────────────────────────────────────────────────────────── -->
 <script>
 // ─── THEME TOGGLE ────────────────────────────────────────────────────────────
-const html   = document.documentElement;
-const themeBtn = document.getElementById('theme-btn');
+const html     = document.documentElement;
+const themeBtn  = document.getElementById('theme-btn');
 const themeIcon = document.getElementById('theme-icon');
-let isDark = true;
+let isDark = false;
 
-const SUN = `<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>`;
+const SUN  = `<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>`;
 const MOON = `<path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>`;
 
 themeBtn.addEventListener('click', () => {
   isDark = !isDark;
   html.setAttribute('data-theme', isDark ? 'dark' : 'light');
   themeIcon.innerHTML = isDark ? SUN : MOON;
-  document.getElementById('navbar').style.background = isDark ? 'rgba(0,0,0,0.72)' : 'rgba(248,249,250,0.88)';
+  document.getElementById('navbar').style.background = isDark
+    ? 'rgba(6,6,18,0.90)'
+    : 'rgba(255,255,255,0.92)';
 });
 
 // ─── BOOT ANIMATION ──────────────────────────────────────────────────────────
@@ -922,7 +943,7 @@ const bootEl    = document.getElementById('boot');
 const bootCvs   = document.getElementById('boot-canvas');
 const bctx      = bootCvs.getContext('2d');
 let   bootStart = null;
-const BOOT_DUR  = 2400;
+const BOOT_DUR  = 2200;
 
 function resizeBoot() {
   bootCvs.width  = window.innerWidth;
@@ -961,8 +982,8 @@ function drawBootFrame(ts) {
       bctx.beginPath();
       bctx.arc(x, y, 1.8, 0, Math.PI * 2);
       bctx.fillStyle = isBlue
-        ? `rgba(0,87,255,${(fade * 0.65).toFixed(2)})`
-        : `rgba(255,255,255,${(fade * 0.22).toFixed(2)})`;
+        ? `rgba(0,87,255,${(fade * 0.5).toFixed(2)})`
+        : `rgba(15,23,42,${(fade * 0.10).toFixed(2)})`;
       bctx.fill();
     }
   }
@@ -970,128 +991,29 @@ function drawBootFrame(ts) {
   if (p < 1) {
     requestAnimationFrame(drawBootFrame);
   } else {
-    // Hold briefly then transition
     setTimeout(finishBoot, 300);
   }
 }
 
 function finishBoot() {
-  // Fade out dot grid
-  gsap.to(bootCvs, { opacity: 0, duration: 0.7, ease: 'power2.out' });
-
-  // Init sphere
-  initSphere();
-
-  // Reveal page after sphere init
+  gsap.to(bootCvs, { opacity: 0, duration: 0.6, ease: 'power2.out' });
   setTimeout(() => {
     gsap.to(bootEl, {
-      opacity: 0, duration: 0.55, ease: 'power2.inOut',
+      opacity: 0, duration: 0.5, ease: 'power2.inOut',
       onComplete: () => {
         bootEl.style.display = 'none';
         document.body.classList.remove('no-scroll');
         gsap.to('#page', { opacity: 1, duration: 0.3 });
-        // Hero text entrance
         gsap.to('#hero-copy',   { opacity: 1, y: 0, duration: 0.9, ease: 'power3.out', delay: 0.15 });
-        gsap.to('#hero-sphere', { opacity: 1, duration: 0.8, delay: 0.05 });
-        // Init other features
+        gsap.to('#hero-visual', { opacity: 1, duration: 0.8, delay: 0.05 });
         initScrollReveal();
         initIphoneTilt();
       }
     });
-  }, 750);
+  }, 700);
 }
 
 requestAnimationFrame(drawBootFrame);
-
-// ─── THREE.JS SPHERE ─────────────────────────────────────────────────────────
-let renderer, scene, camera, wireMesh;
-let mX = 0, mY = 0;
-
-function initSphere() {
-  const canvas = document.getElementById('hero-sphere');
-  const W = 500, H = 500;
-  canvas.width  = W;
-  canvas.height = H;
-  canvas.style.width  = W + 'px';
-  canvas.style.height = H + 'px';
-
-  renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
-  renderer.setSize(W, H);
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-
-  scene  = new THREE.Scene();
-  camera = new THREE.PerspectiveCamera(42, 1, 0.1, 100);
-  camera.position.z = 3.0;
-
-  // Geometry — store original positions for deformation
-  const geo  = new THREE.SphereGeometry(1, 36, 36);
-  const orig = new Float32Array(geo.attributes.position.array);
-  geo.userData.orig = orig;
-
-  // Wireframe layer
-  const wireMat = new THREE.MeshBasicMaterial({
-    color: 0x1466FF, wireframe: true, transparent: true, opacity: 0.38
-  });
-  wireMesh = new THREE.Mesh(geo, wireMat);
-
-  // Solid inner glow
-  const solidMat = new THREE.MeshPhongMaterial({
-    color: 0x0028aa, emissive: 0x000d55, transparent: true, opacity: 0.14, shininess: 80
-  });
-  const solidMesh = new THREE.Mesh(new THREE.SphereGeometry(0.96, 36, 36), solidMat);
-
-  // Outer glow shell
-  const outerMat = new THREE.MeshBasicMaterial({
-    color: 0x0057FF, transparent: true, opacity: 0.045, side: THREE.BackSide
-  });
-  const outerMesh = new THREE.Mesh(new THREE.SphereGeometry(1.18, 36, 36), outerMat);
-
-  // Lights
-  const keyLight  = new THREE.PointLight(0x1466FF, 4.0, 6);
-  keyLight.position.set(2.5, 2, 2);
-  const fillLight = new THREE.PointLight(0x3D82FF, 1.8, 5);
-  fillLight.position.set(-2, -1, 1.2);
-  const ambient   = new THREE.AmbientLight(0x001144, 2.5);
-
-  scene.add(solidMesh, wireMesh, outerMesh, keyLight, fillLight, ambient);
-
-  // Cursor → light movement
-  window.addEventListener('mousemove', e => {
-    mX = (e.clientX / window.innerWidth  - 0.5) * 2;
-    mY = (e.clientY / window.innerHeight - 0.5) * 2;
-    keyLight.position.x = 2.5 + mX * 1.8;
-    keyLight.position.y = 2.0 + mY * 1.8;
-  });
-
-  animateSphere();
-}
-
-function animateSphere() {
-  requestAnimationFrame(animateSphere);
-  const t = Date.now() * 0.001;
-
-  // Rotation
-  wireMesh.rotation.y = t * 0.16;
-  wireMesh.rotation.x = Math.sin(t * 0.065) * 0.14 + mY * 0.025;
-  wireMesh.rotation.z = Math.cos(t * 0.04)  * 0.04;
-
-  // Vertex deformation (breathing + warp)
-  const pos  = wireMesh.geometry.attributes.position;
-  const orig = wireMesh.geometry.userData.orig;
-
-  for (let i = 0; i < pos.count; i++) {
-    const ox = orig[i * 3], oy = orig[i * 3 + 1], oz = orig[i * 3 + 2];
-    const noise   = Math.sin(ox * 3.2 + t * 0.85) * Math.cos(oy * 3.1 + t * 0.6) * Math.sin(oz * 2.2 + t * 0.5);
-    const breath  = Math.sin(t * 0.95) * 0.052;
-    const forward = oz * 0.022 * Math.sin(t * 0.4); // subtle warp toward viewer
-    const scale   = 1 + noise * 0.09 + breath + forward;
-    pos.setXYZ(i, ox * scale, oy * scale, oz * scale);
-  }
-  pos.needsUpdate = true;
-  wireMesh.geometry.computeVertexNormals();
-
-  renderer.render(scene, camera);
-}
 
 // ─── IPHONE TILT ─────────────────────────────────────────────────────────────
 function initIphoneTilt() {
@@ -1126,7 +1048,7 @@ function handleSubmit(e) {
   e.preventDefault();
   const btn = e.target.querySelector('button[type=submit]');
   btn.innerHTML = 'Submitted ✓';
-  btn.style.background = '#083d08';
+  btn.style.background = '#16a34a';
   btn.disabled = true;
 }
 
@@ -1138,4 +1060,3 @@ window.addEventListener('scroll', () => {
 </script>
 </body>
 </html>
-
