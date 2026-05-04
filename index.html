@@ -1135,10 +1135,14 @@
     </a>
 
     <div id="navbar-links">
-      <a href="#problem"       class="nav-link" onclick="closeNav()">Why Flowaify</a>
-      <a href="#how-it-works"  class="nav-link" onclick="closeNav()">How It Works</a>
-      <a href="#plans"         class="nav-link" onclick="closeNav()">Plans</a>
-      <a href="#contact"       class="nav-link mob-only" onclick="closeNav()">Build My System</a>
+      <a href="#problem"          class="nav-link" onclick="closeNav()">Why Flowaify</a>
+      <a href="#how-it-works"     class="nav-link" onclick="closeNav()">How It Works</a>
+      <a href="#plans"            class="nav-link" onclick="closeNav()">Plans</a>
+      <a href="../dashboard/demo.html" class="nav-link" onclick="closeNav()" style="display:inline-flex;align-items:center;gap:5px;">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Dashboard
+      </a>
+      <a href="#contact"          class="nav-link mob-only" onclick="closeNav()">Build My System</a>
     </div>
 
     <div style="display:flex;align-items:center;gap:12px;">
@@ -1197,6 +1201,10 @@
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
               <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
             </svg>
+          </a>
+          <a href="../dashboard/demo.html" class="btn btn-lg" style="background:rgba(0,87,255,0.08);border:1.5px solid rgba(0,87,255,0.28);color:var(--blue-soft,#3D82FF);display:inline-flex;align-items:center;gap:8px;font-weight:600;transition:all 0.2s;" onmouseover="this.style.background='rgba(0,87,255,0.14)';this.style.transform='translateY(-2px)';" onmouseout="this.style.background='rgba(0,87,255,0.08)';this.style.transform='translateY(0)';">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+            View Demo Dashboard
           </a>
         </div>
 
@@ -1335,309 +1343,145 @@
     </div>
   </section>
 
-  <!-- ─── SERVICES ──────────────────────────────────────────────────────── -->
-  <section id="services" class="blend-top-bg" style="padding:120px 60px;background:var(--bg-surface);">
+  <!-- ─── DASHBOARD SHOWCASE ────────────────────────────────────────────── -->
+  <section id="services" style="padding:100px 60px 140px;background:var(--bg-surface);overflow:hidden;">
     <div style="max-width:1440px;margin:0 auto;">
 
-      <div class="reveal" style="margin-bottom:56px;">
-        <span class="section-label">What We Build</span>
-        <h2 style="font-size:48px;font-weight:800;letter-spacing:-0.04em;color:var(--text);margin-top:14px;margin-bottom:16px;">
-          One system.<br/>Every platform, <span style="background:linear-gradient(90deg,#0057FF,#00B4D8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">connected.</span>
-        </h2>
-        <p style="font-size:17px;color:var(--text-muted);max-width:460px;line-height:1.75;">
-          We build and manage the infrastructure that connects your tools, automates your workflow, and handles your pipeline from first contact to booked call.
-        </p>
+      <!-- Header row -->
+      <div class="reveal" style="display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:center;margin-bottom:72px;">
+
+        <!-- Left: copy -->
+        <div>
+          <span class="section-label">Your Command Center</span>
+          <h2 style="font-size:48px;font-weight:800;letter-spacing:-0.04em;color:var(--text);margin-top:14px;margin-bottom:18px;line-height:1.05;">
+            See everything.<br/>
+            <span style="background:linear-gradient(90deg,#0057FF,#8b5cf6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Miss nothing.</span>
+          </h2>
+          <p style="font-size:17px;line-height:1.75;color:var(--text-soft);margin-bottom:36px;max-width:440px;">
+            The moment your system is live, this is your view — every lead, every AI reply, every follow-up sequence, your full HubSpot pipeline. In one place.
+          </p>
+          <div style="display:flex;flex-direction:column;gap:13px;margin-bottom:40px;">
+            <div style="display:flex;align-items:center;gap:12px;">
+              <div style="width:28px;height:28px;border-radius:8px;background:rgba(0,87,255,0.08);border:1px solid rgba(0,87,255,0.14);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+              </div>
+              <span style="font-size:14px;color:var(--text-soft);">Live lead inbox with AI response status</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;">
+              <div style="width:28px;height:28px;border-radius:8px;background:rgba(0,87,255,0.08);border:1px solid rgba(0,87,255,0.14);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+              </div>
+              <span style="font-size:14px;color:var(--text-soft);">Pipeline Kanban synced with HubSpot</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;">
+              <div style="width:28px;height:28px;border-radius:8px;background:rgba(0,87,255,0.08);border:1px solid rgba(0,87,255,0.14);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+              </div>
+              <span style="font-size:14px;color:var(--text-soft);">Every AI message logged with timestamps</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;">
+              <div style="width:28px;height:28px;border-radius:8px;background:rgba(0,87,255,0.08);border:1px solid rgba(0,87,255,0.14);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1018 0 9 9 0 00-18 0"/><polyline points="12 6 12 12 8 14"/></svg>
+              </div>
+              <span style="font-size:14px;color:var(--text-soft);">Follow-up sequences running on autopilot</span>
+            </div>
+          </div>
+          <a href="../dashboard/demo.html" class="btn btn-primary btn-lg" style="display:inline-flex;align-items:center;gap:8px;">
+            Explore the Demo Dashboard
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </a>
+        </div>
+
+        <!-- Right: stat cards -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+          <div style="background:var(--bg-card);border:1px solid var(--border-blue);border-radius:16px;padding:20px 22px;box-shadow:var(--shadow-md);">
+            <div style="font-size:10.5px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--text-muted);margin-bottom:10px;">New Leads Today</div>
+            <div style="font-size:34px;font-weight:800;letter-spacing:-0.05em;color:var(--text);line-height:1;">14</div>
+            <div style="font-size:11px;color:#10b981;font-weight:600;margin-top:6px;">&#8593; 18% vs yesterday</div>
+          </div>
+          <div style="background:var(--bg-card);border:1px solid var(--border-blue);border-radius:16px;padding:20px 22px;box-shadow:var(--shadow-md);">
+            <div style="font-size:10.5px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--text-muted);margin-bottom:10px;">Avg Response Time</div>
+            <div style="font-size:34px;font-weight:800;letter-spacing:-0.05em;color:var(--text);line-height:1;">0:38s</div>
+            <div style="font-size:11px;color:#10b981;font-weight:600;margin-top:6px;">&#8595; 12% faster this week</div>
+          </div>
+          <div style="background:var(--bg-card);border:1px solid var(--border-blue);border-radius:16px;padding:20px 22px;box-shadow:var(--shadow-md);">
+            <div style="font-size:10.5px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--text-muted);margin-bottom:10px;">Pipeline Value</div>
+            <div style="font-size:34px;font-weight:800;letter-spacing:-0.05em;color:var(--text);line-height:1;">$218k</div>
+            <div style="font-size:11px;color:#10b981;font-weight:600;margin-top:6px;">&#8593; $22k this week</div>
+          </div>
+          <div style="background:var(--bg-card);border:1px solid var(--border-blue);border-radius:16px;padding:20px 22px;box-shadow:var(--shadow-md);">
+            <div style="font-size:10.5px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--text-muted);margin-bottom:10px;">Follow-Ups Running</div>
+            <div style="font-size:34px;font-weight:800;letter-spacing:-0.05em;color:var(--text);line-height:1;">47</div>
+            <div style="font-size:11px;color:var(--blue);font-weight:600;margin-top:6px;">Across 5 sequences</div>
+          </div>
+        </div>
       </div>
 
-      <div class="feat-wrap reveal">
+      <!-- Browser mockup -->
+      <div class="reveal" style="position:relative;padding-bottom:32px;">
 
-        <!-- Left: feature tabs -->
-        <div class="feat-tabs">
+        <!-- Soft glow behind frame -->
+        <div style="position:absolute;top:40%;left:50%;transform:translate(-50%,-50%);width:75%;height:50%;background:radial-gradient(ellipse,rgba(0,87,255,0.10) 0%,transparent 70%);pointer-events:none;z-index:0;"></div>
 
-          <div class="feat-tab feat-active" data-feat="0" onclick="selectFeat(0)">
-            <div class="feat-tab-icon">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--tc)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81a19.79 19.79 0 01-3.07-8.68A2 2 0 012 .97h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 8.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/>
-              </svg>
-            </div>
-            <div class="feat-tab-body">
-              <div class="feat-tab-title">Lead Capture & Routing</div>
-              <div class="feat-tab-desc">Every inbound lead captured and routed in real time.</div>
-              <div class="feat-tab-stat"><span class="feat-tab-num">247</span><span class="feat-tab-num-label">leads routed this week</span></div>
-              <div class="feat-tab-bar-wrap"><div class="feat-tab-bar"></div></div>
-            </div>
-          </div>
+        <!-- Browser chrome -->
+        <div id="dash-frame" style="position:relative;z-index:1;border-radius:18px;overflow:hidden;box-shadow:0 40px 100px rgba(0,87,255,0.16),0 16px 48px rgba(0,0,0,0.18);border:1px solid rgba(0,87,255,0.18);">
 
-          <div class="feat-tab" data-feat="1" onclick="selectFeat(1)">
-            <div class="feat-tab-icon">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--tc)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
-              </svg>
+          <!-- Chrome bar -->
+          <div style="background:#f0f4ff;border-bottom:1px solid rgba(0,87,255,0.12);height:46px;display:flex;align-items:center;padding:0 18px;gap:10px;flex-shrink:0;">
+            <div style="display:flex;gap:6px;flex-shrink:0;">
+              <div style="width:12px;height:12px;border-radius:50%;background:#ef4444;opacity:.85;"></div>
+              <div style="width:12px;height:12px;border-radius:50%;background:#f59e0b;opacity:.85;"></div>
+              <div style="width:12px;height:12px;border-radius:50%;background:#10b981;opacity:.85;"></div>
             </div>
-            <div class="feat-tab-body">
-              <div class="feat-tab-title">AI Response System</div>
-              <div class="feat-tab-desc">Personalized AI replies sent in under a minute.</div>
-              <div class="feat-tab-stat"><span class="feat-tab-num">47s</span><span class="feat-tab-num-label">average response time</span></div>
-              <div class="feat-tab-bar-wrap"><div class="feat-tab-bar"></div></div>
+            <div style="flex:1;background:rgba(0,87,255,0.06);border:1px solid rgba(0,87,255,0.10);border-radius:8px;height:28px;display:flex;align-items:center;padding:0 14px;margin:0 16px;gap:6px;">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="rgba(0,87,255,0.45)" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+              <span style="font-size:12px;color:rgba(0,87,255,0.52);font-weight:500;font-family:'Plus Jakarta Sans',sans-serif;">app.flowaify.com/dashboard</span>
+            </div>
+            <div style="display:flex;gap:7px;align-items:center;flex-shrink:0;">
+              <div style="width:7px;height:7px;border-radius:50%;background:#10b981;box-shadow:0 0 0 2px rgba(16,185,129,0.28);"></div>
+              <span style="font-size:11px;font-weight:700;color:#10b981;font-family:'Plus Jakarta Sans',sans-serif;">Live</span>
             </div>
           </div>
 
-          <div class="feat-tab" data-feat="2" onclick="selectFeat(2)">
-            <div class="feat-tab-icon">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--tc)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/>
-                <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
-              </svg>
-            </div>
-            <div class="feat-tab-body">
-              <div class="feat-tab-title">Automated Follow-Ups</div>
-              <div class="feat-tab-desc">Multi-channel sequences that run without you.</div>
-              <div class="feat-tab-stat"><span class="feat-tab-num">3.2×</span><span class="feat-tab-num-label">more bookings vs manual</span></div>
-              <div class="feat-tab-bar-wrap"><div class="feat-tab-bar"></div></div>
-            </div>
+          <!-- Scaled iframe -->
+          <div id="dash-iframe-wrap" style="overflow:hidden;position:relative;">
+            <iframe
+              id="dash-iframe"
+              src="../dashboard/demo.html"
+              scrolling="no"
+              style="width:1440px;height:860px;border:none;transform-origin:top left;pointer-events:none;display:block;"
+            ></iframe>
           </div>
+        </div>
 
-          <div class="feat-tab" data-feat="3" onclick="selectFeat(3)">
-            <div class="feat-tab-icon">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--tc)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
-              </svg>
-            </div>
-            <div class="feat-tab-body">
-              <div class="feat-tab-title">CRM Organization</div>
-              <div class="feat-tab-desc">Every lead tagged and filed — zero manual entry.</div>
-              <div class="feat-tab-stat"><span class="feat-tab-num">100%</span><span class="feat-tab-num-label">auto-tagged on arrival</span></div>
-              <div class="feat-tab-bar-wrap"><div class="feat-tab-bar"></div></div>
-            </div>
-          </div>
+        <!-- Floating CTA pill -->
+        <a href="../dashboard/demo.html"
+           style="position:absolute;bottom:0;left:50%;transform:translateX(-50%);display:inline-flex;align-items:center;gap:8px;padding:12px 28px;background:var(--blue);color:#fff;font-size:14px;font-weight:700;border-radius:100px;box-shadow:0 8px 28px rgba(0,87,255,0.42);text-decoration:none;white-space:nowrap;font-family:'Plus Jakarta Sans',sans-serif;transition:all 0.2s;z-index:10;"
+           onmouseover="this.style.transform='translateX(-50%) translateY(-2px)';this.style.boxShadow='0 12px 36px rgba(0,87,255,0.54)';"
+           onmouseout="this.style.transform='translateX(-50%)';this.style.boxShadow='0 8px 28px rgba(0,87,255,0.42)';">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+          Open Interactive Dashboard
+        </a>
+      </div>
 
-        </div><!-- /feat-tabs -->
+    </div>
+  </section>
 
-        <!-- Right: dashboard mockup -->
-        <div class="feat-dashboard-wrap">
-        <div id="feat-dashboard">
-
-          <!-- Window chrome -->
-          <div class="feat-chrome">
-            <div class="feat-chrome-dots">
-              <span style="background:#FF5F57;"></span>
-              <span style="background:#FEBC2E;"></span>
-              <span style="background:#28C840;"></span>
-            </div>
-            <div class="feat-chrome-url">
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;opacity:.4"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
-              app.flowaify.com/dashboard
-            </div>
-          </div>
-
-          <!-- Main: sidebar + content panels -->
-          <div class="feat-main">
-
-            <!-- Sidebar -->
-            <div class="feat-sidebar">
-              <div class="feat-sidebar-logo">
-                <div class="feat-sidebar-logo-icon">F</div>
-                <div class="feat-sidebar-logo-text">Flow<span>aify</span></div>
-              </div>
-              <div class="feat-sidebar-section">Main</div>
-              <div class="feat-nav-item fnav-active" id="fnav-0">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81a19.79 19.79 0 01-3.07-8.68A2 2 0 012 .97h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 8.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
-                Leads
-                <span class="feat-nav-badge">3</span>
-              </div>
-              <div class="feat-nav-item" id="fnav-1">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
-                Responses
-              </div>
-              <div class="feat-nav-item" id="fnav-2">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
-                Follow-Ups
-              </div>
-              <div class="feat-nav-item" id="fnav-3">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-                CRM
-              </div>
-            </div>
-
-            <!-- Content panels -->
-            <div class="feat-content">
-
-              <!-- Panel 0: Lead Capture -->
-              <div class="feat-panel feat-panel-active" id="feat-panel-0">
-                <div class="fp-stats-row">
-                  <div class="fp-sc fp-sc-blue"><div class="fp-sc-val">12</div><div class="fp-sc-lbl">Today's leads</div></div>
-                  <div class="fp-sc fp-sc-green"><div class="fp-sc-val">98%</div><div class="fp-sc-lbl">Routed instantly</div></div>
-                  <div class="fp-sc fp-sc-amber"><div class="fp-sc-val">&lt;1m</div><div class="fp-sc-lbl">Avg. routing time</div></div>
-                </div>
-                <div class="fp-ph"><span class="fp-ph-title">Incoming Leads</span><span class="fp-ph-live">Live</span></div>
-                <table class="fp-table">
-                  <thead><tr><th>Name</th><th>Source</th><th>Status</th><th>Action</th></tr></thead>
-                  <tbody>
-                    <tr>
-                      <td><div class="fp-name-cell"><div class="fp-av" style="background:rgba(239,68,68,.18);color:#F87171;">JC</div>James Carter</div></td>
-                      <td><span class="fp-src fp-src-meta">Meta Ads</span></td>
-                      <td><span class="fp-badge fp-badge-hot">🔥 Hot</span></td>
-                      <td><button class="fp-route-btn" id="fp-route-btn">Route →</button></td>
-                    </tr>
-                    <tr>
-                      <td><div class="fp-name-cell"><div class="fp-av" style="background:rgba(139,92,246,.18);color:#A78BFA;">SL</div>Sarah Lin</div></td>
-                      <td><span class="fp-src fp-src-web">Website</span></td>
-                      <td><span class="fp-badge fp-badge-new">New</span></td>
-                      <td style="color:var(--dtf);font-size:11px;">Queued</td>
-                    </tr>
-                    <tr>
-                      <td><div class="fp-name-cell"><div class="fp-av" style="background:rgba(245,158,11,.18);color:#FCD34D;">MT</div>Mike Torres</div></td>
-                      <td><span class="fp-src fp-src-ref">Referral</span></td>
-                      <td><span class="fp-badge fp-badge-warm">Warm</span></td>
-                      <td style="color:var(--dtf);font-size:11px;">Queued</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-
-              <!-- Panel 1: AI Response -->
-              <div class="feat-panel" id="feat-panel-1">
-                <div class="fp-stats-row">
-                  <div class="fp-sc fp-sc-green"><div class="fp-sc-val">47s</div><div class="fp-sc-lbl">Avg. send time</div></div>
-                  <div class="fp-sc fp-sc-blue"><div class="fp-sc-val">94%</div><div class="fp-sc-lbl">Open rate</div></div>
-                  <div class="fp-sc fp-sc-violet"><div class="fp-sc-val">100%</div><div class="fp-sc-lbl">Personalized</div></div>
-                </div>
-                <div class="fp-chat-head">
-                  <div class="fp-chat-av">JC</div>
-                  <div><div class="fp-chat-info-name">James Carter</div><div class="fp-chat-info-sub">Meta Ads · Received just now</div></div>
-                  <div class="fp-chat-ai" style="display:flex;align-items:center;gap:4px;"><svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg> AI Auto-Reply</div>
-                </div>
-                <div class="fp-chat">
-                  <div class="fp-msg fp-msg-in">Hey, I saw your ad. Interested in automating my follow-up process.<span class="fp-msg-time">2:41 PM</span></div>
-                  <div class="fp-msg fp-msg-out">Hi James! Great timing — I'd love to show you how Flowaify handles that. Free for a quick 15-min call this week?<span class="fp-msg-time">2:41 PM · AI</span></div>
-                  <div class="fp-speed-badge" id="fp-speed-badge">
-                    <svg width="11" height="11" viewBox="0 0 24 24" fill="#4ADE80" stroke="none"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-                    Sent in 47s
-                  </div>
-                </div>
-              </div>
-
-              <!-- Panel 2: Automated Follow-Ups -->
-              <div class="feat-panel" id="feat-panel-2">
-                <div class="fp-stats-row">
-                  <div class="fp-sc fp-sc-amber"><div class="fp-sc-val">10</div><div class="fp-sc-lbl">Active sequences</div></div>
-                  <div class="fp-sc fp-sc-green"><div class="fp-sc-val">3.2×</div><div class="fp-sc-lbl">More bookings</div></div>
-                  <div class="fp-sc"><div class="fp-sc-val">0</div><div class="fp-sc-lbl">Manual tasks</div></div>
-                </div>
-                <div class="fp-ph"><span class="fp-ph-title">Sequence · James Carter</span><span style="font-size:10px;color:var(--dtf);">Day 1 of 7</span></div>
-                <div>
-                  <div class="fp-step">
-                    <div class="fp-step-left"><div class="fp-step-dot" style="background:rgba(34,197,94,.18);color:#4ADE80;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div><div class="fp-step-line"></div></div>
-                    <div class="fp-step-body">
-                      <div class="fp-step-row"><span class="fp-step-label">Initial SMS</span><span class="fp-ch fp-ch-sms">SMS</span><span class="fp-step-status fp-sts-done">Done</span></div>
-                      <div class="fp-step-time">Day 0 · 47 seconds after opt-in</div>
-                    </div>
-                  </div>
-                  <div class="fp-step">
-                    <div class="fp-step-left"><div class="fp-step-dot" style="background:rgba(0,87,255,.2);color:#5B9FFF;">2</div><div class="fp-step-line"></div></div>
-                    <div class="fp-step-body">
-                      <div class="fp-step-row"><span class="fp-step-label">Follow-up email</span><span class="fp-ch fp-ch-email">Email</span><span class="fp-step-status fp-sts-fire" id="fp-fire-step" style="display:inline-flex;align-items:center;gap:3px;"><svg width="9" height="9" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg>Firing</span></div>
-                      <div class="fp-step-time">Day 1 · 9:00 AM</div>
-                    </div>
-                  </div>
-                  <div class="fp-step">
-                    <div class="fp-step-left"><div class="fp-step-dot" style="background:rgba(139,92,246,.15);color:rgba(139,92,246,.7);">3</div><div class="fp-step-line"></div></div>
-                    <div class="fp-step-body">
-                      <div class="fp-step-row"><span class="fp-step-label">DM reminder</span><span class="fp-ch fp-ch-dm">DM</span><span class="fp-step-status fp-sts-wait">Waiting</span></div>
-                      <div class="fp-step-time">Day 3 · 2:00 PM</div>
-                    </div>
-                  </div>
-                  <div class="fp-step">
-                    <div class="fp-step-left"><div class="fp-step-dot" style="background:var(--dcard);color:var(--dtf);">4</div></div>
-                    <div class="fp-step-body">
-                      <div class="fp-step-row"><span class="fp-step-label">Final SMS</span><span class="fp-ch fp-ch-sms">SMS</span><span class="fp-step-status fp-sts-wait">Scheduled</span></div>
-                      <div class="fp-step-time">Day 7 · 10:00 AM</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Panel 3: CRM Organization -->
-              <div class="feat-panel" id="feat-panel-3">
-                <div class="fp-stats-row">
-                  <div class="fp-sc fp-sc-blue"><div class="fp-sc-val">$127k</div><div class="fp-sc-lbl">Pipeline value</div></div>
-                  <div class="fp-sc fp-sc-green"><div class="fp-sc-val">8</div><div class="fp-sc-lbl">Booked this month</div></div>
-                  <div class="fp-sc fp-sc-violet"><div class="fp-sc-val">34</div><div class="fp-sc-lbl">Active leads</div></div>
-                </div>
-                <div class="fp-ph"><span class="fp-ph-title">Pipeline</span><span style="font-size:10px;color:var(--dtf);">Auto-updated</span></div>
-                <div class="fp-pipeline">
-                  <div class="fp-col">
-                    <div class="fp-col-head"><span class="fp-col-title">New</span><span class="fp-col-cnt fp-cnt-new">2</span></div>
-                    <div class="fp-card">
-                      <div class="fp-card-header"><div class="fp-cav" style="background:rgba(139,92,246,.18);color:#A78BFA;">SL</div><span class="fp-card-name">Sarah Lin</span></div>
-                      <div class="fp-card-sub">Website · Just now</div>
-                      <div class="fp-card-val">Est. $2,400</div>
-                    </div>
-                    <div class="fp-card">
-                      <div class="fp-card-header"><div class="fp-cav" style="background:rgba(245,158,11,.18);color:#FCD34D;">MT</div><span class="fp-card-name">Mike Torres</span></div>
-                      <div class="fp-card-sub">Referral · 2h ago</div>
-                      <div class="fp-card-val">Est. $3,100</div>
-                    </div>
-                  </div>
-                  <div class="fp-col">
-                    <div class="fp-col-head"><span class="fp-col-title">Contacted</span><span class="fp-col-cnt fp-cnt-con">1</span></div>
-                    <div class="fp-card" style="border-color:rgba(0,87,255,.28);background:rgba(0,87,255,.06);">
-                      <div class="fp-card-header"><div class="fp-cav" style="background:rgba(239,68,68,.18);color:#F87171;">JC</div><span class="fp-card-name">James Carter</span></div>
-                      <div class="fp-card-sub">Meta Ads · AI replied</div>
-                      <div style="margin-top:6px;"><button class="fp-tag-btn" id="fp-tag-btn">+ Tag</button></div>
-                    </div>
-                  </div>
-                  <div class="fp-col">
-                    <div class="fp-col-head"><span class="fp-col-title">Booked</span><span class="fp-col-cnt fp-cnt-book">1</span></div>
-                    <div class="fp-card" style="border-color:rgba(34,197,94,.22);background:rgba(34,197,94,.05);">
-                      <div class="fp-card-header"><div class="fp-cav" style="background:rgba(34,197,94,.2);color:#4ADE80;">AM</div><span class="fp-card-name">Alex Morgan</span></div>
-                      <div class="fp-card-sub">Call · Tomorrow 10am</div>
-                      <div class="fp-card-val" style="color:#4ADE80;display:flex;align-items:center;gap:4px;">$4,800 <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-            </div><!-- /feat-content -->
-          </div><!-- /feat-main -->
-
-          <!-- Virtual cursor -->
-          <svg id="feat-cursor" style="left:87%;top:42%;" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M4 2L16 10L10 11L8 18L4 2Z" fill="currentColor" stroke="rgba(0,0,0,0.35)" stroke-width="1.2"/>
-          </svg>
-
-        </div><!-- /feat-dashboard -->
-        </div><!-- /feat-dashboard-wrap -->
-
-      </div><!-- /feat-wrap -->
-
-      <!-- Waveform icons row -->
-      <div class="feat-wave-row reveal" style="margin-top:56px;">
-        <svg class="feat-wave-svg" viewBox="0 0 800 60" preserveAspectRatio="none">
-          <path class="feat-wave-path" d="M100,30 C175,30 175,10 250,10 C325,10 325,50 400,50 C475,50 475,10 550,10 C625,10 625,50 700,50"/>
-        </svg>
-        <div class="feat-wave-nodes">
-          <div class="feat-wave-node fw-active" data-fw="0">
-            <div class="feat-wave-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></div>
-            <span class="feat-wave-label">CRM Sync</span>
-          </div>
-          <div class="feat-wave-node" data-fw="1">
-            <div class="feat-wave-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
-            <span class="feat-wave-label">AI Response</span>
-          </div>
-          <div class="feat-wave-node" data-fw="2">
-            <div class="feat-wave-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
-            <span class="feat-wave-label">Follow-Ups</span>
-          </div>
-          <div class="feat-wave-node" data-fw="3">
-            <div class="feat-wave-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="10" r="4"/><path d="M2 20a10 10 0 0 1 20 0"/></svg></div>
-            <span class="feat-wave-label">Lead Capture</span>
-          </div>
-        </div><!-- /feat-wave-nodes -->
-      </div><!-- /feat-wave-row -->
-
-    </div><!-- /feat inner -->
-  </section><!-- /services -->
+  <script>
+  (function(){
+    function scaleDash() {
+      var wrap = document.getElementById('dash-iframe-wrap');
+      var iframe = document.getElementById('dash-iframe');
+      if (!wrap || !iframe) return;
+      var scale = wrap.parentElement.offsetWidth / 1440;
+      iframe.style.transform = 'scale(' + scale + ')';
+      wrap.style.height = Math.round(860 * scale) + 'px';
+    }
+    window.addEventListener('load', scaleDash);
+    window.addEventListener('resize', scaleDash);
+    scaleDash();
+  })();
+  </script>
 
   <!-- ─── PROBLEM → SOLUTION  <!-- ─── PROBLEM → SOLUTION ─────────────────────────────────────── -->
   <section id="problem" style="padding:120px 60px;background:var(--bg-surface);">
@@ -2756,6 +2600,19 @@
               </div>
             </div>
 
+            <!-- Dashboard teaser -->
+            <div style="margin-bottom:18px;">
+              <a href="../dashboard/demo.html" style="display:flex;align-items:center;gap:10px;padding:11px 13px;background:rgba(0,87,255,0.06);border:1px solid rgba(0,87,255,0.16);border-radius:10px;text-decoration:none;transition:background 0.18s;" onmouseover="this.style.background='rgba(0,87,255,0.1)'" onmouseout="this.style.background='rgba(0,87,255,0.06)'">
+                <div style="width:28px;height:28px;border-radius:8px;background:rgba(0,87,255,0.12);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2.5"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+                </div>
+                <div>
+                  <div style="font-size:12.5px;font-weight:700;color:var(--blue);">See your dashboard first →</div>
+                  <div style="font-size:11px;color:var(--text-muted);">Interactive demo — no signup needed</div>
+                </div>
+              </a>
+            </div>
+
             <!-- Who this is for -->
             <div>
               <p style="font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--blue);margin-bottom:9px;">Who this is for</p>
@@ -3006,9 +2863,10 @@
       </div>
 
       <div style="display:flex;gap:36px;">
-        <a href="#problem"      class="nav-link">Why Flowaify</a>
-        <a href="#plans"        class="nav-link">Plans</a>
-        <a href="#contact"      class="nav-link">Build My System</a>
+        <a href="#problem"                    class="nav-link">Why Flowaify</a>
+        <a href="#plans"                      class="nav-link">Plans</a>
+        <a href="../dashboard/demo.html"      class="nav-link">Demo Dashboard</a>
+        <a href="#contact"                    class="nav-link">Build My System</a>
       </div>
 
       <div style="text-align:right;">
@@ -3313,60 +3171,6 @@ window.addEventListener('scroll', () => {
   }
 })();
 
-// ─── SERVICES FEATURE CYCLING ───────────────────────────────────────────────
-(function(){
-  const features = [
-    { nav: 0, cursor: { left: '87%', top: '42%' } },
-    { nav: 1, cursor: { left: '76%', top: '57%' } },
-    { nav: 2, cursor: { left: '82%', top: '48%' } },
-    { nav: 3, cursor: { left: '49%', top: '48%' } }
-  ];
-  let current = 0;
-  let timer = null;
-
-  function selectFeat(idx, fromAuto) {
-    document.querySelectorAll('.feat-tab').forEach(t => t.classList.remove('feat-active'));
-    document.querySelectorAll('.feat-panel').forEach(p => p.classList.remove('feat-panel-active'));
-    document.querySelectorAll('.feat-nav-item').forEach(n => n.classList.remove('fnav-active'));
-    document.querySelectorAll('.feat-wave-node').forEach(n => n.classList.remove('fw-active'));
-
-    const tabs = document.querySelectorAll('.feat-tab');
-    if (tabs[idx]) tabs[idx].classList.add('feat-active');
-    const panel = document.getElementById('feat-panel-' + idx);
-    if (panel) panel.classList.add('feat-panel-active');
-    const nav = document.getElementById('fnav-' + idx);
-    if (nav) nav.classList.add('fnav-active');
-    const waveNode = document.querySelector('.feat-wave-node[data-fw="' + idx + '"]');
-    if (waveNode) waveNode.classList.add('fw-active');
-
-    const cursor = document.getElementById('feat-cursor');
-    if (cursor) {
-      const f = features[idx];
-      cursor.style.left = f.cursor.left;
-      cursor.style.top = f.cursor.top;
-      setTimeout(function() {
-        cursor.classList.remove('cursor-clicking');
-        void cursor.offsetWidth;
-        cursor.classList.add('cursor-clicking');
-      }, 720);
-    }
-
-    current = idx;
-
-    if (!fromAuto) {
-      clearInterval(timer);
-      timer = setInterval(advance, 4500);
-    }
-  }
-
-  function advance() {
-    selectFeat((current + 1) % 4, true);
-  }
-
-  window.selectFeat = function(idx) { selectFeat(idx, false); };
-
-  timer = setInterval(advance, 4500);
-})();
 
 // ─── BOOT ANIMATION (white dot matrix) ──────────────────────────────────────
 // ─── PLANS FILTER TABS ───────────────────────────────────────────────────────
