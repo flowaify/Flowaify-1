@@ -3,12 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Flowaify — Client Portal</title>
-  <link rel="icon" type="image/png" href="../brand_assets/logo-transparent.png" />
+  <title>Flowaify — Client Dashboard</title>
+  <link rel="icon" type="image/png" href="../logo-transparent.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+
   <style>
     /* ═══════════════════════════════════════════
        THEME TOKENS
@@ -25,1446 +27,1909 @@
     [data-theme="dark"] {
       --bg:          #040915;
       --bg-s:        #070e20;
-      --bg-card:     rgba(10,20,52,0.68);
-      --sidebar-bg:  rgba(4,9,24,0.99);
-      --topbar-bg:   rgba(4,9,21,0.93);
-      --blue-glow:   rgba(0,87,255,0.22);
-      --blue-border: rgba(60,130,255,0.18);
-      --blue-dim:    rgba(0,87,255,0.09);
+      --bg-card:     rgba(10, 20, 52, 0.68);
+      --sidebar-bg:  rgba(4, 9, 24, 0.99);
+      --topbar-bg:   rgba(4, 9, 21, 0.93);
+      --blue-glow:   rgba(0, 87, 255, 0.22);
+      --blue-border: rgba(60, 130, 255, 0.18);
+      --blue-dim:    rgba(0, 87, 255, 0.09);
       --text:        #e2e8f0;
-      --text-m:      rgba(226,232,240,0.48);
-      --text-s:      rgba(226,232,240,0.72);
-      --border:      rgba(226,232,240,0.07);
+      --text-m:      rgba(226, 232, 240, 0.48);
+      --text-s:      rgba(226, 232, 240, 0.72);
+      --border:      rgba(226, 232, 240, 0.07);
       --green:       #10b981;
-      --green-dim:   rgba(16,185,129,0.12);
+      --green-dim:   rgba(16, 185, 129, 0.12);
       --amber:       #f59e0b;
-      --amber-dim:   rgba(245,158,11,0.12);
+      --amber-dim:   rgba(245, 158, 11, 0.12);
       --red:         #ef4444;
-      --red-dim:     rgba(239,68,68,0.11);
+      --red-dim:     rgba(239, 68, 68, 0.11);
       --card-shadow: 0 4px 28px rgba(0,0,0,0.35);
       --input-bg:    rgba(255,255,255,0.04);
       --input-border:rgba(255,255,255,0.1);
     }
+
+    /* Light */
     [data-theme="light"] {
       --bg:          #ffffff;
       --bg-s:        #f8fafc;
-      --bg-card:     rgba(255,255,255,0.94);
+      --bg-card:     rgba(255, 255, 255, 0.94);
       --sidebar-bg:  #ffffff;
-      --topbar-bg:   rgba(255,255,255,0.96);
-      --blue-glow:   rgba(0,87,255,0.10);
-      --blue-border: rgba(0,87,255,0.16);
-      --blue-dim:    rgba(0,87,255,0.06);
+      --topbar-bg:   rgba(255, 255, 255, 0.96);
+      --blue-glow:   rgba(0, 87, 255, 0.10);
+      --blue-border: rgba(0, 87, 255, 0.16);
+      --blue-dim:    rgba(0, 87, 255, 0.06);
       --text:        #0f172a;
-      --text-m:      rgba(15,23,42,0.48);
-      --text-s:      rgba(15,23,42,0.72);
-      --border:      rgba(15,23,42,0.08);
+      --text-m:      rgba(15, 23, 42, 0.48);
+      --text-s:      rgba(15, 23, 42, 0.72);
+      --border:      rgba(15, 23, 42, 0.08);
       --green:       #059669;
-      --green-dim:   rgba(5,150,105,0.09);
+      --green-dim:   rgba(5, 150, 105, 0.09);
       --amber:       #d97706;
-      --amber-dim:   rgba(217,119,6,0.09);
+      --amber-dim:   rgba(217, 119, 6, 0.09);
       --red:         #dc2626;
-      --red-dim:     rgba(220,38,38,0.09);
+      --red-dim:     rgba(220, 38, 38, 0.09);
       --card-shadow: 0 1px 4px rgba(0,0,0,0.06), 0 6px 20px rgba(0,87,255,0.06);
       --input-bg:    #f8faff;
       --input-border:rgba(0,87,255,0.15);
     }
 
-    *,*::before,*::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html,body { height: 100%; font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text); font-size: 14px; line-height: 1.5; overflow-x: hidden; transition: background 0.3s, color 0.3s; }
+    /* ═══════════════════════════════════════════
+       RESET & BASE
+    ═══════════════════════════════════════════ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      height: 100%;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 14px;
+      line-height: 1.5;
+      overflow-x: hidden;
+      transition: background 0.3s, color 0.3s;
+    }
     a { text-decoration: none; color: inherit; }
     ::-webkit-scrollbar { width: 4px; height: 4px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: var(--blue-border); border-radius: 99px; }
 
-    /* LAYOUT */
+    /* ═══════════════════════════════════════════
+       LAYOUT
+    ═══════════════════════════════════════════ */
     .layout { display: flex; min-height: 100vh; }
 
-    /* SIDEBAR */
-    .sidebar { width: var(--sidebar-w); min-height: 100vh; background: var(--sidebar-bg); border-right: 1px solid var(--blue-border); display: flex; flex-direction: column; position: fixed; left: 0; top: 0; bottom: 0; z-index: 50; padding: 20px 0; transition: background 0.3s, border-color 0.3s, transform 0.25s; }
-    .sidebar-logo { display: flex; align-items: center; gap: 10px; padding: 0 18px 20px; border-bottom: 1px solid var(--border); }
-    .sidebar-logo img { width: 28px; height: 28px; object-fit: contain; }
+    /* ═══════════════════════════════════════════
+       SIDEBAR
+    ═══════════════════════════════════════════ */
+    .sidebar {
+      width: var(--sidebar-w);
+      min-height: 100vh;
+      background: var(--sidebar-bg);
+      border-right: 1px solid var(--blue-border);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      left: 0; top: 0; bottom: 0;
+      z-index: 50;
+      padding: 20px 0;
+      transition: background 0.3s, border-color 0.3s;
+    }
+
+    .sidebar-logo {
+      display: flex; align-items: center; gap: 10px;
+      padding: 0 18px 20px;
+      border-bottom: 1px solid var(--border);
+    }
+    .sidebar-logo img {
+      width: 28px; height: 28px; object-fit: contain;
+    }
     [data-theme="dark"] .sidebar-logo img { filter: brightness(1.15); }
+    [data-theme="light"] .sidebar-logo img { filter: none; }
     .sidebar-logo-name { font-size: 14.5px; font-weight: 800; letter-spacing: -0.4px; color: var(--text); }
-    .sidebar-logo-tag { font-size: 9.5px; font-weight: 500; color: var(--text-m); letter-spacing: 0.4px; margin-top: -1px; }
-    .sidebar-label { padding: 18px 18px 7px; font-size: 9.5px; font-weight: 700; letter-spacing: 1px; color: var(--text-m); text-transform: uppercase; }
-    .nav-item { display: flex; align-items: center; gap: 9px; padding: 8.5px 18px; margin: 1px 8px; border-radius: 9px; cursor: pointer; transition: background 0.16s, color 0.16s; color: var(--text-m); font-size: 13px; font-weight: 500; border: 1px solid transparent; user-select: none; }
+    .sidebar-logo-tag  { font-size: 9.5px; font-weight: 500; color: var(--text-m); letter-spacing: 0.4px; margin-top: -1px; }
+
+    .sidebar-label {
+      padding: 18px 18px 7px;
+      font-size: 9.5px; font-weight: 700; letter-spacing: 1px;
+      color: var(--text-m); text-transform: uppercase;
+    }
+
+    .nav-item {
+      display: flex; align-items: center; gap: 9px;
+      padding: 8.5px 18px;
+      margin: 1px 8px;
+      border-radius: 9px;
+      cursor: pointer;
+      transition: background 0.16s, color 0.16s;
+      color: var(--text-m);
+      font-size: 13px; font-weight: 500;
+      border: 1px solid transparent;
+      user-select: none;
+    }
     .nav-item i { width: 15px; height: 15px; flex-shrink: 0; }
     .nav-item:hover { background: var(--blue-dim); color: var(--text-s); }
-    .nav-item.active { background: var(--blue-dim); color: var(--blue-soft); border-color: var(--blue-border); font-weight: 600; }
-    .sidebar-bottom { margin-top: auto; padding: 14px 10px; border-top: 1px solid var(--border); }
-    .client-pill { display: flex; align-items: center; gap: 8px; padding: 10px 12px; background: var(--green-dim); border: 1px solid rgba(16,185,129,0.2); border-radius: 9px; }
-    .client-pulse { width: 7px; height: 7px; border-radius: 50%; background: var(--green); flex-shrink: 0; animation: pulse-g 2s infinite; }
-    .client-name { font-size: 11.5px; font-weight: 700; color: var(--green); }
-    .client-plan { font-size: 10px; color: var(--green); opacity: 0.7; }
+    .nav-item.active {
+      background: var(--blue-dim);
+      color: var(--blue-soft);
+      border-color: var(--blue-border);
+      font-weight: 600;
+    }
 
-    /* MAIN */
-    .main { margin-left: var(--sidebar-w); flex: 1; min-height: 100vh; display: flex; flex-direction: column; }
+    .sidebar-bottom {
+      margin-top: auto;
+      padding: 14px 10px;
+      border-top: 1px solid var(--border);
+    }
+    .hs-pill {
+      display: flex; align-items: center; gap: 8px;
+      padding: 10px 12px;
+      background: var(--green-dim);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+      border-radius: 9px;
+    }
+    [data-theme="light"] .hs-pill { border-color: rgba(5,150,105,0.2); }
+    .pulse {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--green); flex-shrink: 0;
+      animation: pulse-g 2s infinite;
+    }
+    @keyframes pulse-g {
+      0%   { box-shadow: 0 0 0 0 rgba(16,185,129,.5); }
+      70%  { box-shadow: 0 0 0 5px rgba(16,185,129,0); }
+      100% { box-shadow: 0 0 0 0 rgba(16,185,129,0); }
+    }
+    [data-theme="light"] @keyframes pulse-g {
+      0%   { box-shadow: 0 0 0 0 rgba(5,150,105,.4); }
+      70%  { box-shadow: 0 0 0 5px rgba(5,150,105,0); }
+      100% { box-shadow: 0 0 0 0 rgba(5,150,105,0); }
+    }
+    .hs-label { font-size: 11.5px; font-weight: 700; color: var(--green); }
+    .hs-sub   { font-size: 10px; color: var(--green); opacity: 0.7; }
 
-    /* TOPBAR */
-    .topbar { position: sticky; top: 0; z-index: 40; display: flex; align-items: center; justify-content: space-between; padding: 0 28px; height: 62px; background: var(--topbar-bg); backdrop-filter: blur(18px); border-bottom: 1px solid var(--blue-border); transition: background 0.3s, border-color 0.3s; }
-    .topbar-left { display: flex; flex-direction: column; min-width: 0; }
+    /* ═══════════════════════════════════════════
+       MAIN
+    ═══════════════════════════════════════════ */
+    .main {
+      margin-left: var(--sidebar-w);
+      flex: 1;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Topbar ── */
+    .topbar {
+      position: sticky; top: 0; z-index: 40;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 28px;
+      height: 62px;
+      background: var(--topbar-bg);
+      backdrop-filter: blur(18px);
+      border-bottom: 1px solid var(--blue-border);
+      transition: background 0.3s, border-color 0.3s;
+    }
+    .topbar-left { display: flex; flex-direction: column; }
     .topbar-title { font-size: 15px; font-weight: 700; color: var(--text); letter-spacing: -0.3px; }
-    .topbar-sub { font-size: 11px; color: var(--text-m); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .topbar-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
-    .btn-sync { display: flex; align-items: center; gap: 6px; padding: 7px 16px; background: var(--blue); border: none; border-radius: 8px; color: #fff; font-size: 12.5px; font-weight: 600; cursor: pointer; transition: all 0.18s; font-family: inherit; box-shadow: 0 4px 14px rgba(0,87,255,0.35); white-space: nowrap; }
+    .topbar-sub   { font-size: 11px; color: var(--text-m); }
+    .topbar-right { display: flex; align-items: center; gap: 10px; }
+
+    .range-sel {
+      display: flex; align-items: center; gap: 6px;
+      padding: 6px 12px;
+      background: var(--blue-dim);
+      border: 1px solid var(--blue-border);
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .range-sel select {
+      background: transparent; border: none; outline: none;
+      color: var(--text-s); font-size: 12px; font-weight: 500;
+      cursor: pointer; font-family: inherit;
+    }
+    .range-sel select option { background: #0a1232; color: #e2e8f0; }
+    [data-theme="light"] .range-sel select option { background: #fff; color: #0f172a; }
+
+    .btn-sync {
+      display: flex; align-items: center; gap: 6px;
+      padding: 7px 16px;
+      background: var(--blue);
+      border: none; border-radius: 8px;
+      color: #fff; font-size: 12.5px; font-weight: 600;
+      cursor: pointer; transition: all 0.18s;
+      font-family: inherit;
+      box-shadow: 0 4px 14px rgba(0,87,255,0.35);
+    }
     .btn-sync:hover { background: var(--blue-b); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(0,87,255,0.45); }
     .btn-sync i { width: 13px; height: 13px; }
-    .btn-theme { display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; background: var(--blue-dim); border: 1px solid var(--blue-border); border-radius: 8px; cursor: pointer; transition: all 0.18s; color: var(--text-s); flex-shrink: 0; }
+
+    .btn-theme {
+      display: flex; align-items: center; justify-content: center;
+      width: 34px; height: 34px;
+      background: var(--blue-dim);
+      border: 1px solid var(--blue-border);
+      border-radius: 8px;
+      cursor: pointer; transition: all 0.18s;
+      color: var(--text-s);
+    }
     .btn-theme:hover { background: var(--blue-border); }
     .btn-theme i { width: 15px; height: 15px; }
-    .avatar { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg,#0057FF,#8b5cf6); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; color: #fff; cursor: pointer; flex-shrink: 0; }
-    .mobile-menu-btn { display: none; align-items: center; justify-content: center; width: 34px; height: 34px; background: var(--blue-dim); border: 1px solid var(--blue-border); border-radius: 8px; cursor: pointer; color: var(--text-s); flex-shrink: 0; }
-    .mobile-menu-btn i { width: 18px; height: 18px; }
 
-    /* PAGE */
+    .avatar {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: linear-gradient(135deg, #0057FF, #8b5cf6);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 800; color: #fff;
+      cursor: pointer; flex-shrink: 0;
+    }
+
+    /* ═══════════════════════════════════════════
+       PAGE SYSTEM
+    ═══════════════════════════════════════════ */
     .page { display: none; padding: 26px 28px 80px; }
     .page.active { display: block; }
 
-    /* CARD */
-    .card { background: var(--bg-card); backdrop-filter: blur(20px); border: 1px solid var(--blue-border); border-radius: 14px; box-shadow: var(--card-shadow); transition: box-shadow 0.2s, transform 0.2s, border-color 0.2s, background 0.3s; overflow: hidden; }
-    .card:hover { box-shadow: 0 0 28px var(--blue-glow), var(--card-shadow); border-color: rgba(60,130,255,0.3); transform: translateY(-1px); }
+    /* ═══════════════════════════════════════════
+       GLASS CARD
+    ═══════════════════════════════════════════ */
+    .card {
+      background: var(--bg-card);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--blue-border);
+      border-radius: 14px;
+      box-shadow: var(--card-shadow);
+      transition: box-shadow 0.2s, transform 0.2s, border-color 0.2s, background 0.3s;
+      overflow: hidden;
+    }
+    .card:hover {
+      box-shadow: 0 0 28px var(--blue-glow), var(--card-shadow);
+      border-color: rgba(60,130,255,0.3);
+      transform: translateY(-1px);
+    }
 
-    /* SEC HEAD */
-    .sec-head { display: flex; align-items: center; justify-content: space-between; padding: 15px 20px; border-bottom: 1px solid var(--border); }
-    .sec-title { display: flex; align-items: center; gap: 7px; font-size: 13px; font-weight: 700; color: var(--text); }
+    /* ═══════════════════════════════════════════
+       SECTION HEADER
+    ═══════════════════════════════════════════ */
+    .sec-head {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 15px 20px;
+      border-bottom: 1px solid var(--border);
+    }
+    .sec-title {
+      display: flex; align-items: center; gap: 7px;
+      font-size: 13px; font-weight: 700; color: var(--text);
+    }
     .sec-title i { width: 14px; height: 14px; color: var(--blue-soft); }
     .sec-sub { font-size: 11px; color: var(--text-m); font-weight: 500; }
 
-    /* PAGE HEAD */
-    .page-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 22px; }
-    .page-head-title { font-size: 20px; font-weight: 800; color: var(--text); letter-spacing: -0.5px; }
-    .page-head-sub { font-size: 12px; color: var(--text-m); margin-top: 2px; }
-    .page-head-actions { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; flex-shrink: 0; }
-
-    /* BADGES */
-    .badge { display: inline-flex; align-items: center; padding: 3px 9px; border-radius: 99px; font-size: 10.5px; font-weight: 600; white-space: nowrap; }
-    .b-live      { background: var(--green-dim);             color: var(--green);      border: 1px solid rgba(16,185,129,0.2); }
-    .b-setup     { background: var(--amber-dim);             color: var(--amber);      border: 1px solid rgba(245,158,11,0.2); }
-    .b-paused    { background: rgba(139,92,246,.12);         color: var(--purple);     border: 1px solid rgba(139,92,246,.22); }
-    .b-attn      { background: var(--red-dim);               color: var(--red);        border: 1px solid rgba(239,68,68,.2); }
-    .b-connected { background: var(--green-dim);             color: var(--green);      border: 1px solid rgba(16,185,129,0.2); }
-    .b-notconn   { background: rgba(128,128,200,.09);        color: var(--text-m);     border: 1px solid rgba(128,128,200,.14); }
-    .b-optional  { background: var(--blue-dim);              color: var(--blue-soft);  border: 1px solid var(--blue-border); }
-    .b-pending   { background: var(--amber-dim);             color: var(--amber);      border: 1px solid rgba(245,158,11,0.2); }
-
-    /* LIVE PILL */
-    .live-pill { display: flex; align-items: center; gap: 5px; font-size: 10px; font-weight: 700; color: var(--green); background: var(--green-dim); border: 1px solid rgba(16,185,129,0.2); padding: 3px 9px; border-radius: 99px; }
+    .live-pill {
+      display: flex; align-items: center; gap: 5px;
+      font-size: 10px; font-weight: 700; color: var(--green);
+      background: var(--green-dim);
+      border: 1px solid rgba(16,185,129,0.2);
+      padding: 3px 9px; border-radius: 99px;
+    }
+    [data-theme="light"] .live-pill { border-color: rgba(5,150,105,0.2); }
     .live-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--green); animation: pulse-g 1.5s infinite; }
 
-    @keyframes pulse-g { 0%{box-shadow:0 0 0 0 rgba(16,185,129,.5)} 70%{box-shadow:0 0 0 5px rgba(16,185,129,0)} 100%{box-shadow:0 0 0 0 rgba(16,185,129,0)} }
-    @keyframes pulse-a { 0%{box-shadow:0 0 0 0 rgba(245,158,11,.5)} 70%{box-shadow:0 0 0 5px rgba(245,158,11,0)} 100%{box-shadow:0 0 0 0 rgba(245,158,11,0)} }
-    @keyframes pulse-r { 0%{box-shadow:0 0 0 0 rgba(239,68,68,.5)} 70%{box-shadow:0 0 0 5px rgba(239,68,68,0)} 100%{box-shadow:0 0 0 0 rgba(239,68,68,0)} }
-    @keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
-    @keyframes modal-in { from{transform:scale(0.95) translateY(10px);opacity:0} to{transform:scale(1) translateY(0);opacity:1} }
-    @keyframes toast-in { from{transform:translateY(16px);opacity:0} to{transform:translateY(0);opacity:1} }
-    .spinning { animation: spin 1s linear infinite; }
+    /* ═══════════════════════════════════════════
+       PAGE TITLE
+    ═══════════════════════════════════════════ */
+    .page-head {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 22px;
+    }
+    .page-head-title { font-size: 20px; font-weight: 800; color: var(--text); letter-spacing: -0.5px; }
+    .page-head-sub   { font-size: 12px; color: var(--text-m); margin-top: 2px; }
 
-    /* STAT CARDS */
-    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(160px,1fr)); gap: 14px; margin-bottom: 22px; }
-    .stat-card { padding: 18px 20px; display: flex; flex-direction: column; gap: 10px; }
+    /* ═══════════════════════════════════════════
+       STAT CARDS
+    ═══════════════════════════════════════════ */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 14px;
+      margin-bottom: 22px;
+    }
+    .stat-card {
+      padding: 18px 20px;
+      display: flex; flex-direction: column; gap: 10px;
+    }
     .stat-top { display: flex; align-items: center; justify-content: space-between; }
-    .stat-icon { width: 33px; height: 33px; border-radius: 9px; display: flex; align-items: center; justify-content: center; }
+    .stat-icon {
+      width: 33px; height: 33px; border-radius: 9px;
+      display: flex; align-items: center; justify-content: center;
+    }
     .stat-icon i { width: 15px; height: 15px; }
-    .si-blue   { background: rgba(0,87,255,.13);     color: var(--blue-soft); }
-    .si-green  { background: var(--green-dim);       color: var(--green); }
-    .si-amber  { background: var(--amber-dim);       color: var(--amber); }
-    .si-purple { background: rgba(139,92,246,.12);   color: var(--purple); }
-    .si-red    { background: var(--red-dim);         color: var(--red); }
+    .si-blue   { background: rgba(0,87,255,.13); color: var(--blue-soft); }
+    .si-green  { background: var(--green-dim);   color: var(--green); }
+    .si-amber  { background: var(--amber-dim);   color: var(--amber); }
+    .si-purple { background: rgba(139,92,246,.12); color: var(--purple); }
+    .si-red    { background: var(--red-dim);     color: var(--red); }
+
+    .stat-badge {
+      font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 99px;
+    }
+    .sb-up   { background: var(--green-dim); color: var(--green); }
+    .sb-down { background: var(--red-dim);   color: var(--red); }
+    .sb-neu  { background: var(--blue-dim);  color: var(--blue-soft); }
+
     .stat-val   { font-size: 24px; font-weight: 800; color: var(--text); letter-spacing: -0.8px; line-height: 1; }
     .stat-label { font-size: 11px; color: var(--text-m); font-weight: 500; }
 
-    /* PROGRESS */
-    .progress-bar  { height: 6px; background: var(--border); border-radius: 99px; overflow: hidden; margin-top: 8px; }
-    .progress-fill { height: 100%; border-radius: 99px; background: linear-gradient(90deg,var(--blue),var(--purple)); transition: width 0.5s ease; }
+    /* ═══════════════════════════════════════════
+       TABLES
+    ═══════════════════════════════════════════ */
+    .tbl-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    thead th {
+      padding: 10px 18px;
+      text-align: left;
+      font-size: 10px; font-weight: 700; letter-spacing: 0.7px; text-transform: uppercase;
+      color: var(--text-m);
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+    tbody tr {
+      border-bottom: 1px solid rgba(128,128,200,0.06);
+      cursor: pointer;
+      transition: background 0.14s;
+    }
+    tbody tr:hover { background: var(--blue-dim); }
+    tbody tr.sel   { background: rgba(0,87,255,0.08); border-left: 3px solid var(--blue); }
+    tbody td { padding: 11px 18px; font-size: 12.5px; color: var(--text-s); white-space: nowrap; }
+    .ln  { font-weight: 700; color: var(--text); }
+    .lsm { font-size: 10.5px; color: var(--text-m); margin-top: 1px; }
 
-    /* STATUS BANNER */
-    .status-banner { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-radius: 14px; margin-bottom: 22px; border: 1px solid; gap: 16px; flex-wrap: wrap; }
-    .sb-live  { background: var(--green-dim);           border-color: rgba(16,185,129,0.25); }
-    .sb-setup { background: var(--amber-dim);           border-color: rgba(245,158,11,0.25); }
-    .sb-paused{ background: rgba(139,92,246,.10);       border-color: rgba(139,92,246,.25); }
-    .sb-needs { background: var(--red-dim);             border-color: rgba(239,68,68,.25); }
-    .sb-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-    .sb-dot.live   { background: var(--green);  animation: pulse-g 2s infinite; }
-    .sb-dot.setup  { background: var(--amber);  animation: pulse-a 2s infinite; }
-    .sb-dot.paused { background: var(--purple); }
-    .sb-dot.needs  { background: var(--red);    animation: pulse-r 2s infinite; }
-    .sb-label { font-size: 14px; font-weight: 700; }
-    .sb-sub   { font-size: 11.5px; opacity: 0.82; margin-top: 2px; }
+    /* ═══════════════════════════════════════════
+       BADGES
+    ═══════════════════════════════════════════ */
+    .badge {
+      display: inline-flex; align-items: center;
+      padding: 3px 9px; border-radius: 99px;
+      font-size: 10.5px; font-weight: 600; white-space: nowrap;
+    }
+    .b-new    { background: rgba(128,128,200,.09); color: var(--text-m); border: 1px solid rgba(128,128,200,.14); }
+    .b-ai     { background: rgba(0,87,255,.12);    color: var(--blue-soft); border: 1px solid rgba(0,87,255,.2); }
+    .b-qual   { background: var(--amber-dim);      color: var(--amber);    border: 1px solid rgba(245,158,11,.2); }
+    .b-booked { background: rgba(139,92,246,.12);  color: var(--purple);   border: 1px solid rgba(139,92,246,.22); }
+    .b-closed { background: var(--green-dim);      color: var(--green);    border: 1px solid rgba(16,185,129,.2); }
+    .b-lost   { background: var(--red-dim);        color: var(--red);      border: 1px solid rgba(239,68,68,.2); }
 
-    /* CHECKLIST / FEED */
-    .check-item { display: flex; align-items: center; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--border); }
-    .check-item:last-child { border-bottom: none; }
-    .check-icon { width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-    .check-icon i { width: 11px; height: 11px; }
-    .ci-done { background: var(--green-dim);  color: var(--green); }
-    .ci-pend { background: var(--amber-dim);  color: var(--amber); }
-    .ci-none { background: var(--border);     color: var(--text-m); }
-    .ci-opt  { background: var(--blue-dim);   color: var(--blue-soft); }
-    .check-name { font-size: 12.5px; font-weight: 600; color: var(--text-s); }
-    .check-sub  { font-size: 10.5px; color: var(--text-m); margin-top: 1px; }
-    .feed-item { display: flex; align-items: flex-start; gap: 10px; padding: 11px 20px; border-bottom: 1px solid var(--border); }
-    .feed-item:last-child { border-bottom: none; }
-    .feed-dot  { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
-    .feed-ev   { font-size: 12px; font-weight: 600; color: var(--text-s); }
-    .feed-sub  { font-size: 11px; color: var(--text-m); margin-top: 1px; }
-    .feed-time { font-size: 10px; color: var(--text-m); margin-top: 2px; }
+    /* ═══════════════════════════════════════════
+       LEAD DETAIL PANEL
+    ═══════════════════════════════════════════ */
+    .detail-row { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 9px; }
+    .dk  { font-size: 11px; font-weight: 500; color: var(--text-m); }
+    .dv  { font-size: 12px; font-weight: 600; color: var(--text-s); text-align: right; max-width: 160px; }
+    .detail-sec { padding: 14px 20px; border-bottom: 1px solid var(--border); }
+    .score-bar  { height: 4px; background: var(--border); border-radius: 99px; margin-top: 6px; overflow: hidden; }
+    .score-fill { height: 100%; border-radius: 99px; background: linear-gradient(90deg, var(--blue), var(--purple)); transition: width .5s ease; }
 
-    /* CONNECTION CARDS */
-    .conn-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(260px,1fr)); gap: 16px; }
-    .conn-card { padding: 22px; display: flex; flex-direction: column; gap: 14px; transition: box-shadow 0.2s, border-color 0.2s; }
-    .conn-title { font-size: 14px; font-weight: 700; color: var(--text); }
-    .conn-desc  { font-size: 12px; color: var(--text-m); line-height: 1.55; }
-    .conn-footer { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 2px; }
-    .btn-connect { display: inline-flex; align-items: center; gap: 5px; padding: 7px 14px; border: none; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit; transition: all 0.18s; }
-    .btn-connect i { width: 12px; height: 12px; }
-    .bcp  { background: var(--blue); color: #fff; box-shadow: 0 3px 10px rgba(0,87,255,0.3); }
-    .bcp:hover { background: var(--blue-b); transform: translateY(-1px); }
-    .bco  { background: transparent; color: var(--text-s); border: 1px solid var(--blue-border); }
-    .bco:hover { background: var(--blue-dim); }
-    .bcg  { background: var(--green-dim); color: var(--green); border: 1px solid rgba(16,185,129,0.2); }
+    /* ═══════════════════════════════════════════
+       TIMELINE
+    ═══════════════════════════════════════════ */
+    .timeline { padding: 14px 20px; display: flex; flex-direction: column; }
+    .tl-item  { display: flex; gap: 11px; padding-bottom: 16px; position: relative; }
+    .tl-item:last-child { padding-bottom: 0; }
+    .tl-item:not(:last-child)::before {
+      content: ''; position: absolute; left: 13px; top: 28px;
+      width: 1px; height: calc(100% - 14px);
+      background: var(--blue-border);
+    }
+    .tl-dot {
+      width: 27px; height: 27px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .tl-dot i { width: 11px; height: 11px; }
+    .td-blue   { background: rgba(0,87,255,.15); color: var(--blue-soft); }
+    .td-amber  { background: var(--amber-dim);   color: var(--amber); }
+    .td-green  { background: var(--green-dim);   color: var(--green); }
+    .td-purple { background: rgba(139,92,246,.15); color: var(--purple); }
+    .td-red    { background: var(--red-dim);     color: var(--red); }
+    .td-muted  { background: var(--border);      color: var(--text-m); }
+    .tl-body   { flex: 1; min-width: 0; }
+    .tl-ev   { font-size: 12px; font-weight: 600; color: var(--text-s); }
+    .tl-desc { font-size: 11px; color: var(--text-m); margin-top: 1px; line-height: 1.4; }
+    .tl-time { font-size: 10px; color: var(--text-m); margin-top: 3px; }
 
-    /* ACTION CARDS */
-    .action-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); gap: 16px; }
-    .action-card { padding: 24px 22px; display: flex; flex-direction: column; gap: 14px; transition: all 0.2s; cursor: default; }
-    .action-card-icon { width: 48px; height: 48px; border-radius: 14px; display: flex; align-items: center; justify-content: center; }
-    .action-card-icon i { width: 22px; height: 22px; }
-    .action-card-title { font-size: 15px; font-weight: 800; color: var(--text); letter-spacing: -0.3px; }
-    .action-card-desc  { font-size: 12px; color: var(--text-m); line-height: 1.55; flex: 1; }
-    .acbtn { display: inline-flex; align-items: center; gap: 6px; padding: 9px 18px; border: none; border-radius: 9px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit; transition: all 0.18s; align-self: flex-start; }
-    .acbtn i { width: 14px; height: 14px; }
-    .acbtn-green  { background: var(--green);  color: #fff; box-shadow: 0 4px 14px rgba(16,185,129,0.35); }
-    .acbtn-green:hover  { filter: brightness(1.1); transform: translateY(-1px); }
-    .acbtn-amber  { background: var(--amber);  color: #fff; box-shadow: 0 4px 14px rgba(245,158,11,0.35); }
-    .acbtn-amber:hover  { filter: brightness(1.1); transform: translateY(-1px); }
-    .acbtn-blue   { background: var(--blue);   color: #fff; box-shadow: 0 4px 14px rgba(0,87,255,0.35); }
-    .acbtn-blue:hover   { background: var(--blue-b); transform: translateY(-1px); }
-    .acbtn-purple { background: var(--purple); color: #fff; box-shadow: 0 4px 14px rgba(139,92,246,0.35); }
-    .acbtn-purple:hover { filter: brightness(1.1); transform: translateY(-1px); }
+    /* ═══════════════════════════════════════════
+       KANBAN
+    ═══════════════════════════════════════════ */
+    .kanban {
+      padding: 16px 20px;
+      display: flex; gap: 12px;
+      overflow-x: auto;
+    }
+    .kb-col { flex-shrink: 0; width: 192px; display: flex; flex-direction: column; gap: 8px; }
+    .kb-head {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 4px 8px;
+      border-bottom: 2px solid var(--blue-border);
+      font-size: 10px; font-weight: 700; letter-spacing: 0.7px; text-transform: uppercase;
+      color: var(--text-m);
+    }
+    .kb-count {
+      font-size: 10px; font-weight: 700;
+      background: var(--blue-dim); color: var(--blue-soft);
+      border-radius: 99px; padding: 1px 7px;
+    }
+    .kb-card {
+      background: var(--bg-card);
+      border: 1px solid var(--blue-border);
+      border-radius: 10px;
+      padding: 11px 13px;
+      cursor: pointer;
+      transition: all 0.18s;
+    }
+    .kb-card:hover {
+      border-color: rgba(60,130,255,.35);
+      box-shadow: 0 4px 18px var(--blue-glow);
+      transform: translateY(-1px);
+    }
+    .kc-name { font-size: 12px; font-weight: 700; color: var(--text); }
+    .kc-type { font-size: 10.5px; color: var(--text-m); margin-top: 2px; }
+    .kc-val  { font-size: 11px; font-weight: 700; color: var(--blue-soft); margin-top: 7px; }
 
-    /* STATUS HEALTH */
-    .status-grid { display: flex; flex-direction: column; }
-    .status-row { display: flex; align-items: center; justify-content: space-between; padding: 13px 20px; border-bottom: 1px solid var(--border); }
-    .status-row:last-child { border-bottom: none; }
-    .status-row-left { display: flex; align-items: center; gap: 10px; }
-    .status-row-icon { width: 30px; height: 30px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-    .status-row-icon i { width: 13px; height: 13px; }
-    .status-row-name { font-size: 12.5px; font-weight: 600; color: var(--text-s); }
-    .status-row-sub  { font-size: 10.5px; color: var(--text-m); margin-top: 1px; }
+    /* ═══════════════════════════════════════════
+       CHARTS
+    ═══════════════════════════════════════════ */
+    .chart-wrap { position: relative; height: 200px; }
 
-    /* SETTINGS */
+    /* ═══════════════════════════════════════════
+       CHANNEL / SOURCE DOTS & BADGES
+    ═══════════════════════════════════════════ */
+    .src-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; margin-right: 5px; vertical-align: middle; }
+    .ch-sms   { background: var(--green-dim);            color: var(--green);    border: 1px solid rgba(16,185,129,.2); }
+    .ch-email { background: rgba(0,87,255,.1);           color: var(--blue-soft); border: 1px solid rgba(0,87,255,.2); }
+    .ch-igdm  { background: rgba(139,92,246,.1);         color: var(--purple);   border: 1px solid rgba(139,92,246,.2); }
+
+    /* ═══════════════════════════════════════════
+       SETTINGS
+    ═══════════════════════════════════════════ */
     .settings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    @media (max-width: 900px) { .settings-grid { grid-template-columns: 1fr; } }
     .settings-sec { padding: 20px; }
-    .settings-title { font-size: 12px; font-weight: 700; color: var(--text); margin-bottom: 16px; display: flex; align-items: center; gap: 7px; }
+    .settings-title { font-size: 12px; font-weight: 700; color: var(--text); letter-spacing: -0.2px; margin-bottom: 16px; display: flex; align-items: center; gap: 7px; }
     .settings-title i { width: 14px; height: 14px; color: var(--blue-soft); }
     .field { margin-bottom: 14px; }
     .field label { display: block; font-size: 11px; font-weight: 600; color: var(--text-m); margin-bottom: 5px; }
-    .field input,.field select,.field textarea { width: 100%; padding: 8px 12px; background: var(--input-bg); border: 1px solid var(--input-border); border-radius: 8px; color: var(--text); font-size: 12.5px; font-family: inherit; outline: none; transition: border-color 0.15s; resize: vertical; }
-    .field input:focus,.field select:focus,.field textarea:focus { border-color: var(--blue); }
+    .field input, .field select {
+      width: 100%; padding: 8px 12px;
+      background: var(--input-bg); border: 1px solid var(--input-border);
+      border-radius: 8px; color: var(--text); font-size: 12.5px; font-family: inherit;
+      outline: none; transition: border-color 0.15s;
+    }
+    .field input:focus, .field select:focus { border-color: var(--blue); }
     .field select option { background: #0a1232; color: #e2e8f0; }
     [data-theme="light"] .field select option { background: #fff; color: #0f172a; }
     .toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); }
     .toggle-row:last-child { border-bottom: none; }
     .toggle-label { font-size: 12.5px; color: var(--text-s); font-weight: 500; }
     .toggle-sub   { font-size: 10.5px; color: var(--text-m); margin-top: 1px; }
-    .toggle { position: relative; width: 36px; height: 20px; background: var(--border); border-radius: 99px; cursor: pointer; transition: background 0.2s; flex-shrink: 0; }
+    .toggle {
+      position: relative; width: 36px; height: 20px;
+      background: var(--border); border-radius: 99px; cursor: pointer;
+      transition: background 0.2s; flex-shrink: 0;
+    }
     .toggle.on { background: var(--blue); }
-    .toggle::after { content:''; position: absolute; width: 14px; height: 14px; border-radius: 50%; background: #fff; top: 3px; left: 3px; transition: left 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
+    .toggle::after {
+      content: ''; position: absolute;
+      width: 14px; height: 14px; border-radius: 50%; background: #fff;
+      top: 3px; left: 3px; transition: left 0.2s;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    }
     .toggle.on::after { left: 19px; }
 
-    /* SUPPORT CARDS */
-    .support-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(240px,1fr)); gap: 16px; }
-    .support-card { padding: 24px 22px; display: flex; flex-direction: column; gap: 12px; cursor: pointer; transition: all 0.2s; }
-    .support-card:hover { transform: translateY(-2px); box-shadow: 0 0 28px var(--blue-glow), var(--card-shadow); border-color: rgba(60,130,255,0.35); }
-    .support-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; }
-    .support-icon i { width: 20px; height: 20px; }
-    .support-title { font-size: 14px; font-weight: 700; color: var(--text); }
-    .support-desc  { font-size: 12px; color: var(--text-m); line-height: 1.55; flex: 1; }
-    .support-btn { display: inline-flex; align-items: center; gap: 5px; padding: 7px 14px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit; transition: all 0.18s; align-self: flex-start; border: none; }
-    .support-btn i { width: 12px; height: 12px; }
+    /* ═══════════════════════════════════════════
+       SYNC HEALTH
+    ═══════════════════════════════════════════ */
+    .sync-grid  { display: grid; grid-template-columns: repeat(2,1fr); gap: 0; }
+    .sync-item  { padding: 16px 20px; border-bottom: 1px solid var(--border); border-right: 1px solid var(--border); }
+    .sync-item:nth-child(2n) { border-right: none; }
+    .sync-item:nth-last-child(-n+2) { border-bottom: none; }
+    .si-label { font-size: 10.5px; color: var(--text-m); font-weight: 500; }
+    .si-val   { font-size: 20px; font-weight: 800; color: var(--text); letter-spacing: -0.6px; margin-top: 4px; }
 
-    /* MODAL */
-    .modal-overlay { position: fixed; inset: 0; z-index: 200; background: rgba(4,9,21,0.72); backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; padding: 16px; }
-    .modal-overlay.open { display: flex; }
-    [data-theme="light"] .modal-overlay { background: rgba(15,23,42,0.52); }
-    .modal { background: var(--sidebar-bg); border: 1px solid var(--blue-border); border-radius: 16px; box-shadow: 0 24px 64px rgba(0,0,0,0.4); width: 100%; max-width: 480px; overflow: hidden; animation: modal-in 0.2s ease; }
-    .modal-head { display: flex; align-items: flex-start; justify-content: space-between; padding: 20px 22px 16px; border-bottom: 1px solid var(--border); gap: 12px; }
-    .modal-title { font-size: 15px; font-weight: 800; color: var(--text); letter-spacing: -0.3px; }
-    .modal-sub   { font-size: 11.5px; color: var(--text-m); margin-top: 3px; }
-    .modal-close { width: 28px; height: 28px; border-radius: 7px; background: var(--blue-dim); border: none; cursor: pointer; color: var(--text-m); display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: background 0.15s; }
-    .modal-close:hover { background: var(--blue-border); color: var(--text); }
-    .modal-close i { width: 14px; height: 14px; }
-    .modal-body { padding: 20px 22px; }
-    .modal-body p { font-size: 13px; color: var(--text-s); line-height: 1.65; }
-    .modal-body .field { margin-bottom: 12px; }
-    .modal-body .field:last-child { margin-bottom: 0; }
-    .modal-body textarea { min-height: 90px; }
-    .modal-footer { padding: 14px 22px 20px; display: flex; gap: 10px; justify-content: flex-end; }
-    .btn-mcancel  { padding: 8px 18px; background: transparent; border: 1px solid var(--blue-border); border-radius: 8px; color: var(--text-s); font-size: 12.5px; font-weight: 600; cursor: pointer; font-family: inherit; transition: all 0.15s; }
-    .btn-mcancel:hover { background: var(--blue-dim); }
-    .btn-mconfirm { padding: 8px 18px; border: none; border-radius: 8px; font-size: 12.5px; font-weight: 700; cursor: pointer; font-family: inherit; transition: all 0.15s; }
-    .btn-mconfirm.green  { background: var(--green);  color: #fff; box-shadow: 0 3px 10px rgba(16,185,129,0.35); }
-    .btn-mconfirm.amber  { background: var(--amber);  color: #fff; }
-    .btn-mconfirm.blue   { background: var(--blue);   color: #fff; box-shadow: 0 3px 10px rgba(0,87,255,0.35); }
-    .sync-check-item { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border); }
-    .sync-check-item:last-child { border-bottom: none; }
-    .sync-check-left { display: flex; align-items: center; gap: 10px; }
-    .sync-check-icon { width: 32px; height: 32px; border-radius: 9px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-    .sync-check-icon i { width: 14px; height: 14px; }
-    .sync-check-name { font-size: 13px; font-weight: 600; color: var(--text-s); }
-    .sync-check-sub  { font-size: 10.5px; color: var(--text-m); margin-top: 1px; }
+    /* ═══════════════════════════════════════════
+       ATTENTION CARD (OVERVIEW)
+    ═══════════════════════════════════════════ */
+    .attn-item {
+      display: flex; align-items: flex-start; gap: 10px;
+      padding: 12px 20px; border-bottom: 1px solid var(--border);
+    }
+    .attn-item:last-child { border-bottom: none; }
+    .attn-icon { width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+    .attn-icon i { width: 12px; height: 12px; }
+    .attn-body .attn-title { font-size: 12.5px; font-weight: 600; color: var(--text); }
+    .attn-body .attn-sub   { font-size: 11px; color: var(--text-m); margin-top: 2px; }
 
-    /* DEMO BANNER */
-    .demo-banner { position: fixed; bottom: 0; left: var(--sidebar-w); right: 0; padding: 10px 28px; background: var(--topbar-bg); backdrop-filter: blur(14px); border-top: 1px solid var(--blue-border); display: flex; align-items: center; justify-content: space-between; z-index: 100; gap: 12px; }
+    /* ═══════════════════════════════════════════
+       ACTIVITY FEED (OVERVIEW)
+    ═══════════════════════════════════════════ */
+    .feed-item {
+      display: flex; align-items: flex-start; gap: 10px;
+      padding: 11px 20px; border-bottom: 1px solid var(--border);
+    }
+    .feed-item:last-child { border-bottom: none; }
+    .feed-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
+    .feed-ev  { font-size: 12px; font-weight: 600; color: var(--text-s); }
+    .feed-sub { font-size: 11px; color: var(--text-m); margin-top: 1px; }
+    .feed-time{ font-size: 10px; color: var(--text-m); margin-top: 2px; }
+
+    /* ═══════════════════════════════════════════
+       API BAR
+    ═══════════════════════════════════════════ */
+    .api-bar {
+      margin: 0 20px 16px;
+      padding: 11px 14px;
+      background: var(--green-dim);
+      border: 1px solid rgba(16,185,129,0.2);
+      border-radius: 9px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    [data-theme="light"] .api-bar { border-color: rgba(5,150,105,.2); }
+
+    /* ═══════════════════════════════════════════
+       DEMO BANNER
+    ═══════════════════════════════════════════ */
+    .demo-banner {
+      position: fixed; bottom: 0; left: var(--sidebar-w); right: 0;
+      padding: 10px 28px;
+      background: var(--topbar-bg);
+      backdrop-filter: blur(14px);
+      border-top: 1px solid var(--blue-border);
+      display: flex; align-items: center; justify-content: space-between;
+      z-index: 100;
+      transition: background 0.3s, border-color 0.3s;
+    }
     .banner-text { font-size: 12px; color: var(--text-m); }
     .banner-text strong { color: var(--blue-soft); font-weight: 700; }
-    .btn-back { display: flex; align-items: center; gap: 6px; padding: 7px 16px; background: linear-gradient(135deg,var(--blue),var(--purple)); border: none; border-radius: 8px; color: #fff; font-size: 12px; font-weight: 700; cursor: pointer; font-family: inherit; text-decoration: none; box-shadow: 0 4px 16px rgba(0,87,255,0.38); transition: all 0.18s; white-space: nowrap; }
-    .btn-back:hover { transform: translateY(-1px); }
+    .btn-back {
+      display: flex; align-items: center; gap: 6px;
+      padding: 7px 16px;
+      background: linear-gradient(135deg, var(--blue), var(--purple));
+      border: none; border-radius: 8px; color: #fff;
+      font-size: 12px; font-weight: 700; cursor: pointer;
+      font-family: inherit; text-decoration: none;
+      box-shadow: 0 4px 16px rgba(0,87,255,0.38);
+      transition: all 0.18s;
+    }
+    .btn-back:hover { transform: translateY(-1px); box-shadow: 0 6px 22px rgba(0,87,255,0.5); }
 
-    /* GRIDS */
+    /* ═══════════════════════════════════════════
+       GRIDS
+    ═══════════════════════════════════════════ */
     .g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .g3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
+    .leads-grid   { display: grid; grid-template-columns: 1fr 320px; gap: 20px; }
     .overview-bot { display: grid; grid-template-columns: 1fr 340px; gap: 20px; margin-top: 20px; }
+    @media (max-width: 1100px) { .leads-grid, .overview-bot { grid-template-columns: 1fr; } .g2, .g3 { grid-template-columns: 1fr; } }
 
-    /* TOAST */
-    #toast { position: fixed; bottom: 80px; right: 24px; z-index: 300; background: var(--sidebar-bg); border: 1px solid rgba(16,185,129,0.3); border-radius: 12px; padding: 14px 18px; box-shadow: 0 8px 30px rgba(0,0,0,0.3); display: none; align-items: center; gap: 10px; max-width: 340px; animation: toast-in 0.2s ease; }
-    .toast-icon { width: 28px; height: 28px; border-radius: 50%; background: var(--green-dim); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-    .toast-icon i { width: 13px; height: 13px; color: var(--green); }
+    /* ═══════════════════════════════════════════
+       MOBILE NAV OVERLAY & BOTTOM TAB BAR
+    ═══════════════════════════════════════════ */
+    #mob-overlay {
+      display: none;
+      position: fixed; inset: 0; z-index: 45;
+      background: rgba(0,0,0,0.45);
+      backdrop-filter: blur(2px);
+      -webkit-backdrop-filter: blur(2px);
+    }
+    #mob-overlay.open { display: block; }
 
-    /* UTILITY */
+    .mob-ham {
+      display: none;
+      width: 36px; height: 36px; border-radius: 9px;
+      background: var(--blue-dim); border: 1px solid var(--blue-border);
+      color: var(--text-s); cursor: pointer;
+      align-items: center; justify-content: center;
+      transition: background 0.18s;
+      flex-shrink: 0; margin-right: 12px;
+    }
+    .mob-ham i { width: 16px; height: 16px; }
+    .mob-ham:hover { background: var(--blue-border); }
+
+    /* Bottom tab bar */
+    .mob-tabs {
+      display: none;
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 60;
+      background: var(--sidebar-bg);
+      border-top: 1px solid var(--blue-border);
+      padding: 6px 0 env(safe-area-inset-bottom, 6px);
+      justify-content: space-around;
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+    }
+    .mob-tab {
+      display: flex; flex-direction: column; align-items: center; gap: 3px;
+      padding: 6px 10px; border-radius: 10px; cursor: pointer;
+      color: var(--text-m); font-size: 9.5px; font-weight: 600;
+      letter-spacing: 0.02em; transition: color 0.16s, background 0.16s;
+      min-width: 52px;
+    }
+    .mob-tab i { width: 18px; height: 18px; }
+    .mob-tab.active { color: var(--blue-soft); }
+    .mob-tab.active i { filter: drop-shadow(0 0 4px rgba(0,87,255,0.5)); }
+
+    @media (max-width: 768px) {
+      :root { --sidebar-w: 0px; }
+
+      /* Sidebar: off-screen drawer */
+      .sidebar {
+        left: -260px;
+        width: 260px;
+        transition: left 0.28s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.28s;
+        z-index: 55;
+        box-shadow: none;
+      }
+      .sidebar.mob-open {
+        left: 0;
+        box-shadow: 4px 0 40px rgba(0,0,0,0.35);
+      }
+
+      /* Main: full width */
+      .main { margin-left: 0; }
+
+      /* Topbar: show hamburger */
+      .mob-ham { display: flex; }
+      .topbar { padding: 0 16px; height: 58px; }
+      .topbar-title { font-size: 14px; }
+      .topbar-sub   { display: none; }
+      .range-sel    { display: none; }
+      .btn-sync span { display: none; }
+      .topbar-right a[href*="dashboard"] span { display: none; }
+      .btn-sync { padding: 7px 10px; min-width: unset; }
+
+      /* Pages: less padding, add bottom clearance for tab bar */
+      .page { padding: 18px 16px 100px; }
+
+      /* Bottom tab bar: visible */
+      .mob-tabs { display: flex; }
+
+      /* Demo banner: above tab bar */
+      .demo-banner { left: 0; padding: 8px 16px; bottom: 60px; }
+      .banner-text { font-size: 11px; }
+      .banner-text strong { font-size: 11px; }
+
+      /* Stats grid: 2 columns on small screens */
+      .stats-grid { grid-template-columns: 1fr 1fr !important; gap: 10px; }
+      .stat-val { font-size: 20px; }
+
+      /* Kanban: scrollable, smaller columns */
+      .kb-col { width: 168px; }
+
+      /* Settings grid already handles 1-col via existing @media 900px */
+
+      /* Section headers: smaller */
+      .page-head { flex-direction: column; align-items: flex-start; gap: 10px; }
+      .page-head > * { width: 100%; }
+    }
+
+    @media (max-width: 480px) {
+      .topbar { height: 54px; }
+      .page { padding: 14px 12px 100px; }
+      .stats-grid { grid-template-columns: 1fr 1fr !important; gap: 8px; }
+      .stat-card { padding: 14px 14px; }
+      .stat-val { font-size: 18px; }
+      .demo-banner { bottom: 58px; }
+      .mob-tab { min-width: 44px; padding: 6px 6px; font-size: 9px; }
+    }
+
+    /* ═══════════════════════════════════════════
+       UTILITY
+    ═══════════════════════════════════════════ */
     .mb20 { margin-bottom: 20px; }
+    .mb14 { margin-bottom: 14px; }
     .p20  { padding: 20px; }
     .text-green  { color: var(--green); }
     .text-amber  { color: var(--amber); }
     .text-red    { color: var(--red); }
     .text-blue   { color: var(--blue-soft); }
-    .text-purple { color: var(--purple); }
     .text-muted  { color: var(--text-m); }
-    .fw7  { font-weight: 700; }
+    .fw7 { font-weight: 700; }
     .fs11 { font-size: 11px; }
     .fs12 { font-size: 12px; }
 
-    /* MOBILE */
-    @media (max-width: 768px) {
-      :root { --sidebar-w: 0px; }
-      .sidebar { transform: translateX(-100%); width: 244px; }
-      .sidebar.open { transform: translateX(0); }
-      .main { margin-left: 0; }
-      .demo-banner { left: 0; }
-      .mobile-menu-btn { display: flex; }
-      .topbar-right .btn-sync span { display: none; }
-      .topbar-right a[href*="dashboard"] span { display: none; }
-      .page { padding: 20px 16px 90px; }
-      .topbar { padding: 0 16px; }
-      .conn-grid,.action-grid,.support-grid { grid-template-columns: 1fr; }
-      .settings-grid { grid-template-columns: 1fr; }
-      .overview-bot,.g2 { grid-template-columns: 1fr; }
-      .stats-grid { grid-template-columns: 1fr 1fr; }
-      .banner-text { font-size: 11px; }
-    }
-    .sidebar-overlay { display: none; position: fixed; inset: 0; z-index: 49; background: rgba(0,0,0,0.5); }
-    .sidebar-overlay.open { display: block; }
+    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    .spinning { animation: spin 1s linear infinite; }
   </style>
 </head>
 <body>
+
 <div class="layout">
 
-<!-- ═══════════ SIDEBAR ═══════════ -->
-<aside class="sidebar" id="sidebar">
-  <div class="sidebar-logo">
-    <img src="../brand_assets/logo-transparent.png" alt="Flowaify" onerror="this.style.display='none'" />
-    <div>
-      <div class="sidebar-logo-name">flowaify</div>
-      <div class="sidebar-logo-tag">Client Portal</div>
-    </div>
-  </div>
+  <!-- Mobile overlay (tap to close sidebar) -->
+  <div id="mob-overlay" onclick="closeMobSidebar()"></div>
 
-  <div class="sidebar-label">My Dashboard</div>
-  <div class="nav-item active" data-page="overview"><i data-lucide="layout-dashboard"></i> Dashboard</div>
-  <div class="nav-item" data-page="connections"><i data-lucide="plug"></i> Connections</div>
-  <div class="nav-item" data-page="automation"><i data-lucide="zap"></i> Automation Control</div>
-  <div class="nav-item" data-page="settings"><i data-lucide="building-2"></i> Business Settings</div>
-  <div class="nav-item" data-page="status"><i data-lucide="activity"></i> System Status</div>
-  <div class="nav-item" data-page="support"><i data-lucide="life-buoy"></i> Support</div>
+  <!-- ════════════════════════════════
+       SIDEBAR
+  ════════════════════════════════ -->
+  <aside class="sidebar">
 
-  <div class="sidebar-bottom">
-    <div class="client-pill">
-      <div class="client-pulse"></div>
+    <div class="sidebar-logo">
+      <img src="../logo-transparent.png" alt="Flowaify"
+           onerror="this.style.display='none'" />
       <div>
-        <div class="client-name">Acme Business</div>
-        <div class="client-plan">Growth Plan · Active</div>
-      </div>
-    </div>
-  </div>
-</aside>
-<div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
-
-<!-- ═══════════ MAIN ═══════════ -->
-<main class="main">
-
-  <!-- Topbar -->
-  <header class="topbar">
-    <div style="display:flex;align-items:center;gap:10px;min-width:0;">
-      <button class="mobile-menu-btn" onclick="toggleSidebar()"><i data-lucide="menu"></i></button>
-      <div class="topbar-left">
-        <div class="topbar-title" id="topbar-title">Dashboard</div>
-        <div class="topbar-sub" id="topbar-sub"></div>
-      </div>
-    </div>
-    <div class="topbar-right">
-      <button class="btn-sync" onclick="openModal('modal-sync')">
-        <i data-lucide="plug"></i>
-        <span>Connect &amp; Sync Accounts</span>
-      </button>
-      <a href="../brand_assets/dashboard/demo.html" style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;background:var(--blue-dim);border:1px solid var(--blue-border);border-radius:8px;font-size:12px;font-weight:600;color:var(--text-s);text-decoration:none;transition:all 0.18s;white-space:nowrap;flex-shrink:0;" onmouseover="this.style.background='var(--blue-border)'" onmouseout="this.style.background='var(--blue-dim)'">
-        <i data-lucide="bar-chart-2" style="width:13px;height:13px;"></i>
-        <span>Dashboard</span>
-      </a>
-      <button class="btn-theme" onclick="toggleTheme()" title="Toggle theme">
-        <i data-lucide="moon" id="theme-icon"></i>
-      </button>
-      <div class="avatar" title="Acme Business">AB</div>
-    </div>
-  </header>
-
-  <!-- ═════════════════════════════
-       PAGE: OVERVIEW
-  ═════════════════════════════ -->
-  <div class="page active" id="page-overview">
-    <div class="page-head">
-      <div>
-        <div class="page-head-title">Dashboard Overview</div>
-        <div class="page-head-sub">Your Flowaify system at a glance</div>
+        <div class="sidebar-logo-name">flowaify</div>
+        <div class="sidebar-logo-tag">Automation Dashboard</div>
       </div>
     </div>
 
-    <!-- System Status Banner -->
-    <div id="ov-status-banner" class="status-banner sb-setup">
-      <div style="display:flex;align-items:center;gap:12px;">
-        <div class="sb-dot setup" id="ov-status-dot"></div>
+    <div class="sidebar-label">Main</div>
+
+    <div class="nav-item active" data-page="overview">
+      <i data-lucide="layout-dashboard"></i> Overview
+    </div>
+    <div class="nav-item" data-page="leads">
+      <i data-lucide="users"></i> Leads
+    </div>
+    <div class="nav-item" data-page="pipeline">
+      <i data-lucide="kanban"></i> Pipeline
+    </div>
+
+    <div class="sidebar-label">Automation</div>
+
+    <div class="nav-item" data-page="ai">
+      <i data-lucide="bot"></i> AI Responses
+    </div>
+    <div class="nav-item" data-page="followups">
+      <i data-lucide="repeat-2"></i> Follow-Ups
+    </div>
+    <div class="nav-item" data-page="hubspot">
+      <i data-lucide="refresh-cw"></i> HubSpot Sync
+    </div>
+
+    <div class="sidebar-label">Account</div>
+
+    <div class="nav-item" data-page="settings">
+      <i data-lucide="settings-2"></i> Settings
+    </div>
+
+    <div class="sidebar-bottom">
+      <div class="hs-pill">
+        <div class="pulse"></div>
         <div>
-          <div class="sb-label text-amber" id="ov-status-label">Setup Needed</div>
-          <div class="sb-sub text-amber" id="ov-status-desc">Connect your remaining accounts to go live</div>
-        </div>
-      </div>
-      <button class="btn-connect bcp" onclick="showPage('connections')" style="white-space:nowrap;">
-        Complete Setup <i data-lucide="arrow-right" style="width:12px;height:12px;margin-left:4px;"></i>
-      </button>
-    </div>
-
-    <!-- Setup Progress -->
-    <div class="card mb20">
-      <div class="sec-head">
-        <div class="sec-title"><i data-lucide="check-circle-2"></i>Setup Progress</div>
-        <div class="sec-sub" id="setup-progress-label">2 of 3 required steps complete</div>
-      </div>
-      <div class="p20" style="padding-top:14px;">
-        <div class="progress-bar" style="height:8px;margin-top:0;margin-bottom:16px;">
-          <div class="progress-fill" id="setup-progress-bar" style="width:66%"></div>
-        </div>
-        <div style="padding:0;">
-          <div class="check-item">
-            <div class="check-icon ci-done"><i data-lucide="check"></i></div>
-            <div><div class="check-name">Email Connection</div><div class="check-sub">Google Workspace — connected and sending</div></div>
-            <div class="badge b-connected" style="margin-left:auto;flex-shrink:0;">Connected</div>
-          </div>
-          <div class="check-item">
-            <div class="check-icon ci-none" id="crm-check-icon"><i data-lucide="x"></i></div>
-            <div style="flex:1;"><div class="check-name">CRM Connection</div><div class="check-sub">Zoho CRM — not connected</div></div>
-            <div class="badge b-notconn" id="crm-check-badge" style="margin-left:auto;flex-shrink:0;">Not Connected</div>
-          </div>
-          <div class="check-item">
-            <div class="check-icon ci-opt"><i data-lucide="minus"></i></div>
-            <div style="flex:1;"><div class="check-name">SMS Connection</div><div class="check-sub">Twilio — optional, not connected</div></div>
-            <div class="badge b-optional" id="sms-check-badge" style="margin-left:auto;flex-shrink:0;">Optional</div>
-          </div>
-          <div class="check-item">
-            <div class="check-icon ci-done"><i data-lucide="check"></i></div>
-            <div><div class="check-name">Calendar Connection</div><div class="check-sub">Google Calendar — connected</div></div>
-            <div class="badge b-connected" style="margin-left:auto;flex-shrink:0;">Connected</div>
-          </div>
+          <div class="hs-label">HubSpot Connected</div>
+          <div class="hs-sub">Synced 3 min ago</div>
         </div>
       </div>
     </div>
+  </aside>
 
-    <!-- Automation Activity Stats -->
-    <div class="stats-grid">
-      <div class="card stat-card">
-        <div class="stat-top"><div class="stat-icon si-blue"><i data-lucide="user-plus"></i></div></div>
-        <div class="stat-val">47</div><div class="stat-label">New Leads Captured</div>
-      </div>
-      <div class="card stat-card">
-        <div class="stat-top"><div class="stat-icon si-green"><i data-lucide="send"></i></div></div>
-        <div class="stat-val">124</div><div class="stat-label">Follow-Ups Sent</div>
-      </div>
-      <div class="card stat-card">
-        <div class="stat-top"><div class="stat-icon si-purple"><i data-lucide="calendar-check"></i></div></div>
-        <div class="stat-val">9</div><div class="stat-label">Appointments Booked</div>
-      </div>
-      <div class="card stat-card">
-        <div class="stat-top"><div class="stat-icon si-amber"><i data-lucide="zap"></i></div></div>
-        <div class="stat-val">0:42s</div><div class="stat-label">Avg Response Time</div>
-      </div>
-    </div>
+  <!-- ════════════════════════════════
+       MAIN
+  ════════════════════════════════ -->
+  <main class="main">
 
-    <!-- Connected Accounts + Activity feed -->
-    <div class="overview-bot">
-      <div class="card">
-        <div class="sec-head">
-          <div class="sec-title"><i data-lucide="plug"></i>Connected Accounts</div>
-          <button class="btn-connect bco" style="padding:5px 12px;font-size:11.5px;" onclick="showPage('connections')">Manage</button>
-        </div>
-        <div style="padding:0 20px;">
-          <div class="check-item">
-            <div class="check-icon ci-done"><i data-lucide="mail"></i></div>
-            <div style="flex:1;"><div class="check-name">Email</div><div class="check-sub">Google Workspace</div></div>
-            <div class="badge b-connected">Connected</div>
-          </div>
-          <div class="check-item">
-            <div class="check-icon ci-none" id="crm-ov-icon"><i data-lucide="database"></i></div>
-            <div style="flex:1;"><div class="check-name">CRM</div><div class="check-sub">Zoho CRM</div></div>
-            <div class="badge b-notconn" id="crm-ov-badge">Not Connected</div>
-          </div>
-          <div class="check-item">
-            <div class="check-icon ci-opt" id="sms-ov-icon"><i data-lucide="message-circle"></i></div>
-            <div style="flex:1;"><div class="check-name">SMS</div><div class="check-sub">Twilio</div></div>
-            <div class="badge b-optional" id="sms-ov-badge">Optional</div>
-          </div>
-          <div class="check-item">
-            <div class="check-icon ci-done"><i data-lucide="calendar"></i></div>
-            <div style="flex:1;"><div class="check-name">Calendar</div><div class="check-sub">Google Calendar</div></div>
-            <div class="badge b-connected">Connected</div>
-          </div>
+    <!-- Topbar -->
+    <header class="topbar">
+      <div style="display:flex;align-items:center;">
+        <button class="mob-ham" id="mob-ham-btn" onclick="toggleMobSidebar()" aria-label="Menu">
+          <i data-lucide="menu"></i>
+        </button>
+        <div class="topbar-left">
+          <div class="topbar-title" id="topbar-title">Overview</div>
+          <div class="topbar-sub" id="topbar-sub">Loading…</div>
         </div>
       </div>
+      <div class="topbar-right">
+        <div class="range-sel">
+          <i data-lucide="calendar" style="width:12px;height:12px;color:var(--blue-soft)"></i>
+          <select>
+            <option>Last 7 days</option>
+            <option>Last 30 days</option>
+            <option>Last 90 days</option>
+            <option>This month</option>
+          </select>
+        </div>
+        <button class="btn-sync" id="sync-btn" onclick="doSync(this)">
+          <i data-lucide="refresh-cw" id="sync-icon"></i>
+          Sync HubSpot
+        </button>
+        <a href="portal.html" style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;background:var(--blue-dim);border:1px solid var(--blue-border);border-radius:8px;font-size:12px;font-weight:600;color:var(--text-s);text-decoration:none;transition:all 0.18s;white-space:nowrap;flex-shrink:0;" onmouseover="this.style.background='var(--blue-border)'" onmouseout="this.style.background='var(--blue-dim)'">
+          <i data-lucide="layout-grid" style="width:13px;height:13px;"></i>
+          <span>Client Portal</span>
+        </a>
+        <button class="btn-theme" onclick="toggleTheme()" title="Toggle theme">
+          <i data-lucide="moon" id="theme-icon"></i>
+        </button>
+        <div class="avatar">JD</div>
+      </div>
+    </header>
 
-      <div style="display:flex;flex-direction:column;gap:16px;">
+    <!-- ══════════════════════════════════════════
+         PAGE: OVERVIEW
+    ══════════════════════════════════════════ -->
+    <div class="page active" id="page-overview">
+      <div class="page-head">
+        <div>
+          <div class="page-head-title">Command Center</div>
+          <div class="page-head-sub">Real-time view of your lead flow and automation health</div>
+        </div>
+        <div class="live-pill"><div class="live-dot"></div>Live</div>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-grid">
+        <div class="card stat-card">
+          <div class="stat-top"><div class="stat-icon si-blue"><i data-lucide="user-plus"></i></div><div class="stat-badge sb-up">+18%</div></div>
+          <div class="stat-val">14</div><div class="stat-label">New Leads Today</div>
+        </div>
+        <div class="card stat-card">
+          <div class="stat-top"><div class="stat-icon si-green"><i data-lucide="zap"></i></div><div class="stat-badge sb-up">−12%</div></div>
+          <div class="stat-val">0:38s</div><div class="stat-label">Avg Response Time</div>
+        </div>
+        <div class="card stat-card">
+          <div class="stat-top"><div class="stat-icon si-blue"><i data-lucide="bot"></i></div><div class="stat-badge sb-up">+24%</div></div>
+          <div class="stat-val">91</div><div class="stat-label">AI Replies Sent</div>
+        </div>
+        <div class="card stat-card">
+          <div class="stat-top"><div class="stat-icon si-amber"><i data-lucide="repeat-2"></i></div><div class="stat-badge sb-up">+3</div></div>
+          <div class="stat-val">47</div><div class="stat-label">Follow-Ups Running</div>
+        </div>
+        <div class="card stat-card">
+          <div class="stat-top"><div class="stat-icon si-purple"><i data-lucide="dollar-sign"></i></div><div class="stat-badge sb-up">+$22k</div></div>
+          <div class="stat-val">$218k</div><div class="stat-label">Pipeline Value</div>
+        </div>
+        <div class="card stat-card">
+          <div class="stat-top"><div class="stat-icon si-green"><i data-lucide="calendar-check"></i></div><div class="stat-badge sb-up">+5</div></div>
+          <div class="stat-val">9</div><div class="stat-label">Booked Calls</div>
+        </div>
+      </div>
+
+      <!-- Charts row -->
+      <div class="g2 mb20">
+        <div class="card p20">
+          <div class="sec-head" style="padding:0 0 14px;">
+            <div class="sec-title"><i data-lucide="pie-chart"></i>Lead Sources</div>
+            <div class="sec-sub">Last 30 days</div>
+          </div>
+          <div class="chart-wrap"><canvas id="ch-source"></canvas></div>
+        </div>
+        <div class="card p20">
+          <div class="sec-head" style="padding:0 0 14px;">
+            <div class="sec-title"><i data-lucide="trending-up"></i>Response Time Trend</div>
+            <div class="sec-sub">Avg seconds · 14 days</div>
+          </div>
+          <div class="chart-wrap"><canvas id="ch-response"></canvas></div>
+        </div>
+      </div>
+
+      <!-- Bottom: recent leads + activity -->
+      <div class="overview-bot">
+
+        <!-- Recent leads mini table -->
         <div class="card">
           <div class="sec-head">
-            <div class="sec-title"><i data-lucide="activity"></i>Recent Activity</div>
-            <div class="live-pill"><div class="live-dot"></div>Live</div>
+            <div class="sec-title"><i data-lucide="inbox"></i>Recent Leads</div>
+            <div class="sec-sub">Today · 14 total</div>
           </div>
-          <div class="feed-item"><div class="feed-dot" style="background:var(--blue)"></div><div><div class="feed-ev">New lead captured</div><div class="feed-sub">Website form — HVAC inquiry</div><div class="feed-time">8 min ago</div></div></div>
-          <div class="feed-item"><div class="feed-dot" style="background:var(--green)"></div><div><div class="feed-ev">Follow-up sent</div><div class="feed-sub">Email — Day 2 nurture sequence</div><div class="feed-time">42 min ago</div></div></div>
-          <div class="feed-item"><div class="feed-dot" style="background:var(--purple)"></div><div><div class="feed-ev">Appointment request received</div><div class="feed-sub">Thursday 2:00 PM — Consultation</div><div class="feed-time">Yesterday</div></div></div>
-          <div class="feed-item"><div class="feed-dot" style="background:var(--amber)"></div><div><div class="feed-ev">CRM updated</div><div class="feed-sub">3 contact records synced</div><div class="feed-time">2h ago</div></div></div>
-          <div class="feed-item"><div class="feed-dot" style="background:var(--green)"></div><div><div class="feed-ev">Follow-up sent</div><div class="feed-sub">SMS — appointment reminder</div><div class="feed-time">3h ago</div></div></div>
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr><th>Lead</th><th>Source</th><th>Status</th><th>Value</th></tr></thead>
+              <tbody id="ov-lead-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Attention + Activity -->
+        <div style="display:flex;flex-direction:column;gap:16px;">
+
+          <!-- Needs attention -->
+          <div class="card">
+            <div class="sec-head">
+              <div class="sec-title"><i data-lucide="alert-circle"></i>Needs Attention</div>
+              <div class="stat-badge sb-down" style="font-size:10px;">3 items</div>
+            </div>
+            <div class="attn-item">
+              <div class="attn-icon" style="background:var(--amber-dim)"><i data-lucide="clock" style="color:var(--amber)"></i></div>
+              <div class="attn-body">
+                <div class="attn-title">Sofia Reyes — No reply (28h)</div>
+                <div class="attn-sub">AI email sent · Insurance lead</div>
+              </div>
+            </div>
+            <div class="attn-item">
+              <div class="attn-icon" style="background:var(--amber-dim)"><i data-lucide="clock" style="color:var(--amber)"></i></div>
+              <div class="attn-body">
+                <div class="attn-title">Ryan Mitchell — No reply (22h)</div>
+                <div class="attn-sub">AI SMS sent · HVAC Services</div>
+              </div>
+            </div>
+            <div class="attn-item">
+              <div class="attn-icon" style="background:var(--red-dim)"><i data-lucide="alert-triangle" style="color:var(--red)"></i></div>
+              <div class="attn-body">
+                <div class="attn-title">HubSpot sync retry — batch #3</div>
+                <div class="attn-sub">Timeout · 22 min ago · retrying</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Live activity -->
+          <div class="card">
+            <div class="sec-head">
+              <div class="sec-title"><i data-lucide="activity"></i>Live Activity</div>
+              <div class="live-pill"><div class="live-dot"></div>Live</div>
+            </div>
+            <div class="feed-item"><div class="feed-dot" style="background:var(--blue)"></div><div><div class="feed-ev">AI SMS sent → Ryan Mitchell</div><div class="feed-sub">HVAC Services · 0:52s response</div><div class="feed-time">8 min ago</div></div></div>
+            <div class="feed-item"><div class="feed-dot" style="background:var(--green)"></div><div><div class="feed-ev">New lead — Priya Kapoor</div><div class="feed-sub">Google Ads · Dental Clinic</div><div class="feed-time">42 min ago</div></div></div>
+            <div class="feed-item"><div class="feed-dot" style="background:var(--purple)"></div><div><div class="feed-ev">Call booked — David Park</div><div class="feed-sub">Thu 2:00 PM · Mortgage</div><div class="feed-time">Yesterday</div></div></div>
+            <div class="feed-item"><div class="feed-dot" style="background:var(--green)"></div><div><div class="feed-ev">Deal closed — Carlos Rivera</div><div class="feed-sub">$15,000 · Real Estate</div><div class="feed-time">Apr 30</div></div></div>
+            <div class="feed-item"><div class="feed-dot" style="background:var(--amber)"></div><div><div class="feed-ev">HubSpot sync completed</div><div class="feed-sub">1,284 contacts · 47 deals</div><div class="feed-time">3 min ago</div></div></div>
+          </div>
+
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- ═════════════════════════════
-       PAGE: CONNECTIONS
-  ═════════════════════════════ -->
-  <div class="page" id="page-connections">
-    <div class="page-head">
-      <div>
-        <div class="page-head-title">Connections</div>
-        <div class="page-head-sub">Connect your accounts to power your automation</div>
-      </div>
-      <div class="page-head-actions">
-        <button class="btn-connect bco" onclick="openModal('modal-request-setup')"><i data-lucide="headphones"></i> Request Setup</button>
-        <button class="btn-sync" onclick="openModal('modal-sync')"><i data-lucide="plug"></i> <span>Connect &amp; Sync Accounts</span></button>
-      </div>
-    </div>
-
-    <div class="conn-grid">
-      <!-- Email -->
-      <div class="card conn-card">
-        <div style="display:flex;align-items:center;justify-content:space-between;">
-          <div style="width:44px;height:44px;border-radius:12px;background:rgba(0,87,255,.13);display:flex;align-items:center;justify-content:center;"><i data-lucide="mail" style="color:var(--blue-soft);width:20px;height:20px;"></i></div>
-          <div class="badge b-connected" id="email-badge">Connected</div>
-        </div>
+    <!-- ══════════════════════════════════════════
+         PAGE: LEADS
+    ══════════════════════════════════════════ -->
+    <div class="page" id="page-leads">
+      <div class="page-head">
         <div>
-          <div class="conn-title">Email Connection</div>
-          <div class="conn-desc">Connect Google Workspace or Microsoft Outlook so Flowaify can send and track automated email follow-ups on your behalf.</div>
+          <div class="page-head-title">Lead Inbox</div>
+          <div class="page-head-sub">Click any lead to view full detail and automation timeline</div>
         </div>
-        <div class="conn-footer">
-          <div style="font-size:11px;color:var(--green);">Google Workspace · Active</div>
-          <button class="btn-connect bcg" id="email-btn" onclick="handleConnect('email')"><i data-lucide="check" style="width:11px;height:11px;"></i> Connected</button>
-        </div>
+        <div class="live-pill"><div class="live-dot"></div>14 today</div>
       </div>
 
-      <!-- CRM -->
-      <div class="card conn-card">
-        <div style="display:flex;align-items:center;justify-content:space-between;">
-          <div style="width:44px;height:44px;border-radius:12px;background:rgba(139,92,246,.12);display:flex;align-items:center;justify-content:center;"><i data-lucide="database" style="color:var(--purple);width:20px;height:20px;"></i></div>
-          <div class="badge b-notconn" id="crm-badge">Not Connected</div>
+      <div class="leads-grid">
+        <!-- Table -->
+        <div class="card">
+          <div class="sec-head">
+            <div class="sec-title"><i data-lucide="inbox"></i>All Leads</div>
+            <div class="sec-sub">8 contacts</div>
+          </div>
+          <div class="tbl-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Lead</th><th>Source</th><th>Status</th>
+                  <th>HS Stage</th><th>Last Action</th><th>Next Step</th>
+                </tr>
+              </thead>
+              <tbody id="lead-tbody"></tbody>
+            </table>
+          </div>
         </div>
+
+        <!-- Detail panel -->
+        <div class="card" id="lead-detail-card" style="overflow:hidden;">
+          <div class="sec-head">
+            <div class="sec-title"><i data-lucide="user-circle"></i>Lead Detail</div>
+            <div class="sec-sub" id="detail-updated">Select a lead</div>
+          </div>
+          <div class="detail-sec">
+            <div style="font-size:15px;font-weight:800;color:var(--text);letter-spacing:-0.3px;" id="d-name">Marcus Thompson</div>
+            <div style="font-size:11.5px;color:var(--text-m);margin-top:3px;" id="d-sub">Real Estate Investor · Website Form</div>
+          </div>
+          <div class="detail-sec">
+            <div class="detail-row"><span class="dk">Email</span><span class="dv" id="d-email">m.thompson@realty.com</span></div>
+            <div class="detail-row"><span class="dk">Phone</span><span class="dv" id="d-phone">(786) 412-9033</span></div>
+            <div class="detail-row"><span class="dk">Source</span><span class="dv" id="d-source">Website Form</span></div>
+          </div>
+          <div class="detail-sec">
+            <div class="detail-row"><span class="dk">Lead Score</span><span class="dv" id="d-score">82 / 100</span></div>
+            <div class="score-bar"><div class="score-fill" id="d-score-bar" style="width:82%"></div></div>
+          </div>
+          <div class="detail-sec">
+            <div class="detail-row"><span class="dk">HubSpot Stage</span><span class="dv" id="d-stage"><span class="badge b-qual">Qualified</span></span></div>
+            <div class="detail-row"><span class="dk">Deal Value</span><span class="dv" id="d-value">$12,500</span></div>
+            <div class="detail-row"><span class="dk">AI Response</span><span class="dv" id="d-ai"><span class="badge b-closed">Sent — 0:23s</span></span></div>
+            <div class="detail-row"><span class="dk">Follow-Up Seq.</span><span class="dv" id="d-seq"><span class="badge b-ai">Day 3 / 14</span></span></div>
+          </div>
+          <div class="sec-head">
+            <div class="sec-title"><i data-lucide="activity"></i>Automation Timeline</div>
+          </div>
+          <div class="timeline" id="d-timeline"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════
+         PAGE: PIPELINE
+    ══════════════════════════════════════════ -->
+    <div class="page" id="page-pipeline">
+      <div class="page-head">
         <div>
-          <div class="conn-title">CRM Connection</div>
-          <div class="conn-desc">Connect your CRM so leads, notes, and pipeline updates stay organized automatically. Zoho CRM is our recommended setup — HubSpot also supported.</div>
-        </div>
-        <div class="conn-footer">
-          <div style="font-size:11px;color:var(--text-m);" id="crm-provider-label">Zoho CRM · Not connected</div>
-          <button class="btn-connect bcp" id="crm-btn" onclick="handleConnect('crm')"><i data-lucide="plus" style="width:11px;height:11px;"></i> Connect CRM</button>
+          <div class="page-head-title">Pipeline</div>
+          <div class="page-head-sub">$218,400 across 6 stages · 7 active deals</div>
         </div>
       </div>
 
-      <!-- SMS -->
-      <div class="card conn-card">
-        <div style="display:flex;align-items:center;justify-content:space-between;">
-          <div style="width:44px;height:44px;border-radius:12px;background:var(--green-dim);display:flex;align-items:center;justify-content:center;"><i data-lucide="message-circle" style="color:var(--green);width:20px;height:20px;"></i></div>
-          <div class="badge b-optional" id="sms-badge">Optional</div>
+      <!-- Pipeline stats -->
+      <div class="stats-grid mb20">
+        <div class="card stat-card">
+          <div class="stat-top"><div class="stat-icon si-purple"><i data-lucide="dollar-sign"></i></div><div class="stat-badge sb-up">+$22k</div></div>
+          <div class="stat-val">$218k</div><div class="stat-label">Total Pipeline</div>
         </div>
+        <div class="card stat-card">
+          <div class="stat-top"><div class="stat-icon si-blue"><i data-lucide="briefcase"></i></div></div>
+          <div class="stat-val">7</div><div class="stat-label">Open Deals</div>
+        </div>
+        <div class="card stat-card">
+          <div class="stat-top"><div class="stat-icon si-amber"><i data-lucide="bar-chart-2"></i></div></div>
+          <div class="stat-val">$7.3k</div><div class="stat-label">Avg Deal Size</div>
+        </div>
+        <div class="card stat-card">
+          <div class="stat-top"><div class="stat-icon si-green"><i data-lucide="percent"></i></div><div class="stat-badge sb-up">+4%</div></div>
+          <div class="stat-val">68%</div><div class="stat-label">Win Rate</div>
+        </div>
+      </div>
+
+      <!-- Kanban -->
+      <div class="card mb20">
+        <div class="sec-head">
+          <div class="sec-title"><i data-lucide="kanban"></i>Deal Board</div>
+          <div class="sec-sub">Drag to update (coming soon)</div>
+        </div>
+        <div class="kanban" id="kanban-board"></div>
+      </div>
+
+      <!-- Pipeline chart -->
+      <div class="card p20">
+        <div class="sec-head" style="padding:0 0 14px;">
+          <div class="sec-title"><i data-lucide="bar-chart-2"></i>Deals by Stage</div>
+          <div class="sec-sub">Current snapshot</div>
+        </div>
+        <div class="chart-wrap"><canvas id="ch-pipeline"></canvas></div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════
+         PAGE: AI RESPONSES
+    ══════════════════════════════════════════ -->
+    <div class="page" id="page-ai">
+      <div class="page-head">
         <div>
-          <div class="conn-title">SMS Connection</div>
-          <div class="conn-desc">Enable SMS automation and instant lead alerts through Twilio. Optional but recommended — text messages get faster responses than email alone.</div>
+          <div class="page-head-title">AI Responses</div>
+          <div class="page-head-sub">Every reply Flowaify sent on your behalf</div>
         </div>
-        <div class="conn-footer">
-          <div style="font-size:11px;color:var(--text-m);" id="sms-provider-label">Twilio · Optional</div>
-          <button class="btn-connect bcp" id="sms-btn" onclick="handleConnect('sms')"><i data-lucide="plus" style="width:11px;height:11px;"></i> Connect SMS</button>
-        </div>
+        <div class="live-pill"><div class="live-dot"></div>91 this week</div>
       </div>
 
-      <!-- Calendar -->
-      <div class="card conn-card">
-        <div style="display:flex;align-items:center;justify-content:space-between;">
-          <div style="width:44px;height:44px;border-radius:12px;background:var(--amber-dim);display:flex;align-items:center;justify-content:center;"><i data-lucide="calendar" style="color:var(--amber);width:20px;height:20px;"></i></div>
-          <div class="badge b-connected" id="cal-badge">Connected</div>
+      <div class="stats-grid mb20">
+        <div class="card stat-card">
+          <div class="stat-top"><div class="stat-icon si-blue"><i data-lucide="send"></i></div><div class="stat-badge sb-up">+24%</div></div>
+          <div class="stat-val">91</div><div class="stat-label">Total Sent</div>
         </div>
-        <div>
-          <div class="conn-title">Calendar Connection</div>
-          <div class="conn-desc">Connect a calendar for booking, appointment tracking, and scheduling automations. Flowaify can send confirmation and reminder messages automatically.</div>
+        <div class="card stat-card">
+          <div class="stat-top"><div class="stat-icon si-green"><i data-lucide="zap"></i></div><div class="stat-badge sb-up">−12%</div></div>
+          <div class="stat-val">0:38s</div><div class="stat-label">Avg Response Time</div>
         </div>
-        <div class="conn-footer">
-          <div style="font-size:11px;color:var(--green);">Google Calendar · Active</div>
-          <button class="btn-connect bcg" id="cal-btn" onclick="handleConnect('calendar')"><i data-lucide="check" style="width:11px;height:11px;"></i> Connected</button>
+        <div class="card stat-card">
+          <div class="stat-top"><div class="stat-icon si-purple"><i data-lucide="message-circle"></i></div></div>
+          <div class="stat-val">64%</div><div class="stat-label">SMS Replies</div>
         </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ═════════════════════════════
-       PAGE: AUTOMATION CONTROL
-  ═════════════════════════════ -->
-  <div class="page" id="page-automation">
-    <div class="page-head">
-      <div>
-        <div class="page-head-title">Automation Control</div>
-        <div class="page-head-sub">Manage your Flowaify system without touching any technical settings</div>
-      </div>
-      <div class="badge b-setup" id="auto-status-pill" style="font-size:11.5px;padding:5px 12px;">Setup Needed</div>
-    </div>
-
-    <!-- Status banner -->
-    <div id="auto-status-banner" class="status-banner sb-setup">
-      <div style="display:flex;align-items:center;gap:12px;">
-        <div class="sb-dot setup" id="auto-status-dot"></div>
-        <div>
-          <div class="sb-label text-amber" id="auto-status-label">System is not live yet</div>
-          <div class="sb-sub text-amber" id="auto-status-desc">Complete your account connections, then click Launch System to go live</div>
+        <div class="card stat-card">
+          <div class="stat-top"><div class="stat-icon si-amber"><i data-lucide="mail"></i></div></div>
+          <div class="stat-val">36%</div><div class="stat-label">Email Replies</div>
         </div>
       </div>
-    </div>
 
-    <div class="action-grid">
-      <div class="card action-card">
-        <div class="action-card-icon" style="background:var(--green-dim);"><i data-lucide="rocket" style="color:var(--green);width:22px;height:22px;"></i></div>
-        <div class="action-card-title">Launch System</div>
-        <div class="action-card-desc">Ready to go live? Launch your Flowaify automation once your accounts are connected. Flowaify will start capturing leads and sending follow-ups automatically.</div>
-        <button class="acbtn acbtn-green" onclick="openModal('modal-launch')"><i data-lucide="rocket"></i> Launch System</button>
+      <!-- Charts row -->
+      <div class="g2 mb20">
+        <div class="card p20">
+          <div class="sec-head" style="padding:0 0 14px;">
+            <div class="sec-title"><i data-lucide="clock"></i>Response Time Today</div>
+            <div class="sec-sub">Seconds per reply · hourly</div>
+          </div>
+          <div class="chart-wrap"><canvas id="ch-ai-time"></canvas></div>
+        </div>
+        <div class="card p20">
+          <div class="sec-head" style="padding:0 0 14px;">
+            <div class="sec-title"><i data-lucide="message-square"></i>Replies by Channel</div>
+            <div class="sec-sub">This week</div>
+          </div>
+          <div class="chart-wrap"><canvas id="ch-ai-channel"></canvas></div>
+        </div>
       </div>
 
-      <div class="card action-card">
-        <div class="action-card-icon" style="background:var(--amber-dim);"><i data-lucide="pause-circle" style="color:var(--amber);width:22px;height:22px;"></i></div>
-        <div class="action-card-title">Pause Automation</div>
-        <div class="action-card-desc">Temporarily pause all automations without disconnecting your accounts. Flowaify will stop sending follow-ups until you choose to resume.</div>
-        <button class="acbtn acbtn-amber" onclick="openModal('modal-pause')"><i data-lucide="pause-circle"></i> Pause Automation</button>
-      </div>
-
-      <div class="card action-card">
-        <div class="action-card-icon" style="background:var(--blue-dim);"><i data-lucide="play-circle" style="color:var(--blue-soft);width:22px;height:22px;"></i></div>
-        <div class="action-card-title">Resume Automation</div>
-        <div class="action-card-desc">Turn your automations back on after a pause. Flowaify will pick up where it left off and continue your active sequences from where they stopped.</div>
-        <button class="acbtn acbtn-blue" onclick="openModal('modal-resume')"><i data-lucide="play-circle"></i> Resume Automation</button>
-      </div>
-
-      <div class="card action-card">
-        <div class="action-card-icon" style="background:rgba(139,92,246,.12);"><i data-lucide="edit-3" style="color:var(--purple);width:22px;height:22px;"></i></div>
-        <div class="action-card-title">Request Changes</div>
-        <div class="action-card-desc">Need to update your follow-up messages, routing rules, business hours, or workflow settings? Send a change request to the Flowaify team.</div>
-        <button class="acbtn acbtn-purple" onclick="openModal('modal-changes')"><i data-lucide="edit-3"></i> Request Changes</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ═════════════════════════════
-       PAGE: BUSINESS SETTINGS
-  ═════════════════════════════ -->
-  <div class="page" id="page-settings">
-    <div class="page-head">
-      <div>
-        <div class="page-head-title">Business Settings</div>
-        <div class="page-head-sub">Keep your business information up to date</div>
-      </div>
-    </div>
-
-    <div class="settings-grid">
+      <!-- AI message log -->
       <div class="card">
-        <div class="sec-head"><div class="sec-title"><i data-lucide="building-2"></i>Business Information</div></div>
-        <div class="settings-sec">
-          <div class="field"><label>Business Name</label><input type="text" placeholder="Your Business Name" /></div>
-          <div class="field"><label>Main Contact Name</label><input type="text" placeholder="Full name" /></div>
-          <div class="field"><label>Business Email</label><input type="email" placeholder="contact@yourbusiness.com" /></div>
-          <div class="field"><label>Business Phone</label><input type="text" placeholder="(555) 000-0000" /></div>
-          <div class="field"><label>Service Areas</label><input type="text" placeholder="e.g. Miami, FL · South Florida" /></div>
+        <div class="sec-head">
+          <div class="sec-title"><i data-lucide="bot"></i>AI Message Log</div>
+          <div class="sec-sub">Last 8 replies</div>
+        </div>
+        <div class="tbl-wrap">
+          <table>
+            <thead>
+              <tr><th>Lead</th><th>Type</th><th>Channel</th><th>Message Preview</th><th>Sent</th><th>Time</th><th>Status</th></tr>
+            </thead>
+            <tbody id="ai-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════
+         PAGE: FOLLOW-UPS
+    ══════════════════════════════════════════ -->
+    <div class="page" id="page-followups">
+      <div class="page-head">
+        <div>
+          <div class="page-head-title">Follow-Up Engine</div>
+          <div class="page-head-sub">Automated sequences running across all leads</div>
         </div>
       </div>
 
+      <div class="stats-grid mb20">
+        <div class="card stat-card">
+          <div class="stat-top"><div class="stat-icon si-blue"><i data-lucide="repeat-2"></i></div><div class="stat-badge sb-up">+3</div></div>
+          <div class="stat-val">47</div><div class="stat-label">Active Sequences</div>
+        </div>
+        <div class="card stat-card">
+          <div class="stat-top"><div class="stat-icon si-green"><i data-lucide="check-circle-2"></i></div></div>
+          <div class="stat-val">12</div><div class="stat-label">Completed This Week</div>
+        </div>
+        <div class="card stat-card">
+          <div class="stat-top"><div class="stat-icon si-purple"><i data-lucide="percent"></i></div><div class="stat-badge sb-up">+2%</div></div>
+          <div class="stat-val">74%</div><div class="stat-label">Avg Completion Rate</div>
+        </div>
+        <div class="card stat-card">
+          <div class="stat-top"><div class="stat-icon si-amber"><i data-lucide="timer"></i></div></div>
+          <div class="stat-val">8 min</div><div class="stat-label">Next to Fire</div>
+        </div>
+      </div>
+
+      <!-- Channel chart + sequences overview -->
+      <div class="g2 mb20">
+        <div class="card p20">
+          <div class="sec-head" style="padding:0 0 14px;">
+            <div class="sec-title"><i data-lucide="bar-chart-2"></i>Active by Channel</div>
+          </div>
+          <div class="chart-wrap"><canvas id="ch-fu-channel"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="sec-head">
+            <div class="sec-title"><i data-lucide="list"></i>Sequence Library</div>
+          </div>
+          <div class="timeline" style="padding-top:10px;">
+            <div class="tl-item"><div class="tl-dot td-blue"><i data-lucide="repeat-2"></i></div><div class="tl-body"><div class="tl-ev">14-Day Real Estate Nurture</div><div class="tl-desc">SMS + Email · Steps: 14 · Active: 18</div></div></div>
+            <div class="tl-item"><div class="tl-dot td-green"><i data-lucide="repeat-2"></i></div><div class="tl-body"><div class="tl-ev">7-Day Insurance Intro</div><div class="tl-desc">Email + SMS · Steps: 7 · Active: 11</div></div></div>
+            <div class="tl-item"><div class="tl-dot td-purple"><i data-lucide="repeat-2"></i></div><div class="tl-body"><div class="tl-ev">7-Day Med Spa Follow-Up</div><div class="tl-desc">SMS + Email · Steps: 7 · Active: 9</div></div></div>
+            <div class="tl-item"><div class="tl-dot td-amber"><i data-lucide="repeat-2"></i></div><div class="tl-body"><div class="tl-ev">14-Day Clinic Outreach</div><div class="tl-desc">Email + SMS · Steps: 14 · Active: 5</div></div></div>
+            <div class="tl-item" style="padding-bottom:0"><div class="tl-dot td-muted"><i data-lucide="repeat-2"></i></div><div class="tl-body"><div class="tl-ev">Pre-Call Reminder</div><div class="tl-desc">SMS · Steps: 2 · Active: 4</div></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Full follow-up table -->
       <div class="card">
-        <div class="sec-head"><div class="sec-title"><i data-lucide="clock"></i>Schedule &amp; Hours</div></div>
-        <div class="settings-sec">
-          <div class="field">
-            <label>Business Hours</label>
-            <select><option>Mon–Fri 8AM–8PM</option><option>Mon–Sat 8AM–6PM</option><option>Every day 9AM–9PM</option><option>24 / 7</option><option>Custom</option></select>
-          </div>
-          <div class="field">
-            <label>Time Zone</label>
-            <select><option>EST (UTC-5)</option><option>CST (UTC-6)</option><option>MST (UTC-7)</option><option>PST (UTC-8)</option></select>
-          </div>
-          <div class="field"><label>Appointment Booking Link</label><input type="text" placeholder="https://calendly.com/yourbusiness" /></div>
-          <div class="field">
-            <label>Follow-Up Preferences</label>
-            <select><option>Email + SMS (Recommended)</option><option>Email Only</option><option>SMS Only</option></select>
-          </div>
+        <div class="sec-head">
+          <div class="sec-title"><i data-lucide="table-2"></i>All Active Sequences</div>
+          <div class="sec-sub">47 running now</div>
+        </div>
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr><th>Lead</th><th>Sequence</th><th>Channel</th><th>Step</th><th>Status</th><th>Next Fire</th></tr></thead>
+            <tbody id="fu-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════
+         PAGE: HUBSPOT SYNC
+    ══════════════════════════════════════════ -->
+    <div class="page" id="page-hubspot">
+      <div class="page-head">
+        <div>
+          <div class="page-head-title">HubSpot Sync</div>
+          <div class="page-head-sub">Connection health, sync metrics, and event log</div>
+        </div>
+        <div class="live-pill"><div class="live-dot"></div>Connected</div>
+      </div>
+
+      <!-- Top cards -->
+      <div class="stats-grid mb20">
+        <div class="card stat-card">
+          <div class="stat-top"><div class="stat-icon si-green"><i data-lucide="users"></i></div><div class="stat-badge sb-up">+14</div></div>
+          <div class="stat-val">1,284</div><div class="stat-label">Contacts Synced</div>
+        </div>
+        <div class="card stat-card">
+          <div class="stat-top"><div class="stat-icon si-blue"><i data-lucide="briefcase"></i></div><div class="stat-badge sb-up">+3</div></div>
+          <div class="stat-val">47</div><div class="stat-label">Deals Updated</div>
+        </div>
+        <div class="card stat-card">
+          <div class="stat-top"><div class="stat-icon si-amber"><i data-lucide="alert-triangle"></i></div></div>
+          <div class="stat-val text-amber">2</div><div class="stat-label">Failed Syncs</div>
+        </div>
+        <div class="card stat-card">
+          <div class="stat-top"><div class="stat-icon si-green"><i data-lucide="clock"></i></div></div>
+          <div class="stat-val" style="font-size:16px;letter-spacing:-0.3px;">3 min ago</div><div class="stat-label">Last Sync</div>
         </div>
       </div>
 
+      <div class="g2 mb20">
+        <!-- API Health -->
+        <div class="card">
+          <div class="sec-head">
+            <div class="sec-title"><i data-lucide="activity"></i>API Health</div>
+            <div class="live-pill"><div class="live-dot"></div>Operational</div>
+          </div>
+          <div class="api-bar">
+            <div>
+              <div style="font-size:12px;font-weight:700;color:var(--green);">HubSpot API — All Systems Operational</div>
+              <div style="font-size:11px;color:var(--green);opacity:0.75;margin-top:2px;">Rate: 89 / 100 calls used · Resets in 4 min</div>
+            </div>
+            <div class="live-pill"><div class="live-dot"></div>OK</div>
+          </div>
+          <div class="p20" style="padding-top:0;">
+            <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+              <span class="fs11 text-muted">API Rate Limit Used</span>
+              <span class="fs11 fw7 text-green">89%</span>
+            </div>
+            <div style="height:6px;background:var(--border);border-radius:99px;overflow:hidden;">
+              <div style="width:89%;height:100%;background:linear-gradient(90deg,var(--blue),var(--green));border-radius:99px;"></div>
+            </div>
+            <div style="margin-top:18px;">
+              <div class="detail-row"><span class="dk">Portal ID</span><span class="dv">12847293</span></div>
+              <div class="detail-row"><span class="dk">Account</span><span class="dv">Flowaify Client Portal</span></div>
+              <div class="detail-row"><span class="dk">Pipeline</span><span class="dv">Flowaify Pipeline</span></div>
+              <div class="detail-row"><span class="dk">Sync Interval</span><span class="dv">Every 5 minutes</span></div>
+              <div class="detail-row"><span class="dk">Webhook Status</span><span class="dv"><span class="badge b-closed">Active</span></span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sync activity chart -->
+        <div class="card p20">
+          <div class="sec-head" style="padding:0 0 14px;">
+            <div class="sec-title"><i data-lucide="bar-chart-2"></i>Sync Volume</div>
+            <div class="sec-sub">Contacts synced per day</div>
+          </div>
+          <div class="chart-wrap"><canvas id="ch-sync"></canvas></div>
+        </div>
+      </div>
+
+      <!-- Sync event log -->
       <div class="card">
-        <div class="sec-head"><div class="sec-title"><i data-lucide="git-branch"></i>Lead Routing &amp; CRM</div></div>
-        <div class="settings-sec">
-          <div class="field">
-            <label>Primary CRM Pipeline</label>
-            <select><option>Flowaify Pipeline (Zoho)</option><option>Main Sales Pipeline</option><option>Custom Pipeline</option></select>
-          </div>
-          <div class="field">
-            <label>Lead Routing Rules</label>
-            <select><option>Auto-assign to owner</option><option>Round-robin distribution</option><option>Manual assignment</option></select>
-          </div>
-          <div class="field">
-            <label>Default Follow-Up Sequence</label>
-            <select><option>14-Day Nurture Sequence</option><option>7-Day Intro Sequence</option><option>Quick Follow-Up (3 days)</option></select>
-          </div>
+        <div class="sec-head">
+          <div class="sec-title"><i data-lucide="scroll-text"></i>Sync Event Log</div>
+          <div class="sec-sub">Last 10 events</div>
         </div>
-      </div>
-
-      <div class="card">
-        <div class="sec-head"><div class="sec-title"><i data-lucide="bell"></i>Notification Preferences</div></div>
-        <div class="settings-sec">
-          <div class="toggle-row">
-            <div><div class="toggle-label">New lead alert</div><div class="toggle-sub">SMS + Email when a new lead arrives</div></div>
-            <div class="toggle on" onclick="this.classList.toggle('on')"></div>
-          </div>
-          <div class="toggle-row">
-            <div><div class="toggle-label">Follow-up confirmation</div><div class="toggle-sub">Notify when a follow-up is sent</div></div>
-            <div class="toggle" onclick="this.classList.toggle('on')"></div>
-          </div>
-          <div class="toggle-row">
-            <div><div class="toggle-label">Appointment booked</div><div class="toggle-sub">Alert when a new appointment is confirmed</div></div>
-            <div class="toggle on" onclick="this.classList.toggle('on')"></div>
-          </div>
-          <div class="toggle-row">
-            <div><div class="toggle-label">Daily summary</div><div class="toggle-sub">Morning digest of previous day's activity</div></div>
-            <div class="toggle on" onclick="this.classList.toggle('on')"></div>
-          </div>
-          <div class="toggle-row">
-            <div><div class="toggle-label">Weekly report</div><div class="toggle-sub">Performance summary every Monday</div></div>
-            <div class="toggle" onclick="this.classList.toggle('on')"></div>
-          </div>
-          <div style="margin-top:16px;">
-            <button onclick="saveSettings()" style="width:100%;padding:9px;background:var(--blue);border:none;border-radius:8px;color:#fff;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 4px 14px rgba(0,87,255,0.35);">Save Business Settings</button>
-          </div>
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr><th>Event</th><th>Detail</th><th>Status</th><th>Time</th></tr></thead>
+            <tbody>
+              <tr><td class="ln">Contact synced</td><td class="text-muted">Marcus Thompson → HubSpot</td><td><span class="badge b-closed">Success</span></td><td class="text-muted">3 min ago</td></tr>
+              <tr><td class="ln">Deal updated</td><td class="text-muted">Sofia Reyes — $4,800</td><td><span class="badge b-closed">Success</span></td><td class="text-muted">11 min ago</td></tr>
+              <tr><td class="ln">Sync retry</td><td class="text-muted">Batch #3 — connection timeout</td><td><span class="badge b-qual">Retrying</span></td><td class="text-muted">22 min ago</td></tr>
+              <tr><td class="ln">Contact synced</td><td class="text-muted">Jennifer White → HubSpot</td><td><span class="badge b-closed">Success</span></td><td class="text-muted">41 min ago</td></tr>
+              <tr><td class="ln">Deal created</td><td class="text-muted">Priya Kapoor — $6,800</td><td><span class="badge b-closed">Success</span></td><td class="text-muted">1h ago</td></tr>
+              <tr><td class="ln">Contact synced</td><td class="text-muted">Ryan Mitchell → HubSpot</td><td><span class="badge b-closed">Success</span></td><td class="text-muted">1h 12m ago</td></tr>
+              <tr><td class="ln">Stage updated</td><td class="text-muted">David Park → Booked</td><td><span class="badge b-closed">Success</span></td><td class="text-muted">Yesterday</td></tr>
+              <tr><td class="ln">Deal closed</td><td class="text-muted">Carlos Rivera — $15,000</td><td><span class="badge b-closed">Success</span></td><td class="text-muted">Apr 30</td></tr>
+              <tr><td class="ln">Batch sync</td><td class="text-muted">42 contacts updated</td><td><span class="badge b-closed">Success</span></td><td class="text-muted">Apr 30</td></tr>
+              <tr><td class="ln">Webhook received</td><td class="text-muted">Deal stage change from HubSpot</td><td><span class="badge b-closed">Success</span></td><td class="text-muted">Apr 30</td></tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
+
+    <!-- ══════════════════════════════════════════
+         PAGE: SETTINGS
+    ══════════════════════════════════════════ -->
+    <div class="page" id="page-settings">
+      <div class="page-head">
+        <div>
+          <div class="page-head-title">Settings</div>
+          <div class="page-head-sub">Account, integrations, and automation preferences</div>
+        </div>
+      </div>
+
+      <div class="settings-grid">
+
+        <!-- Account -->
+        <div class="card">
+          <div class="sec-head">
+            <div class="sec-title"><i data-lucide="building-2"></i>Account</div>
+          </div>
+          <div class="settings-sec">
+            <div class="field"><label>Business Name</label><input type="text" value="Your Business" /></div>
+            <div class="field"><label>Contact Email</label><input type="email" value="autofi.company@gmail.com" /></div>
+            <div class="field"><label>Phone</label><input type="text" value="(786) 412-9033" /></div>
+            <div class="field"><label>Website</label><input type="text" value="flowaify.com" /></div>
+            <div class="field">
+              <label>Industry</label>
+              <select><option>Real Estate</option><option>Insurance</option><option>Mortgage</option><option>Med Spa</option><option>Dental</option><option>Service Business</option></select>
+            </div>
+            <div class="field">
+              <label>Time Zone</label>
+              <select><option>EST (UTC-5)</option><option>CST (UTC-6)</option><option>MST (UTC-7)</option><option>PST (UTC-8)</option></select>
+            </div>
+          </div>
+        </div>
+
+        <!-- HubSpot -->
+        <div class="card">
+          <div class="sec-head">
+            <div class="sec-title"><i data-lucide="refresh-cw"></i>HubSpot Integration</div>
+            <div class="live-pill"><div class="live-dot"></div>Connected</div>
+          </div>
+          <div class="settings-sec">
+            <div class="field"><label>Portal ID</label><input type="text" value="12847293" /></div>
+            <div class="field">
+              <label>Sync Frequency</label>
+              <select><option>Every 5 minutes</option><option>Every 15 minutes</option><option>Every 30 minutes</option><option>Hourly</option></select>
+            </div>
+            <div class="field">
+              <label>Default Pipeline</label>
+              <select><option>Flowaify Pipeline</option><option>Sales Pipeline</option><option>Custom Pipeline</option></select>
+            </div>
+            <div class="field"><label>Webhook URL</label><input type="text" value="https://hooks.flowaify.com/hs/..." readonly /></div>
+            <div style="margin-top:6px;">
+              <button style="width:100%;padding:9px;background:var(--red-dim);border:1px solid rgba(239,68,68,.2);border-radius:8px;color:var(--red);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">Disconnect HubSpot</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Notifications -->
+        <div class="card">
+          <div class="sec-head">
+            <div class="sec-title"><i data-lucide="bell"></i>Notifications</div>
+          </div>
+          <div class="settings-sec">
+            <div class="toggle-row">
+              <div><div class="toggle-label">New lead alert</div><div class="toggle-sub">SMS + Email when a lead comes in</div></div>
+              <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+            </div>
+            <div class="toggle-row">
+              <div><div class="toggle-label">AI reply confirmation</div><div class="toggle-sub">Email when AI sends a message</div></div>
+              <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+            </div>
+            <div class="toggle-row">
+              <div><div class="toggle-label">Failed sync alert</div><div class="toggle-sub">Instant alert on HubSpot sync error</div></div>
+              <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+            </div>
+            <div class="toggle-row">
+              <div><div class="toggle-label">Daily summary</div><div class="toggle-sub">Email digest at 8 AM each day</div></div>
+              <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+            </div>
+            <div class="toggle-row">
+              <div><div class="toggle-label">Weekly report</div><div class="toggle-sub">Performance summary every Monday</div></div>
+              <div class="toggle" onclick="this.classList.toggle('on')"></div>
+            </div>
+            <div class="toggle-row">
+              <div><div class="toggle-label">Lead no-reply warning</div><div class="toggle-sub">Alert if lead hasn't responded in 24h</div></div>
+              <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Automation -->
+        <div class="card">
+          <div class="sec-head">
+            <div class="sec-title"><i data-lucide="bot"></i>Automation Preferences</div>
+          </div>
+          <div class="settings-sec">
+            <div class="field">
+              <label>AI Response Delay</label>
+              <select><option>30 seconds</option><option>1 minute</option><option>2 minutes</option><option>5 minutes</option></select>
+            </div>
+            <div class="field">
+              <label>Default Follow-Up Sequence</label>
+              <select><option>14-Day Real Estate Nurture</option><option>7-Day Insurance Intro</option><option>7-Day Med Spa Follow-Up</option><option>14-Day Clinic Outreach</option></select>
+            </div>
+            <div class="field">
+              <label>Working Hours</label>
+              <select><option>Mon–Fri 8AM–8PM</option><option>Mon–Sat 8AM–6PM</option><option>Every day 9AM–9PM</option><option>24 / 7</option></select>
+            </div>
+            <div class="toggle-row">
+              <div><div class="toggle-label">Auto-create HubSpot deals</div><div class="toggle-sub">When a new lead is qualified</div></div>
+              <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+            </div>
+            <div class="toggle-row">
+              <div><div class="toggle-label">AI handles unsubscribes</div><div class="toggle-sub">Auto-remove opted-out contacts</div></div>
+              <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+            </div>
+            <div style="margin-top:16px;">
+              <button style="width:100%;padding:9px;background:var(--blue);border:none;border-radius:8px;color:#fff;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 4px 14px rgba(0,87,255,0.35);">Save Preferences</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </main><!-- end .main -->
+</div><!-- end .layout -->
+
+<!-- Mobile bottom tab bar -->
+<nav class="mob-tabs" id="mob-tabs">
+  <div class="mob-tab active" data-page="overview" onclick="mobNav('overview')">
+    <i data-lucide="layout-dashboard"></i>Overview
   </div>
-
-  <!-- ═════════════════════════════
-       PAGE: SYSTEM STATUS
-  ═════════════════════════════ -->
-  <div class="page" id="page-status">
-    <div class="page-head">
-      <div>
-        <div class="page-head-title">System Status</div>
-        <div class="page-head-sub">Health of all your connected services and automation</div>
-      </div>
-      <button class="btn-sync" onclick="refreshStatus()">
-        <i data-lucide="refresh-cw" id="refresh-icon"></i> <span>Refresh Status</span>
-      </button>
-    </div>
-
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;">
-      <div class="live-pill"><div class="live-dot"></div>Monitoring Active</div>
-      <span style="font-size:11.5px;color:var(--text-m);">Last checked: just now · Auto-refreshes every 5 min</span>
-    </div>
-
-    <div class="card mb20">
-      <div class="sec-head">
-        <div class="sec-title"><i data-lucide="plug"></i>Account Connections</div>
-        <div class="sec-sub">4 services monitored</div>
-      </div>
-      <div class="status-grid">
-        <div class="status-row">
-          <div class="status-row-left">
-            <div class="status-row-icon si-blue"><i data-lucide="mail"></i></div>
-            <div><div class="status-row-name">Email Connection</div><div class="status-row-sub">Google Workspace · Outbound email active</div></div>
-          </div>
-          <div class="badge b-connected">Connected</div>
-        </div>
-        <div class="status-row">
-          <div class="status-row-left">
-            <div class="status-row-icon" style="background:rgba(139,92,246,.12);color:var(--purple);"><i data-lucide="database"></i></div>
-            <div><div class="status-row-name">CRM Connection</div><div class="status-row-sub" id="crm-status-sub">Zoho CRM · Not linked yet</div></div>
-          </div>
-          <div class="badge b-notconn" id="crm-status-badge">Not Connected</div>
-        </div>
-        <div class="status-row">
-          <div class="status-row-left">
-            <div class="status-row-icon si-green"><i data-lucide="message-circle"></i></div>
-            <div><div class="status-row-name">SMS Connection</div><div class="status-row-sub" id="sms-status-sub">Twilio · Optional service</div></div>
-          </div>
-          <div class="badge b-optional" id="sms-status-badge">Optional</div>
-        </div>
-        <div class="status-row">
-          <div class="status-row-left">
-            <div class="status-row-icon si-amber"><i data-lucide="calendar"></i></div>
-            <div><div class="status-row-name">Calendar Connection</div><div class="status-row-sub">Google Calendar · Booking active</div></div>
-          </div>
-          <div class="badge b-connected">Connected</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="card mb20">
-      <div class="sec-head">
-        <div class="sec-title"><i data-lucide="zap"></i>Automation Services</div>
-        <div class="sec-sub">5 services monitored</div>
-      </div>
-      <div class="status-grid">
-        <div class="status-row">
-          <div class="status-row-left">
-            <div class="status-row-icon si-blue"><i data-lucide="user-plus"></i></div>
-            <div><div class="status-row-name">Lead Capture</div><div class="status-row-sub">Website form and ad integrations active</div></div>
-          </div>
-          <div class="badge b-live">Live</div>
-        </div>
-        <div class="status-row">
-          <div class="status-row-left">
-            <div class="status-row-icon" style="background:rgba(139,92,246,.12);color:var(--purple);"><i data-lucide="refresh-cw"></i></div>
-            <div><div class="status-row-name">CRM Sync</div><div class="status-row-sub" id="crm-sync-sub">Waiting for CRM connection</div></div>
-          </div>
-          <div class="badge b-pending" id="crm-sync-badge">Pending</div>
-        </div>
-        <div class="status-row">
-          <div class="status-row-left">
-            <div class="status-row-icon si-green"><i data-lucide="send"></i></div>
-            <div><div class="status-row-name">Follow-Up Automation</div><div class="status-row-sub">Email sequences active</div></div>
-          </div>
-          <div class="badge b-live">Live</div>
-        </div>
-        <div class="status-row">
-          <div class="status-row-left">
-            <div class="status-row-icon si-amber"><i data-lucide="calendar-check"></i></div>
-            <div><div class="status-row-name">Appointment Automation</div><div class="status-row-sub">Booking confirmations and reminders active</div></div>
-          </div>
-          <div class="badge b-live">Live</div>
-        </div>
-        <div class="status-row">
-          <div class="status-row-left">
-            <div class="status-row-icon si-green"><i data-lucide="message-circle"></i></div>
-            <div><div class="status-row-name">SMS Automation</div><div class="status-row-sub" id="sms-auto-sub">Waiting for SMS connection</div></div>
-          </div>
-          <div class="badge b-notconn" id="sms-auto-badge">Not Connected</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="sec-head">
-        <div class="sec-title"><i data-lucide="clock"></i>Sync Timestamps</div>
-      </div>
-      <div class="status-grid">
-        <div class="status-row">
-          <div class="status-row-left">
-            <div class="status-row-icon si-green"><i data-lucide="check-circle-2"></i></div>
-            <div><div class="status-row-name">Last Successful Sync</div><div class="status-row-sub">Email follow-up batch · 14 contacts processed</div></div>
-          </div>
-          <span style="font-size:12px;color:var(--text-m);">8 min ago</span>
-        </div>
-        <div class="status-row">
-          <div class="status-row-left">
-            <div class="status-row-icon si-blue"><i data-lucide="activity"></i></div>
-            <div><div class="status-row-name">Last System Check</div><div class="status-row-sub">All active services pinged and verified</div></div>
-          </div>
-          <span style="font-size:12px;color:var(--text-m);">Just now</span>
-        </div>
-      </div>
-    </div>
+  <div class="mob-tab" data-page="leads" onclick="mobNav('leads')">
+    <i data-lucide="users"></i>Leads
   </div>
-
-  <!-- ═════════════════════════════
-       PAGE: SUPPORT
-  ═════════════════════════════ -->
-  <div class="page" id="page-support">
-    <div class="page-head">
-      <div>
-        <div class="page-head-title">Help &amp; Support</div>
-        <div class="page-head-sub">We're here to help — reach out anytime</div>
-      </div>
-    </div>
-
-    <div class="support-grid mb20">
-      <div class="card support-card" onclick="openModal('modal-request-setup')">
-        <div class="support-icon si-blue"><i data-lucide="settings-2"></i></div>
-        <div class="support-title">Request Setup</div>
-        <div class="support-desc">Need help connecting your accounts? Our team can walk you through or handle the setup for you — no technical knowledge required.</div>
-        <button class="support-btn" style="background:var(--blue);color:#fff;box-shadow:0 4px 14px rgba(0,87,255,0.35);" onclick="event.stopPropagation();openModal('modal-request-setup')"><i data-lucide="arrow-right"></i> Request Setup</button>
-      </div>
-
-      <div class="card support-card" onclick="openModal('modal-report-issue')">
-        <div class="support-icon" style="background:var(--red-dim);"><i data-lucide="alert-triangle" style="color:var(--red);"></i></div>
-        <div class="support-title">Report an Issue</div>
-        <div class="support-desc">Something not working right? Report a problem with your email, CRM, leads, SMS, calendar, or automation and we'll investigate right away.</div>
-        <button class="support-btn" style="background:var(--red-dim);color:var(--red);" onclick="event.stopPropagation();openModal('modal-report-issue')"><i data-lucide="arrow-right"></i> Report Issue</button>
-      </div>
-
-      <div class="card support-card" onclick="openModal('modal-changes')">
-        <div class="support-icon" style="background:rgba(139,92,246,.12);"><i data-lucide="edit-3" style="color:var(--purple);"></i></div>
-        <div class="support-title">Request Automation Change</div>
-        <div class="support-desc">Need to update follow-up rules, routing, messages, business hours, or workflow settings? Send us a change request and we'll handle it.</div>
-        <button class="support-btn" style="background:rgba(139,92,246,.12);color:var(--purple);" onclick="event.stopPropagation();openModal('modal-changes')"><i data-lucide="arrow-right"></i> Request Change</button>
-      </div>
-
-      <div class="card support-card" onclick="openModal('modal-contact')">
-        <div class="support-icon si-green"><i data-lucide="message-square"></i></div>
-        <div class="support-title">Contact Support</div>
-        <div class="support-desc">General questions, account management, or anything else — get in touch with the Flowaify support team directly and we'll reply promptly.</div>
-        <button class="support-btn" style="background:var(--green-dim);color:var(--green);" onclick="event.stopPropagation();openModal('modal-contact')"><i data-lucide="arrow-right"></i> Contact Support</button>
-      </div>
-    </div>
-
-    <div class="card p20">
-      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;">
-        <div><div style="font-size:13px;font-weight:700;color:var(--text);">Support Hours</div><div style="font-size:11.5px;color:var(--text-m);margin-top:3px;">Monday – Friday · 9AM – 6PM EST</div></div>
-        <div><div style="font-size:13px;font-weight:700;color:var(--text);">Response Time</div><div style="font-size:11.5px;color:var(--text-m);margin-top:3px;">Typically within a few hours</div></div>
-        <div><div style="font-size:13px;font-weight:700;color:var(--text);">Urgent Issues</div><div style="font-size:11.5px;color:var(--text-m);margin-top:3px;">Critical issues escalated within 1 hour</div></div>
-      </div>
-    </div>
+  <div class="mob-tab" data-page="pipeline" onclick="mobNav('pipeline')">
+    <i data-lucide="kanban"></i>Pipeline
   </div>
-
-</main>
-</div>
-
-<!-- ═══════════════════════════════════
-     MODALS
-═══════════════════════════════════ -->
-
-<!-- Connect & Sync Overview Modal -->
-<div class="modal-overlay" id="modal-sync">
-  <div class="modal">
-    <div class="modal-head">
-      <div><div class="modal-title">Connect &amp; Sync Accounts</div><div class="modal-sub">Review your connection status and link missing accounts</div></div>
-      <button class="modal-close" onclick="closeModal('modal-sync')"><i data-lucide="x"></i></button>
-    </div>
-    <div class="modal-body">
-      <div class="sync-check-item">
-        <div class="sync-check-left">
-          <div class="sync-check-icon" style="background:rgba(0,87,255,.13);"><i data-lucide="mail" style="color:var(--blue-soft);"></i></div>
-          <div><div class="sync-check-name">Email</div><div class="sync-check-sub">Google Workspace · Connected</div></div>
-        </div>
-        <div class="badge b-connected">Connected</div>
-      </div>
-      <div class="sync-check-item">
-        <div class="sync-check-left">
-          <div class="sync-check-icon" style="background:rgba(139,92,246,.12);"><i data-lucide="database" style="color:var(--purple);"></i></div>
-          <div><div class="sync-check-name">CRM</div><div class="sync-check-sub" id="modal-sync-crm-sub">Zoho CRM · Not connected</div></div>
-        </div>
-        <div class="badge b-notconn" id="modal-sync-crm-badge">Not Connected</div>
-      </div>
-      <div class="sync-check-item">
-        <div class="sync-check-left">
-          <div class="sync-check-icon" style="background:var(--green-dim);"><i data-lucide="message-circle" style="color:var(--green);"></i></div>
-          <div><div class="sync-check-name">SMS</div><div class="sync-check-sub" id="modal-sync-sms-sub">Twilio · Optional</div></div>
-        </div>
-        <div class="badge b-optional" id="modal-sync-sms-badge">Optional</div>
-      </div>
-      <div class="sync-check-item">
-        <div class="sync-check-left">
-          <div class="sync-check-icon" style="background:var(--amber-dim);"><i data-lucide="calendar" style="color:var(--amber);"></i></div>
-          <div><div class="sync-check-name">Calendar</div><div class="sync-check-sub">Google Calendar · Connected</div></div>
-        </div>
-        <div class="badge b-connected">Connected</div>
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn-mcancel" onclick="closeModal('modal-sync')">Close</button>
-      <button class="btn-mconfirm blue" onclick="closeModal('modal-sync');showPage('connections')">Go to Connections</button>
-    </div>
+  <div class="mob-tab" data-page="ai" onclick="mobNav('ai')">
+    <i data-lucide="bot"></i>AI
   </div>
-</div>
-
-<!-- Launch System Modal -->
-<div class="modal-overlay" id="modal-launch">
-  <div class="modal">
-    <div class="modal-head">
-      <div><div class="modal-title">Launch Your System</div><div class="modal-sub">Confirm you're ready to go live</div></div>
-      <button class="modal-close" onclick="closeModal('modal-launch')"><i data-lucide="x"></i></button>
-    </div>
-    <div class="modal-body">
-      <p>Once launched, Flowaify will begin capturing leads, sending automated follow-ups, and keeping your CRM updated in real time.</p>
-      <div style="margin-top:14px;padding:12px 16px;background:var(--green-dim);border:1px solid rgba(16,185,129,0.2);border-radius:10px;">
-        <div style="font-size:12px;font-weight:700;color:var(--green);margin-bottom:6px;">Ready to launch:</div>
-        <div style="font-size:11.5px;color:var(--green);opacity:0.85;line-height:1.8;">✓ Email Connection — Active<br>✓ Calendar Connection — Active<br>✓ Lead capture — Configured<br>✓ Follow-up sequences — Ready</div>
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn-mcancel" onclick="closeModal('modal-launch')">Not yet</button>
-      <button class="btn-mconfirm green" onclick="launchSystem()">Launch Now</button>
-    </div>
+  <div class="mob-tab" data-page="followups" onclick="mobNav('followups')">
+    <i data-lucide="repeat-2"></i>Follow-Ups
   </div>
-</div>
-
-<!-- Pause Modal -->
-<div class="modal-overlay" id="modal-pause">
-  <div class="modal">
-    <div class="modal-head">
-      <div><div class="modal-title">Pause Automation</div><div class="modal-sub">Temporarily stop automated activity</div></div>
-      <button class="modal-close" onclick="closeModal('modal-pause')"><i data-lucide="x"></i></button>
-    </div>
-    <div class="modal-body">
-      <p>Are you sure you want to pause automation? Your accounts will stay connected, but Flowaify will stop sending automated follow-ups until you resume.</p>
-      <div style="margin-top:14px;padding:12px 16px;background:var(--amber-dim);border:1px solid rgba(245,158,11,0.2);border-radius:10px;">
-        <div style="font-size:12px;font-weight:600;color:var(--amber);margin-bottom:4px;">While paused:</div>
-        <div style="font-size:11.5px;color:var(--amber);opacity:0.85;line-height:1.8;">• No automated messages will be sent<br>• Your accounts remain connected<br>• Active sequences resume where they left off<br>• You can resume anytime</div>
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn-mcancel" onclick="closeModal('modal-pause')">Keep Running</button>
-      <button class="btn-mconfirm amber" onclick="pauseSystem()">Pause Automation</button>
-    </div>
+  <div class="mob-tab" data-page="settings" onclick="mobNav('settings')">
+    <i data-lucide="settings-2"></i>Settings
   </div>
-</div>
-
-<!-- Resume Modal -->
-<div class="modal-overlay" id="modal-resume">
-  <div class="modal">
-    <div class="modal-head">
-      <div><div class="modal-title">Resume Automation</div><div class="modal-sub">Turn your automation back on</div></div>
-      <button class="modal-close" onclick="closeModal('modal-resume')"><i data-lucide="x"></i></button>
-    </div>
-    <div class="modal-body">
-      <p>Resume your automation? Flowaify will pick up where it left off and continue sending follow-ups, capturing leads, and updating your records automatically.</p>
-    </div>
-    <div class="modal-footer">
-      <button class="btn-mcancel" onclick="closeModal('modal-resume')">Cancel</button>
-      <button class="btn-mconfirm green" onclick="resumeSystem()">Resume Now</button>
-    </div>
-  </div>
-</div>
-
-<!-- Request Changes Modal -->
-<div class="modal-overlay" id="modal-changes">
-  <div class="modal">
-    <div class="modal-head">
-      <div><div class="modal-title">Request Changes</div><div class="modal-sub">Ask Flowaify to update your system settings</div></div>
-      <button class="modal-close" onclick="closeModal('modal-changes')"><i data-lucide="x"></i></button>
-    </div>
-    <div class="modal-body">
-      <div class="field">
-        <label>What would you like to change?</label>
-        <select>
-          <option>Follow-up message content</option>
-          <option>Lead routing rules</option>
-          <option>Business hours / schedule</option>
-          <option>Automation sequence settings</option>
-          <option>CRM pipeline configuration</option>
-          <option>Other</option>
-        </select>
-      </div>
-      <div class="field"><label>Describe the change you need</label><textarea placeholder="Please describe what you'd like updated…"></textarea></div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn-mcancel" onclick="closeModal('modal-changes')">Cancel</button>
-      <button class="btn-mconfirm blue" onclick="submitForm('modal-changes','Change request submitted! Our team will make updates within 1–2 business days.')">Submit Request</button>
-    </div>
-  </div>
-</div>
-
-<!-- Request Setup Modal -->
-<div class="modal-overlay" id="modal-request-setup">
-  <div class="modal">
-    <div class="modal-head">
-      <div><div class="modal-title">Request Setup</div><div class="modal-sub">We'll help connect and configure your accounts</div></div>
-      <button class="modal-close" onclick="closeModal('modal-request-setup')"><i data-lucide="x"></i></button>
-    </div>
-    <div class="modal-body">
-      <div class="field"><label>Which accounts need setup?</label><input type="text" placeholder="e.g. CRM, SMS" /></div>
-      <div class="field"><label>Best time to connect</label><input type="text" placeholder="e.g. Weekdays after 2PM EST" /></div>
-      <div class="field"><label>Additional notes (optional)</label><textarea placeholder="Any details that would help our team get started…"></textarea></div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn-mcancel" onclick="closeModal('modal-request-setup')">Cancel</button>
-      <button class="btn-mconfirm blue" onclick="submitForm('modal-request-setup','Setup request submitted! Our team will reach out within 1 business day.')">Submit Request</button>
-    </div>
-  </div>
-</div>
-
-<!-- Report Issue Modal -->
-<div class="modal-overlay" id="modal-report-issue">
-  <div class="modal">
-    <div class="modal-head">
-      <div><div class="modal-title">Report an Issue</div><div class="modal-sub">Let us know what's not working</div></div>
-      <button class="modal-close" onclick="closeModal('modal-report-issue')"><i data-lucide="x"></i></button>
-    </div>
-    <div class="modal-body">
-      <div class="field">
-        <label>Which area is affected?</label>
-        <select><option>Email</option><option>CRM / Contacts</option><option>Leads not capturing</option><option>SMS / Text messages</option><option>Calendar / Appointments</option><option>Automation stopped</option><option>Other</option></select>
-      </div>
-      <div class="field"><label>Describe the issue</label><textarea placeholder="What are you seeing? When did it start?…"></textarea></div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn-mcancel" onclick="closeModal('modal-report-issue')">Cancel</button>
-      <button class="btn-mconfirm blue" onclick="submitForm('modal-report-issue','Issue reported! Our team will investigate and follow up with you shortly.')">Submit Report</button>
-    </div>
-  </div>
-</div>
-
-<!-- Contact Support Modal -->
-<div class="modal-overlay" id="modal-contact">
-  <div class="modal">
-    <div class="modal-head">
-      <div><div class="modal-title">Contact Support</div><div class="modal-sub">Get help from the Flowaify team</div></div>
-      <button class="modal-close" onclick="closeModal('modal-contact')"><i data-lucide="x"></i></button>
-    </div>
-    <div class="modal-body">
-      <div class="field"><label>Your name</label><input type="text" placeholder="Full name" /></div>
-      <div class="field"><label>Email to reply to</label><input type="email" placeholder="you@yourbusiness.com" /></div>
-      <div class="field"><label>Message</label><textarea placeholder="How can we help?…"></textarea></div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn-mcancel" onclick="closeModal('modal-contact')">Cancel</button>
-      <button class="btn-mconfirm blue" onclick="submitForm('modal-contact','Message sent! Expect a reply within a few hours.')">Send Message</button>
-    </div>
-  </div>
-</div>
-
-<!-- Connect Email Modal -->
-<div class="modal-overlay" id="modal-connect-email">
-  <div class="modal">
-    <div class="modal-head">
-      <div><div class="modal-title">Email Connection</div><div class="modal-sub">Connected via Google Workspace</div></div>
-      <button class="modal-close" onclick="closeModal('modal-connect-email')"><i data-lucide="x"></i></button>
-    </div>
-    <div class="modal-body">
-      <p>Your email is connected and working. Flowaify is sending automated follow-ups through your Google Workspace account.</p>
-      <div style="margin-top:14px;padding:12px 16px;background:var(--green-dim);border:1px solid rgba(16,185,129,0.2);border-radius:10px;">
-        <div style="font-size:12px;font-weight:700;color:var(--green);margin-bottom:4px;">Connection Details</div>
-        <div style="font-size:11.5px;color:var(--green);opacity:0.85;line-height:1.8;">Provider: Google Workspace<br>Status: Active · Sending enabled<br>Last activity: 8 minutes ago</div>
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn-mcancel" onclick="closeModal('modal-connect-email')">Close</button>
-      <button class="btn-mconfirm blue" onclick="closeModal('modal-connect-email');openModal('modal-request-setup')">Request Changes</button>
-    </div>
-  </div>
-</div>
-
-<!-- Connect CRM Modal -->
-<div class="modal-overlay" id="modal-connect-crm">
-  <div class="modal">
-    <div class="modal-head">
-      <div><div class="modal-title">Connect CRM</div><div class="modal-sub">Link Zoho CRM to your Flowaify system</div></div>
-      <button class="modal-close" onclick="closeModal('modal-connect-crm')"><i data-lucide="x"></i></button>
-    </div>
-    <div class="modal-body">
-      <p>Connecting your CRM lets Flowaify automatically create contacts, update pipeline stages, and sync all lead activity without any manual work.</p>
-      <div style="margin-top:16px;display:flex;flex-direction:column;gap:10px;">
-        <button class="acbtn acbtn-blue" style="width:100%;justify-content:center;padding:11px;" onclick="mockConnectCRM()"><i data-lucide="database"></i> Connect Zoho CRM</button>
-        <button class="btn-mcancel" style="width:100%;text-align:center;" onclick="closeModal('modal-connect-crm');openModal('modal-request-setup')">Have Flowaify set this up for me</button>
-      </div>
-    </div>
-    <div class="modal-footer" style="padding-top:6px;">
-      <button class="btn-mcancel" onclick="closeModal('modal-connect-crm')">Cancel</button>
-    </div>
-  </div>
-</div>
-
-<!-- Connect SMS Modal -->
-<div class="modal-overlay" id="modal-connect-sms">
-  <div class="modal">
-    <div class="modal-head">
-      <div><div class="modal-title">Connect SMS</div><div class="modal-sub">Enable text message automation via Twilio</div></div>
-      <button class="modal-close" onclick="closeModal('modal-connect-sms')"><i data-lucide="x"></i></button>
-    </div>
-    <div class="modal-body">
-      <p>Connecting SMS lets Flowaify send instant text message follow-ups to new leads, appointment reminders, and lead alerts directly to your phone.</p>
-      <div style="margin-top:16px;display:flex;flex-direction:column;gap:10px;">
-        <button class="acbtn acbtn-green" style="width:100%;justify-content:center;padding:11px;" onclick="mockConnectSMS()"><i data-lucide="message-circle"></i> Connect SMS (Twilio)</button>
-        <button class="btn-mcancel" style="width:100%;text-align:center;" onclick="closeModal('modal-connect-sms');openModal('modal-request-setup')">Have Flowaify set this up for me</button>
-      </div>
-    </div>
-    <div class="modal-footer" style="padding-top:6px;">
-      <button class="btn-mcancel" onclick="closeModal('modal-connect-sms')">Skip for now</button>
-    </div>
-  </div>
-</div>
-
-<!-- Connect Calendar Modal -->
-<div class="modal-overlay" id="modal-connect-calendar">
-  <div class="modal">
-    <div class="modal-head">
-      <div><div class="modal-title">Calendar Connection</div><div class="modal-sub">Connected via Google Calendar</div></div>
-      <button class="modal-close" onclick="closeModal('modal-connect-calendar')"><i data-lucide="x"></i></button>
-    </div>
-    <div class="modal-body">
-      <p>Your calendar is connected and working. Flowaify is tracking appointments, sending reminders, and confirming bookings automatically.</p>
-      <div style="margin-top:14px;padding:12px 16px;background:var(--green-dim);border:1px solid rgba(16,185,129,0.2);border-radius:10px;">
-        <div style="font-size:12px;font-weight:700;color:var(--green);margin-bottom:4px;">Connection Details</div>
-        <div style="font-size:11.5px;color:var(--green);opacity:0.85;line-height:1.8;">Provider: Google Calendar<br>Status: Active · Booking enabled<br>Last booking: 3 hours ago</div>
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn-mcancel" onclick="closeModal('modal-connect-calendar')">Close</button>
-      <button class="btn-mconfirm blue" onclick="closeModal('modal-connect-calendar');openModal('modal-request-setup')">Request Changes</button>
-    </div>
-  </div>
-</div>
-
-<!-- Toast -->
-<div id="toast">
-  <div class="toast-icon"><i data-lucide="check"></i></div>
-  <div id="toast-msg" style="font-size:12.5px;font-weight:600;color:var(--text-s);line-height:1.45;"></div>
-</div>
+</nav>
 
 <!-- Demo Banner -->
 <div class="demo-banner">
-  <div class="banner-text"><strong>Client Portal Demo</strong> — Preview of your Flowaify dashboard. Real data activates once your system is live.</div>
-  <a class="btn-back" href="../brand_assets/index.html"><i data-lucide="arrow-left" style="width:12px;height:12px;"></i> Back to Site</a>
+  <div class="banner-text">
+    <strong>Demo Mode</strong> — Preview of your Flowaify dashboard. Your real data populates automatically once your system is live.
+  </div>
+  <a class="btn-back" href="../index.html">
+    <i data-lucide="arrow-left" style="width:12px;height:12px;"></i>
+    Back to Site
+  </a>
 </div>
 
+<!-- ═══════════════════════════════════════
+     DATA & LOGIC
+═══════════════════════════════════════ -->
 <script>
-/* ─── STATE ─── */
-const STATE = {
-  systemStatus: 'setup_needed',
-  crm: 'not_connected',
-  sms: 'not_connected',
+/* ── Lead Data ── */
+const LEADS = [
+  { id:1, name:"Marcus Thompson", co:"Real Estate Investor", email:"m.thompson@realty.com", phone:"(786) 412-9033", source:"Website Form", srcColor:"#2979FF", status:"Qualified", sc:"b-qual", hs:"Decision", last:"AI SMS sent", next:"Follow-up Day 4", score:82, val:"$12,500", ai:"Sent — 0:23s", seq:"Day 3 / 14",
+    tl:[
+      {ic:"file-text", cl:"td-blue", ev:"Website form submitted", ds:"Real estate inquiry — buy/sell consultation", tm:"Today, 9:14 AM"},
+      {ic:"user-check", cl:"td-amber", ev:"Contact created in HubSpot", ds:"Tagged: Real Estate · High Intent", tm:"Today, 9:14 AM"},
+      {ic:"message-circle", cl:"td-green", ev:"AI SMS reply sent", ds:"\"Hi Marcus! This is [Business]. Got your request — let's connect.\"", tm:"Today, 9:14 AM · 0:23s"},
+      {ic:"briefcase", cl:"td-purple", ev:"Deal created in HubSpot", ds:"Value: $12,500 · Stage: Decision", tm:"Today, 9:15 AM"},
+      {ic:"repeat-2", cl:"td-red", ev:"14-day follow-up sequence started", ds:"Channel: SMS + Email", tm:"Today, 9:15 AM"},
+      {ic:"clock", cl:"td-muted", ev:"Next follow-up scheduled", ds:"Day 4 — SMS check-in", tm:"Tomorrow, 9:14 AM"},
+    ]},
+  { id:2, name:"Sofia Reyes", co:"State Farm Insurance", email:"sreyes@gmail.com", phone:"(305) 887-4421", source:"Meta Ads", srcColor:"#2979FF", status:"AI Contacted", sc:"b-ai", hs:"Prospect", last:"Email sequence", next:"Day 2 email", score:64, val:"$4,800", ai:"Sent — 0:41s", seq:"Day 1 / 7",
+    tl:[
+      {ic:"mouse-pointer-click", cl:"td-blue", ev:"Meta Ad clicked → form submitted", ds:"Insurance quote request · Campaign: Insurance Leads Q2", tm:"Today, 10:52 AM"},
+      {ic:"user-check", cl:"td-amber", ev:"Contact created in HubSpot", ds:"Tagged: Insurance · Meta Ads", tm:"Today, 10:52 AM"},
+      {ic:"mail", cl:"td-green", ev:"AI email reply sent", ds:"Quote confirmation + availability offer", tm:"Today, 10:53 AM · 0:41s"},
+      {ic:"briefcase", cl:"td-purple", ev:"Deal created in HubSpot", ds:"Value: $4,800 · Stage: Prospect", tm:"Today, 10:53 AM"},
+      {ic:"repeat-2", cl:"td-red", ev:"7-day insurance follow-up started", ds:"Channel: Email + SMS", tm:"Today, 10:53 AM"},
+      {ic:"clock", cl:"td-muted", ev:"Next email scheduled", ds:"Day 2 — value email with case studies", tm:"Tomorrow, 10:52 AM"},
+    ]},
+  { id:3, name:"David Park", co:"First-Time Home Buyer", email:"david.park@outlook.com", phone:"(213) 554-7782", source:"Google Ads", srcColor:"#10b981", status:"Booked", sc:"b-booked", hs:"Booked", last:"Call booked", next:"Call Thu 2pm", score:91, val:"$8,200", ai:"Sent — 0:31s", seq:"Booked",
+    tl:[
+      {ic:"search", cl:"td-blue", ev:"Google Ads click → form submitted", ds:"Mortgage pre-approval inquiry", tm:"Yesterday, 3:22 PM"},
+      {ic:"user-check", cl:"td-amber", ev:"Contact created in HubSpot", ds:"Tagged: Mortgage · Google Ads · High Intent", tm:"Yesterday, 3:22 PM"},
+      {ic:"message-circle", cl:"td-green", ev:"AI SMS sent with Calendly link", ds:"\"Ready to walk through your options — pick a time.\"", tm:"Yesterday, 3:22 PM · 0:31s"},
+      {ic:"calendar-check", cl:"td-purple", ev:"Call booked via Calendly", ds:"Thursday 2:00 PM — consultation confirmed", tm:"Yesterday, 4:05 PM"},
+      {ic:"briefcase", cl:"td-amber", ev:"HubSpot stage updated → Booked", ds:"Deal value updated: $8,200", tm:"Yesterday, 4:05 PM"},
+      {ic:"clock", cl:"td-muted", ev:"Reminder sequence active", ds:"24hr + 1hr pre-call reminders", tm:"Thursday, 1:00 PM"},
+    ]},
+  { id:4, name:"Jennifer White", co:"Luxe Med Spa", email:"jennifer@luxemedspa.com", phone:"(404) 331-0928", source:"Website Form", srcColor:"#2979FF", status:"New", sc:"b-new", hs:"New Lead", last:"AI email reply", next:"Awaiting reply", score:55, val:"$3,600", ai:"Sent — 0:47s", seq:"Day 1 / 7",
+    tl:[
+      {ic:"file-text", cl:"td-blue", ev:"Website form submitted", ds:"\"Interested in botox packages — do you have availability?\"", tm:"Today, 11:38 AM"},
+      {ic:"user-check", cl:"td-amber", ev:"Contact created in HubSpot", ds:"Tagged: Med Spa · Website Form", tm:"Today, 11:38 AM"},
+      {ic:"message-circle", cl:"td-green", ev:"AI email reply sent", ds:"Pricing overview + booking link sent", tm:"Today, 11:39 AM · 0:47s"},
+      {ic:"repeat-2", cl:"td-red", ev:"7-Day Med Spa sequence started", ds:"Channel: Email + SMS", tm:"Today, 11:39 AM"},
+      {ic:"clock", cl:"td-muted", ev:"Awaiting reply", ds:"Follow-up triggers if no reply in 24hrs", tm:"Tomorrow, 11:38 AM"},
+    ]},
+  { id:5, name:"Carlos Rivera", co:"Realty Plus Group", email:"c.rivera@realtyplus.com", phone:"(954) 776-2214", source:"Referral", srcColor:"#f59e0b", status:"Closed", sc:"b-closed", hs:"Closed Won", last:"Deal closed", next:"Onboarding", score:97, val:"$15,000", ai:"Complete", seq:"Complete",
+    tl:[
+      {ic:"users", cl:"td-blue", ev:"Referral received from existing client", ds:"Referred by: Michael Ortega", tm:"Apr 28, 9:00 AM"},
+      {ic:"user-check", cl:"td-amber", ev:"Contact created in HubSpot", ds:"Tagged: Real Estate · Referral · VIP", tm:"Apr 28, 9:01 AM"},
+      {ic:"message-circle", cl:"td-green", ev:"AI SMS intro sent", ds:"Personalized message mentioning referral", tm:"Apr 28, 9:01 AM · 0:18s"},
+      {ic:"phone-call", cl:"td-purple", ev:"Discovery call completed", ds:"45 min — deal scope confirmed", tm:"Apr 29, 11:00 AM"},
+      {ic:"briefcase", cl:"td-green", ev:"Deal closed — $15,000", ds:"HubSpot stage: Closed Won", tm:"Apr 30, 2:14 PM"},
+      {ic:"check-circle", cl:"td-amber", ev:"Onboarding sequence triggered", ds:"Welcome email + setup checklist sent", tm:"Apr 30, 2:15 PM"},
+    ]},
+  { id:6, name:"Amanda Foster", co:"Allstate Agent", email:"afoster@allstate.net", phone:"(615) 443-8801", source:"Website Form", srcColor:"#2979FF", status:"Qualified", sc:"b-qual", hs:"Proposal", last:"Proposal sent", next:"Follow-up Day 6", score:74, val:"$5,100", ai:"Sent — 0:29s", seq:"Day 5 / 14",
+    tl:[
+      {ic:"file-text", cl:"td-blue", ev:"Website form submitted", ds:"Insurance automation inquiry", tm:"Apr 29, 2:15 PM"},
+      {ic:"user-check", cl:"td-amber", ev:"Contact created in HubSpot", ds:"Tagged: Insurance · Website Form", tm:"Apr 29, 2:15 PM"},
+      {ic:"message-circle", cl:"td-green", ev:"AI SMS sent", ds:"Intro + qualifier questions", tm:"Apr 29, 2:15 PM · 0:29s"},
+      {ic:"mail", cl:"td-purple", ev:"Proposal email sent", ds:"Custom system proposal — $5,100/setup", tm:"Apr 30, 10:00 AM"},
+      {ic:"clock", cl:"td-muted", ev:"Follow-up Day 6 scheduled", ds:"Check-in SMS — proposal status", tm:"Tomorrow, 2:15 PM"},
+    ]},
+  { id:7, name:"Ryan Mitchell", co:"Mitchell HVAC Services", email:"ryan@mitchellhvac.com", phone:"(480) 221-6634", source:"Meta Ads", srcColor:"#2979FF", status:"AI Contacted", sc:"b-ai", hs:"Prospect", last:"AI SMS sent", next:"Day 3 SMS", score:58, val:"$2,900", ai:"Sent — 0:52s", seq:"Day 2 / 7",
+    tl:[
+      {ic:"mouse-pointer-click", cl:"td-blue", ev:"Meta Lead Form submitted", ds:"HVAC business automation inquiry · Campaign: Service Biz Q2", tm:"Today, 8:44 AM"},
+      {ic:"user-check", cl:"td-amber", ev:"Contact created in HubSpot", ds:"Tagged: Service Business · Meta Ads", tm:"Today, 8:44 AM"},
+      {ic:"message-circle", cl:"td-green", ev:"AI SMS reply sent", ds:"\"Hey Ryan — saw your interest in automating follow-ups. Got a minute?\"", tm:"Today, 8:45 AM · 0:52s"},
+      {ic:"repeat-2", cl:"td-red", ev:"7-day service biz sequence started", ds:"Channel: SMS", tm:"Today, 8:45 AM"},
+      {ic:"clock", cl:"td-muted", ev:"Day 3 SMS scheduled", ds:"Case study share + availability ask", tm:"Wednesday, 8:44 AM"},
+    ]},
+  { id:8, name:"Priya Kapoor", co:"Smile Dental Group", email:"priya@smiledental.com", phone:"(312) 890-5577", source:"Google Ads", srcColor:"#10b981", status:"New", sc:"b-new", hs:"New Lead", last:"AI email sent", next:"Awaiting reply", score:61, val:"$6,800", ai:"Sent — 0:35s", seq:"Day 1 / 14",
+    tl:[
+      {ic:"search", cl:"td-blue", ev:"Google Ads form submitted", ds:"Dental clinic lead automation inquiry", tm:"Today, 12:02 PM"},
+      {ic:"user-check", cl:"td-amber", ev:"Contact created in HubSpot", ds:"Tagged: Dental Clinic · Google Ads", tm:"Today, 12:02 PM"},
+      {ic:"mail", cl:"td-green", ev:"AI email reply sent", ds:"\"Hi Priya — thanks for reaching out. Here's how we help clinics like yours.\"", tm:"Today, 12:03 PM · 0:35s"},
+      {ic:"repeat-2", cl:"td-red", ev:"14-day clinic sequence started", ds:"Channel: Email + SMS", tm:"Today, 12:03 PM"},
+      {ic:"clock", cl:"td-muted", ev:"Awaiting reply", ds:"Day 2 email triggers if no reply in 24hrs", tm:"Tomorrow, 12:02 PM"},
+    ]},
+];
+
+const KANBAN = {
+  "New":          [{name:"Jennifer White", type:"Med Spa",       val:"$3,600"},{name:"Priya Kapoor", type:"Dental Clinic", val:"$6,800"}],
+  "AI Contacted": [{name:"Sofia Reyes",    type:"Insurance",     val:"$4,800"},{name:"Ryan Mitchell",type:"HVAC Services", val:"$2,900"}],
+  "Qualified":    [{name:"Marcus Thompson",type:"Real Estate",   val:"$12,500"},{name:"Amanda Foster",type:"Insurance Agent",val:"$5,100"}],
+  "Booked":       [{name:"David Park",     type:"Mortgage",      val:"$8,200"}],
+  "Closed":       [{name:"Carlos Rivera",  type:"Real Estate",   val:"$15,000"}],
+  "Lost":         [{name:"James Holloway", type:"Service Biz",   val:"$2,200"}],
 };
 
-/* ─── PAGE NAV ─── */
+const AI_MSGS = [
+  {lead:"Marcus Thompson",type:"Real Estate",ch:"SMS",   msg:"\"Hi Marcus! This is [Business]. Got your real estate request — let's connect.\"", sent:"Today 9:14 AM", ms:"0:23s", status:"Replied",  sc:"b-closed"},
+  {lead:"Sofia Reyes",    type:"Insurance",  ch:"Email", msg:"\"Hi Sofia — thanks for your insurance quote request. Here's what we offer…\"",     sent:"Today 10:53 AM",ms:"0:41s", status:"No Reply", sc:"b-new"},
+  {lead:"David Park",     type:"Mortgage",   ch:"SMS",   msg:"\"Hey David! Ready to walk through your mortgage options — here's a quick link.\"",  sent:"Yesterday 3:22 PM",ms:"0:31s",status:"Booked",  sc:"b-booked"},
+  {lead:"Jennifer White", type:"Med Spa",    ch:"Email", msg:"\"Hi Jennifer! Thanks for your inquiry — here's our med spa service pricing and booking link.\"",sent:"Today 11:39 AM",ms:"0:47s", status:"Viewed",  sc:"b-ai"},
+  {lead:"Carlos Rivera",  type:"Real Estate",ch:"SMS",   msg:"\"Hi Carlos! [Michael] mentioned we should connect — quick intro below.\"",           sent:"Apr 28 9:01 AM",ms:"0:18s", status:"Replied",  sc:"b-closed"},
+  {lead:"Amanda Foster",  type:"Insurance",  ch:"SMS",   msg:"\"Hi Amanda — thanks for reaching out. A few quick questions to get started.\"",      sent:"Apr 29 2:15 PM",ms:"0:29s", status:"Replied",  sc:"b-closed"},
+  {lead:"Ryan Mitchell",  type:"HVAC",       ch:"SMS",   msg:"\"Hey Ryan — saw your interest in automating follow-ups for your HVAC biz.\"",         sent:"Today 8:45 AM", ms:"0:52s", status:"No Reply", sc:"b-new"},
+  {lead:"Priya Kapoor",   type:"Dental",     ch:"Email", msg:"\"Hi Priya — thanks for reaching out. Here's how we help clinics capture more leads.\"",sent:"Today 12:03 PM",ms:"0:35s", status:"No Reply", sc:"b-new"},
+];
+
+const FOLLOWUPS = [
+  {lead:"Marcus Thompson", seq:"14-Day Real Estate Nurture",  ch:"sms",   step:"3/14", status:"Active", next:"Tomorrow 9am"},
+  {lead:"Sofia Reyes",     seq:"7-Day Insurance Intro",       ch:"email", step:"1/7",  status:"Active", next:"Tomorrow 10am"},
+  {lead:"Amanda Foster",   seq:"14-Day Proposal Follow-Up",   ch:"sms",   step:"5/14", status:"Active", next:"Tomorrow 2pm"},
+  {lead:"Ryan Mitchell",   seq:"7-Day Service Biz Sequence",  ch:"sms",   step:"2/7",  status:"Active", next:"Wed 8am"},
+  {lead:"Priya Kapoor",    seq:"14-Day Clinic Outreach",      ch:"email", step:"1/14", status:"Active", next:"Tomorrow 12pm"},
+  {lead:"Jennifer White",  seq:"7-Day Med Spa Follow-Up",     ch:"sms",   step:"1/7",  status:"Waiting",next:"Tomorrow 11am"},
+  {lead:"David Park",      seq:"Pre-Call Reminder",           ch:"sms",   step:"1/2",  status:"Active", next:"Thu 1pm"},
+  {lead:"Carlos Rivera",   seq:"Onboarding Sequence",         ch:"email", step:"1/5",  status:"Active", next:"Tomorrow 2pm"},
+];
+
+/* ── Charts registry ── */
+const chartsInit = {};
+let chartsInstances = {};
+
+/* ── Page switching ── */
 const PAGE_META = {
-  overview:    { title: 'Dashboard',          sub: '' },
-  connections: { title: 'Connections',         sub: 'Manage your account integrations' },
-  automation:  { title: 'Automation Control',  sub: 'Control your Flowaify system' },
-  settings:    { title: 'Business Settings',   sub: 'Update your business information' },
-  status:      { title: 'System Status',       sub: 'Health of all connected services' },
-  support:     { title: 'Help & Support',      sub: "We're here to help" },
+  overview: {title:"Overview",       sub:""},
+  leads:    {title:"Leads",          sub:"Click a row to view detail and timeline"},
+  pipeline: {title:"Pipeline",       sub:"$218,400 · 6 stages · 7 active deals"},
+  ai:       {title:"AI Responses",   sub:"Every message sent on your behalf"},
+  followups:{title:"Follow-Ups",     sub:"47 active sequences running now"},
+  hubspot:  {title:"HubSpot Sync",   sub:"Last synced 3 min ago · All systems operational"},
+  settings: {title:"Settings",       sub:"Account, integrations, and automation preferences"},
 };
 
 function showPage(id) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById('page-' + id).classList.add('active');
-  const nav = document.querySelector('.nav-item[data-page="' + id + '"]');
-  if (nav) nav.classList.add('active');
-  const m = PAGE_META[id];
-  document.getElementById('topbar-title').textContent = m.title;
-  document.getElementById('topbar-sub').textContent   = m.sub || new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
-  closeSidebar();
-  window.scrollTo(0, 0);
-}
-document.querySelectorAll('.nav-item[data-page]').forEach(el =>
-  el.addEventListener('click', () => showPage(el.dataset.page))
-);
+  document.querySelector(`.nav-item[data-page="${id}"]`).classList.add('active');
 
-/* ─── THEME ─── */
+  const meta = PAGE_META[id];
+  document.getElementById('topbar-title').textContent = meta.title;
+  document.getElementById('topbar-sub').textContent   = meta.sub || new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+
+  initPageCharts(id);
+}
+
+document.querySelectorAll('.nav-item[data-page]').forEach(el => {
+  el.addEventListener('click', () => {
+    showPage(el.dataset.page);
+    closeMobSidebar();
+  });
+});
+
+/* ── Mobile sidebar ── */
+function toggleMobSidebar() {
+  const sidebar  = document.querySelector('.sidebar');
+  const overlay  = document.getElementById('mob-overlay');
+  const isOpen   = sidebar.classList.contains('mob-open');
+  if (isOpen) {
+    sidebar.classList.remove('mob-open');
+    overlay.classList.remove('open');
+  } else {
+    sidebar.classList.add('mob-open');
+    overlay.classList.add('open');
+  }
+}
+function closeMobSidebar() {
+  document.querySelector('.sidebar').classList.remove('mob-open');
+  document.getElementById('mob-overlay').classList.remove('open');
+}
+
+/* ── Mobile bottom tab navigation ── */
+function mobNav(id) {
+  showPage(id);
+  document.querySelectorAll('.mob-tab').forEach(t => t.classList.toggle('active', t.dataset.page === id));
+}
+
+/* ── Theme toggle ── */
 function toggleTheme() {
   const html = document.documentElement;
-  const dark = html.getAttribute('data-theme') === 'dark';
-  html.setAttribute('data-theme', dark ? 'light' : 'dark');
-  document.getElementById('theme-icon').setAttribute('data-lucide', dark ? 'moon' : 'sun');
+  const isDark = html.getAttribute('data-theme') === 'dark';
+  html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  document.getElementById('theme-icon').setAttribute('data-lucide', isDark ? 'moon' : 'sun');
   lucide.createIcons();
+  updateChartThemes();
 }
 
-/* ─── MOBILE SIDEBAR ─── */
-function toggleSidebar() {
-  document.getElementById('sidebar').classList.toggle('open');
-  document.getElementById('sidebar-overlay').classList.toggle('open');
-}
-function closeSidebar() {
-  document.getElementById('sidebar').classList.remove('open');
-  document.getElementById('sidebar-overlay').classList.remove('open');
-}
-
-/* ─── MODALS ─── */
-function openModal(id) {
-  document.getElementById(id).classList.add('open');
+/* ── Sync button ── */
+function doSync(btn) {
+  btn.disabled = true; btn.style.opacity = '0.7';
+  btn.innerHTML = '<i data-lucide="loader-2" style="width:13px;height:13px;" class="spinning"></i> Syncing…';
   lucide.createIcons();
-}
-function closeModal(id) { document.getElementById(id).classList.remove('open'); }
-document.querySelectorAll('.modal-overlay').forEach(o =>
-  o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); })
-);
-
-/* ─── TOAST ─── */
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  document.getElementById('toast-msg').textContent = msg;
-  t.style.display = 'flex';
-  lucide.createIcons();
-  clearTimeout(t._timer);
-  t._timer = setTimeout(() => { t.style.display = 'none'; }, 3800);
-}
-
-/* ─── STATUS UI UPDATE ─── */
-function updateStatusUI() {
-  const s = STATE.systemStatus;
-  const configs = {
-    live:          { bannerCls:'sb-live',   dotCls:'live',   labelCls:'text-green',  label:'System is Live',          desc:'Flowaify is actively capturing leads and sending follow-ups', pillCls:'b-live',   pillTxt:'Live' },
-    paused:        { bannerCls:'sb-paused', dotCls:'paused', labelCls:'text-purple', label:'Automation Paused',        desc:'Accounts connected · No messages sending · Resume anytime',   pillCls:'b-paused', pillTxt:'Paused' },
-    setup_needed:  { bannerCls:'sb-setup',  dotCls:'setup',  labelCls:'text-amber',  label:'Setup Needed',             desc:'Connect your remaining accounts to go live',                   pillCls:'b-setup',  pillTxt:'Setup Needed' },
-  };
-  const c = configs[s] || configs.setup_needed;
-
-  ['ov-status-banner', 'auto-status-banner'].forEach(id => {
-    const el = document.getElementById(id);
-    el.className = 'status-banner ' + c.bannerCls + (id === 'auto-status-banner' ? ' mb20' : '');
-  });
-  ['ov-status-dot', 'auto-status-dot'].forEach(id => {
-    document.getElementById(id).className = 'sb-dot ' + c.dotCls;
-  });
-  ['ov-status-label', 'auto-status-label'].forEach(id => {
-    const el = document.getElementById(id);
-    el.textContent = c.label;
-    el.className = 'sb-label ' + c.labelCls;
-  });
-  ['ov-status-desc', 'auto-status-desc'].forEach(id => {
-    const el = document.getElementById(id);
-    el.textContent = c.desc;
-    el.className = 'sb-sub ' + c.labelCls;
-  });
-  const pill = document.getElementById('auto-status-pill');
-  pill.className = 'badge ' + c.pillCls;
-  pill.textContent = c.pillTxt;
-
-  // Show/hide "Complete Setup" button on overview banner
-  const completeBtn = document.querySelector('#ov-status-banner .btn-connect');
-  if (completeBtn) completeBtn.style.display = s === 'setup_needed' ? '' : 'none';
-}
-
-function launchSystem() {
-  closeModal('modal-launch');
-  STATE.systemStatus = 'live';
-  updateStatusUI();
-  showToast('Your system is now live! Flowaify is actively running.');
-}
-function pauseSystem() {
-  closeModal('modal-pause');
-  STATE.systemStatus = 'paused';
-  updateStatusUI();
-  showToast('Automation paused. Your accounts remain connected.');
-}
-function resumeSystem() {
-  closeModal('modal-resume');
-  STATE.systemStatus = 'live';
-  updateStatusUI();
-  showToast('Automation resumed — Flowaify is back online.');
-}
-
-/* ─── CONNECTIONS ─── */
-function handleConnect(type) {
-  const map = { email:'modal-connect-email', crm:'modal-connect-crm', sms:'modal-connect-sms', calendar:'modal-connect-calendar' };
-  openModal(map[type]);
-}
-
-function mockConnectCRM() {
-  closeModal('modal-connect-crm');
-  STATE.crm = 'connected';
-
-  const els = {
-    badge: ['crm-badge','crm-ov-badge','crm-check-badge','crm-status-badge','modal-sync-crm-badge'],
-    sub: { 'crm-provider-label':'Zoho CRM · Connected', 'modal-sync-crm-sub':'Zoho CRM · Connected', 'crm-status-sub':'Zoho CRM · Active', 'crm-sync-sub':'Sync active', },
-    syncBadge: 'crm-sync-badge',
-    autoSyncBadge: 'crm-sync-badge',
-  };
-
-  els.badge.forEach(id => {
-    const el = document.getElementById(id);
-    if (el) { el.className = 'badge b-connected'; el.textContent = 'Connected'; }
-  });
-  Object.entries(els.sub).forEach(([id, txt]) => {
-    const el = document.getElementById(id);
-    if (el) { el.textContent = txt; el.style.color = 'var(--green)'; }
-  });
-  const btn = document.getElementById('crm-btn');
-  if (btn) { btn.className = 'btn-connect bcg'; btn.innerHTML = '<i data-lucide="check" style="width:11px;height:11px;"></i> Connected'; }
-
-  const checkIcon = document.getElementById('crm-check-icon');
-  if (checkIcon) { checkIcon.className = 'check-icon ci-done'; checkIcon.innerHTML = '<i data-lucide="check"></i>'; }
-
-  const ovIcon = document.getElementById('crm-ov-icon');
-  if (ovIcon) ovIcon.className = 'check-icon ci-done';
-
-  const syncBadge = document.getElementById('crm-sync-badge');
-  if (syncBadge) { syncBadge.className = 'badge b-live'; syncBadge.textContent = 'Live'; }
-
-  lucide.createIcons();
-  showToast('CRM connected! Flowaify will now sync leads and contacts to Zoho CRM.');
-}
-
-function mockConnectSMS() {
-  closeModal('modal-connect-sms');
-  STATE.sms = 'connected';
-
-  ['sms-badge','sms-ov-badge','sms-check-badge','sms-status-badge','modal-sync-sms-badge'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) { el.className = 'badge b-connected'; el.textContent = 'Connected'; }
-  });
-  [['sms-provider-label','Twilio · Connected'],['modal-sync-sms-sub','Twilio · Connected'],['sms-status-sub','Twilio · Active'],['sms-auto-sub','SMS automation active']].forEach(([id, txt]) => {
-    const el = document.getElementById(id);
-    if (el) { el.textContent = txt; el.style.color = 'var(--green)'; }
-  });
-
-  const autoB = document.getElementById('sms-auto-badge');
-  if (autoB) { autoB.className = 'badge b-live'; autoB.textContent = 'Live'; }
-
-  const btn = document.getElementById('sms-btn');
-  if (btn) { btn.className = 'btn-connect bcg'; btn.innerHTML = '<i data-lucide="check" style="width:11px;height:11px;"></i> Connected'; }
-
-  const ovIcon = document.getElementById('sms-ov-icon');
-  if (ovIcon) ovIcon.className = 'check-icon ci-done';
-
-  lucide.createIcons();
-  showToast('SMS connected! Flowaify will now send automated text messages via Twilio.');
-}
-
-/* ─── FORMS ─── */
-function submitForm(modalId, msg) {
-  closeModal(modalId);
-  showToast(msg);
-}
-function saveSettings() {
-  showToast('Business settings saved successfully.');
-}
-
-/* ─── STATUS REFRESH ─── */
-function refreshStatus() {
-  const icon = document.getElementById('refresh-icon');
-  icon.classList.add('spinning');
   setTimeout(() => {
-    icon.classList.remove('spinning');
+    btn.disabled = false; btn.style.opacity = '1';
+    btn.innerHTML = '<i data-lucide="check" style="width:13px;height:13px;"></i> Synced';
     lucide.createIcons();
-    showToast('Status refreshed — all systems checked.');
-  }, 1800);
+    setTimeout(() => {
+      btn.innerHTML = '<i data-lucide="refresh-cw" style="width:13px;height:13px;"></i> Sync HubSpot';
+      lucide.createIcons();
+    }, 2500);
+  }, 2200);
 }
 
-/* ─── INIT ─── */
-window.addEventListener('DOMContentLoaded', () => {
+/* ── Render overview lead table ── */
+function renderOvLeads() {
+  const tb = document.getElementById('ov-lead-tbody');
+  LEADS.slice(0,5).forEach(l => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><div class="ln">${l.name}</div><div class="lsm">${l.co}</div></td>
+      <td><span class="src-dot" style="background:${l.srcColor}"></span>${l.source}</td>
+      <td><span class="badge ${l.sc}">${l.status}</span></td>
+      <td style="color:var(--blue-soft);font-weight:700;">${l.val}</td>`;
+    tb.appendChild(tr);
+  });
+}
+
+/* ── Render lead table ── */
+function renderLeads() {
+  const tb = document.getElementById('lead-tbody');
+  LEADS.forEach((l, i) => {
+    const tr = document.createElement('tr');
+    if (i === 0) tr.classList.add('sel');
+    tr.innerHTML = `
+      <td><div class="ln">${l.name}</div><div class="lsm">${l.co}</div></td>
+      <td><span class="src-dot" style="background:${l.srcColor}"></span>${l.source}</td>
+      <td><span class="badge ${l.sc}">${l.status}</span></td>
+      <td style="color:var(--text-m)">${l.hs}</td>
+      <td style="color:var(--text-m)">${l.last}</td>
+      <td style="color:var(--blue-soft)">${l.next}</td>`;
+    tr.addEventListener('click', () => selectLead(l, tr));
+    tb.appendChild(tr);
+  });
+}
+
+function selectLead(l, row) {
+  document.querySelectorAll('#lead-tbody tr').forEach(r => r.classList.remove('sel'));
+  row.classList.add('sel');
+  document.getElementById('d-name').textContent = l.name;
+  document.getElementById('d-sub').textContent  = l.co + ' · ' + l.source;
+  document.getElementById('d-email').textContent = l.email;
+  document.getElementById('d-phone').textContent = l.phone;
+  document.getElementById('d-source').textContent= l.source;
+  document.getElementById('d-score').textContent = l.score + ' / 100';
+  document.getElementById('d-score-bar').style.width = l.score + '%';
+  document.getElementById('d-value').textContent = l.val;
+  document.getElementById('d-stage').innerHTML = `<span class="badge ${l.sc}">${l.status}</span>`;
+  document.getElementById('d-ai').innerHTML    = `<span class="badge b-closed">${l.ai}</span>`;
+  document.getElementById('d-seq').innerHTML   = `<span class="badge b-ai">${l.seq}</span>`;
+  document.getElementById('detail-updated').textContent = 'Updated just now';
+  renderTimeline(l.tl);
+}
+
+function renderTimeline(events) {
+  const tl = document.getElementById('d-timeline');
+  tl.innerHTML = '';
+  events.forEach(e => {
+    const div = document.createElement('div');
+    div.className = 'tl-item';
+    div.innerHTML = `
+      <div class="tl-dot ${e.cl}"><i data-lucide="${e.ic}"></i></div>
+      <div class="tl-body">
+        <div class="tl-ev">${e.ev}</div>
+        <div class="tl-desc">${e.ds}</div>
+        <div class="tl-time">${e.tm}</div>
+      </div>`;
+    tl.appendChild(div);
+  });
+  lucide.createIcons();
+}
+
+/* ── Render Kanban ── */
+function renderKanban() {
+  const board = document.getElementById('kanban-board');
+  Object.entries(KANBAN).forEach(([stage, cards]) => {
+    const col = document.createElement('div');
+    col.className = 'kb-col';
+    col.innerHTML = `
+      <div class="kb-head">${stage}<span class="kb-count">${cards.length}</span></div>
+      ${cards.map(c => `
+        <div class="kb-card">
+          <div class="kc-name">${c.name}</div>
+          <div class="kc-type">${c.type}</div>
+          <div class="kc-val">${c.val}</div>
+        </div>`).join('')}`;
+    board.appendChild(col);
+  });
+}
+
+/* ── Render AI table ── */
+function renderAI() {
+  const tb = document.getElementById('ai-tbody');
+  AI_MSGS.forEach(m => {
+    const chCls = m.ch === 'SMS' ? 'ch-sms' : m.ch === 'Email' ? 'ch-email' : 'ch-igdm';
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><div class="ln">${m.lead}</div><div class="lsm">${m.type}</div></td>
+      <td style="color:var(--text-m)">${m.type}</td>
+      <td><span class="badge ${chCls}">${m.ch}</span></td>
+      <td style="max-width:220px;overflow:hidden;text-overflow:ellipsis;color:var(--text-m);font-size:11.5px;">${m.msg}</td>
+      <td style="color:var(--text-m)">${m.sent}</td>
+      <td style="color:var(--blue-soft);font-weight:700;">${m.ms}</td>
+      <td><span class="badge ${m.sc}">${m.status}</span></td>`;
+    tb.appendChild(tr);
+  });
+}
+
+/* ── Render Follow-Ups ── */
+function renderFollowups() {
+  const tb = document.getElementById('fu-tbody');
+  FOLLOWUPS.forEach(f => {
+    const chCls = f.ch === 'sms' ? 'ch-sms' : f.ch === 'email' ? 'ch-email' : 'ch-igdm';
+    const chLbl = f.ch === 'sms' ? 'SMS' : 'Email';
+    const stCls = f.status === 'Active' ? 'b-closed' : 'b-new';
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><span class="ln">${f.lead}</span></td>
+      <td style="color:var(--text-m);max-width:190px;overflow:hidden;text-overflow:ellipsis;">${f.seq}</td>
+      <td><span class="badge ${chCls}">${chLbl}</span></td>
+      <td style="color:var(--blue-soft);font-weight:700;">${f.step}</td>
+      <td><span class="badge ${stCls}">${f.status}</span></td>
+      <td style="color:var(--text-m)">${f.next}</td>`;
+    tb.appendChild(tr);
+  });
+}
+
+/* ── Chart helpers ── */
+function isDark() { return document.documentElement.getAttribute('data-theme') === 'dark'; }
+function gridColor() { return isDark() ? 'rgba(226,232,240,0.05)' : 'rgba(15,23,42,0.06)'; }
+function tickColor() { return isDark() ? 'rgba(226,232,240,0.38)' : 'rgba(15,23,42,0.42)'; }
+function tooltipBg() { return isDark() ? 'rgba(10,20,50,0.96)' : 'rgba(255,255,255,0.98)'; }
+function tooltipTxt(){ return isDark() ? '#e2e8f0' : '#0f172a'; }
+function tooltipMut(){ return isDark() ? 'rgba(226,232,240,0.6)' : 'rgba(15,23,42,0.55)'; }
+
+function baseTooltip() {
+  return { backgroundColor: tooltipBg(), borderColor: 'rgba(60,130,255,0.28)', borderWidth:1, titleColor: tooltipTxt(), bodyColor: tooltipMut(), padding:10 };
+}
+function baseScales() {
+  return {
+    x: { grid: { color: gridColor(), drawBorder:false }, ticks: { color: tickColor(), font:{size:10} } },
+    y: { grid: { color: gridColor(), drawBorder:false }, ticks: { color: tickColor(), font:{size:10} } },
+  };
+}
+function baseLegend() {
+  return { labels: { color: tickColor(), font:{family:'Plus Jakarta Sans',size:11,weight:'500'}, boxWidth:10, boxHeight:10, padding:14 } };
+}
+
+function initPageCharts(page) {
+  if (chartsInit[page]) return;
+  chartsInit[page] = true;
+
+  if (page === 'overview') {
+    chartsInstances['source'] = new Chart(document.getElementById('ch-source'), {
+      type:'doughnut',
+      data:{
+        labels:['Website Form','Meta Ads','Google Ads','Email Inquiry','Referral'],
+        datasets:[{data:[38,26,19,9,8],backgroundColor:['#2979FF','#8b5cf6','#10b981','#f59e0b','#ef4444'],borderColor: isDark() ? 'rgba(4,9,21,0.8)' : '#fff', borderWidth:3, hoverOffset:7}]
+      },
+      options:{responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{position:'right',...baseLegend()}, tooltip:{...baseTooltip(), callbacks:{label:c=>` ${c.parsed}%`}}},
+        cutout:'66%'}
+    });
+    chartsInstances['response'] = new Chart(document.getElementById('ch-response'), {
+      type:'line',
+      data:{
+        labels:['Apr 20','Apr 21','Apr 22','Apr 23','Apr 24','Apr 25','Apr 26','Apr 27','Apr 28','Apr 29','Apr 30','May 1','May 2','May 3'],
+        datasets:[{label:'Avg seconds',data:[72,65,58,70,51,49,63,44,58,42,47,39,41,38],borderColor:'#2979FF',backgroundColor:'rgba(41,121,255,0.08)',fill:true,tension:0.45,pointBackgroundColor:'#2979FF',pointBorderColor: isDark() ? 'rgba(4,9,21,0.9)' : '#fff',pointRadius:3,pointHoverRadius:5,borderWidth:2}]
+      },
+      options:{responsive:true,maintainAspectRatio:false, plugins:{legend:{display:false},tooltip:{...baseTooltip(),callbacks:{label:c=>` ${c.parsed.y}s avg`}}}, scales:baseScales()}
+    });
+  }
+
+  if (page === 'pipeline') {
+    chartsInstances['pipeline'] = new Chart(document.getElementById('ch-pipeline'), {
+      type:'bar',
+      data:{
+        labels:['New','AI Contacted','Qualified','Booked','Closed','Lost'],
+        datasets:[{label:'Deals',data:[2,2,2,1,1,1],backgroundColor:['rgba(226,232,240,0.15)','rgba(41,121,255,0.5)','rgba(245,158,11,0.5)','rgba(139,92,246,0.5)','rgba(16,185,129,0.55)','rgba(239,68,68,0.4)'],borderRadius:7,borderSkipped:false}]
+      },
+      options:{responsive:true,maintainAspectRatio:false, plugins:{legend:{display:false},tooltip:{...baseTooltip()}},
+        scales:{...baseScales(), y:{...baseScales().y, ticks:{...baseScales().y.ticks, stepSize:1}}}}
+    });
+  }
+
+  if (page === 'ai') {
+    const hrs = ['8am','9am','10am','11am','12pm','1pm','2pm','3pm','4pm','5pm'];
+    chartsInstances['aitime'] = new Chart(document.getElementById('ch-ai-time'), {
+      type:'line',
+      data:{
+        labels:hrs,
+        datasets:[{label:'Response (sec)',data:[45,38,52,31,41,47,29,36,43,38],borderColor:'#10b981',backgroundColor:'rgba(16,185,129,0.08)',fill:true,tension:0.4,pointBackgroundColor:'#10b981',pointRadius:3,borderWidth:2}]
+      },
+      options:{responsive:true,maintainAspectRatio:false, plugins:{legend:{display:false},tooltip:{...baseTooltip(),callbacks:{label:c=>` ${c.parsed.y}s`}}}, scales:{...baseScales(), y:{...baseScales().y, ticks:{...baseScales().y.ticks, callback:v=>v+'s'}}}}
+    });
+    chartsInstances['aichannel'] = new Chart(document.getElementById('ch-ai-channel'), {
+      type:'doughnut',
+      data:{
+        labels:['SMS','Email','Phone Call'],
+        datasets:[{data:[55,36,9],backgroundColor:['rgba(16,185,129,0.7)','rgba(41,121,255,0.7)','rgba(139,92,246,0.7)'],borderColor: isDark() ? 'rgba(4,9,21,0.8)' : '#fff',borderWidth:3,hoverOffset:6}]
+      },
+      options:{responsive:true,maintainAspectRatio:false, plugins:{legend:{position:'right',...baseLegend()},tooltip:{...baseTooltip(),callbacks:{label:c=>` ${c.parsed}%`}}}, cutout:'66%'}
+    });
+  }
+
+  if (page === 'followups') {
+    chartsInstances['fuchannel'] = new Chart(document.getElementById('ch-fu-channel'), {
+      type:'bar',
+      data:{
+        labels:['SMS','Email','Email+SMS','Call'],
+        datasets:[{label:'Active sequences',data:[28,15,4,0],backgroundColor:['rgba(16,185,129,0.6)','rgba(41,121,255,0.6)','rgba(139,92,246,0.6)','rgba(245,158,11,0.6)'],borderRadius:8,borderSkipped:false}]
+      },
+      options:{responsive:true,maintainAspectRatio:false, plugins:{legend:{display:false},tooltip:{...baseTooltip()}},
+        scales:{...baseScales(), y:{...baseScales().y, ticks:{...baseScales().y.ticks, stepSize:5}}}}
+    });
+  }
+
+  if (page === 'hubspot') {
+    chartsInstances['sync'] = new Chart(document.getElementById('ch-sync'), {
+      type:'bar',
+      data:{
+        labels:['Apr 27','Apr 28','Apr 29','Apr 30','May 1','May 2','May 3'],
+        datasets:[{label:'Contacts',data:[186,214,243,271,259,293,318],backgroundColor:'rgba(41,121,255,0.55)',borderRadius:7,borderSkipped:false}]
+      },
+      options:{responsive:true,maintainAspectRatio:false, plugins:{legend:{display:false},tooltip:{...baseTooltip()}}, scales:baseScales()}
+    });
+  }
+}
+
+/* ── Update chart themes on toggle ── */
+function updateChartThemes() {
+  Object.values(chartsInstances).forEach(ch => {
+    const ds = ch.data.datasets;
+    if (ch.config.type === 'doughnut') {
+      ds.forEach(d => { d.borderColor = isDark() ? 'rgba(4,9,21,0.8)' : '#fff'; });
+    }
+    if (ch.config.options?.scales) {
+      ['x','y'].forEach(ax => {
+        if (ch.config.options.scales[ax]) {
+          ch.config.options.scales[ax].grid.color = gridColor();
+          ch.config.options.scales[ax].ticks.color = tickColor();
+        }
+      });
+    }
+    if (ch.config.options?.plugins?.legend?.labels) {
+      ch.config.options.plugins.legend.labels.color = tickColor();
+    }
+    ch.update();
+  });
+}
+
+/* ── Date ── */
+function setDate() {
+  const d = new Date();
   document.getElementById('topbar-sub').textContent =
-    new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
-  updateStatusUI();
+    d.toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+}
+
+/* ── Init ── */
+window.addEventListener('DOMContentLoaded', () => {
+  setDate();
+  renderOvLeads();
+  renderLeads();
+  renderTimeline(LEADS[0].tl);
+  selectLead(LEADS[0], document.querySelector('#lead-tbody tr'));
+  renderKanban();
+  renderAI();
+  renderFollowups();
+  initPageCharts('overview');
   lucide.createIcons();
 });
 </script>
+
 </body>
 </html>

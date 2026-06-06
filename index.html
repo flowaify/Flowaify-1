@@ -4,8 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>flowaify — Automate. Flow. Amplify.</title>
-  <link rel="icon" type="image/png" href="logo-transparent.png" />
-  <link rel="apple-touch-icon" href="logo-transparent.png" />
+  <link rel="shortcut icon" href="favicon.ico" />
+  <link rel="icon" type="image/x-icon" href="favicon.ico" />
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="logo-transparent.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -130,7 +133,7 @@
       box-shadow: var(--shadow-sm);
       transition: transform 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.25s, border-color 0.25s;
     }
-    .card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); border-color: var(--border-blue); }
+    .card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); border-color: var(--border-blue); }
 
     /* .glass is an alias for .card */
     .glass {
@@ -140,7 +143,7 @@
       box-shadow: var(--shadow-sm);
       transition: transform 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.25s, border-color 0.25s;
     }
-    .glass:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); border-color: var(--border-blue); }
+    .glass:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); border-color: var(--border-blue); }
 
     /* Plan card */
     .plan {
@@ -150,7 +153,7 @@
       transition: transform 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.25s, border-color 0.25s;
       cursor: default;
     }
-    .plan:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); border-color: var(--border-blue); }
+    .plan:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); border-color: var(--border-blue); }
     .plan.featured {
       border-color: var(--blue);
       background: linear-gradient(145deg, rgba(0,87,255,0.04), rgba(0,87,255,0.01));
@@ -180,7 +183,7 @@
     /* Marquee */
     .marquee-wrap { display: flex; overflow: hidden; }
     .marquee-track {
-      display: flex; align-items: center; gap: 72px;
+      display: flex; align-items: center; gap: 52px;
       animation: marquee 28s linear infinite; width: max-content;
       will-change: transform;
     }
@@ -1072,6 +1075,7 @@
       .mob-only { display:block; }
       #hamburger { display:flex !important; }
       #navbar-cta { display:none !important; }
+      #portal-btn  { display:none !important; }
 
       /* ── Hero ── */
       #hero-section { padding-top:60px; padding-bottom:60px; }
@@ -1181,7 +1185,6 @@
       #contact { padding:60px 20px 0 !important; }
       .contact-headline { font-size:38px !important; line-height:1.05 !important; }
       .contact-2col { grid-template-columns:1fr !important; }
-      .contact-logo-bg { width:min(900px,120vw); }
       .contact-whatget-grid { grid-template-columns:1fr !important; }
       /* Form 2-col field rows → 1-col */
       #contact-form div[style*="grid-template-columns:1fr 1fr"] {
@@ -1234,7 +1237,6 @@
       .plans-table th { font-size:12px !important; }
       #contact { padding:48px 16px 0 !important; }
       .contact-headline { font-size:28px !important; }
-      .contact-logo-bg { width:130vw; }
       footer { padding:28px 16px !important; }
       #problem { padding:48px 16px !important; }
       #problem h2 { font-size:26px !important; }
@@ -1296,10 +1298,9 @@
     <div id="navbar-links">
       <a href="#who-for" class="nav-link" onclick="closeNav()" style="display:inline-flex;align-items:center;gap:4px;">Solutions <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></a>
       <a href="#how-it-works"     class="nav-link" onclick="closeNav()">How It Works</a>
-      <a href="demo.html" class="nav-link" onclick="closeNav()">Dashboard</a>
       <a href="#plans"            class="nav-link" onclick="closeNav()">Plans</a>
       <a href="#faq"              class="nav-link" onclick="closeNav()">FAQ</a>
-      <a href="#contact"          class="nav-link mob-only" onclick="closeNav()">Book a Discovery Call</a>
+      <a href="#build-my-plan"    class="nav-link mob-only" onclick="closeNav()">Build My Plan</a>
     </div>
 
     <div style="display:flex;align-items:center;gap:12px;">
@@ -1312,7 +1313,11 @@
           <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>
         </svg>
       </button>
-      <a id="navbar-cta" href="#contact" class="btn btn-primary">Book a Call →</a>
+      <a id="portal-btn" href="dashboard/portal.html" class="btn" style="display:inline-flex;align-items:center;gap:6px;border:1.5px solid rgba(0,87,255,0.28);color:var(--blue-soft,#3D82FF);background:rgba(0,87,255,0.06);font-size:13px;font-weight:600;padding:8px 16px;border-radius:9px;text-decoration:none;transition:all 0.18s;white-space:nowrap;" onmouseover="this.style.background='rgba(0,87,255,0.13)';this.style.transform='translateY(-1px)'" onmouseout="this.style.background='rgba(0,87,255,0.06)';this.style.transform='translateY(0)'">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        Client Portal
+      </a>
+      <a id="navbar-cta" href="#build-my-plan" class="btn btn-primary">Build My Plan</a>
     </div>
   </nav>
 
@@ -1343,7 +1348,7 @@
 
         <div id="hero-pill" class="pill-tag" style="opacity:0;transform:translateY(12px);margin-bottom:32px;display:inline-flex;">
           <span class="pulse" style="width:6px;height:6px;border-radius:50%;background:var(--blue);display:inline-block;"></span>
-          <span style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--blue);">Start Flowing</span>
+          <span style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--blue);">AI Lead Automation</span>
         </div>
 
         <h1 id="hero-h1" style="opacity:0;transform:translateY(12px);font-size:64px;font-weight:800;line-height:1.03;letter-spacing:-0.05em;margin-bottom:24px;color:var(--text);">
@@ -1351,17 +1356,17 @@
         </h1>
 
         <p id="hero-sub" style="opacity:0;transform:translateY(12px);font-size:18px;line-height:1.75;color:var(--text-soft);max-width:460px;margin-bottom:40px;">
-          Flowaify responds instantly, organizes every lead, syncs to your CRM, and automates follow-up so nothing slips through the cracks.
+          Flowaify builds custom AI lead automation systems for service businesses that need faster replies, cleaner CRM organization, and automatic follow-up.
         </p>
 
         <div id="hero-ctas" style="opacity:0;transform:translateY(12px);display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:32px;">
-          <a href="#contact" class="btn btn-primary btn-lg">
-            Book a Discovery Call
+          <a href="#build-my-plan" class="btn btn-primary btn-lg">
+            Build My Plan
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
               <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
             </svg>
           </a>
-          <a href="demo.html" class="btn btn-lg" style="background:rgba(0,87,255,0.08);border:1.5px solid rgba(0,87,255,0.28);color:var(--blue-soft,#3D82FF);display:inline-flex;align-items:center;gap:8px;font-weight:600;transition:all 0.2s;" onmouseover="this.style.background='rgba(0,87,255,0.14)';this.style.transform='translateY(-2px)';" onmouseout="this.style.background='rgba(0,87,255,0.08)';this.style.transform='translateY(0)';">
+          <a href="dashboard/demo.html" class="btn btn-lg" style="background:rgba(0,87,255,0.08);border:1.5px solid rgba(0,87,255,0.28);color:var(--blue-soft,#3D82FF);display:inline-flex;align-items:center;gap:8px;font-weight:600;transition:all 0.2s;" onmouseover="this.style.background='rgba(0,87,255,0.14)';this.style.transform='translateY(-2px)';" onmouseout="this.style.background='rgba(0,87,255,0.08)';this.style.transform='translateY(0)';">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
             View Demo Dashboard
           </a>
@@ -1450,8 +1455,14 @@
         </div>
         <div style="width:1px;height:24px;background:var(--border);"></div>
         <div style="display:flex;align-items:center;gap:11px;">
+          <!-- Google Sheets -->
+          <svg width="26" height="26" viewBox="0 0 24 24"><rect width="24" height="24" rx="3" fill="#0F9D58"/><rect x="6" y="8" width="12" height="1.5" rx="0.75" fill="white" opacity="0.9"/><rect x="6" y="11" width="12" height="1.5" rx="0.75" fill="white" opacity="0.9"/><rect x="6" y="14" width="8" height="1.5" rx="0.75" fill="white" opacity="0.9"/><rect x="6" y="5" width="5" height="2" rx="1" fill="white" opacity="0.5"/></svg>
+          <span style="font-size:15px;font-weight:600;color:var(--text-soft);">Google Sheets</span>
+        </div>
+        <div style="width:1px;height:24px;background:var(--border);"></div>
+        <div style="display:flex;align-items:center;gap:11px;">
           <svg width="26" height="26" viewBox="0 0 24 24" fill="#D97757"><path d="M13.2 3L7 14.4h3.4L16.6 3zM10.8 9.6L17 21H13.6L7.4 9.6z"/></svg>
-          <span style="font-size:15px;font-weight:600;color:var(--text-soft);">Claude</span>
+          <span style="font-size:15px;font-weight:600;color:var(--text-soft);">Claude AI</span>
         </div>
         <div style="width:1px;height:24px;background:var(--border);"></div>
         <div style="display:flex;align-items:center;gap:11px;">
@@ -1463,6 +1474,12 @@
             <circle cx="16.8" cy="16.8" r="1.8" fill="white"/>
           </svg>
           <span style="font-size:15px;font-weight:600;color:var(--text-soft);">Twilio</span>
+        </div>
+        <div style="width:1px;height:24px;background:var(--border);"></div>
+        <div style="display:flex;align-items:center;gap:11px;">
+          <!-- Calendly -->
+          <svg width="26" height="26" viewBox="0 0 24 24"><rect width="24" height="24" rx="5" fill="#006BFF"/><rect x="5" y="9" width="14" height="10" rx="2" fill="white" opacity="0.9"/><rect x="8" y="6" width="2" height="5" rx="1" fill="white"/><rect x="14" y="6" width="2" height="5" rx="1" fill="white"/><circle cx="9" cy="14" r="1.2" fill="#006BFF"/><circle cx="12" cy="14" r="1.2" fill="#006BFF"/></svg>
+          <span style="font-size:15px;font-weight:600;color:var(--text-soft);">Calendly</span>
         </div>
         <div style="width:1px;height:24px;background:var(--border);"></div>
         <div style="display:flex;align-items:center;gap:11px;">
@@ -1485,8 +1502,13 @@
         </div>
         <div style="width:1px;height:24px;background:var(--border);"></div>
         <div style="display:flex;align-items:center;gap:11px;">
+          <svg width="26" height="26" viewBox="0 0 24 24"><rect width="24" height="24" rx="3" fill="#0F9D58"/><rect x="6" y="8" width="12" height="1.5" rx="0.75" fill="white" opacity="0.9"/><rect x="6" y="11" width="12" height="1.5" rx="0.75" fill="white" opacity="0.9"/><rect x="6" y="14" width="8" height="1.5" rx="0.75" fill="white" opacity="0.9"/><rect x="6" y="5" width="5" height="2" rx="1" fill="white" opacity="0.5"/></svg>
+          <span style="font-size:15px;font-weight:600;color:var(--text-soft);">Google Sheets</span>
+        </div>
+        <div style="width:1px;height:24px;background:var(--border);"></div>
+        <div style="display:flex;align-items:center;gap:11px;">
           <svg width="26" height="26" viewBox="0 0 24 24" fill="#D97757"><path d="M13.2 3L7 14.4h3.4L16.6 3zM10.8 9.6L17 21H13.6L7.4 9.6z"/></svg>
-          <span style="font-size:15px;font-weight:600;color:var(--text-soft);">Claude</span>
+          <span style="font-size:15px;font-weight:600;color:var(--text-soft);">Claude AI</span>
         </div>
         <div style="width:1px;height:24px;background:var(--border);"></div>
         <div style="display:flex;align-items:center;gap:11px;">
@@ -1498,6 +1520,11 @@
             <circle cx="16.8" cy="16.8" r="1.8" fill="white"/>
           </svg>
           <span style="font-size:15px;font-weight:600;color:var(--text-soft);">Twilio</span>
+        </div>
+        <div style="width:1px;height:24px;background:var(--border);"></div>
+        <div style="display:flex;align-items:center;gap:11px;">
+          <svg width="26" height="26" viewBox="0 0 24 24"><rect width="24" height="24" rx="5" fill="#006BFF"/><rect x="5" y="9" width="14" height="10" rx="2" fill="white" opacity="0.9"/><rect x="8" y="6" width="2" height="5" rx="1" fill="white"/><rect x="14" y="6" width="2" height="5" rx="1" fill="white"/><circle cx="9" cy="14" r="1.2" fill="#006BFF"/><circle cx="12" cy="14" r="1.2" fill="#006BFF"/></svg>
+          <span style="font-size:15px;font-weight:600;color:var(--text-soft);">Calendly</span>
         </div>
         <div style="width:1px;height:24px;background:var(--border);"></div>
         <div style="display:flex;align-items:center;gap:11px;">
@@ -1520,7 +1547,7 @@
           <span style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--blue);">Built for Inbound-Lead Businesses</span>
         </div>
         <h2 style="font-size:52px;font-weight:800;letter-spacing:-0.05em;color:var(--text);line-height:1.08;margin-bottom:20px;">
-          Built for teams that<br/>can't afford to <span style="color:var(--blue);">miss leads.</span>
+          Built for businesses where every<br/>missed lead <span style="color:var(--blue);">costs money.</span>
         </h2>
         <p style="font-size:17px;color:var(--text-muted);max-width:540px;margin:0 auto;line-height:1.75;">
           Flowaify helps inbound-driven businesses capture, respond, and convert more leads—without the manual work.
@@ -1536,26 +1563,25 @@
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
           </div>
           <div style="flex:1;">
-            <h3 style="font-size:18px;font-weight:700;color:var(--text);margin-bottom:8px;">Real Estate Teams</h3>
-            <p style="font-size:14px;color:var(--text-muted);line-height:1.6;margin-bottom:16px;">Capture buyer and seller inquiries, route leads, and automate follow-up.</p>
-            <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:20px;">
-              <div style="display:flex;align-items:center;gap:9px;font-size:13px;color:var(--text-soft);">
+            <h3 style="font-size:18px;font-weight:700;color:var(--text);margin-bottom:6px;">Real Estate Teams</h3>
+            <p style="font-size:12.5px;color:var(--blue);font-weight:600;margin-bottom:8px;">Buyer and seller inquiries go unanswered when agents are busy.</p>
+            <p style="font-size:13.5px;color:var(--text-muted);line-height:1.6;margin-bottom:14px;">Flowaify captures every inquiry, replies instantly, routes it to the right agent, and follows up automatically until they respond.</p>
+            <div style="display:flex;flex-direction:column;gap:7px;margin-bottom:16px;">
+              <div style="display:flex;align-items:center;gap:9px;font-size:12.5px;color:var(--text-soft);">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-                Instant lead capture from any source
+                Form submitted → AI reply in under 90 seconds
               </div>
-              <div style="display:flex;align-items:center;gap:9px;font-size:13px;color:var(--text-soft);">
+              <div style="display:flex;align-items:center;gap:9px;font-size:12.5px;color:var(--text-soft);">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-                Smart routing to the right agent
+                Lead routed to agent + CRM updated automatically
               </div>
-              <div style="display:flex;align-items:center;gap:9px;font-size:13px;color:var(--text-soft);">
+              <div style="display:flex;align-items:center;gap:9px;font-size:12.5px;color:var(--text-soft);">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-                Automated follow-ups that convert
+                14-day SMS + email follow-up sequence triggered
               </div>
             </div>
-            <div style="display:flex;justify-content:flex-end;">
-              <div style="width:36px;height:36px;border-radius:10px;background:var(--bg-surface);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-              </div>
+            <div style="padding:10px 13px;background:var(--bg-surface);border:1px solid var(--border);border-radius:8px;font-size:11.5px;color:var(--text-muted);line-height:1.5;">
+              <span style="font-weight:700;color:var(--text-soft);">Workflow:</span> Website form → AI SMS reply → HubSpot contact created → 14-day nurture sequence
             </div>
           </div>
         </div>
@@ -1563,29 +1589,28 @@
         <!-- Home Service Businesses -->
         <div class="card" style="padding:32px;display:flex;gap:24px;align-items:flex-start;">
           <div style="width:64px;height:64px;border-radius:16px;background:rgba(0,87,255,0.07);border:1px solid rgba(0,87,255,0.12);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07M8.46 8.46a5 5 0 0 0 0 7.07"/></svg>
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
           </div>
           <div style="flex:1;">
-            <h3 style="font-size:18px;font-weight:700;color:var(--text);margin-bottom:8px;">Home Service Businesses</h3>
-            <p style="font-size:14px;color:var(--text-muted);line-height:1.6;margin-bottom:16px;">Respond to quote requests, book appointments, and reduce missed calls.</p>
-            <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:20px;">
-              <div style="display:flex;align-items:center;gap:9px;font-size:13px;color:var(--text-soft);">
+            <h3 style="font-size:18px;font-weight:700;color:var(--text);margin-bottom:6px;">Home Service Businesses</h3>
+            <p style="font-size:12.5px;color:var(--blue);font-weight:600;margin-bottom:8px;">Quote requests come in while you're on the job — and go cold fast.</p>
+            <p style="font-size:13.5px;color:var(--text-muted);line-height:1.6;margin-bottom:14px;">Flowaify responds to every inbound request the moment it arrives, books the appointment, sends reminders, and follows up if there's no reply.</p>
+            <div style="display:flex;flex-direction:column;gap:7px;margin-bottom:16px;">
+              <div style="display:flex;align-items:center;gap:9px;font-size:12.5px;color:var(--text-soft);">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-                Automated quote &amp; inquiry handling
+                Quote request → instant automated response
               </div>
-              <div style="display:flex;align-items:center;gap:9px;font-size:13px;color:var(--text-soft);">
+              <div style="display:flex;align-items:center;gap:9px;font-size:12.5px;color:var(--text-soft);">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-                Appointment booking &amp; reminders
+                Appointment booking + SMS reminders sent
               </div>
-              <div style="display:flex;align-items:center;gap:9px;font-size:13px;color:var(--text-soft);">
+              <div style="display:flex;align-items:center;gap:9px;font-size:12.5px;color:var(--text-soft);">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-                Missed call &amp; text-back automation
+                Missed call text-back so no inquiry is dropped
               </div>
             </div>
-            <div style="display:flex;justify-content:flex-end;">
-              <div style="width:36px;height:36px;border-radius:10px;background:var(--bg-surface);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-              </div>
+            <div style="padding:10px 13px;background:var(--bg-surface);border:1px solid var(--border);border-radius:8px;font-size:11.5px;color:var(--text-muted);line-height:1.5;">
+              <span style="font-weight:700;color:var(--text-soft);">Workflow:</span> Missed call → auto text-back → booking link sent → reminder sequence activated
             </div>
           </div>
         </div>
@@ -1593,29 +1618,28 @@
         <!-- Med Spas & Clinics -->
         <div class="card" style="padding:32px;display:flex;gap:24px;align-items:flex-start;">
           <div style="width:64px;height:64px;border-radius:16px;background:rgba(0,87,255,0.07);border:1px solid rgba(0,87,255,0.12);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M12 8v8M8 12h8"/></svg>
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
           </div>
           <div style="flex:1;">
-            <h3 style="font-size:18px;font-weight:700;color:var(--text);margin-bottom:8px;">Med Spas &amp; Clinics</h3>
-            <p style="font-size:14px;color:var(--text-muted);line-height:1.6;margin-bottom:16px;">Handle inquiries, intake, and appointment follow-up automatically.</p>
-            <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:20px;">
-              <div style="display:flex;align-items:center;gap:9px;font-size:13px;color:var(--text-soft);">
+            <h3 style="font-size:18px;font-weight:700;color:var(--text);margin-bottom:6px;">Med Spas &amp; Clinics</h3>
+            <p style="font-size:12.5px;color:var(--blue);font-weight:600;margin-bottom:8px;">Inquiries arrive after hours and front desks can't keep up.</p>
+            <p style="font-size:13.5px;color:var(--text-muted);line-height:1.6;margin-bottom:14px;">Flowaify handles every inquiry around the clock — sending service info, collecting intake data, and confirming appointments automatically.</p>
+            <div style="display:flex;flex-direction:column;gap:7px;margin-bottom:16px;">
+              <div style="display:flex;align-items:center;gap:9px;font-size:12.5px;color:var(--text-soft);">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-                24/7 inquiry response
+                24/7 inquiry response — even after hours
               </div>
-              <div style="display:flex;align-items:center;gap:9px;font-size:13px;color:var(--text-soft);">
+              <div style="display:flex;align-items:center;gap:9px;font-size:12.5px;color:var(--text-soft);">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-                Intake forms &amp; lead qualification
+                Intake form collection + lead qualification
               </div>
-              <div style="display:flex;align-items:center;gap:9px;font-size:13px;color:var(--text-soft);">
+              <div style="display:flex;align-items:center;gap:9px;font-size:12.5px;color:var(--text-soft);">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-                Appointment confirmations &amp; reminders
+                Appointment confirmations + no-show reminders
               </div>
             </div>
-            <div style="display:flex;justify-content:flex-end;">
-              <div style="width:36px;height:36px;border-radius:10px;background:var(--bg-surface);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-              </div>
+            <div style="padding:10px 13px;background:var(--bg-surface);border:1px solid var(--border);border-radius:8px;font-size:11.5px;color:var(--text-muted);line-height:1.5;">
+              <span style="font-weight:700;color:var(--text-soft);">Workflow:</span> Inquiry received → pricing sent → intake form collected → appointment confirmed → reminder sequence starts
             </div>
           </div>
         </div>
@@ -1623,34 +1647,42 @@
         <!-- Local Service Brands -->
         <div class="card" style="padding:32px;display:flex;gap:24px;align-items:flex-start;">
           <div style="width:64px;height:64px;border-radius:16px;background:rgba(0,87,255,0.07);border:1px solid rgba(0,87,255,0.12);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/><path d="M2 17h20"/></svg>
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="2"/><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
           </div>
           <div style="flex:1;">
-            <h3 style="font-size:18px;font-weight:700;color:var(--text);margin-bottom:8px;">Local Service Brands</h3>
-            <p style="font-size:14px;color:var(--text-muted);line-height:1.6;margin-bottom:16px;">Centralize website leads, forms, and CRM organization.</p>
-            <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:20px;">
-              <div style="display:flex;align-items:center;gap:9px;font-size:13px;color:var(--text-soft);">
+            <h3 style="font-size:18px;font-weight:700;color:var(--text);margin-bottom:6px;">Local Service Brands</h3>
+            <p style="font-size:12.5px;color:var(--blue);font-weight:600;margin-bottom:8px;">Leads come in from multiple sources with no single system to track them.</p>
+            <p style="font-size:13.5px;color:var(--text-muted);line-height:1.6;margin-bottom:14px;">Flowaify pulls every lead into one place, responds automatically, routes them to the right person, and keeps the CRM organized without manual data entry.</p>
+            <div style="display:flex;flex-direction:column;gap:7px;margin-bottom:16px;">
+              <div style="display:flex;align-items:center;gap:9px;font-size:12.5px;color:var(--text-soft);">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-                All leads in one unified inbox
+                All leads in one unified inbox — no spreadsheets
               </div>
-              <div style="display:flex;align-items:center;gap:9px;font-size:13px;color:var(--text-soft);">
+              <div style="display:flex;align-items:center;gap:9px;font-size:12.5px;color:var(--text-soft);">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-                Form routing &amp; team notifications
+                Form routing + instant team notifications
               </div>
-              <div style="display:flex;align-items:center;gap:9px;font-size:13px;color:var(--text-soft);">
+              <div style="display:flex;align-items:center;gap:9px;font-size:12.5px;color:var(--text-soft);">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-                CRM sync &amp; automated workflows
+                CRM synced automatically — zero manual entry
               </div>
             </div>
-            <div style="display:flex;justify-content:flex-end;">
-              <div style="width:36px;height:36px;border-radius:10px;background:var(--bg-surface);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-              </div>
+            <div style="padding:10px 13px;background:var(--bg-surface);border:1px solid var(--border);border-radius:8px;font-size:11.5px;color:var(--text-muted);line-height:1.5;">
+              <span style="font-weight:700;color:var(--text-soft);">Workflow:</span> Website form → lead routed to team member → CRM updated → automated follow-up sequence starts
             </div>
           </div>
         </div>
 
       </div><!-- /4 cards -->
+
+      <!-- CTA row -->
+      <div class="reveal" style="text-align:center;margin-top:20px;">
+        <p style="font-size:15px;color:var(--text-muted);margin-bottom:20px;">Sound like your business? We'll show you exactly how a system would work for you.</p>
+        <a href="#build-my-plan" class="btn btn-primary btn-lg" style="display:inline-flex;align-items:center;gap:8px;">
+          Build My Plan
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </a>
+      </div>
 
     </div>
   </section>
@@ -1965,14 +1997,15 @@
               <span style="font-size:14px;color:var(--text-soft);">Follow-up sequences running on autopilot</span>
             </div>
           </div>
-          <a href="demo.html" class="btn btn-primary btn-lg" style="display:inline-flex;align-items:center;gap:8px;">
+          <a href="dashboard/demo.html" class="btn btn-primary btn-lg" style="display:inline-flex;align-items:center;gap:8px;">
             Explore the Demo Dashboard
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
           </a>
         </div>
 
         <!-- Right: stat cards -->
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;position:relative;">
+          <div style="position:absolute;top:-12px;right:0;z-index:1;display:inline-flex;align-items:center;gap:5px;background:rgba(0,87,255,0.07);border:1px solid rgba(0,87,255,0.18);border-radius:100px;padding:3px 10px;font-size:10px;font-weight:700;color:var(--blue);letter-spacing:0.05em;">Demo Data</div>
           <div style="background:var(--bg-card);border:1px solid var(--border-blue);border-radius:16px;padding:20px 22px;box-shadow:var(--shadow-md);">
             <div style="font-size:10.5px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--text-muted);margin-bottom:10px;">New Leads Today</div>
             <div style="font-size:34px;font-weight:800;letter-spacing:-0.05em;color:var(--text);line-height:1;">14</div>
@@ -2026,7 +2059,7 @@
           <div id="dash-iframe-wrap" style="overflow:hidden;position:relative;">
             <iframe
               id="dash-iframe"
-              src="demo.html"
+              src="dashboard/demo.html"
               scrolling="no"
               style="width:1440px;height:860px;border:none;transform-origin:top left;pointer-events:none;display:block;"
             ></iframe>
@@ -2034,7 +2067,7 @@
         </div>
 
         <!-- Floating CTA pill -->
-        <a href="demo.html"
+        <a href="dashboard/demo.html"
            style="position:absolute;bottom:0;left:50%;transform:translateX(-50%);display:inline-flex;align-items:center;gap:8px;padding:12px 28px;background:var(--blue);color:#fff;font-size:14px;font-weight:700;border-radius:100px;box-shadow:0 8px 28px rgba(0,87,255,0.42);text-decoration:none;white-space:nowrap;font-family:'Plus Jakarta Sans',sans-serif;transition:all 0.2s;z-index:10;"
            onmouseover="this.style.transform='translateX(-50%) translateY(-2px)';this.style.boxShadow='0 12px 36px rgba(0,87,255,0.54)';"
            onmouseout="this.style.transform='translateX(-50%)';this.style.boxShadow='0 8px 28px rgba(0,87,255,0.42)';">
@@ -2070,9 +2103,9 @@
       position: absolute; left: 0; right: 0; top: 0; height: 0;
       background: var(--blue); z-index: 0; pointer-events: none;
       opacity: 0;
-      transition: top 1.1s cubic-bezier(0.65,0,0.35,1),
-                  height 1.1s cubic-bezier(0.65,0,0.35,1),
-                  opacity 0.4s ease;
+      transition: top 0.72s cubic-bezier(0.65,0,0.35,1),
+                  height 0.72s cubic-bezier(0.65,0,0.35,1),
+                  opacity 0.35s ease;
     }
     /* Zones sit above the panel; only go transparent after slider is ready */
     .hiw-zone { position: relative; z-index: 1; }
@@ -2606,17 +2639,17 @@
             <tr>
               <th style="width:44%;padding:0 0 24px;text-align:left;border-bottom:1px solid var(--border);"></th>
               <th style="width:18.6%;padding:0 12px 24px;text-align:center;border-bottom:1px solid var(--border);vertical-align:bottom;">
-                <div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px;">Foundation</div>
+                <div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px;">Essential</div>
                 <div style="font-size:14px;font-weight:800;letter-spacing:-0.02em;color:var(--text);line-height:1.2;margin-bottom:16px;">Capture &amp;<br/>respond.</div>
                 <a href="#contact" style="display:flex;align-items:center;justify-content:center;padding:9px 0;background:var(--bg-card);border:1.5px solid var(--border);color:var(--text);border-radius:8px;font-size:12px;font-weight:700;text-decoration:none;">Let&#8217;s talk &#8594;</a>
               </th>
               <th style="width:18.6%;padding:0 12px 24px;text-align:center;border-bottom:1px solid var(--border);vertical-align:bottom;">
-                <div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px;">Growth</div>
+                <div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px;">Pipeline</div>
                 <div style="font-size:14px;font-weight:800;letter-spacing:-0.02em;color:var(--text);line-height:1.2;margin-bottom:16px;">Full pipeline.<br/>Multi-channel.</div>
                 <a href="#contact" style="display:flex;align-items:center;justify-content:center;padding:9px 0;background:var(--bg-card);border:1.5px solid var(--border);color:var(--text);border-radius:8px;font-size:12px;font-weight:700;text-decoration:none;">Let&#8217;s talk &#8594;</a>
               </th>
               <th class="pcol-advanced" style="width:18.6%;padding:0 0 24px 12px;text-align:center;border-bottom:2px solid transparent;background:linear-gradient(var(--bg-surface),var(--bg-surface)) padding-box,linear-gradient(135deg,#94A3B8,#CBD5E1,#94A3B8) border-box;vertical-align:bottom;">
-                <div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;background:linear-gradient(135deg,#94A3B8,#CBD5E1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px;">Advanced</div>
+                <div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#94A3B8;margin-bottom:8px;">Command</div>
                 <div style="font-size:14px;font-weight:800;letter-spacing:-0.02em;color:var(--text);line-height:1.2;margin-bottom:16px;">High volume.<br/>Complex ops.</div>
                 <a href="#contact" style="display:flex;align-items:center;justify-content:center;padding:9px 0;background:linear-gradient(135deg,#94A3B8 0%,#CBD5E1 50%,#94A3B8 100%);color:#1E293B;border-radius:8px;font-size:12px;font-weight:700;text-decoration:none;">Let&#8217;s talk &#8594;</a>
               </th>
@@ -2796,18 +2829,17 @@
     /* Responsive */
     @media(max-width:960px){
       .contact-2col { grid-template-columns:1fr !important; }
-      .contact-logo-bg { width:min(1000px,110vw); }
       .contact-headline { font-size:38px !important; }
     }
     @media(max-width:640px){
       #contact { padding:52px 16px 0 !important; }
       .contact-headline { font-size:30px !important; }
-      .contact-logo-bg { width:130vw; }
       .contact-whatget-grid { grid-template-columns:1fr !important; }
     }
   </style>
 
   <section id="contact" style="padding:100px 60px 0;background:var(--bg);">
+    <span id="build-my-plan" style="display:block;position:relative;top:-80px;visibility:hidden;"></span>
 
     <!-- Background layers -->
     <div class="contact-aura"></div>
@@ -2871,7 +2903,7 @@
 
           <!-- Dashboard teaser -->
           <div style="margin-bottom:18px;">
-            <a href="demo.html" style="display:flex;align-items:center;gap:10px;padding:11px 13px;background:rgba(0,87,255,0.06);border:1px solid rgba(0,87,255,0.16);border-radius:10px;text-decoration:none;transition:background 0.18s;" onmouseover="this.style.background='rgba(0,87,255,0.1)'" onmouseout="this.style.background='rgba(0,87,255,0.06)'">
+            <a href="dashboard/demo.html" style="display:flex;align-items:center;gap:10px;padding:11px 13px;background:rgba(0,87,255,0.06);border:1px solid rgba(0,87,255,0.16);border-radius:10px;text-decoration:none;transition:background 0.18s;" onmouseover="this.style.background='rgba(0,87,255,0.1)'" onmouseout="this.style.background='rgba(0,87,255,0.06)'">
               <div style="width:28px;height:28px;border-radius:8px;background:rgba(0,87,255,0.12);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2.5"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
               </div>
@@ -2921,8 +2953,8 @@
                   <input type="text" name="business" class="form-input" placeholder="Your business" autocomplete="organization"/>
                 </div>
                 <div class="form-field">
-                  <label class="form-label">Website / IG</label>
-                  <input type="text" name="website" class="form-input" placeholder="yoursite.com or @handle" autocomplete="url"/>
+                  <label class="form-label">Website URL</label>
+                  <input type="text" name="website" class="form-input" placeholder="yoursite.com" autocomplete="url"/>
                 </div>
               </div>
               <div class="form-field">
@@ -3040,7 +3072,7 @@
             <!-- Submit -->
             <div>
               <button type="submit" class="btn-primary" style="width:100%;justify-content:center;font-size:13px;font-weight:800;padding:13px 20px;border-radius:10px;display:flex;align-items:center;gap:7px;border:none;cursor:pointer;letter-spacing:-0.01em;">
-                Request My Discovery Call
+                Build My Plan
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
               </button>
               <div style="display:flex;align-items:center;justify-content:center;gap:7px;margin-top:12px;">
@@ -3139,7 +3171,7 @@
     .faq-icon { flex-shrink:0;width:24px;height:24px;border-radius:50%;background:rgba(0,87,255,0.08);border:1px solid rgba(0,87,255,0.15);display:flex;align-items:center;justify-content:center;transition:transform .25s,background .2s; }
     .faq-item.open .faq-icon { transform:rotate(45deg);background:rgba(0,87,255,0.15); }
     .faq-body { overflow:hidden;max-height:0;transition:max-height .35s cubic-bezier(.4,0,.2,1); }
-    .faq-item.open .faq-body { max-height:200px; }
+    .faq-item.open .faq-body { max-height:400px; }
     .faq-a { font-size:14.5px;color:var(--text-muted);line-height:1.75;padding-bottom:22px; }
   </style>
   <section id="faq" style="padding:80px 60px;background:var(--bg);">
@@ -3211,11 +3243,11 @@
           </a>
           <p style="font-size:13px;color:var(--text-muted);line-height:1.7;max-width:280px;margin-bottom:20px;">Lead capture, CRM sync, and follow-up automation for inbound-lead businesses.</p>
           <div style="display:flex;flex-direction:column;gap:10px;">
-            <a href="#contact" style="display:inline-flex;align-items:center;gap:7px;padding:10px 18px;background:var(--blue);color:white;border-radius:9px;font-size:13px;font-weight:700;text-decoration:none;width:fit-content;">
-              Book a Discovery Call
+            <a href="#build-my-plan" style="display:inline-flex;align-items:center;gap:7px;padding:10px 18px;background:var(--blue);color:white;border-radius:9px;font-size:13px;font-weight:700;text-decoration:none;width:fit-content;">
+              Build My Plan
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
             </a>
-            <a href="demo.html" style="display:inline-flex;align-items:center;gap:7px;padding:10px 18px;border:1.5px solid var(--border);color:var(--text);border-radius:9px;font-size:13px;font-weight:600;text-decoration:none;width:fit-content;">
+            <a href="dashboard/demo.html" style="display:inline-flex;align-items:center;gap:7px;padding:10px 18px;border:1.5px solid var(--border);color:var(--text);border-radius:9px;font-size:13px;font-weight:600;text-decoration:none;width:fit-content;">
               View Demo Dashboard
             </a>
           </div>
@@ -3229,7 +3261,7 @@
             <a href="#how-it-works" class="nav-link" style="font-size:13.5px;">How It Works</a>
             <a href="#how-it-works" class="nav-link" style="font-size:13.5px;">Workflow Library</a>
             <a href="#faq" class="nav-link" style="font-size:13.5px;">FAQ</a>
-            <a href="#contact" class="nav-link" style="font-size:13.5px;">Book a Discovery Call</a>
+            <a href="#build-my-plan" class="nav-link" style="font-size:13.5px;">Build My Plan</a>
           </div>
         </div>
 
@@ -3249,17 +3281,17 @@
         <div>
           <div style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:16px;">Contact</div>
           <div style="display:flex;flex-direction:column;gap:10px;">
-            <a href="mailto:autofi.company@gmail.com" style="font-size:13.5px;color:var(--blue);text-decoration:none;font-weight:600;">contact@flowaify.app</a>
+            <a href="mailto:contact@flowaify.app" style="font-size:13.5px;color:var(--blue);text-decoration:none;font-weight:600;">contact@flowaify.app</a>
             <a href="tel:8333569243" style="font-size:13.5px;color:var(--text-soft);text-decoration:none;">(833) 356-9243</a>
           </div>
           <div style="display:flex;gap:10px;margin-top:20px;">
-            <a href="#" style="width:34px;height:34px;border-radius:8px;background:var(--bg-card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--text-muted);text-decoration:none;" aria-label="LinkedIn">
+            <a href="https://linkedin.com/company/flowaify" target="_blank" rel="noopener" style="width:34px;height:34px;border-radius:8px;background:var(--bg-card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--text-muted);text-decoration:none;transition:border-color 0.2s,color 0.2s;" aria-label="LinkedIn" onmouseover="this.style.borderColor='rgba(0,87,255,0.35)';this.style.color='var(--blue)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-muted)'">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
             </a>
-            <a href="#" style="width:34px;height:34px;border-radius:8px;background:var(--bg-card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--text-muted);text-decoration:none;" aria-label="Instagram">
+            <a href="https://instagram.com/flowaify" target="_blank" rel="noopener" style="width:34px;height:34px;border-radius:8px;background:var(--bg-card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--text-muted);text-decoration:none;transition:border-color 0.2s,color 0.2s;" aria-label="Instagram" onmouseover="this.style.borderColor='rgba(0,87,255,0.35)';this.style.color='var(--blue)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-muted)'">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
             </a>
-            <a href="#" style="width:34px;height:34px;border-radius:8px;background:var(--bg-card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--text-muted);text-decoration:none;" aria-label="Twitter">
+            <a href="https://twitter.com/flowaify" target="_blank" rel="noopener" style="width:34px;height:34px;border-radius:8px;background:var(--bg-card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--text-muted);text-decoration:none;transition:border-color 0.2s,color 0.2s;" aria-label="Twitter / X" onmouseover="this.style.borderColor='rgba(0,87,255,0.35)';this.style.color='var(--blue)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-muted)'">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"/></svg>
             </a>
           </div>
@@ -3269,7 +3301,7 @@
 
       <!-- Bottom bar -->
       <div style="border-top:1px solid var(--border);padding:20px 0;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;">
-        <p style="font-size:12px;color:var(--text-muted);">© 2025 Flowaify. All rights reserved.</p>
+        <p style="font-size:12px;color:var(--text-muted);">© 2026 Flowaify. All rights reserved.</p>
         <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap;">
           <a href="#" style="font-size:12px;color:var(--text-muted);text-decoration:none;">Privacy Policy</a>
           <a href="#" style="font-size:12px;color:var(--text-muted);text-decoration:none;">Terms of Service</a>
@@ -4106,7 +4138,7 @@ window.addEventListener('scroll', () => {
 
       var leads = [
         { body: 'New lead responded automatically',  sub: 'Marcus T. — Website form — 34s ago',   seq: '3 active sequences' },
-        { body: 'Instagram DM replied in 47 seconds', sub: 'Jordan R. — Instagram DM — 47s ago',    seq: '4 active sequences' },
+        { body: 'Email inquiry replied in 47 seconds', sub: 'Jordan R. — Website Form — 47s ago',    seq: '4 active sequences' },
         { body: 'Paid ads lead followed up',           sub: 'Lee Corp — Google Ads — 29s ago',      seq: '4 active sequences' },
         { body: 'Lead qualified — sequence started', sub: 'Patel Group — Facebook — 52s ago', seq: '5 active sequences' },
         { body: 'Phone inquiry auto-responded',        sub: 'Rivera LLC — Phone — 41s ago',         seq: '3 active sequences' },
