@@ -125,6 +125,20 @@
     .footer-note a { color: #64748B; text-decoration: none; }
     .footer-note a:hover { color: #0057FF; }
 
+    .form-links {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 18px;
+    }
+    .form-link-back, .form-link-plan {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: 12px; font-weight: 600;
+      color: #94A3B8; text-decoration: none;
+      transition: color 0.15s;
+    }
+    .form-link-back:hover, .form-link-plan:hover { color: #0057FF; }
+
     /* ═══════════════════════════════════════
        RIGHT — Hero side
     ═══════════════════════════════════════ */
@@ -438,6 +452,17 @@
         Need help? <a href="mailto:contact@flowaify.app">contact@flowaify.app</a>
       </p>
 
+      <div class="form-links">
+        <a href="https://flowaify.app" class="form-link-back">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+          Back to website
+        </a>
+        <a href="https://flowaify.app/#pricing" class="form-link-plan">
+          Build a plan
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </a>
+      </div>
+
     </div>
   </div>
 
@@ -467,11 +492,6 @@
       </div>
       <h2 class="hero-title">Safe &amp; secure<br/>sign in</h2>
       <p class="hero-desc">Your data is protected with enterprise-grade encryption. Everything you share stays private.</p>
-      <div class="hero-dots">
-        <span></span>
-        <span></span>
-        <span class="active"></span>
-      </div>
     </div>
 
   </div>
