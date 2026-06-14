@@ -9,6 +9,45 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <script src="https://cdn.auth0.com/js/auth0-spa-js/2.18/auth0-spa-js.production.js"></script>
+  <style>
+    /* ── Auth0 gate overlay ── */
+    #auth-gate {
+      position: fixed; inset: 0; z-index: 9999;
+      background: #ffffff;
+      display: flex; align-items: center; justify-content: center;
+      flex-direction: column; gap: 14px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    [data-theme="dark"] #auth-gate { background: #040915; }
+    #auth-gate .ag-logo { width: 44px; height: 44px; object-fit: contain; }
+    #auth-gate .ag-spinner {
+      width: 28px; height: 28px; border-radius: 50%;
+      border: 2px solid rgba(0,87,255,0.15);
+      border-top-color: #0057FF;
+      animation: ag-spin 0.75s linear infinite;
+    }
+    #auth-gate .ag-label {
+      font-size: 12.5px; font-weight: 600;
+      color: rgba(0,87,255,0.65); margin: 0; letter-spacing: 0.02em;
+    }
+    @keyframes ag-spin { to { transform: rotate(360deg); } }
+
+    /* Logout button in sidebar */
+    .btn-logout {
+      width: 100%; display: flex; align-items: center; gap: 8px;
+      padding: 9px 12px; margin-top: 8px;
+      background: transparent; border: 1px solid var(--border);
+      border-radius: 8px; cursor: pointer; font-family: inherit;
+      font-size: 12px; font-weight: 600; color: var(--text-m);
+      transition: background 0.15s, color 0.15s, border-color 0.15s;
+    }
+    .btn-logout:hover {
+      background: var(--red-dim); color: var(--red);
+      border-color: rgba(239,68,68,0.25);
+    }
+    .btn-logout i { width: 13px; height: 13px; }
+  </style>
   <style>
     /* ═══════════════════════════════════════════
        THEME TOKENS
@@ -365,7 +404,16 @@
   </style>
 </head>
 <body>
-<div class="layout">
+
+<!-- Auth gate: shown while checking session, hidden once authenticated -->
+<div id="auth-gate">
+  <img class="ag-logo" src="logo-transparent.png" alt="Flowaify" onerror="this.style.display='none'" />
+  <div class="ag-spinner"></div>
+  <p class="ag-label">Signing you in…</p>
+</div>
+
+<!-- Main app: hidden until auth is confirmed -->
+<div class="layout" id="app-layout" style="display:none;">
 
 <!-- ═══════════ SIDEBAR ═══════════ -->
 <aside class="sidebar" id="sidebar">
@@ -389,10 +437,14 @@
     <div class="client-pill">
       <div class="client-pulse"></div>
       <div>
-        <div class="client-name">Acme Business</div>
-        <div class="client-plan">Growth Plan · Active</div>
+        <div class="client-name" id="sidebar-client-name">Loading…</div>
+        <div class="client-plan" id="sidebar-client-plan">Client Portal</div>
       </div>
     </div>
+    <button class="btn-logout" onclick="portalLogout()">
+      <i data-lucide="log-out"></i>
+      Sign Out
+    </button>
   </div>
 </aside>
 <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
@@ -421,7 +473,7 @@
       <button class="btn-theme" onclick="toggleTheme()" title="Toggle theme">
         <i data-lucide="moon" id="theme-icon"></i>
       </button>
-      <div class="avatar" title="Acme Business">AB</div>
+      <div class="avatar" id="topbar-avatar" title="">—</div>
     </div>
   </header>
 
@@ -1465,6 +1517,66 @@ window.addEventListener('DOMContentLoaded', () => {
   updateStatusUI();
   lucide.createIcons();
 });
+</script>
+
+<!-- ─── AUTH0 GATE ─── -->
+<script>
+(async () => {
+  const client = await auth0.createAuth0Client({
+    domain: 'dev-8qaje37awjk3ptzf.us.auth0.com',
+    clientId: 'tx74Owqn3jVeSaVuxfFHsKloqbPqfAmN',
+    authorizationParams: {
+      redirect_uri: window.location.origin + window.location.pathname
+    },
+    cacheLocation: 'localstorage'
+  });
+
+  window._auth0 = client;
+
+  // Handle redirect callback after Auth0 login
+  if (location.search.includes('code=') && location.search.includes('state=')) {
+    try {
+      await client.handleRedirectCallback();
+    } catch (e) {
+      console.warn('Auth0 callback error:', e);
+    }
+    history.replaceState({}, '', location.pathname);
+  }
+
+  if (await client.isAuthenticated()) {
+    const user = await client.getUser();
+
+    // Build display values from Auth0 user profile
+    const name    = user.name || user.nickname || user.email || 'Client';
+    const email   = user.email || '';
+    const initials = name.split(' ').slice(0, 2).map(n => n[0]).join('').toUpperCase() || '??';
+
+    // Wire identity into the UI
+    const el = id => document.getElementById(id);
+    if (el('sidebar-client-name')) el('sidebar-client-name').textContent = name;
+    if (el('sidebar-client-plan')) el('sidebar-client-plan').textContent = email;
+    if (el('topbar-avatar'))       { el('topbar-avatar').textContent = initials; el('topbar-avatar').title = email; }
+
+    // Reveal the app, hide the gate
+    el('auth-gate').style.display = 'none';
+    el('app-layout').style.display = '';
+
+    // Re-run lucide now that the layout is visible
+    lucide.createIcons();
+
+  } else {
+    // Not logged in — send to Auth0
+    await client.loginWithRedirect();
+  }
+})();
+
+function portalLogout() {
+  if (window._auth0) {
+    window._auth0.logout({
+      logoutParams: { returnTo: window.location.origin }
+    });
+  }
+}
 </script>
 </body>
 </html>
