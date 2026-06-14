@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Flowaify — Dashboard</title>
+  <link rel="icon" href="flowaify-logo.webp" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script src="https://cdn.auth0.com/js/auth0-spa-js/2.18/auth0-spa-js.production.js"></script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --blue:        #0057FF;
+      --blue-dim:    rgba(0,87,255,0.10);
+      --blue-border: rgba(0,87,255,0.18);
+      --sidebar-w:   240px;
+      --bg:          #040915;
+      --card:        rgba(10,20,52,0.65);
+      --border:      rgba(255,255,255,0.07);
+      --text:        #e2e8f0;
+      --text-m:      rgba(226,232,240,0.45);
+      --text-s:      rgba(226,232,240,0.75);
+      --green:       #10b981;
+      --green-dim:   rgba(16,185,129,0.12);
+      --red:         #ef4444;
+      --red-dim:     rgba(239,68,68,0.10);
+      --amber:       #f59e0b;
+    }
+
+    html, body { height: 100%; }
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--bg); color: var(--text);
+      min-height: 100vh; display: flex;
+    }
+
+    /* ── Auth Gate ── */
+    #auth-gate {
+      position: fixed; inset: 0; z-index: 9999;
+      background: #ffffff;
+      display: flex; align-items: center; justify-content: center;
+      flex-direction: column; gap: 14px;
+    }
+    #auth-gate img { width: 44px; height: 44px; object-fit: contain; }
+    #auth-gate .spinner {
+      width: 26px; height: 26px; border-radius: 50%;
+      border: 2px solid rgba(0,87,255,0.15);
+      border-top-color: #0057FF;
+      animation: spin 0.7s linear infinite;
+    }
+    #auth-gate p { font-size: 12.5px; font-weight: 600; color: rgba(0,87,255,0.65); font-family: 'Plus Jakarta Sans', sans-serif; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── App ── */
+    #app { display: none; width: 100%; min-height: 100vh; }
+
+    /* ── Sidebar ── */
+    #sidebar {
+      width: var(--sidebar-w); min-height: 100vh;
+      background: rgba(4,9,24,0.99); border-right: 1px solid var(--border);
+      display: flex; flex-direction: column;
+      position: fixed; left: 0; top: 0; bottom: 0; z-index: 100;
+    }
+    .sb-brand {
+      padding: 18px 18px 16px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 9px;
+    }
+    .sb-brand img { width: 30px; height: 30px; object-fit: contain; }
+    .sb-brand-name { font-size: 15px; font-weight: 800; letter-spacing: -0.04em; color: #e2e8f0; }
+    .sb-brand-name span { color: var(--blue); }
+
+    .sb-nav { flex: 1; padding: 10px; display: flex; flex-direction: column; gap: 2px; }
+    .sb-label {
+      font-size: 9.5px; font-weight: 700; color: var(--text-m);
+      letter-spacing: 0.09em; text-transform: uppercase; padding: 10px 10px 4px;
+    }
+    .nav-item {
+      display: flex; align-items: center; gap: 9px;
+      padding: 9px 12px; border-radius: 8px;
+      cursor: pointer; font-size: 13px; font-weight: 600;
+      color: var(--text-m); transition: all 0.14s;
+      border: 1px solid transparent; background: none;
+      width: 100%; text-align: left; font-family: inherit; text-decoration: none;
+    }
+    .nav-item:hover { background: var(--blue-dim); color: var(--text-s); }
+    .nav-item.active { background: var(--blue-dim); color: #e2e8f0; border-color: var(--blue-border); }
+    .nav-item svg { width: 14px; height: 14px; flex-shrink: 0; }
+    .sb-divider { height: 1px; background: var(--border); margin: 8px 10px; }
+
+    .sb-back {
+      margin: 8px 10px 4px; padding: 10px 14px;
+      background: var(--blue-dim); border-radius: 10px;
+      border: 1px solid var(--blue-border);
+      display: flex; align-items: center; gap: 9px;
+      text-decoration: none; color: var(--text-s);
+      font-size: 12.5px; font-weight: 700; transition: opacity 0.14s;
+    }
+    .sb-back:hover { opacity: 0.75; }
+    .sb-back svg { width: 13px; height: 13px; }
+
+    .sb-user { padding: 12px 14px; border-top: 1px solid var(--border); }
+    .sb-user-row { display: flex; align-items: center; gap: 9px; margin-bottom: 10px; }
+    .sb-avatar {
+      width: 30px; height: 30px; border-radius: 50%;
+      background: var(--blue-dim); border: 1px solid var(--blue-border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11.5px; font-weight: 800; color: #7aadff; flex-shrink: 0;
+    }
+    .sb-uname { font-size: 12px; font-weight: 700; color: var(--text-s); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sb-uemail { font-size: 10.5px; color: var(--text-m); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .btn-logout {
+      width: 100%; display: flex; align-items: center; gap: 7px;
+      padding: 8px 11px; background: transparent;
+      border: 1px solid var(--border); border-radius: 8px;
+      cursor: pointer; font-family: inherit; font-size: 12px; font-weight: 600;
+      color: var(--text-m); transition: all 0.14s;
+    }
+    .btn-logout:hover { background: var(--red-dim); color: var(--red); border-color: rgba(239,68,68,0.22); }
+    .btn-logout svg { width: 13px; height: 13px; }
+
+    /* ── Main ── */
+    #main { margin-left: var(--sidebar-w); flex: 1; display: flex; flex-direction: column; }
+    #topbar {
+      height: 56px; border-bottom: 1px solid var(--border);
+      background: rgba(4,9,21,0.95); backdrop-filter: blur(12px);
+      display: flex; align-items: center; gap: 10px;
+      padding: 0 28px; position: sticky; top: 0; z-index: 50;
+    }
+    #topbar h1 { font-size: 14.5px; font-weight: 700; color: var(--text-s); letter-spacing: -0.02em; }
+    .tb-dot { width: 3px; height: 3px; border-radius: 50%; background: var(--border); }
+    .tb-badge {
+      display: none; align-items: center; gap: 5px;
+      padding: 3px 9px; border-radius: 20px;
+      background: var(--green-dim); border: 1px solid rgba(16,185,129,0.2);
+      font-size: 11px; font-weight: 600; color: var(--green);
+    }
+    .tb-badge.show { display: flex; }
+    .tb-badge::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: var(--green); }
+
+    #content { flex: 1; padding: 28px; }
+
+    /* ── Sync Banner ── */
+    #sync-banner {
+      background: var(--blue-dim); border: 1px solid var(--blue-border);
+      border-radius: 12px; padding: 16px 20px;
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 16px; margin-bottom: 28px;
+    }
+    #sync-banner.hidden { display: none; }
+    .banner-text { font-size: 13px; font-weight: 600; color: var(--text-s); }
+    .banner-sub { font-size: 11.5px; color: var(--text-m); margin-top: 2px; }
+    .btn-banner {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 8px 16px; border-radius: 8px;
+      background: var(--blue); color: #fff;
+      font-family: inherit; font-size: 12.5px; font-weight: 700;
+      border: none; cursor: pointer; white-space: nowrap;
+      box-shadow: 0 4px 12px rgba(0,87,255,0.24);
+      transition: opacity 0.14s;
+    }
+    .btn-banner:hover { opacity: 0.88; }
+    .btn-banner:disabled { opacity: 0.5; pointer-events: none; }
+    .btn-banner svg { width: 13px; height: 13px; }
+
+    /* ── Metrics row ── */
+    .metrics-row {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      gap: 14px; margin-bottom: 22px;
+    }
+    .metric-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; padding: 18px 20px;
+    }
+    .metric-label { font-size: 11px; font-weight: 600; color: var(--text-m); text-transform: uppercase; letter-spacing: 0.06em; }
+    .metric-value {
+      font-size: 26px; font-weight: 800; color: var(--text);
+      letter-spacing: -0.04em; margin-top: 8px; line-height: 1;
+    }
+    .metric-value.empty { color: var(--text-m); font-size: 18px; font-weight: 600; }
+    .metric-change { font-size: 11px; font-weight: 600; color: var(--text-m); margin-top: 5px; }
+
+    /* ── Content grid ── */
+    .content-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 16px; margin-bottom: 16px;
+    }
+    .panel {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; overflow: hidden;
+    }
+    .panel-head {
+      padding: 16px 20px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .panel-title { font-size: 13px; font-weight: 700; color: var(--text-s); }
+    .panel-body { padding: 20px; }
+
+    /* Empty panel state */
+    .panel-empty {
+      text-align: center; padding: 32px 20px;
+    }
+    .pe-icon {
+      width: 36px; height: 36px; border-radius: 9px;
+      background: var(--blue-dim); border: 1px solid var(--blue-border);
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 12px;
+    }
+    .pe-icon svg { width: 16px; height: 16px; color: #7aadff; }
+    .pe-text { font-size: 12px; color: var(--text-m); font-weight: 500; line-height: 1.6; }
+
+    /* Chart placeholder */
+    .chart-ph {
+      height: 140px; background: rgba(10,20,52,0.4);
+      border-radius: 8px; display: flex; align-items: center; justify-content: center;
+      border: 1px dashed var(--border);
+    }
+    .chart-ph-text { font-size: 12px; color: var(--text-m); font-weight: 500; }
+
+    /* Syncing anim */
+    @keyframes pulse { 0%,100%{opacity:1}50%{opacity:.35} }
+    .syncing-dot { width:7px;height:7px;border-radius:50%;background:var(--blue);animation:pulse 0.9s ease-in-out infinite;display:inline-block;margin-right:5px;vertical-align:middle; }
+  </style>
+</head>
+<body>
+
+<!-- Auth gate -->
+<div id="auth-gate">
+  <img src="flowaify-logo.webp" alt="Flowaify" />
+  <div class="spinner"></div>
+  <p>Verifying access...</p>
+</div>
+
+<!-- App -->
+<div id="app">
+
+  <!-- Sidebar -->
+  <aside id="sidebar">
+    <div class="sb-brand">
+      <img src="flowaify-logo.webp" alt="" />
+      <span class="sb-brand-name">flow<span>ai</span>fy</span>
+    </div>
+
+    <nav class="sb-nav">
+      <span class="sb-label">Dashboard</span>
+      <a class="nav-item active" href="dashboard.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Overview
+      </a>
+      <div class="sb-divider"></div>
+    </nav>
+
+    <a href="portal.html" class="sb-back">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      Back to Connections
+    </a>
+
+    <div class="sb-user">
+      <div class="sb-user-row">
+        <div class="sb-avatar" id="user-avatar">?</div>
+        <div>
+          <div class="sb-uname" id="user-name">—</div>
+          <div class="sb-uemail" id="user-email"></div>
+        </div>
+      </div>
+      <button class="btn-logout" onclick="doLogout()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Sign out
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div id="main">
+    <header id="topbar">
+      <h1>Dashboard</h1>
+      <div class="tb-dot"></div>
+      <span class="tb-badge" id="sync-badge">Zoho Connected</span>
+    </header>
+
+    <div id="content">
+
+      <!-- Sync banner (shown when not connected) -->
+      <div id="sync-banner">
+        <div>
+          <div class="banner-text">Connect Zoho CRM to see your data</div>
+          <div class="banner-sub">Your dashboard will populate automatically once Zoho is synced.</div>
+        </div>
+        <button class="btn-banner" id="banner-btn" onclick="goSync()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+          Go to Connections
+        </button>
+      </div>
+
+      <!-- Metrics -->
+      <div class="metrics-row">
+        <div class="metric-card">
+          <div class="metric-label">Total Leads</div>
+          <div class="metric-value empty" id="m-leads">—</div>
+          <div class="metric-change" id="m-leads-sub">Connect Zoho to see data</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Deals Open</div>
+          <div class="metric-value empty" id="m-deals">—</div>
+          <div class="metric-change" id="m-deals-sub">Connect Zoho to see data</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Automations</div>
+          <div class="metric-value empty" id="m-autos">—</div>
+          <div class="metric-change" id="m-autos-sub">Connect Zoho to see data</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Tasks Active</div>
+          <div class="metric-value empty" id="m-tasks">—</div>
+          <div class="metric-change" id="m-tasks-sub">Connect Zoho to see data</div>
+        </div>
+      </div>
+
+      <!-- Content panels -->
+      <div class="content-grid">
+        <div class="panel">
+          <div class="panel-head">
+            <span class="panel-title">Recent Activity</span>
+          </div>
+          <div class="panel-body">
+            <div class="panel-empty">
+              <div class="pe-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+              <div class="pe-text">Activity will appear here<br/>after Zoho is connected.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head">
+            <span class="panel-title">Pipeline Overview</span>
+          </div>
+          <div class="panel-body">
+            <div class="chart-ph">
+              <span class="chart-ph-text">Chart data requires Zoho sync</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="content-grid">
+        <div class="panel">
+          <div class="panel-head">
+            <span class="panel-title">Open Deals</span>
+          </div>
+          <div class="panel-body">
+            <div class="panel-empty">
+              <div class="pe-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+              <div class="pe-text">Deal data will appear here<br/>after Zoho is connected.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head">
+            <span class="panel-title">Automation Status</span>
+          </div>
+          <div class="panel-body">
+            <div class="panel-empty">
+              <div class="pe-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
+              <div class="pe-text">Automation data will appear<br/>after Zoho is connected.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  var ZOHO_KEY  = 'fwa_zoho_connected';
+  var auth0Client;
+
+  (async function () {
+    auth0Client = await auth0.createAuth0Client({
+      domain:   'auth.flowaify.app',
+      clientId: 'tx74Owqn3jVeSaVuxfFHsKloqbPqfAmN',
+      authorizationParams: { redirect_uri: window.location.origin + '/dashboard.html' }
+    });
+
+    if (location.search.includes('code=') || location.search.includes('state=')) {
+      try { await auth0Client.handleRedirectCallback(); } catch (e) {}
+      history.replaceState({}, '', location.pathname);
+    }
+
+    var isAuth = await auth0Client.isAuthenticated();
+    if (!isAuth) { await auth0Client.loginWithRedirect(); return; }
+
+    var user = await auth0Client.getUser();
+    document.getElementById('user-avatar').textContent = (user.name || user.email || '?').charAt(0).toUpperCase();
+    document.getElementById('user-name').textContent   = user.name || user.email;
+    document.getElementById('user-email').textContent  = user.email || '';
+
+    document.getElementById('auth-gate').style.display = 'none';
+    document.getElementById('app').style.display = 'flex';
+
+    renderState();
+  })();
+
+  function doLogout() {
+    auth0Client.logout({ logoutParams: { returnTo: 'https://flowaify.app' } });
+  }
+
+  function goSync() {
+    window.location.href = 'portal.html';
+  }
+
+  function renderState() {
+    var connected = localStorage.getItem(ZOHO_KEY) === 'true';
+
+    document.getElementById('sync-banner').classList.toggle('hidden', connected);
+    document.getElementById('sync-badge').classList.toggle('show', connected);
+
+    var emptyText = 'Connect Zoho to see data';
+    ['leads','deals','autos','tasks'].forEach(function(k) {
+      var sub = document.getElementById('m-' + k + '-sub');
+      if (sub) sub.textContent = connected ? 'Awaiting data' : emptyText;
+    });
+  }
+</script>
+</body>
+</html>
