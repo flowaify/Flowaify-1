@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Flowaify — Sign In</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script src="https://cdn.auth0.com/js/lock/11.31/lock.min.js"></script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: #ffffff;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Subtle dot grid */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(0,87,255,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,87,255,0.04) 1px, transparent 1px);
+      background-size: 64px 64px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Ambient blue glow top-right */
+    body::after {
+      content: '';
+      position: fixed;
+      top: -140px;
+      right: -140px;
+      width: 700px;
+      height: 700px;
+      background: radial-gradient(circle, rgba(0,87,255,0.10) 0%, transparent 65%);
+      filter: blur(60px);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Particle canvas */
+    #particles {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── Accent grid lines ── */
+    .accent-lines {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .hline, .vline {
+      position: absolute;
+      background: rgba(0, 87, 255, 0.10);
+      will-change: transform, opacity;
+    }
+    .hline {
+      left: 0; right: 0; height: 1px;
+      transform: scaleX(0);
+      transform-origin: 50% 50%;
+      animation: drawX 0.9s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+    }
+    .vline {
+      top: 0; bottom: 0; width: 1px;
+      transform: scaleY(0);
+      transform-origin: 50% 0%;
+      animation: drawY 1s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+    }
+    .hline:nth-child(1) { top: 18%; animation-delay: 0.10s; }
+    .hline:nth-child(2) { top: 50%; animation-delay: 0.20s; }
+    .hline:nth-child(3) { top: 82%; animation-delay: 0.30s; }
+    .vline:nth-child(4) { left: 22%; animation-delay: 0.40s; }
+    .vline:nth-child(5) { left: 50%; animation-delay: 0.52s; }
+    .vline:nth-child(6) { left: 78%; animation-delay: 0.64s; }
+
+    @keyframes drawX {
+      0%   { transform: scaleX(0); opacity: 0; }
+      60%  { opacity: 0.8; }
+      100% { transform: scaleX(1); opacity: 0.4; }
+    }
+    @keyframes drawY {
+      0%   { transform: scaleY(0); opacity: 0; }
+      60%  { opacity: 0.8; }
+      100% { transform: scaleY(1); opacity: 0.4; }
+    }
+
+    /* Wrapper — fade up on load */
+    .wrap {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 420px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      animation: fadeUp 0.8s cubic-bezier(0.22, 0.61, 0.36, 1) 0.25s both;
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(22px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Brand */
+    .brand {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+    .brand-logo {
+      width: 52px;
+      height: 52px;
+      object-fit: contain;
+      display: block;
+      margin: 0 auto 16px;
+    }
+    .brand-name {
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      color: #0F172A;
+      line-height: 1;
+    }
+    .brand-name span { color: #0057FF; }
+    .brand-sub {
+      font-size: 13px;
+      color: #64748B;
+      margin-top: 7px;
+      font-weight: 500;
+    }
+
+    #lock-container { width: 100%; }
+
+    /* ── Auth0 Lock overrides ── */
+    .auth0-lock.auth0-lock .auth0-lock-overlay { display: none !important; }
+    .auth0-lock-center { padding: 0 !important; }
+
+    .auth0-lock.auth0-lock .auth0-lock-widget {
+      width: 100% !important;
+      max-width: 100% !important;
+      border-radius: 16px !important;
+      border: 1px solid #E2E8F0 !important;
+      box-shadow:
+        0 1px 3px rgba(0,0,0,0.05),
+        0 8px 32px rgba(0,87,255,0.09) !important;
+      font-family: 'Plus Jakarta Sans', sans-serif !important;
+    }
+
+    .auth0-lock.auth0-lock .auth0-lock-header {
+      background: #FFFFFF !important;
+      border-radius: 16px 16px 0 0 !important;
+      padding: 28px 28px 0 !important;
+      border-bottom: none !important;
+    }
+    .auth0-lock.auth0-lock .auth0-lock-header-logo { display: none !important; }
+    .auth0-lock.auth0-lock .auth0-lock-header-welcome {
+      font-family: 'Plus Jakarta Sans', sans-serif !important;
+      font-size: 16px !important;
+      font-weight: 700 !important;
+      color: #0F172A !important;
+      letter-spacing: -0.02em !important;
+    }
+
+    /* Hide social buttons & separator */
+    .auth0-lock.auth0-lock .auth0-lock-social-buttons-container { display: none !important; }
+    .auth0-lock.auth0-lock .auth0-lock-socsec-separator          { display: none !important; }
+
+    .auth0-lock.auth0-lock .auth0-lock-content {
+      background: #FFFFFF !important;
+      padding: 22px 28px 28px !important;
+      border-radius: 0 0 16px 16px !important;
+    }
+
+    .auth0-lock.auth0-lock .auth0-lock-label,
+    .auth0-lock.auth0-lock .auth0-lock-placeholder {
+      font-family: 'Plus Jakarta Sans', sans-serif !important;
+      font-size: 11.5px !important;
+      font-weight: 600 !important;
+      color: #64748B !important;
+      text-transform: none !important;
+      letter-spacing: 0 !important;
+    }
+
+    .auth0-lock.auth0-lock .auth0-lock-input-wrap {
+      border: 1.5px solid #E2E8F0 !important;
+      border-radius: 10px !important;
+      background: #FFFFFF !important;
+      transition: border-color 0.18s, box-shadow 0.18s !important;
+    }
+    .auth0-lock.auth0-lock .auth0-lock-input-wrap.auth0-lock-focused,
+    .auth0-lock.auth0-lock .auth0-lock-input-wrap:focus-within {
+      border-color: #0057FF !important;
+      box-shadow: 0 0 0 3px rgba(0,87,255,0.09) !important;
+    }
+    .auth0-lock.auth0-lock .auth0-lock-input-wrap-with-icon { border-radius: 10px !important; }
+
+    .auth0-lock.auth0-lock .auth0-lock-input {
+      font-family: 'Plus Jakarta Sans', sans-serif !important;
+      font-size: 14px !important;
+      color: #0F172A !important;
+      background: transparent !important;
+    }
+    .auth0-lock.auth0-lock .auth0-lock-input::placeholder { color: #94A3B8 !important; }
+    .auth0-lock.auth0-lock .auth0-lock-icon { color: #94A3B8 !important; }
+
+    .auth0-lock.auth0-lock .auth0-lock-submit {
+      background: #0057FF !important;
+      background-image: none !important;
+      border-radius: 10px !important;
+      font-family: 'Plus Jakarta Sans', sans-serif !important;
+      font-size: 14px !important;
+      font-weight: 700 !important;
+      letter-spacing: -0.01em !important;
+      height: 44px !important;
+      box-shadow: 0 4px 14px rgba(0,87,255,0.28) !important;
+      transition: transform 0.18s, box-shadow 0.18s !important;
+    }
+    .auth0-lock.auth0-lock .auth0-lock-submit:hover {
+      transform: translateY(-1px) !important;
+      box-shadow: 0 6px 20px rgba(0,87,255,0.40) !important;
+    }
+    .auth0-lock.auth0-lock .auth0-lock-submit:active { transform: translateY(0) !important; }
+    .auth0-lock.auth0-lock .auth0-lock-submit .auth0-label-submit {
+      font-family: 'Plus Jakarta Sans', sans-serif !important;
+      font-size: 14px !important;
+      font-weight: 700 !important;
+      letter-spacing: -0.01em !important;
+    }
+
+    .auth0-lock.auth0-lock .auth0-lock-alternative a,
+    .auth0-lock.auth0-lock .auth0-lock-terms a {
+      color: #0057FF !important;
+      font-family: 'Plus Jakarta Sans', sans-serif !important;
+      font-size: 13px !important;
+      font-weight: 600 !important;
+    }
+    .auth0-lock.auth0-lock .auth0-lock-alternative,
+    .auth0-lock.auth0-lock .auth0-lock-terms {
+      font-family: 'Plus Jakarta Sans', sans-serif !important;
+      font-size: 13px !important;
+      color: #64748B !important;
+    }
+
+    .auth0-lock.auth0-lock .auth0-global-message.auth0-global-message-error {
+      background: rgba(239,68,68,0.07) !important;
+      border: 1px solid rgba(239,68,68,0.2) !important;
+      border-radius: 8px !important;
+      font-family: 'Plus Jakarta Sans', sans-serif !important;
+      font-size: 13px !important;
+      color: #DC2626 !important;
+    }
+
+    .auth0-lock.auth0-lock .auth0-global-message.auth0-global-message-success {
+      background: rgba(34,197,94,0.07) !important;
+      border: 1px solid rgba(34,197,94,0.2) !important;
+      border-radius: 8px !important;
+      font-family: 'Plus Jakarta Sans', sans-serif !important;
+      font-size: 13px !important;
+      color: #16A34A !important;
+    }
+
+    .auth0-lock.auth0-lock .auth0-lock-badge-bottom {
+      opacity: 0.30 !important;
+      transform: scale(0.88) !important;
+    }
+
+    .footer-note {
+      margin-top: 20px;
+      text-align: center;
+      font-size: 11.5px;
+      color: #94A3B8;
+      font-weight: 500;
+      line-height: 1.6;
+    }
+    .footer-note a { color: #64748B; text-decoration: none; }
+    .footer-note a:hover { color: #0057FF; }
+  </style>
+</head>
+<body>
+
+  <!-- Particle canvas -->
+  <canvas id="particles"></canvas>
+
+  <!-- Accent grid lines -->
+  <div class="accent-lines">
+    <div class="hline"></div>
+    <div class="hline"></div>
+    <div class="hline"></div>
+    <div class="vline"></div>
+    <div class="vline"></div>
+    <div class="vline"></div>
+  </div>
+
+  <div class="wrap">
+    <div class="brand">
+      <img
+        class="brand-logo"
+        src="https://flowaify.app/flowaify-logo.webp"
+        alt="Flowaify"
+        onerror="this.style.display='none'"
+      />
+      <div class="brand-name">flow<span>ai</span>fy</div>
+      <div class="brand-sub">Sign in to your client portal</div>
+    </div>
+
+    <div id="lock-container"></div>
+
+    <p class="footer-note">
+      Need help? <a href="mailto:contact@flowaify.app">contact@flowaify.app</a>
+    </p>
+  </div>
+
+  <script>
+    /* ── Particle animation ── */
+    (function () {
+      var canvas = document.getElementById('particles');
+      var ctx = canvas.getContext('2d');
+      var ps = [], raf;
+
+      function setSize() {
+        canvas.width  = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }
+
+      function make() {
+        return {
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          v: Math.random() * 0.28 + 0.06,
+          o: Math.random() * 0.18 + 0.06
+        };
+      }
+
+      function init() {
+        ps = [];
+        var n = Math.floor((canvas.width * canvas.height) / 9000);
+        for (var i = 0; i < n; i++) ps.push(make());
+      }
+
+      function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ps.forEach(function (p) {
+          p.y -= p.v;
+          if (p.y < 0) {
+            p.x = Math.random() * canvas.width;
+            p.y = canvas.height + 20;
+            p.v = Math.random() * 0.28 + 0.06;
+            p.o = Math.random() * 0.18 + 0.06;
+          }
+          ctx.fillStyle = 'rgba(0,87,255,' + p.o + ')';
+          ctx.fillRect(p.x, p.y, 0.8, 2.4);
+        });
+        raf = requestAnimationFrame(draw);
+      }
+
+      window.addEventListener('resize', function () { setSize(); init(); });
+      setSize();
+      init();
+      draw();
+    })();
+
+    /* ── Auth0 Lock ── */
+    var config = JSON.parse(decodeURIComponent(escape(window.atob('@@config@@'))));
+    config.extraParams = config.extraParams || {};
+
+    var lock = new Auth0Lock(config.clientID, config.auth0Domain, {
+      container: 'lock-container',
+      auth: {
+        redirectUrl: config.callbackURL,
+        responseType:
+          (config.internalOptions || {}).response_type ||
+          (config.callbackOnLocationHash ? 'token' : 'code'),
+        params: config.internalOptions
+      },
+      configurationBaseUrl: config.clientConfigurationBaseUrl,
+      overrides: {
+        __tenant:       config.auth0Tenant,
+        __token_issuer: config.authorizationServer.issuer
+      },
+      assetsUrl:          config.assetsUrl,
+      allowedConnections: ['Username-Password-Authentication'],
+      rememberLastLogin:  !config.prompt,
+      language: (config.dict && typeof config.dict === 'string') ? config.dict : undefined,
+      languageDictionary: (config.dict && config.dict.signin && config.dict.signin.title)
+        ? { title: config.dict.signin.title }
+        : { title: 'Welcome back' },
+      theme: {
+        logo:            'https://flowaify.app/flowaify-logo.webp',
+        primaryColor:    '#0057FF',
+        foregroundColor: '#0F172A'
+      },
+      prefill: config.extraParams.login_hint
+        ? { email: config.extraParams.login_hint, username: config.extraParams.login_hint }
+        : null,
+      closable:                         false,
+      defaultADUsernameFromEmailPrefix: false,
+      avatar:                           null
+    });
+
+    lock.show();
+  </script>
+</body>
+</html>
