@@ -65,7 +65,7 @@
       position: relative;
       z-index: 1;
       width: 100%;
-      max-width: 400px;
+      max-width: 380px;
       animation: fadeUp 0.75s cubic-bezier(0.22, 0.61, 0.36, 1) 0.15s both;
     }
 
@@ -77,16 +77,16 @@
     /* Brand */
     .brand {
       text-align: center;
-      margin-bottom: 36px;
+      margin-bottom: 28px;
     }
     .brand-logo {
-      width: 48px; height: 48px;
+      width: 44px; height: 44px;
       object-fit: contain;
       display: block;
-      margin: 0 auto 12px;
+      margin: 0 auto 10px;
     }
     .brand-name {
-      font-size: 20px;
+      font-size: 19px;
       font-weight: 800;
       letter-spacing: -0.04em;
       color: #0F172A;
@@ -97,26 +97,26 @@
     /* Form heading */
     .form-heading {
       text-align: center;
-      margin-bottom: 24px;
+      margin-bottom: 20px;
     }
     .form-heading h1 {
-      font-size: 28px;
+      font-size: 26px;
       font-weight: 700;
       color: #0F172A;
       letter-spacing: -0.03em;
       line-height: 1.2;
     }
     .form-heading p {
-      font-size: 14px;
+      font-size: 13.5px;
       color: #64748B;
-      margin-top: 6px;
+      margin-top: 5px;
       font-weight: 500;
     }
 
     #lock-container { width: 100%; }
 
     .footer-note {
-      margin-top: 24px;
+      margin-top: 20px;
       text-align: center;
       font-size: 12px;
       color: #94A3B8;
@@ -292,28 +292,28 @@
       border-radius: 14px !important;
       border: 1px solid #E2E8F0 !important;
       box-shadow:
-        0 1px 3px rgba(0,0,0,0.05),
-        0 8px 28px rgba(0,87,255,0.08) !important;
+        0 1px 3px rgba(0,0,0,0.04),
+        0 8px 28px rgba(0,87,255,0.07) !important;
       font-family: 'Plus Jakarta Sans', sans-serif !important;
+      overflow: hidden !important;
     }
 
-    /* Hide header (logo + title + tabs) — we show our own */
+    /* Hide header and tabs */
     .auth0-lock.auth0-lock .auth0-lock-header { display: none !important; }
 
-    /* Hide social buttons */
+    /* Hide social */
     .auth0-lock.auth0-lock .auth0-lock-social-buttons-container { display: none !important; }
     .auth0-lock.auth0-lock .auth0-lock-socsec-separator          { display: none !important; }
 
     .auth0-lock.auth0-lock .auth0-lock-content {
       background: #FFFFFF !important;
-      padding: 28px !important;
-      border-radius: 14px !important;
+      padding: 24px 24px 0 24px !important;
     }
 
     .auth0-lock.auth0-lock .auth0-lock-label,
     .auth0-lock.auth0-lock .auth0-lock-placeholder {
       font-family: 'Plus Jakarta Sans', sans-serif !important;
-      font-size: 13px !important;
+      font-size: 12.5px !important;
       font-weight: 600 !important;
       color: #0F172A !important;
       text-transform: none !important;
@@ -342,27 +342,28 @@
     .auth0-lock.auth0-lock .auth0-lock-input::placeholder { color: #94A3B8 !important; }
     .auth0-lock.auth0-lock .auth0-lock-icon { color: #CBD5E1 !important; }
 
+    /* Submit button — clean, no arrow */
     .auth0-lock.auth0-lock .auth0-lock-submit {
       background: #0057FF !important;
       background-image: none !important;
-      border-radius: 9px !important;
+      border-radius: 0 0 13px 13px !important;
       font-family: 'Plus Jakarta Sans', sans-serif !important;
       font-size: 14px !important;
       font-weight: 700 !important;
       letter-spacing: -0.01em !important;
-      height: 46px !important;
-      box-shadow: 0 4px 14px rgba(0,87,255,0.30) !important;
-      transition: transform 0.15s, box-shadow 0.15s !important;
+      height: 50px !important;
+      margin-top: 8px !important;
+      box-shadow: none !important;
+      transition: opacity 0.15s !important;
     }
-    .auth0-lock.auth0-lock .auth0-lock-submit:hover {
-      transform: translateY(-1px) !important;
-      box-shadow: 0 6px 20px rgba(0,87,255,0.44) !important;
-    }
-    .auth0-lock.auth0-lock .auth0-lock-submit:active { transform: translateY(0) !important; }
+    .auth0-lock.auth0-lock .auth0-lock-submit:hover { opacity: 0.88 !important; }
+    .auth0-lock.auth0-lock .auth0-lock-submit:active { opacity: 0.78 !important; }
+    .auth0-lock.auth0-lock .auth0-lock-submit svg { display: none !important; }
     .auth0-lock.auth0-lock .auth0-lock-submit .auth0-label-submit {
       font-family: 'Plus Jakarta Sans', sans-serif !important;
       font-size: 14px !important;
       font-weight: 700 !important;
+      letter-spacing: 0 !important;
     }
 
     .auth0-lock.auth0-lock .auth0-lock-alternative a,
@@ -543,7 +544,13 @@
       initialScreen:      'login',
       rememberLastLogin:  !config.prompt,
       language: (config.dict && typeof config.dict === 'string') ? config.dict : undefined,
-      languageDictionary: { title: '' },
+      languageDictionary: {
+        title: '',
+        loginSubmitLabel: 'Sign in',
+        emailInputPlaceholder: 'Email',
+        passwordInputPlaceholder: 'Password',
+        forgotPasswordAction: 'Forgot password?'
+      },
       theme: {
         logo:            'https://flowaify.app/flowaify-logo.webp',
         primaryColor:    '#0057FF',
