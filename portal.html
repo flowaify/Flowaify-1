@@ -11,194 +11,198 @@
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
   <script src="https://cdn.auth0.com/js/auth0-spa-js/2.18/auth0-spa-js.production.js"></script>
   <style>
-    /* ── Auth gate ── */
     #auth-gate {
-      position: fixed; inset: 0; z-index: 9999;
-      background: #ffffff;
+      position: fixed; inset: 0; z-index: 9999; background: #fff;
       display: flex; align-items: center; justify-content: center;
-      flex-direction: column; gap: 14px;
-      font-family: 'Plus Jakarta Sans', sans-serif;
+      flex-direction: column; gap: 14px; font-family: 'Plus Jakarta Sans', sans-serif;
     }
-    #auth-gate .ag-logo { width: 44px; height: 44px; object-fit: contain; }
-    #auth-gate .ag-spinner {
-      width: 28px; height: 28px; border-radius: 50%;
-      border: 2px solid rgba(0,87,255,0.15);
-      border-top-color: #0057FF;
-      animation: ag-spin 0.75s linear infinite;
-    }
-    #auth-gate .ag-label { font-size: 12.5px; font-weight: 600; color: rgba(0,87,255,0.65); margin: 0; letter-spacing: 0.02em; }
+    #auth-gate .ag-logo   { width: 40px; height: 40px; object-fit: contain; }
+    #auth-gate .ag-spinner{ width: 26px; height: 26px; border-radius: 50%; border: 2px solid rgba(0,87,255,0.15); border-top-color: #0057FF; animation: ag-spin 0.75s linear infinite; }
+    #auth-gate .ag-label  { font-size: 12px; font-weight: 600; color: rgba(0,87,255,0.6); }
     @keyframes ag-spin { to { transform: rotate(360deg); } }
-
-    .btn-logout {
-      width: 100%; display: flex; align-items: center; gap: 8px;
-      padding: 9px 12px; margin-top: 8px;
-      background: transparent; border: 1px solid var(--border);
-      border-radius: 8px; cursor: pointer; font-family: inherit;
-      font-size: 12px; font-weight: 600; color: var(--text-m);
-      transition: background 0.15s, color 0.15s, border-color 0.15s;
-    }
-    .btn-logout:hover { background: var(--red-dim); color: var(--red); border-color: rgba(220,38,38,0.25); }
-    .btn-logout i { width: 13px; height: 13px; }
   </style>
   <style>
     :root {
-      --sidebar-w: 244px;
-      --blue:        #0057FF;
-      --blue-b:      #2979FF;
-      --blue-soft:   #4d94ff;
-      --purple:      #8b5cf6;
-      --bg:          #f8fafc;
-      --bg-s:        #f1f5f9;
-      --bg-card:     #ffffff;
-      --sidebar-bg:  #ffffff;
-      --topbar-bg:   rgba(255,255,255,0.96);
-      --blue-glow:   rgba(0,87,255,0.08);
-      --blue-border: rgba(0,87,255,0.13);
-      --blue-dim:    rgba(0,87,255,0.05);
-      --text:        #0f172a;
-      --text-m:      rgba(15,23,42,0.45);
-      --text-s:      rgba(15,23,42,0.70);
-      --border:      rgba(15,23,42,0.07);
-      --green:       #059669;
-      --green-dim:   rgba(5,150,105,0.08);
-      --amber:       #d97706;
-      --amber-dim:   rgba(217,119,6,0.08);
-      --red:         #dc2626;
-      --red-dim:     rgba(220,38,38,0.08);
-      --card-shadow: 0 1px 3px rgba(0,0,0,0.05), 0 4px 16px rgba(0,87,255,0.05);
-      --input-bg:    #f8faff;
+      --blue:       #0057FF;
+      --blue-b:     #2979FF;
+      --blue-soft:  #4d94ff;
+      --purple:     #8b5cf6;
+      --green:      #059669;
+      --amber:      #d97706;
+      --red:        #dc2626;
+      --bg:         #f8fafc;
+      --bg-card:    #ffffff;
+      --topbar-bg:  rgba(255,255,255,0.97);
+      --border:     rgba(15,23,42,0.08);
+      --blue-border:rgba(0,87,255,0.14);
+      --blue-dim:   rgba(0,87,255,0.06);
+      --green-dim:  rgba(5,150,105,0.08);
+      --amber-dim:  rgba(217,119,6,0.08);
+      --red-dim:    rgba(220,38,38,0.08);
+      --purple-dim: rgba(139,92,246,0.08);
+      --text:       #0f172a;
+      --text-m:     rgba(15,23,42,0.44);
+      --text-s:     rgba(15,23,42,0.68);
+      --card-shadow:0 1px 3px rgba(0,0,0,0.05), 0 4px 16px rgba(0,87,255,0.05);
+      --input-bg:   #f8faff;
       --input-border:rgba(0,87,255,0.15);
     }
 
-    *,*::before,*::after { box-sizing: border-box; margin: 0; padding: 0; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html, body { height: 100%; font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text); font-size: 14px; line-height: 1.5; overflow-x: hidden; }
     a { text-decoration: none; color: inherit; }
     ::-webkit-scrollbar { width: 4px; height: 4px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: var(--blue-border); border-radius: 99px; }
 
-    .layout { display: flex; min-height: 100vh; }
+    /* ─── TOP NAV ─── */
+    .topnav {
+      position: sticky; top: 0; z-index: 60;
+      background: var(--topbar-bg); backdrop-filter: blur(18px);
+      border-bottom: 1px solid var(--blue-border);
+    }
+    .topnav-bar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 32px; height: 62px; gap: 16px;
+    }
+    .topnav-brand { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+    .topnav-brand img { width: 28px; height: 28px; object-fit: contain; }
+    .topnav-brand-name { font-size: 14.5px; font-weight: 800; letter-spacing: -0.4px; color: var(--text); }
+    .topnav-brand-tag  { font-size: 9.5px; font-weight: 500; color: var(--text-m); letter-spacing: 0.4px; }
 
-    /* SIDEBAR */
-    .sidebar { width: var(--sidebar-w); min-height: 100vh; background: var(--sidebar-bg); border-right: 1px solid var(--blue-border); display: flex; flex-direction: column; position: fixed; left: 0; top: 0; bottom: 0; z-index: 50; padding: 20px 0; transition: transform 0.25s; }
-    .sidebar-logo { display: flex; align-items: center; gap: 10px; padding: 0 18px 20px; border-bottom: 1px solid var(--border); }
-    .sidebar-logo img { width: 28px; height: 28px; object-fit: contain; }
-    .sidebar-logo-name { font-size: 14.5px; font-weight: 800; letter-spacing: -0.4px; color: var(--text); }
-    .sidebar-logo-tag { font-size: 9.5px; font-weight: 500; color: var(--text-m); letter-spacing: 0.4px; margin-top: -1px; }
-    .sidebar-label { padding: 18px 18px 7px; font-size: 9.5px; font-weight: 700; letter-spacing: 1px; color: var(--text-m); text-transform: uppercase; }
-    .nav-item { display: flex; align-items: center; gap: 9px; padding: 8.5px 18px; margin: 1px 8px; border-radius: 9px; cursor: pointer; transition: background 0.16s, color 0.16s; color: var(--text-m); font-size: 13px; font-weight: 500; border: 1px solid transparent; user-select: none; }
-    .nav-item i { width: 15px; height: 15px; flex-shrink: 0; }
-    .nav-item:hover { background: var(--blue-dim); color: var(--text-s); }
-    .nav-item.active { background: var(--blue-dim); color: var(--blue); border-color: var(--blue-border); font-weight: 600; }
-    .sidebar-bottom { margin-top: auto; padding: 14px 10px; border-top: 1px solid var(--border); }
-    .client-pill { display: flex; align-items: center; gap: 8px; padding: 10px 12px; background: var(--green-dim); border: 1px solid rgba(5,150,105,0.18); border-radius: 9px; }
-    .client-pulse { width: 7px; height: 7px; border-radius: 50%; background: var(--green); flex-shrink: 0; animation: pulse-g 2s infinite; }
-    .client-name { font-size: 11.5px; font-weight: 700; color: var(--green); }
-    .client-sub { font-size: 10px; color: var(--green); opacity: 0.7; }
+    .topnav-tabs {
+      display: flex; align-items: center; gap: 2px; flex: 1;
+      justify-content: center; overflow-x: auto; padding: 0 16px;
+      scrollbar-width: none;
+    }
+    .topnav-tabs::-webkit-scrollbar { display: none; }
+    .nav-tab {
+      display: flex; align-items: center; gap: 7px;
+      padding: 7px 14px; border-radius: 9px; cursor: pointer;
+      font-size: 12.5px; font-weight: 500; color: var(--text-m);
+      transition: background 0.15s, color 0.15s; white-space: nowrap;
+      border: 1px solid transparent; flex-shrink: 0; user-select: none;
+    }
+    .nav-tab i { width: 14px; height: 14px; flex-shrink: 0; }
+    .nav-tab:hover { background: var(--blue-dim); color: var(--text-s); }
+    .nav-tab.active { background: var(--blue-dim); color: var(--blue); border-color: var(--blue-border); font-weight: 600; }
 
-    /* MAIN */
-    .main { margin-left: var(--sidebar-w); flex: 1; min-height: 100vh; display: flex; flex-direction: column; }
-
-    /* TOPBAR */
-    .topbar { position: sticky; top: 0; z-index: 40; display: flex; align-items: center; justify-content: space-between; padding: 0 28px; height: 62px; background: var(--topbar-bg); backdrop-filter: blur(18px); border-bottom: 1px solid var(--blue-border); }
-    .topbar-left { display: flex; flex-direction: column; min-width: 0; }
-    .topbar-title { font-size: 15px; font-weight: 700; color: var(--text); letter-spacing: -0.3px; }
-    .topbar-sub { font-size: 11px; color: var(--text-m); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .topbar-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
-    .btn-sync { display: flex; align-items: center; gap: 6px; padding: 7px 16px; background: var(--blue); border: none; border-radius: 8px; color: #fff; font-size: 12.5px; font-weight: 600; cursor: pointer; transition: all 0.18s; font-family: inherit; box-shadow: 0 4px 14px rgba(0,87,255,0.28); white-space: nowrap; }
+    .topnav-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+    .btn-sync {
+      display: flex; align-items: center; gap: 6px; padding: 7px 16px;
+      background: var(--blue); border: none; border-radius: 8px; color: #fff;
+      font-size: 12.5px; font-weight: 600; cursor: pointer; font-family: inherit;
+      box-shadow: 0 4px 14px rgba(0,87,255,0.28); transition: all 0.18s; white-space: nowrap;
+    }
     .btn-sync:hover { background: var(--blue-b); transform: translateY(-1px); }
     .btn-sync i { width: 13px; height: 13px; }
-    .btn-dash { display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; background: var(--blue-dim); border: 1px solid var(--blue-border); border-radius: 8px; font-size: 12px; font-weight: 600; color: var(--text-s); text-decoration: none; transition: all 0.18s; white-space: nowrap; flex-shrink: 0; }
-    .btn-dash:hover { background: rgba(0,87,255,0.1); color: var(--blue); }
-    .btn-dash i { width: 13px; height: 13px; }
-    .avatar { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg,#0057FF,#8b5cf6); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; color: #fff; cursor: pointer; flex-shrink: 0; user-select: none; transition: box-shadow 0.2s; }
-    .avatar:hover { box-shadow: 0 0 0 3px rgba(0,87,255,0.2); }
+    .topnav-dash-link {
+      display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px;
+      background: var(--blue-dim); border: 1px solid var(--blue-border);
+      border-radius: 8px; font-size: 12px; font-weight: 600; color: var(--text-s);
+      transition: all 0.18s; white-space: nowrap;
+    }
+    .topnav-dash-link:hover { background: rgba(0,87,255,0.1); color: var(--blue); }
+    .topnav-dash-link i { width: 13px; height: 13px; }
+
+    /* PROFILE DROPDOWN */
     .avatar-wrap { position: relative; }
-    .profile-menu { position: absolute; right: 0; top: calc(100% + 8px); background: #fff; border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.13); padding: 6px; min-width: 190px; display: none; z-index: 200; }
+    .avatar {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: linear-gradient(135deg,#0057FF,#8b5cf6);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 800; color: #fff; cursor: pointer;
+      user-select: none; transition: box-shadow 0.2s; flex-shrink: 0;
+    }
+    .avatar:hover { box-shadow: 0 0 0 3px rgba(0,87,255,0.18); }
+    .profile-menu {
+      position: absolute; right: 0; top: calc(100% + 8px);
+      background: #fff; border: 1px solid var(--border); border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.13); padding: 6px; min-width: 190px;
+      display: none; z-index: 200;
+    }
     .profile-menu.open { display: block; animation: pmenu-in 0.15s ease; }
     @keyframes pmenu-in { from{opacity:0;transform:translateY(-6px)} to{opacity:1;transform:translateY(0)} }
     .profile-menu-header { padding: 10px 12px 8px; border-bottom: 1px solid var(--border); margin-bottom: 4px; }
     .profile-menu-name  { font-size: 12.5px; font-weight: 700; color: var(--text); }
     .profile-menu-email { font-size: 10.5px; color: var(--text-m); margin-top: 1px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .profile-menu-item { display: flex; align-items: center; gap: 9px; padding: 8px 12px; font-size: 12.5px; color: var(--text-s); font-weight: 500; cursor: pointer; border-radius: 8px; transition: background 0.13s, color 0.13s; }
+    .profile-menu-item  { display: flex; align-items: center; gap: 9px; padding: 8px 12px; font-size: 12.5px; color: var(--text-s); font-weight: 500; cursor: pointer; border-radius: 8px; transition: background 0.13s, color 0.13s; }
     .profile-menu-item:hover { background: var(--blue-dim); color: var(--blue); }
     .profile-menu-item i { width: 14px; height: 14px; }
     .profile-menu-sep { border: none; border-top: 1px solid var(--border); margin: 4px 0; }
     .profile-menu-item.danger:hover { background: var(--red-dim); color: var(--red); }
-    .mobile-menu-btn { display: none; align-items: center; justify-content: center; width: 34px; height: 34px; background: var(--blue-dim); border: 1px solid var(--blue-border); border-radius: 8px; cursor: pointer; color: var(--text-s); flex-shrink: 0; }
-    .mobile-menu-btn i { width: 18px; height: 18px; }
+
+    /* PAGE TITLE ROW */
+    .page-header-strip {
+      background: #fff; border-bottom: 1px solid var(--border);
+      padding: 0 32px; display: flex; align-items: center; gap: 10px; height: 42px;
+    }
+    .page-header-strip-title { font-size: 12.5px; font-weight: 700; color: var(--text-s); }
+    .page-header-strip-sep { color: var(--text-m); font-size: 12px; }
+    .page-header-strip-sub  { font-size: 12px; color: var(--text-m); }
+
+    /* MOBILE NAV TOGGLE */
+    .mob-nav-btn { display: none; width: 34px; height: 34px; border-radius: 9px; background: var(--blue-dim); border: 1px solid var(--blue-border); color: var(--text-s); cursor: pointer; align-items: center; justify-content: center; }
+    .mob-nav-btn i { width: 16px; height: 16px; }
+    .mob-nav-drawer { display: none; position: fixed; inset: 0; z-index: 100; background: rgba(0,0,0,0.4); }
+    .mob-nav-drawer.open { display: block; }
+    .mob-nav-sheet { position: absolute; top: 0; left: 0; width: 260px; height: 100%; background: #fff; border-right: 1px solid var(--border); padding: 20px 16px; display: flex; flex-direction: column; gap: 4px; }
+    .mob-nav-close { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid var(--border); }
+    .mob-nav-close img { width: 24px; height: 24px; object-fit: contain; }
+    .mob-nav-close span { font-size: 14px; font-weight: 800; color: var(--text); }
 
     /* PAGE */
-    .page { display: none; padding: 26px 28px 60px; }
+    .page { display: none; padding: 28px 32px 80px; }
     .page.active { display: block; }
+    .page-head { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 24px; gap: 16px; flex-wrap: wrap; }
+    .page-head-title { font-size: 21px; font-weight: 800; color: var(--text); letter-spacing: -0.5px; }
+    .page-head-sub { font-size: 12px; color: var(--text-m); margin-top: 3px; }
+    .page-head-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
 
     /* CARD */
-    .card { background: var(--bg-card); border: 1px solid var(--blue-border); border-radius: 14px; box-shadow: var(--card-shadow); transition: box-shadow 0.2s, transform 0.2s, border-color 0.2s; overflow: hidden; }
-    .card:hover { box-shadow: 0 0 24px var(--blue-glow), var(--card-shadow); border-color: rgba(0,87,255,0.22); transform: translateY(-1px); }
+    .card { background: var(--bg-card); border: 1px solid var(--blue-border); border-radius: 14px; box-shadow: var(--card-shadow); overflow: hidden; transition: box-shadow 0.2s, transform 0.2s; }
+    .card:hover { box-shadow: 0 0 0 1px rgba(0,87,255,0.18), var(--card-shadow); transform: translateY(-1px); }
 
     /* SEC HEAD */
     .sec-head { display: flex; align-items: center; justify-content: space-between; padding: 15px 20px; border-bottom: 1px solid var(--border); }
     .sec-title { display: flex; align-items: center; gap: 7px; font-size: 13px; font-weight: 700; color: var(--text); }
     .sec-title i { width: 14px; height: 14px; color: var(--blue); }
-    .sec-sub { font-size: 11px; color: var(--text-m); font-weight: 500; }
-
-    /* PAGE HEAD */
-    .page-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 22px; }
-    .page-head-title { font-size: 20px; font-weight: 800; color: var(--text); letter-spacing: -0.5px; }
-    .page-head-sub { font-size: 12px; color: var(--text-m); margin-top: 2px; }
-    .page-head-actions { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; flex-shrink: 0; }
+    .sec-sub { font-size: 11px; color: var(--text-m); }
 
     /* BADGES */
     .badge { display: inline-flex; align-items: center; padding: 3px 9px; border-radius: 99px; font-size: 10.5px; font-weight: 600; white-space: nowrap; }
-    .b-live      { background: var(--green-dim);         color: var(--green);  border: 1px solid rgba(5,150,105,0.2); }
-    .b-setup     { background: var(--amber-dim);         color: var(--amber);  border: 1px solid rgba(217,119,6,0.2); }
-    .b-paused    { background: rgba(139,92,246,.10);     color: var(--purple); border: 1px solid rgba(139,92,246,.2); }
-    .b-connected { background: var(--green-dim);         color: var(--green);  border: 1px solid rgba(5,150,105,0.2); }
-    .b-notconn   { background: rgba(100,116,139,.08);   color: #64748b;       border: 1px solid rgba(100,116,139,.15); }
-    .b-optional  { background: var(--blue-dim);          color: var(--blue);   border: 1px solid var(--blue-border); }
-    .b-pending   { background: var(--amber-dim);         color: var(--amber);  border: 1px solid rgba(217,119,6,0.2); }
-
-    /* LIVE PILL */
-    .live-pill { display: flex; align-items: center; gap: 5px; font-size: 10px; font-weight: 700; color: var(--green); background: var(--green-dim); border: 1px solid rgba(5,150,105,0.18); padding: 3px 9px; border-radius: 99px; }
-    .live-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--green); animation: pulse-g 1.5s infinite; }
-
-    @keyframes pulse-g { 0%{box-shadow:0 0 0 0 rgba(5,150,105,.4)} 70%{box-shadow:0 0 0 5px rgba(5,150,105,0)} 100%{box-shadow:0 0 0 0 rgba(5,150,105,0)} }
-    @keyframes pulse-a { 0%{box-shadow:0 0 0 0 rgba(217,119,6,.4)} 70%{box-shadow:0 0 0 5px rgba(217,119,6,0)} 100%{box-shadow:0 0 0 0 rgba(217,119,6,0)} }
-    @keyframes pulse-r { 0%{box-shadow:0 0 0 0 rgba(220,38,38,.4)} 70%{box-shadow:0 0 0 5px rgba(220,38,38,0)} 100%{box-shadow:0 0 0 0 rgba(220,38,38,0)} }
-    @keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
-    @keyframes modal-in { from{transform:scale(0.95) translateY(10px);opacity:0} to{transform:scale(1) translateY(0);opacity:1} }
-    @keyframes toast-in { from{transform:translateY(16px);opacity:0} to{transform:translateY(0);opacity:1} }
-    .spinning { animation: spin 1s linear infinite; }
+    .b-notconn { background: rgba(100,116,139,.08); color: #64748b; border: 1px solid rgba(100,116,139,.15); }
+    .b-optional { background: var(--blue-dim); color: var(--blue); border: 1px solid var(--blue-border); }
+    .b-setup    { background: var(--amber-dim); color: var(--amber); border: 1px solid rgba(217,119,6,0.2); }
+    .b-live     { background: var(--green-dim); color: var(--green); border: 1px solid rgba(5,150,105,0.2); }
 
     /* STAT CARDS */
-    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(160px,1fr)); gap: 14px; margin-bottom: 22px; }
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px,1fr)); gap: 14px; margin-bottom: 22px; }
     .stat-card { padding: 18px 20px; display: flex; flex-direction: column; gap: 8px; }
-    .stat-top { display: flex; align-items: center; justify-content: space-between; }
+    .stat-top  { display: flex; align-items: center; justify-content: space-between; }
     .stat-icon { width: 33px; height: 33px; border-radius: 9px; display: flex; align-items: center; justify-content: center; }
     .stat-icon i { width: 15px; height: 15px; }
-    .si-blue   { background: rgba(0,87,255,.10);   color: var(--blue); }
-    .si-green  { background: var(--green-dim);     color: var(--green); }
-    .si-amber  { background: var(--amber-dim);     color: var(--amber); }
-    .si-purple { background: rgba(139,92,246,.10); color: var(--purple); }
+    .si-blue   { background: rgba(0,87,255,.10); color: var(--blue); }
+    .si-green  { background: var(--green-dim);   color: var(--green); }
+    .si-amber  { background: var(--amber-dim);   color: var(--amber); }
+    .si-purple { background: var(--purple-dim);  color: var(--purple); }
     .stat-val   { font-size: 24px; font-weight: 800; color: var(--text); letter-spacing: -0.8px; line-height: 1; }
     .stat-label { font-size: 11px; color: var(--text-m); font-weight: 500; }
     .stat-hint  { font-size: 10px; color: var(--text-m); opacity: 0.7; }
 
     /* PROGRESS */
-    .progress-bar  { height: 6px; background: var(--border); border-radius: 99px; overflow: hidden; margin-top: 8px; }
-    .progress-fill { height: 100%; border-radius: 99px; background: linear-gradient(90deg,var(--blue),var(--purple)); transition: width 0.5s ease; }
+    .progress-bar  { height: 7px; background: var(--border); border-radius: 99px; overflow: hidden; margin-top: 8px; }
+    .progress-fill { height: 100%; border-radius: 99px; background: linear-gradient(90deg,var(--blue),var(--purple)); }
 
     /* STATUS BANNER */
     .status-banner { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-radius: 14px; margin-bottom: 22px; border: 1px solid; gap: 16px; flex-wrap: wrap; }
-    .sb-live   { background: var(--green-dim);     border-color: rgba(5,150,105,0.22); }
-    .sb-setup  { background: var(--amber-dim);     border-color: rgba(217,119,6,0.22); }
-    .sb-paused { background: rgba(139,92,246,.08); border-color: rgba(139,92,246,.22); }
-    .sb-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-    .sb-dot.live   { background: var(--green);  animation: pulse-g 2s infinite; }
-    .sb-dot.setup  { background: var(--amber);  animation: pulse-a 2s infinite; }
-    .sb-dot.paused { background: var(--purple); }
-    .sb-label { font-size: 14px; font-weight: 700; }
-    .sb-sub   { font-size: 11.5px; opacity: 0.82; margin-top: 2px; }
+    .sb-setup  { background: var(--amber-dim); border-color: rgba(217,119,6,0.22); }
+    .sb-dot    { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+    .sb-dot.setup { background: var(--amber); animation: pulse-a 2s infinite; }
+    @keyframes pulse-a { 0%{box-shadow:0 0 0 0 rgba(217,119,6,.4)} 70%{box-shadow:0 0 0 5px rgba(217,119,6,0)} 100%{box-shadow:0 0 0 0 rgba(217,119,6,0)} }
+    @keyframes pulse-g { 0%{box-shadow:0 0 0 0 rgba(5,150,105,.4)} 70%{box-shadow:0 0 0 5px rgba(5,150,105,0)} 100%{box-shadow:0 0 0 0 rgba(5,150,105,0)} }
+    @keyframes spin { to{transform:rotate(360deg)} }
+    .spinning { animation: spin 0.9s linear infinite; }
 
     /* CHECK ITEMS */
     .check-item { display: flex; align-items: center; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--border); }
@@ -216,14 +220,13 @@
     .conn-card { padding: 22px; display: flex; flex-direction: column; gap: 14px; }
     .conn-title { font-size: 14px; font-weight: 700; color: var(--text); }
     .conn-desc  { font-size: 12px; color: var(--text-m); line-height: 1.55; }
-    .conn-footer { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 2px; }
-    .btn-connect { display: inline-flex; align-items: center; gap: 5px; padding: 7px 14px; border: none; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit; transition: all 0.18s; }
+    .conn-footer{ display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 2px; }
+    .btn-connect{ display: inline-flex; align-items: center; gap: 5px; padding: 7px 14px; border: none; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit; transition: all 0.18s; }
     .btn-connect i { width: 12px; height: 12px; }
     .bcp { background: var(--blue); color: #fff; box-shadow: 0 3px 10px rgba(0,87,255,0.25); }
     .bcp:hover { background: var(--blue-b); transform: translateY(-1px); }
     .bco { background: transparent; color: var(--text-s); border: 1px solid var(--blue-border); }
     .bco:hover { background: var(--blue-dim); }
-    .bcg { background: var(--green-dim); color: var(--green); border: 1px solid rgba(5,150,105,0.2); }
 
     /* ACTION CARDS */
     .action-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); gap: 16px; }
@@ -235,16 +238,15 @@
     .acbtn { display: inline-flex; align-items: center; gap: 6px; padding: 9px 18px; border: none; border-radius: 9px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit; transition: all 0.18s; align-self: flex-start; }
     .acbtn i { width: 14px; height: 14px; }
     .acbtn-green  { background: var(--green);  color: #fff; box-shadow: 0 4px 14px rgba(5,150,105,0.3); }
-    .acbtn-green:hover  { filter: brightness(1.1); transform: translateY(-1px); }
+    .acbtn-green:hover { filter: brightness(1.1); transform: translateY(-1px); }
     .acbtn-amber  { background: var(--amber);  color: #fff; }
-    .acbtn-amber:hover  { filter: brightness(1.1); transform: translateY(-1px); }
+    .acbtn-amber:hover { filter: brightness(1.1); transform: translateY(-1px); }
     .acbtn-blue   { background: var(--blue);   color: #fff; box-shadow: 0 4px 14px rgba(0,87,255,0.3); }
-    .acbtn-blue:hover   { background: var(--blue-b); transform: translateY(-1px); }
+    .acbtn-blue:hover { background: var(--blue-b); transform: translateY(-1px); }
     .acbtn-purple { background: var(--purple); color: #fff; }
     .acbtn-purple:hover { filter: brightness(1.1); transform: translateY(-1px); }
 
-    /* STATUS HEALTH */
-    .status-grid { display: flex; flex-direction: column; }
+    /* STATUS GRID */
     .status-row { display: flex; align-items: center; justify-content: space-between; padding: 13px 20px; border-bottom: 1px solid var(--border); }
     .status-row:last-child { border-bottom: none; }
     .status-row-left { display: flex; align-items: center; gap: 10px; }
@@ -259,8 +261,7 @@
     .field { margin-bottom: 14px; }
     .field label { display: block; font-size: 11px; font-weight: 600; color: var(--text-m); margin-bottom: 5px; }
     .field input,.field select,.field textarea { width: 100%; padding: 8px 12px; background: var(--input-bg); border: 1px solid var(--input-border); border-radius: 8px; color: var(--text); font-size: 12.5px; font-family: inherit; outline: none; transition: border-color 0.15s; resize: vertical; }
-    .field input:focus,.field select:focus,.field textarea:focus { border-color: var(--blue); }
-    .field select option { background: #fff; color: #0f172a; }
+    .field input:focus,.field select:focus { border-color: var(--blue); }
     .toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); }
     .toggle-row:last-child { border-bottom: none; }
     .toggle-label { font-size: 12.5px; color: var(--text-s); font-weight: 500; }
@@ -270,7 +271,7 @@
     .toggle::after { content:''; position: absolute; width: 14px; height: 14px; border-radius: 50%; background: #fff; top: 3px; left: 3px; transition: left 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
     .toggle.on::after { left: 19px; }
 
-    /* SUPPORT */
+    /* SUPPORT CARDS */
     .support-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(240px,1fr)); gap: 16px; }
     .support-card { padding: 24px 22px; display: flex; flex-direction: column; gap: 12px; cursor: pointer; transition: all 0.2s; }
     .support-card:hover { transform: translateY(-2px); }
@@ -278,18 +279,25 @@
     .support-icon i { width: 20px; height: 20px; }
     .support-title { font-size: 14px; font-weight: 700; color: var(--text); }
     .support-desc  { font-size: 12px; color: var(--text-m); line-height: 1.55; flex: 1; }
-    .support-btn { display: inline-flex; align-items: center; gap: 5px; padding: 7px 14px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit; transition: all 0.18s; align-self: flex-start; border: none; }
+    .support-btn   { display: inline-flex; align-items: center; gap: 5px; padding: 7px 14px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit; transition: all 0.18s; align-self: flex-start; border: none; }
     .support-btn i { width: 12px; height: 12px; }
+
+    /* EMPTY STATE */
+    .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 36px 20px; gap: 12px; text-align: center; }
+    .empty-state i { width: 32px; height: 32px; color: rgba(15,23,42,0.14); }
+    .empty-state-title { font-size: 13px; font-weight: 700; color: var(--text-s); }
+    .empty-state-text  { font-size: 12px; color: var(--text-m); line-height: 1.6; max-width: 280px; }
 
     /* MODAL */
     .modal-overlay { position: fixed; inset: 0; z-index: 200; background: rgba(15,23,42,0.45); backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; padding: 16px; }
     .modal-overlay.open { display: flex; }
     .modal { background: #fff; border: 1px solid var(--blue-border); border-radius: 16px; box-shadow: 0 24px 64px rgba(0,0,0,0.18); width: 100%; max-width: 480px; overflow: hidden; animation: modal-in 0.2s ease; }
+    @keyframes modal-in { from{opacity:0;transform:scale(0.95) translateY(10px)} to{opacity:1;transform:scale(1) translateY(0)} }
     .modal-head { display: flex; align-items: flex-start; justify-content: space-between; padding: 20px 22px 16px; border-bottom: 1px solid var(--border); gap: 12px; }
-    .modal-title { font-size: 15px; font-weight: 800; color: var(--text); letter-spacing: -0.3px; }
+    .modal-title { font-size: 15px; font-weight: 800; color: var(--text); }
     .modal-sub   { font-size: 11.5px; color: var(--text-m); margin-top: 3px; }
-    .modal-close { width: 28px; height: 28px; border-radius: 7px; background: var(--blue-dim); border: none; cursor: pointer; color: var(--text-m); display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: background 0.15s; }
-    .modal-close:hover { background: var(--blue-border); color: var(--text); }
+    .modal-close { width: 28px; height: 28px; border-radius: 7px; background: var(--blue-dim); border: none; cursor: pointer; color: var(--text-m); display: flex; align-items: center; justify-content: center; }
+    .modal-close:hover { background: var(--blue-border); }
     .modal-close i { width: 14px; height: 14px; }
     .modal-body { padding: 20px 22px; }
     .modal-body p { font-size: 13px; color: var(--text-s); line-height: 1.65; }
@@ -297,790 +305,376 @@
     .modal-body .field:last-child { margin-bottom: 0; }
     .modal-body textarea { min-height: 90px; }
     .modal-footer { padding: 14px 22px 20px; display: flex; gap: 10px; justify-content: flex-end; }
-    .btn-mcancel  { padding: 8px 18px; background: transparent; border: 1px solid var(--blue-border); border-radius: 8px; color: var(--text-s); font-size: 12.5px; font-weight: 600; cursor: pointer; font-family: inherit; transition: all 0.15s; }
-    .btn-mcancel:hover { background: var(--blue-dim); }
-    .btn-mconfirm { padding: 8px 18px; border: none; border-radius: 8px; font-size: 12.5px; font-weight: 700; cursor: pointer; font-family: inherit; transition: all 0.15s; }
-    .btn-mconfirm.green { background: var(--green); color: #fff; }
-    .btn-mconfirm.amber { background: var(--amber); color: #fff; }
-    .btn-mconfirm.blue  { background: var(--blue);  color: #fff; box-shadow: 0 3px 10px rgba(0,87,255,0.3); }
-    .sync-check-item { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border); }
-    .sync-check-item:last-child { border-bottom: none; }
-    .sync-check-left { display: flex; align-items: center; gap: 10px; }
-    .sync-check-icon { width: 32px; height: 32px; border-radius: 9px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-    .sync-check-icon i { width: 14px; height: 14px; }
-    .sync-check-name { font-size: 13px; font-weight: 600; color: var(--text-s); }
-    .sync-check-sub  { font-size: 10.5px; color: var(--text-m); margin-top: 1px; }
-
-    /* EMPTY STATE */
-    .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 36px 20px; gap: 12px; text-align: center; }
-    .empty-state i { width: 32px; height: 32px; color: rgba(15,23,42,0.15); }
-    .empty-state-title { font-size: 13px; font-weight: 700; color: var(--text-s); }
-    .empty-state-text { font-size: 12px; color: var(--text-m); line-height: 1.6; max-width: 280px; }
-
-    /* GRID */
-    .overview-bot { display: grid; grid-template-columns: 1fr 340px; gap: 20px; margin-top: 20px; }
+    .btn-mc  { padding: 8px 18px; background: transparent; border: 1px solid var(--blue-border); border-radius: 8px; color: var(--text-s); font-size: 12.5px; font-weight: 600; cursor: pointer; font-family: inherit; }
+    .btn-mc:hover { background: var(--blue-dim); }
+    .btn-mok { padding: 8px 18px; border: none; border-radius: 8px; background: var(--blue); color: #fff; font-size: 12.5px; font-weight: 700; cursor: pointer; font-family: inherit; box-shadow: 0 3px 10px rgba(0,87,255,0.3); }
+    .btn-mok-am { padding: 8px 18px; border: none; border-radius: 8px; background: var(--amber); color: #fff; font-size: 12.5px; font-weight: 700; cursor: pointer; font-family: inherit; }
+    .btn-mok-gr { padding: 8px 18px; border: none; border-radius: 8px; background: var(--green); color: #fff; font-size: 12.5px; font-weight: 700; cursor: pointer; font-family: inherit; }
+    .sync-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border); }
+    .sync-row:last-child { border-bottom: none; }
+    .sync-row-left { display: flex; align-items: center; gap: 10px; }
+    .sync-icon-wrap { width: 32px; height: 32px; border-radius: 9px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .sync-icon-wrap i { width: 14px; height: 14px; }
 
     /* TOAST */
-    #toast { position: fixed; bottom: 24px; right: 24px; z-index: 300; background: #fff; border: 1px solid rgba(5,150,105,0.25); border-radius: 12px; padding: 14px 18px; box-shadow: 0 8px 30px rgba(0,0,0,0.12); display: none; align-items: center; gap: 10px; max-width: 340px; animation: toast-in 0.2s ease; }
+    #toast { position: fixed; bottom: 24px; right: 24px; z-index: 300; background: #fff; border: 1px solid rgba(5,150,105,0.22); border-radius: 12px; padding: 14px 18px; box-shadow: 0 8px 30px rgba(0,0,0,0.1); display: none; align-items: center; gap: 10px; max-width: 340px; animation: toast-in 0.2s ease; }
     .toast-icon { width: 28px; height: 28px; border-radius: 50%; background: var(--green-dim); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
     .toast-icon i { width: 13px; height: 13px; color: var(--green); }
+    @keyframes toast-in { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
 
+    /* GRID */
+    .g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .overview-bot { display: grid; grid-template-columns: 1fr 340px; gap: 20px; margin-top: 20px; }
     .mb20 { margin-bottom: 20px; }
     .p20  { padding: 20px; }
-    .text-green  { color: var(--green); }
-    .text-amber  { color: var(--amber); }
-    .text-blue   { color: var(--blue); }
-    .text-purple { color: var(--purple); }
 
-    @media (max-width: 768px) {
-      :root { --sidebar-w: 0px; }
-      .sidebar { transform: translateX(-100%); width: 244px; }
-      .sidebar.open { transform: translateX(0); }
-      .main { margin-left: 0; }
-      .mobile-menu-btn { display: flex; }
-      .btn-sync span { display: none; }
-      .btn-dash span { display: none; }
-      .page { padding: 20px 16px 60px; }
-      .topbar { padding: 0 16px; }
-      .conn-grid,.action-grid,.support-grid { grid-template-columns: 1fr; }
-      .settings-grid { grid-template-columns: 1fr; }
-      .overview-bot { grid-template-columns: 1fr; }
+    /* MOBILE */
+    @media (max-width: 860px) {
+      .topnav-tabs { display: none; }
+      .mob-nav-btn { display: flex; }
+      .topnav-bar { padding: 0 16px; gap: 10px; }
+      .page { padding: 20px 16px 80px; }
+      .conn-grid,.action-grid,.support-grid,.settings-grid { grid-template-columns: 1fr; }
+      .overview-bot,.g2 { grid-template-columns: 1fr; }
       .stats-grid { grid-template-columns: 1fr 1fr; }
     }
-    .sidebar-overlay { display: none; position: fixed; inset: 0; z-index: 49; background: rgba(0,0,0,0.3); }
-    .sidebar-overlay.open { display: block; }
   </style>
 </head>
 <body>
 
-<!-- Auth gate -->
 <div id="auth-gate">
-  <img class="ag-logo" src="logo-transparent.png" alt="Flowaify" onerror="this.style.display='none'" />
+  <img class="ag-logo" src="logo-transparent.png" alt="" onerror="this.style.display='none'" />
   <div class="ag-spinner"></div>
   <p class="ag-label">Signing you in…</p>
 </div>
 
-<!-- App -->
-<div class="layout" id="app-layout" style="display:none;">
-
-<!-- SIDEBAR -->
-<aside class="sidebar" id="sidebar">
-  <div class="sidebar-logo">
-    <img src="logo-transparent.png" alt="Flowaify" onerror="this.style.display='none'" />
-    <div>
-      <div class="sidebar-logo-name">flowaify</div>
-      <div class="sidebar-logo-tag">Workspace</div>
+<div id="mob-nav-drawer" class="mob-nav-drawer" onclick="closeMobNav(event)">
+  <div class="mob-nav-sheet">
+    <div class="mob-nav-close">
+      <img src="logo-transparent.png" alt="" onerror="this.style.display='none'" />
+      <span>Workspace</span>
     </div>
+    <div class="nav-tab" data-page="overview" onclick="showPage('overview');closeMobNav()"><i data-lucide="layout-dashboard"></i>Overview</div>
+    <div class="nav-tab" data-page="connections" onclick="showPage('connections');closeMobNav()"><i data-lucide="plug"></i>Connections</div>
+    <div class="nav-tab" data-page="automation" onclick="showPage('automation');closeMobNav()"><i data-lucide="zap"></i>Automation</div>
+    <div class="nav-tab" data-page="settings" onclick="showPage('settings');closeMobNav()"><i data-lucide="building-2"></i>Business Settings</div>
+    <div class="nav-tab" data-page="status" onclick="showPage('status');closeMobNav()"><i data-lucide="activity"></i>System Status</div>
+    <div class="nav-tab" data-page="support" onclick="showPage('support');closeMobNav()"><i data-lucide="life-buoy"></i>Support</div>
   </div>
+</div>
 
-  <div class="sidebar-label">Navigation</div>
-  <div class="nav-item active" data-page="overview"><i data-lucide="layout-dashboard"></i> Overview</div>
-  <div class="nav-item" data-page="connections"><i data-lucide="plug"></i> Connections</div>
-  <div class="nav-item" data-page="automation"><i data-lucide="zap"></i> Automation Control</div>
-  <div class="nav-item" data-page="settings"><i data-lucide="building-2"></i> Business Settings</div>
-  <div class="nav-item" data-page="status"><i data-lucide="activity"></i> System Status</div>
-  <div class="nav-item" data-page="support"><i data-lucide="life-buoy"></i> Support</div>
+<div id="app" style="display:none;">
 
-  <div class="sidebar-bottom">
-    <div class="client-pill">
-      <div class="client-pulse"></div>
+<!-- TOP NAVIGATION -->
+<nav class="topnav">
+  <div class="topnav-bar">
+    <div class="topnav-brand">
+      <img src="logo-transparent.png" alt="Flowaify" onerror="this.style.display='none'" />
       <div>
-        <div class="client-name" id="sidebar-client-name">Loading…</div>
-        <div class="client-sub">Workspace</div>
+        <div class="topnav-brand-name">flowaify</div>
+        <div class="topnav-brand-tag">Workspace</div>
       </div>
     </div>
-    <button class="btn-logout" onclick="portalLogout()">
-      <i data-lucide="log-out"></i> Sign Out
-    </button>
-  </div>
-</aside>
-<div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
 
-<!-- MAIN -->
-<main class="main">
+    <button class="mob-nav-btn" onclick="openMobNav()"><i data-lucide="menu"></i></button>
 
-  <header class="topbar">
-    <div style="display:flex;align-items:center;gap:10px;min-width:0;">
-      <button class="mobile-menu-btn" onclick="toggleSidebar()"><i data-lucide="menu"></i></button>
-      <div class="topbar-left">
-        <div class="topbar-title" id="topbar-title">Overview</div>
-        <div class="topbar-sub" id="topbar-sub"></div>
-      </div>
+    <div class="topnav-tabs">
+      <div class="nav-tab active" data-page="overview"><i data-lucide="layout-dashboard"></i>Overview</div>
+      <div class="nav-tab" data-page="connections"><i data-lucide="plug"></i>Connections</div>
+      <div class="nav-tab" data-page="automation"><i data-lucide="zap"></i>Automation</div>
+      <div class="nav-tab" data-page="settings"><i data-lucide="building-2"></i>Business Settings</div>
+      <div class="nav-tab" data-page="status"><i data-lucide="activity"></i>System Status</div>
+      <div class="nav-tab" data-page="support"><i data-lucide="life-buoy"></i>Support</div>
     </div>
-    <div class="topbar-right">
+
+    <div class="topnav-right">
       <button class="btn-sync" onclick="openModal('modal-sync')">
-        <i data-lucide="plug"></i><span>Connect &amp; Sync</span>
+        <i data-lucide="plug"></i> Connect &amp; Sync
       </button>
-      <a class="btn-dash" href="dashboard.html">
-        <i data-lucide="bar-chart-2"></i><span>Dashboard</span>
+      <a class="topnav-dash-link" href="dashboard.html">
+        <i data-lucide="bar-chart-2"></i> Dashboard
       </a>
       <div class="avatar-wrap">
-        <div class="avatar" id="topbar-avatar" onclick="togglePortalProfileMenu()" title="">—</div>
-        <div class="profile-menu" id="portal-profile-menu">
+        <div class="avatar" id="portal-avatar" onclick="toggleProfileMenu()">—</div>
+        <div class="profile-menu" id="profile-menu">
           <div class="profile-menu-header">
             <div class="profile-menu-name" id="portal-menu-name">User</div>
             <div class="profile-menu-email" id="portal-menu-email">—</div>
           </div>
-          <div class="profile-menu-item" onclick="showPage('settings');closePortalProfileMenu()"><i data-lucide="building-2"></i> Business Settings</div>
-          <div class="profile-menu-item" onclick="showPage('support');closePortalProfileMenu()"><i data-lucide="life-buoy"></i> Support</div>
-          <div class="profile-menu-item" onclick="window.location.href='dashboard.html';closePortalProfileMenu()"><i data-lucide="bar-chart-2"></i> Dashboard</div>
+          <div class="profile-menu-item" onclick="showPage('settings');closeProfileMenu()"><i data-lucide="building-2"></i> Business Settings</div>
+          <div class="profile-menu-item" onclick="showPage('support');closeProfileMenu()"><i data-lucide="life-buoy"></i> Support</div>
+          <div class="profile-menu-item" onclick="window.location.href='dashboard.html'"><i data-lucide="bar-chart-2"></i> Dashboard</div>
           <hr class="profile-menu-sep" />
           <div class="profile-menu-item danger" onclick="portalLogout()"><i data-lucide="log-out"></i> Sign Out</div>
         </div>
       </div>
     </div>
-  </header>
+  </div>
+</nav>
 
-  <!-- OVERVIEW -->
-  <div class="page active" id="page-overview">
-    <div class="page-head">
+<!-- OVERVIEW -->
+<div class="page active" id="page-overview">
+  <div class="page-head">
+    <div><div class="page-head-title">Workspace Overview</div><div class="page-head-sub">Your Flowaify system at a glance</div></div>
+  </div>
+
+  <div class="status-banner sb-setup">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div class="sb-dot setup"></div>
       <div>
-        <div class="page-head-title">Workspace Overview</div>
-        <div class="page-head-sub">Your Flowaify system at a glance</div>
+        <div style="font-size:14px;font-weight:700;color:var(--amber);">Setup Needed</div>
+        <div style="font-size:11.5px;color:var(--amber);opacity:0.85;margin-top:2px;">Connect your accounts to activate your Flowaify system</div>
       </div>
     </div>
+    <button class="btn-connect bcp" onclick="showPage('connections')">Complete Setup <i data-lucide="arrow-right" style="width:12px;height:12px;margin-left:4px;"></i></button>
+  </div>
 
-    <div id="ov-status-banner" class="status-banner sb-setup">
-      <div style="display:flex;align-items:center;gap:12px;">
-        <div class="sb-dot setup" id="ov-status-dot"></div>
-        <div>
-          <div class="sb-label text-amber" id="ov-status-label">Setup Needed</div>
-          <div class="sb-sub text-amber" id="ov-status-desc">Connect your accounts to activate your Flowaify system</div>
-        </div>
-      </div>
-      <button class="btn-connect bcp" onclick="showPage('connections')" style="white-space:nowrap;">
-        Complete Setup <i data-lucide="arrow-right" style="width:12px;height:12px;margin-left:4px;"></i>
-      </button>
-    </div>
-
-    <!-- Setup Progress -->
-    <div class="card mb20">
-      <div class="sec-head">
-        <div class="sec-title"><i data-lucide="check-circle-2"></i>Setup Progress</div>
-        <div class="sec-sub">0 of 3 required steps complete</div>
-      </div>
-      <div class="p20" style="padding-top:14px;">
-        <div class="progress-bar" style="height:8px;margin-top:0;margin-bottom:16px;">
-          <div class="progress-fill" style="width:0%"></div>
-        </div>
-        <div>
-          <div class="check-item">
-            <div class="check-icon ci-none"><i data-lucide="mail"></i></div>
-            <div style="flex:1;"><div class="check-name">Email Connection</div><div class="check-sub">Required for automated follow-ups</div></div>
-            <div class="badge b-notconn">Not Connected</div>
-          </div>
-          <div class="check-item">
-            <div class="check-icon ci-none"><i data-lucide="database"></i></div>
-            <div style="flex:1;"><div class="check-name">CRM Connection</div><div class="check-sub">Flow CRM — not connected</div></div>
-            <div class="badge b-notconn">Not Connected</div>
-          </div>
-          <div class="check-item">
-            <div class="check-icon ci-opt"><i data-lucide="minus"></i></div>
-            <div style="flex:1;"><div class="check-name">SMS Connection</div><div class="check-sub">Twilio — optional</div></div>
-            <div class="badge b-optional">Optional</div>
-          </div>
-          <div class="check-item">
-            <div class="check-icon ci-none"><i data-lucide="calendar"></i></div>
-            <div style="flex:1;"><div class="check-name">Calendar Connection</div><div class="check-sub">Required for booking automations</div></div>
-            <div class="badge b-notconn">Not Connected</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Stats -->
-    <div class="stats-grid">
-      <div class="card stat-card">
-        <div class="stat-top"><div class="stat-icon si-blue"><i data-lucide="user-plus"></i></div></div>
-        <div class="stat-val">—</div>
-        <div class="stat-label">New Leads Captured</div>
-        <div class="stat-hint">Sync accounts to start tracking</div>
-      </div>
-      <div class="card stat-card">
-        <div class="stat-top"><div class="stat-icon si-green"><i data-lucide="send"></i></div></div>
-        <div class="stat-val">—</div>
-        <div class="stat-label">Follow-Ups Sent</div>
-        <div class="stat-hint">Sync accounts to start tracking</div>
-      </div>
-      <div class="card stat-card">
-        <div class="stat-top"><div class="stat-icon si-purple"><i data-lucide="calendar-check"></i></div></div>
-        <div class="stat-val">—</div>
-        <div class="stat-label">Appointments Booked</div>
-        <div class="stat-hint">Sync accounts to start tracking</div>
-      </div>
-      <div class="card stat-card">
-        <div class="stat-top"><div class="stat-icon si-amber"><i data-lucide="zap"></i></div></div>
-        <div class="stat-val">—</div>
-        <div class="stat-label">Avg Response Time</div>
-        <div class="stat-hint">Sync accounts to start tracking</div>
-      </div>
-    </div>
-
-    <!-- Bottom grid -->
-    <div class="overview-bot">
-      <div class="card">
-        <div class="sec-head">
-          <div class="sec-title"><i data-lucide="plug"></i>Connected Accounts</div>
-          <button class="btn-connect bco" style="padding:5px 12px;font-size:11.5px;" onclick="showPage('connections')">Manage</button>
-        </div>
-        <div style="padding:0 20px;">
-          <div class="check-item">
-            <div class="check-icon ci-none"><i data-lucide="mail"></i></div>
-            <div style="flex:1;"><div class="check-name">Email</div><div class="check-sub">Not connected</div></div>
-            <div class="badge b-notconn">Not Connected</div>
-          </div>
-          <div class="check-item">
-            <div class="check-icon ci-none"><i data-lucide="database"></i></div>
-            <div style="flex:1;"><div class="check-name">CRM</div><div class="check-sub">Flow CRM</div></div>
-            <div class="badge b-notconn">Not Connected</div>
-          </div>
-          <div class="check-item">
-            <div class="check-icon ci-opt"><i data-lucide="message-circle"></i></div>
-            <div style="flex:1;"><div class="check-name">SMS</div><div class="check-sub">Twilio — optional</div></div>
-            <div class="badge b-optional">Optional</div>
-          </div>
-          <div class="check-item">
-            <div class="check-icon ci-none"><i data-lucide="calendar"></i></div>
-            <div style="flex:1;"><div class="check-name">Calendar</div><div class="check-sub">Not connected</div></div>
-            <div class="badge b-notconn">Not Connected</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="sec-head">
-          <div class="sec-title"><i data-lucide="activity"></i>Recent Activity</div>
-        </div>
-        <div class="empty-state">
-          <i data-lucide="activity"></i>
-          <div class="empty-state-title">No activity yet</div>
-          <div class="empty-state-text">Connect and sync your accounts to see live events here.</div>
-        </div>
-      </div>
+  <div class="card mb20">
+    <div class="sec-head"><div class="sec-title"><i data-lucide="check-circle-2"></i>Setup Progress</div><div class="sec-sub">0 of 3 required steps complete</div></div>
+    <div class="p20" style="padding-top:14px;">
+      <div class="progress-bar" style="margin-bottom:16px;"><div class="progress-fill" style="width:0%"></div></div>
+      <div class="check-item"><div class="check-icon ci-none"><i data-lucide="mail"></i></div><div style="flex:1;"><div class="check-name">Email Connection</div><div class="check-sub">Required for automated follow-ups</div></div><div class="badge b-notconn">Not Connected</div></div>
+      <div class="check-item"><div class="check-icon ci-none"><i data-lucide="database"></i></div><div style="flex:1;"><div class="check-name">CRM Connection</div><div class="check-sub">Flow CRM — not connected</div></div><div class="badge b-notconn">Not Connected</div></div>
+      <div class="check-item"><div class="check-icon ci-opt"><i data-lucide="minus"></i></div><div style="flex:1;"><div class="check-name">SMS Connection</div><div class="check-sub">Twilio — optional</div></div><div class="badge b-optional">Optional</div></div>
+      <div class="check-item"><div class="check-icon ci-none"><i data-lucide="calendar"></i></div><div style="flex:1;"><div class="check-name">Calendar Connection</div><div class="check-sub">Required for booking automations</div></div><div class="badge b-notconn">Not Connected</div></div>
     </div>
   </div>
 
-  <!-- CONNECTIONS -->
-  <div class="page" id="page-connections">
-    <div class="page-head">
-      <div>
-        <div class="page-head-title">Connections</div>
-        <div class="page-head-sub">Connect your accounts to power your automation</div>
-      </div>
-      <div class="page-head-actions">
-        <button class="btn-connect bco" onclick="openModal('modal-request-setup')"><i data-lucide="headphones"></i> Request Setup</button>
-        <button class="btn-sync" onclick="openModal('modal-sync')"><i data-lucide="plug"></i> <span>Connect &amp; Sync</span></button>
-      </div>
-    </div>
-
-    <div class="conn-grid">
-      <div class="card conn-card">
-        <div style="display:flex;align-items:center;justify-content:space-between;">
-          <div style="width:44px;height:44px;border-radius:12px;background:rgba(0,87,255,.10);display:flex;align-items:center;justify-content:center;"><i data-lucide="mail" style="color:var(--blue);width:20px;height:20px;"></i></div>
-          <div class="badge b-notconn">Not Connected</div>
-        </div>
-        <div>
-          <div class="conn-title">Email Connection</div>
-          <div class="conn-desc">Connect Google Workspace or Microsoft Outlook so Flowaify can send and track automated email follow-ups on your behalf.</div>
-        </div>
-        <div class="conn-footer">
-          <div style="font-size:11px;color:var(--text-m);">Not connected</div>
-          <button class="btn-connect bcp" onclick="handleConnect('email')"><i data-lucide="plus" style="width:11px;height:11px;"></i> Connect Email</button>
-        </div>
-      </div>
-
-      <div class="card conn-card">
-        <div style="display:flex;align-items:center;justify-content:space-between;">
-          <div style="width:44px;height:44px;border-radius:12px;background:rgba(139,92,246,.10);display:flex;align-items:center;justify-content:center;"><i data-lucide="database" style="color:var(--purple);width:20px;height:20px;"></i></div>
-          <div class="badge b-notconn">Not Connected</div>
-        </div>
-        <div>
-          <div class="conn-title">CRM Connection</div>
-          <div class="conn-desc">Connect your CRM so leads, notes, and pipeline updates stay organized automatically. Flow CRM is our recommended setup — fully integrated with Flowaify automations.</div>
-        </div>
-        <div class="conn-footer">
-          <div style="font-size:11px;color:var(--text-m);">Flow CRM · Not connected</div>
-          <button class="btn-connect bcp" onclick="handleConnect('crm')"><i data-lucide="plus" style="width:11px;height:11px;"></i> Connect CRM</button>
-        </div>
-      </div>
-
-      <div class="card conn-card">
-        <div style="display:flex;align-items:center;justify-content:space-between;">
-          <div style="width:44px;height:44px;border-radius:12px;background:var(--green-dim);display:flex;align-items:center;justify-content:center;"><i data-lucide="message-circle" style="color:var(--green);width:20px;height:20px;"></i></div>
-          <div class="badge b-optional">Optional</div>
-        </div>
-        <div>
-          <div class="conn-title">SMS Connection</div>
-          <div class="conn-desc">Enable SMS automation and instant lead alerts through Twilio. Optional but recommended — text messages get faster responses than email alone.</div>
-        </div>
-        <div class="conn-footer">
-          <div style="font-size:11px;color:var(--text-m);">Twilio · Optional</div>
-          <button class="btn-connect bcp" onclick="handleConnect('sms')"><i data-lucide="plus" style="width:11px;height:11px;"></i> Connect SMS</button>
-        </div>
-      </div>
-
-      <div class="card conn-card">
-        <div style="display:flex;align-items:center;justify-content:space-between;">
-          <div style="width:44px;height:44px;border-radius:12px;background:var(--amber-dim);display:flex;align-items:center;justify-content:center;"><i data-lucide="calendar" style="color:var(--amber);width:20px;height:20px;"></i></div>
-          <div class="badge b-notconn">Not Connected</div>
-        </div>
-        <div>
-          <div class="conn-title">Calendar Connection</div>
-          <div class="conn-desc">Connect a calendar for booking, appointment tracking, and scheduling automations. Flowaify can send confirmation and reminder messages automatically.</div>
-        </div>
-        <div class="conn-footer">
-          <div style="font-size:11px;color:var(--text-m);">Not connected</div>
-          <button class="btn-connect bcp" onclick="handleConnect('calendar')"><i data-lucide="plus" style="width:11px;height:11px;"></i> Connect Calendar</button>
-        </div>
-      </div>
-    </div>
+  <div class="stats-grid">
+    <div class="card stat-card"><div class="stat-top"><div class="stat-icon si-blue"><i data-lucide="user-plus"></i></div></div><div class="stat-val">—</div><div class="stat-label">New Leads Captured</div><div class="stat-hint">Sync accounts to start tracking</div></div>
+    <div class="card stat-card"><div class="stat-top"><div class="stat-icon si-green"><i data-lucide="send"></i></div></div><div class="stat-val">—</div><div class="stat-label">Follow-Ups Sent</div><div class="stat-hint">Sync accounts to start tracking</div></div>
+    <div class="card stat-card"><div class="stat-top"><div class="stat-icon si-purple"><i data-lucide="calendar-check"></i></div></div><div class="stat-val">—</div><div class="stat-label">Appointments Booked</div><div class="stat-hint">Sync accounts to start tracking</div></div>
+    <div class="card stat-card"><div class="stat-top"><div class="stat-icon si-amber"><i data-lucide="zap"></i></div></div><div class="stat-val">—</div><div class="stat-label">Avg Response Time</div><div class="stat-hint">Sync accounts to start tracking</div></div>
   </div>
 
-  <!-- AUTOMATION CONTROL -->
-  <div class="page" id="page-automation">
-    <div class="page-head">
-      <div>
-        <div class="page-head-title">Automation Control</div>
-        <div class="page-head-sub">Manage your Flowaify system without touching any technical settings</div>
-      </div>
-      <div class="badge b-setup" id="auto-status-pill" style="font-size:11.5px;padding:5px 12px;">Setup Needed</div>
-    </div>
-
-    <div id="auto-status-banner" class="status-banner sb-setup mb20">
-      <div style="display:flex;align-items:center;gap:12px;">
-        <div class="sb-dot setup" id="auto-status-dot"></div>
-        <div>
-          <div class="sb-label text-amber" id="auto-status-label">System is not live yet</div>
-          <div class="sb-sub text-amber" id="auto-status-desc">Complete your account connections, then click Launch System to go live</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="action-grid">
-      <div class="card action-card">
-        <div class="action-card-icon" style="background:var(--green-dim);"><i data-lucide="rocket" style="color:var(--green);width:22px;height:22px;"></i></div>
-        <div class="action-card-title">Launch System</div>
-        <div class="action-card-desc">Ready to go live? Launch your Flowaify automation once your accounts are connected. Flowaify will start capturing leads and sending follow-ups automatically.</div>
-        <button class="acbtn acbtn-green" onclick="openModal('modal-launch')"><i data-lucide="rocket"></i> Launch System</button>
-      </div>
-      <div class="card action-card">
-        <div class="action-card-icon" style="background:var(--amber-dim);"><i data-lucide="pause-circle" style="color:var(--amber);width:22px;height:22px;"></i></div>
-        <div class="action-card-title">Pause Automation</div>
-        <div class="action-card-desc">Temporarily pause all automations without disconnecting your accounts. Flowaify will stop sending follow-ups until you choose to resume.</div>
-        <button class="acbtn acbtn-amber" onclick="openModal('modal-pause')"><i data-lucide="pause-circle"></i> Pause Automation</button>
-      </div>
-      <div class="card action-card">
-        <div class="action-card-icon" style="background:var(--blue-dim);"><i data-lucide="play-circle" style="color:var(--blue);width:22px;height:22px;"></i></div>
-        <div class="action-card-title">Resume Automation</div>
-        <div class="action-card-desc">Turn your automations back on after a pause. Flowaify will pick up where it left off and continue your active sequences from where they stopped.</div>
-        <button class="acbtn acbtn-blue" onclick="openModal('modal-resume')"><i data-lucide="play-circle"></i> Resume Automation</button>
-      </div>
-      <div class="card action-card">
-        <div class="action-card-icon" style="background:rgba(139,92,246,.10);"><i data-lucide="edit-3" style="color:var(--purple);width:22px;height:22px;"></i></div>
-        <div class="action-card-title">Request Changes</div>
-        <div class="action-card-desc">Need to update your follow-up messages, routing rules, business hours, or workflow settings? Send a change request to the Flowaify team.</div>
-        <button class="acbtn acbtn-purple" onclick="openModal('modal-changes')"><i data-lucide="edit-3"></i> Request Changes</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- BUSINESS SETTINGS -->
-  <div class="page" id="page-settings">
-    <div class="page-head">
-      <div>
-        <div class="page-head-title">Business Settings</div>
-        <div class="page-head-sub">Keep your business information up to date</div>
-      </div>
-    </div>
-
-    <div class="settings-grid">
-      <div class="card">
-        <div class="sec-head"><div class="sec-title"><i data-lucide="building-2"></i>Business Information</div></div>
-        <div class="settings-sec">
-          <div class="field"><label>Business Name</label><input type="text" placeholder="Your Business Name" /></div>
-          <div class="field"><label>Main Contact Name</label><input type="text" placeholder="Full name" /></div>
-          <div class="field"><label>Business Email</label><input type="email" placeholder="contact@yourbusiness.com" /></div>
-          <div class="field"><label>Business Phone</label><input type="text" placeholder="(555) 000-0000" /></div>
-          <div class="field"><label>Service Areas</label><input type="text" placeholder="e.g. Miami, FL · South Florida" /></div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="sec-head"><div class="sec-title"><i data-lucide="clock"></i>Schedule &amp; Hours</div></div>
-        <div class="settings-sec">
-          <div class="field">
-            <label>Business Hours</label>
-            <select><option>Mon–Fri 8AM–8PM</option><option>Mon–Sat 8AM–6PM</option><option>Every day 9AM–9PM</option><option>24 / 7</option><option>Custom</option></select>
-          </div>
-          <div class="field">
-            <label>Time Zone</label>
-            <select><option>EST (UTC-5)</option><option>CST (UTC-6)</option><option>MST (UTC-7)</option><option>PST (UTC-8)</option></select>
-          </div>
-          <div class="field"><label>Appointment Booking Link</label><input type="text" placeholder="https://calendly.com/yourbusiness" /></div>
-          <div class="field">
-            <label>Follow-Up Preferences</label>
-            <select><option>Email + SMS (Recommended)</option><option>Email Only</option><option>SMS Only</option></select>
-          </div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="sec-head"><div class="sec-title"><i data-lucide="git-branch"></i>Lead Routing &amp; CRM</div></div>
-        <div class="settings-sec">
-          <div class="field">
-            <label>Primary CRM Pipeline</label>
-            <select><option>Flowaify Pipeline (Flow CRM)</option><option>Main Sales Pipeline</option><option>Custom Pipeline</option></select>
-          </div>
-          <div class="field">
-            <label>Lead Routing Rules</label>
-            <select><option>Auto-assign to owner</option><option>Round-robin distribution</option><option>Manual assignment</option></select>
-          </div>
-          <div class="field">
-            <label>Default Follow-Up Sequence</label>
-            <select><option>14-Day Nurture Sequence</option><option>7-Day Intro Sequence</option><option>Quick Follow-Up (3 days)</option></select>
-          </div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="sec-head"><div class="sec-title"><i data-lucide="bell"></i>Notification Preferences</div></div>
-        <div class="settings-sec">
-          <div class="toggle-row">
-            <div><div class="toggle-label">New lead alert</div><div class="toggle-sub">SMS + Email when a new lead arrives</div></div>
-            <div class="toggle on" onclick="this.classList.toggle('on')"></div>
-          </div>
-          <div class="toggle-row">
-            <div><div class="toggle-label">Follow-up confirmation</div><div class="toggle-sub">Notify when a follow-up is sent</div></div>
-            <div class="toggle" onclick="this.classList.toggle('on')"></div>
-          </div>
-          <div class="toggle-row">
-            <div><div class="toggle-label">Appointment booked</div><div class="toggle-sub">Alert when a new appointment is confirmed</div></div>
-            <div class="toggle on" onclick="this.classList.toggle('on')"></div>
-          </div>
-          <div class="toggle-row">
-            <div><div class="toggle-label">Daily summary</div><div class="toggle-sub">Morning digest of previous day's activity</div></div>
-            <div class="toggle on" onclick="this.classList.toggle('on')"></div>
-          </div>
-          <div class="toggle-row">
-            <div><div class="toggle-label">Weekly report</div><div class="toggle-sub">Performance summary every Monday</div></div>
-            <div class="toggle" onclick="this.classList.toggle('on')"></div>
-          </div>
-          <div style="margin-top:16px;">
-            <button onclick="showToast('Settings saved successfully.')" style="width:100%;padding:9px;background:var(--blue);border:none;border-radius:8px;color:#fff;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 4px 14px rgba(0,87,255,0.28);">Save Business Settings</button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- SYSTEM STATUS -->
-  <div class="page" id="page-status">
-    <div class="page-head">
-      <div>
-        <div class="page-head-title">System Status</div>
-        <div class="page-head-sub">Health of all your connected services and automation</div>
-      </div>
-      <button class="btn-sync" onclick="refreshStatus()">
-        <i data-lucide="refresh-cw" id="refresh-icon"></i> <span>Refresh</span>
-      </button>
-    </div>
-
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;">
-      <div style="display:flex;align-items:center;gap:5px;font-size:10px;font-weight:700;color:var(--amber);background:var(--amber-dim);border:1px solid rgba(217,119,6,0.18);padding:3px 9px;border-radius:99px;">
-        <div style="width:5px;height:5px;border-radius:50%;background:var(--amber);animation:pulse-a 1.5s infinite;"></div> Monitoring
-      </div>
-      <span style="font-size:11.5px;color:var(--text-m);">Awaiting account connections · Last check: just now</span>
-    </div>
-
-    <div class="card mb20">
-      <div class="sec-head">
-        <div class="sec-title"><i data-lucide="plug"></i>Account Connections</div>
-        <div class="sec-sub">4 services monitored</div>
-      </div>
-      <div class="status-grid">
-        <div class="status-row">
-          <div class="status-row-left">
-            <div class="status-row-icon si-blue"><i data-lucide="mail"></i></div>
-            <div><div class="status-row-name">Email Connection</div><div class="status-row-sub">Not connected yet</div></div>
-          </div>
-          <div class="badge b-notconn">Not Connected</div>
-        </div>
-        <div class="status-row">
-          <div class="status-row-left">
-            <div class="status-row-icon" style="background:rgba(139,92,246,.10);color:var(--purple);"><i data-lucide="database"></i></div>
-            <div><div class="status-row-name">CRM Connection</div><div class="status-row-sub">Flow CRM · Not linked yet</div></div>
-          </div>
-          <div class="badge b-notconn">Not Connected</div>
-        </div>
-        <div class="status-row">
-          <div class="status-row-left">
-            <div class="status-row-icon si-green"><i data-lucide="message-circle"></i></div>
-            <div><div class="status-row-name">SMS Connection</div><div class="status-row-sub">Twilio · Optional service</div></div>
-          </div>
-          <div class="badge b-optional">Optional</div>
-        </div>
-        <div class="status-row">
-          <div class="status-row-left">
-            <div class="status-row-icon si-amber"><i data-lucide="calendar"></i></div>
-            <div><div class="status-row-name">Calendar Connection</div><div class="status-row-sub">Not connected yet</div></div>
-          </div>
-          <div class="badge b-notconn">Not Connected</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="card mb20">
-      <div class="sec-head">
-        <div class="sec-title"><i data-lucide="zap"></i>Automation Services</div>
-        <div class="sec-sub">5 services monitored</div>
-      </div>
-      <div class="status-grid">
-        <div class="status-row">
-          <div class="status-row-left">
-            <div class="status-row-icon si-blue"><i data-lucide="user-plus"></i></div>
-            <div><div class="status-row-name">Lead Capture</div><div class="status-row-sub">Waiting for account connection</div></div>
-          </div>
-          <div class="badge b-setup">Pending</div>
-        </div>
-        <div class="status-row">
-          <div class="status-row-left">
-            <div class="status-row-icon" style="background:rgba(139,92,246,.10);color:var(--purple);"><i data-lucide="refresh-cw"></i></div>
-            <div><div class="status-row-name">CRM Sync</div><div class="status-row-sub">Waiting for CRM connection</div></div>
-          </div>
-          <div class="badge b-setup">Pending</div>
-        </div>
-        <div class="status-row">
-          <div class="status-row-left">
-            <div class="status-row-icon si-green"><i data-lucide="send"></i></div>
-            <div><div class="status-row-name">Follow-Up Automation</div><div class="status-row-sub">Waiting for email connection</div></div>
-          </div>
-          <div class="badge b-setup">Pending</div>
-        </div>
-        <div class="status-row">
-          <div class="status-row-left">
-            <div class="status-row-icon si-amber"><i data-lucide="calendar-check"></i></div>
-            <div><div class="status-row-name">Appointment Automation</div><div class="status-row-sub">Waiting for calendar connection</div></div>
-          </div>
-          <div class="badge b-setup">Pending</div>
-        </div>
-        <div class="status-row">
-          <div class="status-row-left">
-            <div class="status-row-icon si-green"><i data-lucide="message-circle"></i></div>
-            <div><div class="status-row-name">SMS Automation</div><div class="status-row-sub">Waiting for SMS connection</div></div>
-          </div>
-          <div class="badge b-notconn">Not Connected</div>
-        </div>
-      </div>
-    </div>
-
+  <div class="overview-bot">
     <div class="card">
-      <div class="sec-head"><div class="sec-title"><i data-lucide="clock"></i>Sync History</div></div>
-      <div class="empty-state">
-        <i data-lucide="clock"></i>
-        <div class="empty-state-title">No sync history yet</div>
-        <div class="empty-state-text">Connect your accounts to start tracking sync events and system activity.</div>
+      <div class="sec-head"><div class="sec-title"><i data-lucide="plug"></i>Connected Accounts</div><button class="btn-connect bco" style="padding:5px 12px;font-size:11.5px;" onclick="showPage('connections')">Manage</button></div>
+      <div style="padding:0 20px;">
+        <div class="check-item"><div class="check-icon ci-none"><i data-lucide="mail"></i></div><div style="flex:1;"><div class="check-name">Email</div><div class="check-sub">Not connected</div></div><div class="badge b-notconn">Not Connected</div></div>
+        <div class="check-item"><div class="check-icon ci-none"><i data-lucide="database"></i></div><div style="flex:1;"><div class="check-name">Flow CRM</div><div class="check-sub">Not connected</div></div><div class="badge b-notconn">Not Connected</div></div>
+        <div class="check-item"><div class="check-icon ci-opt"><i data-lucide="message-circle"></i></div><div style="flex:1;"><div class="check-name">SMS</div><div class="check-sub">Twilio — optional</div></div><div class="badge b-optional">Optional</div></div>
+        <div class="check-item"><div class="check-icon ci-none"><i data-lucide="calendar"></i></div><div style="flex:1;"><div class="check-name">Calendar</div><div class="check-sub">Not connected</div></div><div class="badge b-notconn">Not Connected</div></div>
       </div>
+    </div>
+    <div class="card">
+      <div class="sec-head"><div class="sec-title"><i data-lucide="activity"></i>Recent Activity</div></div>
+      <div class="empty-state"><i data-lucide="activity"></i><div class="empty-state-title">No activity yet</div><div class="empty-state-text">Connect and sync your accounts to see live events here.</div></div>
     </div>
   </div>
-
-  <!-- SUPPORT -->
-  <div class="page" id="page-support">
-    <div class="page-head">
-      <div>
-        <div class="page-head-title">Help &amp; Support</div>
-        <div class="page-head-sub">We're here to help — reach out anytime</div>
-      </div>
-    </div>
-
-    <div class="support-grid mb20">
-      <div class="card support-card" onclick="openModal('modal-request-setup')">
-        <div class="support-icon si-blue"><i data-lucide="settings-2"></i></div>
-        <div class="support-title">Request Setup</div>
-        <div class="support-desc">Need help connecting your accounts? Our team can walk you through or handle the setup for you — no technical knowledge required.</div>
-        <button class="support-btn" style="background:var(--blue);color:#fff;" onclick="event.stopPropagation();openModal('modal-request-setup')"><i data-lucide="arrow-right"></i> Request Setup</button>
-      </div>
-      <div class="card support-card" onclick="openModal('modal-report-issue')">
-        <div class="support-icon" style="background:var(--red-dim);"><i data-lucide="alert-triangle" style="color:var(--red);"></i></div>
-        <div class="support-title">Report an Issue</div>
-        <div class="support-desc">Something not working right? Report a problem with your email, CRM, leads, SMS, calendar, or automation and we'll investigate right away.</div>
-        <button class="support-btn" style="background:var(--red-dim);color:var(--red);" onclick="event.stopPropagation();openModal('modal-report-issue')"><i data-lucide="arrow-right"></i> Report Issue</button>
-      </div>
-      <div class="card support-card" onclick="openModal('modal-changes')">
-        <div class="support-icon" style="background:rgba(139,92,246,.10);"><i data-lucide="edit-3" style="color:var(--purple);"></i></div>
-        <div class="support-title">Request Automation Change</div>
-        <div class="support-desc">Need to update follow-up rules, routing, messages, business hours, or workflow settings? Send us a change request and we'll handle it.</div>
-        <button class="support-btn" style="background:rgba(139,92,246,.10);color:var(--purple);" onclick="event.stopPropagation();openModal('modal-changes')"><i data-lucide="arrow-right"></i> Request Change</button>
-      </div>
-      <div class="card support-card" onclick="openModal('modal-contact')">
-        <div class="support-icon si-green"><i data-lucide="message-square"></i></div>
-        <div class="support-title">Contact Support</div>
-        <div class="support-desc">General questions, account management, or anything else — get in touch with the Flowaify support team directly and we'll reply promptly.</div>
-        <button class="support-btn" style="background:var(--green-dim);color:var(--green);" onclick="event.stopPropagation();openModal('modal-contact')"><i data-lucide="arrow-right"></i> Contact Support</button>
-      </div>
-    </div>
-
-    <div class="card p20">
-      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;">
-        <div><div style="font-size:13px;font-weight:700;color:var(--text);">Support Hours</div><div style="font-size:11.5px;color:var(--text-m);margin-top:3px;">Monday – Friday · 9AM – 6PM EST</div></div>
-        <div><div style="font-size:13px;font-weight:700;color:var(--text);">Response Time</div><div style="font-size:11.5px;color:var(--text-m);margin-top:3px;">Typically within a few hours</div></div>
-        <div><div style="font-size:13px;font-weight:700;color:var(--text);">Urgent Issues</div><div style="font-size:11.5px;color:var(--text-m);margin-top:3px;">Critical issues escalated within 1 hour</div></div>
-      </div>
-    </div>
-  </div>
-
-</main>
 </div>
+
+<!-- CONNECTIONS -->
+<div class="page" id="page-connections">
+  <div class="page-head">
+    <div><div class="page-head-title">Connections</div><div class="page-head-sub">Connect your accounts to power your automation</div></div>
+    <div class="page-head-actions">
+      <button class="btn-connect bco" onclick="openModal('modal-request-setup')"><i data-lucide="headphones"></i> Request Setup</button>
+      <button class="btn-sync" onclick="openModal('modal-sync')"><i data-lucide="plug"></i> Connect &amp; Sync</button>
+    </div>
+  </div>
+  <div class="conn-grid">
+    <div class="card conn-card">
+      <div style="display:flex;align-items:center;justify-content:space-between;"><div style="width:44px;height:44px;border-radius:12px;background:rgba(0,87,255,.10);display:flex;align-items:center;justify-content:center;"><i data-lucide="mail" style="color:var(--blue);width:20px;height:20px;"></i></div><div class="badge b-notconn">Not Connected</div></div>
+      <div><div class="conn-title">Email Connection</div><div class="conn-desc">Connect Google Workspace or Microsoft Outlook so Flowaify can send and track automated email follow-ups on your behalf.</div></div>
+      <div class="conn-footer"><div style="font-size:11px;color:var(--text-m);">Not connected</div><button class="btn-connect bcp" onclick="openModal('modal-request-setup')"><i data-lucide="plus" style="width:11px;height:11px;"></i> Connect Email</button></div>
+    </div>
+    <div class="card conn-card">
+      <div style="display:flex;align-items:center;justify-content:space-between;"><div style="width:44px;height:44px;border-radius:12px;background:rgba(139,92,246,.10);display:flex;align-items:center;justify-content:center;"><i data-lucide="database" style="color:var(--purple);width:20px;height:20px;"></i></div><div class="badge b-notconn">Not Connected</div></div>
+      <div><div class="conn-title">Flow CRM</div><div class="conn-desc">Connect Flow CRM so leads, notes, and pipeline updates stay organized automatically. Flowaify syncs lead data, deals, and activity in real time.</div></div>
+      <div class="conn-footer"><div style="font-size:11px;color:var(--text-m);">Flow CRM · Not connected</div><button class="btn-connect bcp" onclick="openModal('modal-request-setup')"><i data-lucide="plus" style="width:11px;height:11px;"></i> Connect CRM</button></div>
+    </div>
+    <div class="card conn-card">
+      <div style="display:flex;align-items:center;justify-content:space-between;"><div style="width:44px;height:44px;border-radius:12px;background:var(--green-dim);display:flex;align-items:center;justify-content:center;"><i data-lucide="message-circle" style="color:var(--green);width:20px;height:20px;"></i></div><div class="badge b-optional">Optional</div></div>
+      <div><div class="conn-title">SMS Connection</div><div class="conn-desc">Enable SMS automation and instant lead alerts through Twilio. Optional but recommended — text messages get faster responses than email alone.</div></div>
+      <div class="conn-footer"><div style="font-size:11px;color:var(--text-m);">Twilio · Optional</div><button class="btn-connect bcp" onclick="openModal('modal-request-setup')"><i data-lucide="plus" style="width:11px;height:11px;"></i> Connect SMS</button></div>
+    </div>
+    <div class="card conn-card">
+      <div style="display:flex;align-items:center;justify-content:space-between;"><div style="width:44px;height:44px;border-radius:12px;background:var(--amber-dim);display:flex;align-items:center;justify-content:center;"><i data-lucide="calendar" style="color:var(--amber);width:20px;height:20px;"></i></div><div class="badge b-notconn">Not Connected</div></div>
+      <div><div class="conn-title">Calendar Connection</div><div class="conn-desc">Connect a calendar for booking, appointment tracking, and scheduling automations. Flowaify can send confirmation and reminder messages automatically.</div></div>
+      <div class="conn-footer"><div style="font-size:11px;color:var(--text-m);">Not connected</div><button class="btn-connect bcp" onclick="openModal('modal-request-setup')"><i data-lucide="plus" style="width:11px;height:11px;"></i> Connect Calendar</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- AUTOMATION CONTROL -->
+<div class="page" id="page-automation">
+  <div class="page-head">
+    <div><div class="page-head-title">Automation Control</div><div class="page-head-sub">Manage your Flowaify system without touching any technical settings</div></div>
+    <div class="badge b-setup" style="font-size:11.5px;padding:5px 12px;margin-top:4px;">Setup Needed</div>
+  </div>
+  <div class="status-banner sb-setup mb20">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div class="sb-dot setup"></div>
+      <div>
+        <div style="font-size:14px;font-weight:700;color:var(--amber);">System is not live yet</div>
+        <div style="font-size:11.5px;color:var(--amber);opacity:0.85;margin-top:2px;">Complete your account connections, then click Launch System to go live</div>
+      </div>
+    </div>
+  </div>
+  <div class="action-grid">
+    <div class="card action-card"><div class="action-card-icon" style="background:var(--green-dim);"><i data-lucide="rocket" style="color:var(--green);"></i></div><div class="action-card-title">Launch System</div><div class="action-card-desc">Ready to go live? Launch your Flowaify automation once your accounts are connected. Flowaify will start capturing leads and sending follow-ups automatically.</div><button class="acbtn acbtn-green" onclick="openModal('modal-launch')"><i data-lucide="rocket"></i> Launch System</button></div>
+    <div class="card action-card"><div class="action-card-icon" style="background:var(--amber-dim);"><i data-lucide="pause-circle" style="color:var(--amber);"></i></div><div class="action-card-title">Pause Automation</div><div class="action-card-desc">Temporarily pause all automations without disconnecting your accounts. Flowaify will stop sending follow-ups until you choose to resume.</div><button class="acbtn acbtn-amber" onclick="openModal('modal-pause')"><i data-lucide="pause-circle"></i> Pause Automation</button></div>
+    <div class="card action-card"><div class="action-card-icon" style="background:var(--blue-dim);"><i data-lucide="play-circle" style="color:var(--blue);"></i></div><div class="action-card-title">Resume Automation</div><div class="action-card-desc">Turn your automations back on after a pause. Flowaify will pick up where it left off and continue your active sequences from where they stopped.</div><button class="acbtn acbtn-blue" onclick="openModal('modal-resume')"><i data-lucide="play-circle"></i> Resume Automation</button></div>
+    <div class="card action-card"><div class="action-card-icon" style="background:var(--purple-dim);"><i data-lucide="edit-3" style="color:var(--purple);"></i></div><div class="action-card-title">Request Changes</div><div class="action-card-desc">Need to update your follow-up messages, routing rules, business hours, or workflow settings? Send a change request to the Flowaify team.</div><button class="acbtn acbtn-purple" onclick="openModal('modal-changes')"><i data-lucide="edit-3"></i> Request Changes</button></div>
+  </div>
+</div>
+
+<!-- BUSINESS SETTINGS -->
+<div class="page" id="page-settings">
+  <div class="page-head"><div><div class="page-head-title">Business Settings</div><div class="page-head-sub">Keep your business information up to date</div></div></div>
+  <div class="settings-grid">
+    <div class="card"><div class="sec-head"><div class="sec-title"><i data-lucide="building-2"></i>Business Information</div></div><div class="settings-sec"><div class="field"><label>Business Name</label><input type="text" placeholder="Your Business Name" /></div><div class="field"><label>Main Contact Name</label><input type="text" placeholder="Full name" /></div><div class="field"><label>Business Email</label><input type="email" placeholder="contact@yourbusiness.com" /></div><div class="field"><label>Business Phone</label><input type="text" placeholder="(555) 000-0000" /></div><div class="field"><label>Service Areas</label><input type="text" placeholder="e.g. Miami, FL · South Florida" /></div></div></div>
+    <div class="card"><div class="sec-head"><div class="sec-title"><i data-lucide="clock"></i>Schedule &amp; Hours</div></div><div class="settings-sec"><div class="field"><label>Business Hours</label><select><option>Mon–Fri 8AM–8PM</option><option>Mon–Sat 8AM–6PM</option><option>Every day 9AM–9PM</option><option>24 / 7</option><option>Custom</option></select></div><div class="field"><label>Time Zone</label><select><option>EST (UTC-5)</option><option>CST (UTC-6)</option><option>MST (UTC-7)</option><option>PST (UTC-8)</option></select></div><div class="field"><label>Appointment Booking Link</label><input type="text" placeholder="https://calendly.com/yourbusiness" /></div><div class="field"><label>Follow-Up Preferences</label><select><option>Email + SMS (Recommended)</option><option>Email Only</option><option>SMS Only</option></select></div></div></div>
+    <div class="card"><div class="sec-head"><div class="sec-title"><i data-lucide="git-branch"></i>Lead Routing &amp; CRM</div></div><div class="settings-sec"><div class="field"><label>Primary CRM Pipeline</label><select><option>Flowaify Pipeline (Flow CRM)</option><option>Main Sales Pipeline</option><option>Custom Pipeline</option></select></div><div class="field"><label>Lead Routing Rules</label><select><option>Auto-assign to owner</option><option>Round-robin distribution</option><option>Manual assignment</option></select></div><div class="field"><label>Default Follow-Up Sequence</label><select><option>14-Day Nurture Sequence</option><option>7-Day Intro Sequence</option><option>Quick Follow-Up (3 days)</option></select></div></div></div>
+    <div class="card"><div class="sec-head"><div class="sec-title"><i data-lucide="bell"></i>Notification Preferences</div></div><div class="settings-sec"><div class="toggle-row"><div><div class="toggle-label">New lead alert</div><div class="toggle-sub">SMS + Email when a new lead arrives</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div><div class="toggle-row"><div><div class="toggle-label">Follow-up confirmation</div><div class="toggle-sub">Notify when a follow-up is sent</div></div><div class="toggle" onclick="this.classList.toggle('on')"></div></div><div class="toggle-row"><div><div class="toggle-label">Appointment booked</div><div class="toggle-sub">Alert when appointment is confirmed</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div><div class="toggle-row"><div><div class="toggle-label">Daily summary</div><div class="toggle-sub">Morning digest of previous day's activity</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div><div class="toggle-row"><div><div class="toggle-label">Weekly report</div><div class="toggle-sub">Performance summary every Monday</div></div><div class="toggle" onclick="this.classList.toggle('on')"></div></div><div style="margin-top:16px;"><button onclick="showToast('Settings saved.')" style="width:100%;padding:9px;background:var(--blue);border:none;border-radius:8px;color:#fff;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 4px 14px rgba(0,87,255,0.25);">Save Business Settings</button></div></div></div>
+  </div>
+</div>
+
+<!-- SYSTEM STATUS -->
+<div class="page" id="page-status">
+  <div class="page-head">
+    <div><div class="page-head-title">System Status</div><div class="page-head-sub">Health of all your connected services and automation</div></div>
+    <button class="btn-sync" onclick="refreshStatus()"><i data-lucide="refresh-cw" id="refresh-icon"></i> Refresh</button>
+  </div>
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;">
+    <div style="display:flex;align-items:center;gap:5px;font-size:10px;font-weight:700;color:var(--amber);background:var(--amber-dim);border:1px solid rgba(217,119,6,0.18);padding:3px 9px;border-radius:99px;"><div style="width:5px;height:5px;border-radius:50%;background:var(--amber);animation:pulse-a 1.5s infinite;"></div> Monitoring</div>
+    <span style="font-size:11.5px;color:var(--text-m);">Awaiting account connections · Last check: just now</span>
+  </div>
+  <div class="card mb20">
+    <div class="sec-head"><div class="sec-title"><i data-lucide="plug"></i>Account Connections</div><div class="sec-sub">4 services monitored</div></div>
+    <div class="status-row"><div class="status-row-left"><div class="status-row-icon si-blue"><i data-lucide="mail"></i></div><div><div class="status-row-name">Email Connection</div><div class="status-row-sub">Not connected yet</div></div></div><div class="badge b-notconn">Not Connected</div></div>
+    <div class="status-row"><div class="status-row-left"><div class="status-row-icon" style="background:rgba(139,92,246,.10);color:var(--purple);"><i data-lucide="database"></i></div><div><div class="status-row-name">Flow CRM</div><div class="status-row-sub">Not linked yet</div></div></div><div class="badge b-notconn">Not Connected</div></div>
+    <div class="status-row"><div class="status-row-left"><div class="status-row-icon si-green"><i data-lucide="message-circle"></i></div><div><div class="status-row-name">SMS Connection</div><div class="status-row-sub">Twilio · Optional service</div></div></div><div class="badge b-optional">Optional</div></div>
+    <div class="status-row"><div class="status-row-left"><div class="status-row-icon si-amber"><i data-lucide="calendar"></i></div><div><div class="status-row-name">Calendar Connection</div><div class="status-row-sub">Not connected yet</div></div></div><div class="badge b-notconn">Not Connected</div></div>
+  </div>
+  <div class="card mb20">
+    <div class="sec-head"><div class="sec-title"><i data-lucide="zap"></i>Automation Services</div><div class="sec-sub">5 services monitored</div></div>
+    <div class="status-row"><div class="status-row-left"><div class="status-row-icon si-blue"><i data-lucide="user-plus"></i></div><div><div class="status-row-name">Lead Capture</div><div class="status-row-sub">Waiting for account connection</div></div></div><div class="badge b-setup">Pending</div></div>
+    <div class="status-row"><div class="status-row-left"><div class="status-row-icon" style="background:rgba(139,92,246,.10);color:var(--purple);"><i data-lucide="refresh-cw"></i></div><div><div class="status-row-name">CRM Sync</div><div class="status-row-sub">Waiting for Flow CRM connection</div></div></div><div class="badge b-setup">Pending</div></div>
+    <div class="status-row"><div class="status-row-left"><div class="status-row-icon si-green"><i data-lucide="send"></i></div><div><div class="status-row-name">Follow-Up Automation</div><div class="status-row-sub">Waiting for email connection</div></div></div><div class="badge b-setup">Pending</div></div>
+    <div class="status-row"><div class="status-row-left"><div class="status-row-icon si-amber"><i data-lucide="calendar-check"></i></div><div><div class="status-row-name">Appointment Automation</div><div class="status-row-sub">Waiting for calendar connection</div></div></div><div class="badge b-setup">Pending</div></div>
+    <div class="status-row"><div class="status-row-left"><div class="status-row-icon si-green"><i data-lucide="message-circle"></i></div><div><div class="status-row-name">SMS Automation</div><div class="status-row-sub">Waiting for SMS connection</div></div></div><div class="badge b-notconn">Not Connected</div></div>
+  </div>
+  <div class="card">
+    <div class="sec-head"><div class="sec-title"><i data-lucide="clock"></i>Sync History</div></div>
+    <div class="empty-state"><i data-lucide="clock"></i><div class="empty-state-title">No sync history yet</div><div class="empty-state-text">Connect your accounts to start tracking sync events and system activity.</div></div>
+  </div>
+</div>
+
+<!-- SUPPORT -->
+<div class="page" id="page-support">
+  <div class="page-head"><div><div class="page-head-title">Help &amp; Support</div><div class="page-head-sub">We're here to help — reach out anytime</div></div></div>
+  <div class="support-grid mb20">
+    <div class="card support-card" onclick="openModal('modal-request-setup')">
+      <div class="support-icon si-blue"><i data-lucide="settings-2"></i></div>
+      <div class="support-title">Request Setup</div>
+      <div class="support-desc">Need help connecting your accounts? Our team can walk you through or handle the setup for you.</div>
+      <button class="support-btn" style="background:var(--blue);color:#fff;" onclick="event.stopPropagation();openModal('modal-request-setup')"><i data-lucide="arrow-right"></i> Request Setup</button>
+    </div>
+    <div class="card support-card" onclick="openModal('modal-report-issue')">
+      <div class="support-icon" style="background:var(--red-dim);"><i data-lucide="alert-triangle" style="color:var(--red);"></i></div>
+      <div class="support-title">Report an Issue</div>
+      <div class="support-desc">Something not working right? Report a problem with your email, CRM, leads, SMS, calendar, or automation.</div>
+      <button class="support-btn" style="background:var(--red-dim);color:var(--red);" onclick="event.stopPropagation();openModal('modal-report-issue')"><i data-lucide="arrow-right"></i> Report Issue</button>
+    </div>
+    <div class="card support-card" onclick="openModal('modal-changes')">
+      <div class="support-icon" style="background:var(--purple-dim);"><i data-lucide="edit-3" style="color:var(--purple);"></i></div>
+      <div class="support-title">Request Automation Change</div>
+      <div class="support-desc">Need to update follow-up rules, routing, messages, business hours, or workflow settings? Send us a request.</div>
+      <button class="support-btn" style="background:var(--purple-dim);color:var(--purple);" onclick="event.stopPropagation();openModal('modal-changes')"><i data-lucide="arrow-right"></i> Request Change</button>
+    </div>
+    <div class="card support-card" onclick="openModal('modal-contact')">
+      <div class="support-icon si-green"><i data-lucide="message-square"></i></div>
+      <div class="support-title">Contact Support</div>
+      <div class="support-desc">General questions, account management, or anything else — get in touch with the Flowaify support team directly.</div>
+      <button class="support-btn" style="background:var(--green-dim);color:var(--green);" onclick="event.stopPropagation();openModal('modal-contact')"><i data-lucide="arrow-right"></i> Contact Support</button>
+    </div>
+  </div>
+  <div class="card p20">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;">
+      <div><div style="font-size:13px;font-weight:700;color:var(--text);">Support Hours</div><div style="font-size:11.5px;color:var(--text-m);margin-top:3px;">Monday – Friday · 9AM – 6PM EST</div></div>
+      <div><div style="font-size:13px;font-weight:700;color:var(--text);">Response Time</div><div style="font-size:11.5px;color:var(--text-m);margin-top:3px;">Typically within a few hours</div></div>
+      <div><div style="font-size:13px;font-weight:700;color:var(--text);">Urgent Issues</div><div style="font-size:11.5px;color:var(--text-m);margin-top:3px;">Critical issues escalated within 1 hour</div></div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /app -->
 
 <!-- MODALS -->
 <div class="modal-overlay" id="modal-sync">
   <div class="modal">
-    <div class="modal-head">
-      <div><div class="modal-title">Connect &amp; Sync Accounts</div><div class="modal-sub">Review connection status and link missing accounts</div></div>
-      <button class="modal-close" onclick="closeModal('modal-sync')"><i data-lucide="x"></i></button>
-    </div>
+    <div class="modal-head"><div><div class="modal-title">Connect &amp; Sync Accounts</div><div class="modal-sub">Review connection status and link missing accounts</div></div><button class="modal-close" onclick="closeModal('modal-sync')"><i data-lucide="x"></i></button></div>
     <div class="modal-body">
-      <div class="sync-check-item"><div class="sync-check-left"><div class="sync-check-icon" style="background:rgba(0,87,255,.10);"><i data-lucide="mail" style="color:var(--blue);"></i></div><div><div class="sync-check-name">Email</div><div class="sync-check-sub">Not connected</div></div></div><div class="badge b-notconn">Not Connected</div></div>
-      <div class="sync-check-item"><div class="sync-check-left"><div class="sync-check-icon" style="background:rgba(139,92,246,.10);"><i data-lucide="database" style="color:var(--purple);"></i></div><div><div class="sync-check-name">CRM</div><div class="sync-check-sub">Flow CRM · Not connected</div></div></div><div class="badge b-notconn">Not Connected</div></div>
-      <div class="sync-check-item"><div class="sync-check-left"><div class="sync-check-icon" style="background:var(--green-dim);"><i data-lucide="message-circle" style="color:var(--green);"></i></div><div><div class="sync-check-name">SMS</div><div class="sync-check-sub">Twilio · Optional</div></div></div><div class="badge b-optional">Optional</div></div>
-      <div class="sync-check-item"><div class="sync-check-left"><div class="sync-check-icon" style="background:var(--amber-dim);"><i data-lucide="calendar" style="color:var(--amber);"></i></div><div><div class="sync-check-name">Calendar</div><div class="sync-check-sub">Not connected</div></div></div><div class="badge b-notconn">Not Connected</div></div>
+      <div class="sync-row"><div class="sync-row-left"><div class="sync-icon-wrap" style="background:rgba(0,87,255,.10);"><i data-lucide="mail" style="color:var(--blue);"></i></div><div><div style="font-size:13px;font-weight:600;color:var(--text-s);">Email</div><div style="font-size:10.5px;color:var(--text-m);">Not connected</div></div></div><div class="badge b-notconn">Not Connected</div></div>
+      <div class="sync-row"><div class="sync-row-left"><div class="sync-icon-wrap" style="background:rgba(139,92,246,.10);"><i data-lucide="database" style="color:var(--purple);"></i></div><div><div style="font-size:13px;font-weight:600;color:var(--text-s);">Flow CRM</div><div style="font-size:10.5px;color:var(--text-m);">Not connected</div></div></div><div class="badge b-notconn">Not Connected</div></div>
+      <div class="sync-row"><div class="sync-row-left"><div class="sync-icon-wrap" style="background:var(--green-dim);"><i data-lucide="message-circle" style="color:var(--green);"></i></div><div><div style="font-size:13px;font-weight:600;color:var(--text-s);">SMS</div><div style="font-size:10.5px;color:var(--text-m);">Twilio · Optional</div></div></div><div class="badge b-optional">Optional</div></div>
+      <div class="sync-row"><div class="sync-row-left"><div class="sync-icon-wrap" style="background:var(--amber-dim);"><i data-lucide="calendar" style="color:var(--amber);"></i></div><div><div style="font-size:13px;font-weight:600;color:var(--text-s);">Calendar</div><div style="font-size:10.5px;color:var(--text-m);">Not connected</div></div></div><div class="badge b-notconn">Not Connected</div></div>
     </div>
-    <div class="modal-footer">
-      <button class="btn-mcancel" onclick="closeModal('modal-sync')">Close</button>
-      <button class="btn-mconfirm blue" onclick="closeModal('modal-sync');showPage('connections')">Go to Connections</button>
-    </div>
+    <div class="modal-footer"><button class="btn-mc" onclick="closeModal('modal-sync')">Close</button><button class="btn-mok" onclick="closeModal('modal-sync');showPage('connections')">Go to Connections</button></div>
   </div>
 </div>
 
 <div class="modal-overlay" id="modal-launch">
   <div class="modal">
-    <div class="modal-head">
-      <div><div class="modal-title">Launch Your System</div><div class="modal-sub">Confirm you're ready to go live</div></div>
-      <button class="modal-close" onclick="closeModal('modal-launch')"><i data-lucide="x"></i></button>
-    </div>
-    <div class="modal-body">
-      <p>Once launched, Flowaify will begin capturing leads, sending automated follow-ups, and keeping your CRM updated in real time.</p>
-      <div style="margin-top:14px;padding:12px 16px;background:var(--amber-dim);border:1px solid rgba(217,119,6,0.2);border-radius:10px;">
-        <div style="font-size:12px;font-weight:700;color:var(--amber);margin-bottom:6px;">Action required first:</div>
-        <div style="font-size:11.5px;color:var(--amber);opacity:0.9;line-height:1.8;">Complete your account connections before launching. Go to Connections to set up Email, CRM, and Calendar.</div>
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn-mcancel" onclick="closeModal('modal-launch')">Cancel</button>
-      <button class="btn-mconfirm blue" onclick="closeModal('modal-launch');showPage('connections')">Go to Connections</button>
-    </div>
+    <div class="modal-head"><div><div class="modal-title">Launch Your System</div><div class="modal-sub">Confirm you're ready to go live</div></div><button class="modal-close" onclick="closeModal('modal-launch')"><i data-lucide="x"></i></button></div>
+    <div class="modal-body"><p>Once launched, Flowaify will begin capturing leads, sending automated follow-ups, and keeping your CRM updated in real time.</p><div style="margin-top:14px;padding:12px 16px;background:var(--amber-dim);border:1px solid rgba(217,119,6,0.2);border-radius:10px;font-size:11.5px;color:var(--amber);line-height:1.8;">Complete your account connections before launching. Go to Connections to set up Email, Flow CRM, and Calendar.</div></div>
+    <div class="modal-footer"><button class="btn-mc" onclick="closeModal('modal-launch')">Cancel</button><button class="btn-mok" onclick="closeModal('modal-launch');showPage('connections')">Go to Connections</button></div>
   </div>
 </div>
 
 <div class="modal-overlay" id="modal-pause">
   <div class="modal">
-    <div class="modal-head">
-      <div><div class="modal-title">Pause Automation</div><div class="modal-sub">Temporarily stop automated activity</div></div>
-      <button class="modal-close" onclick="closeModal('modal-pause')"><i data-lucide="x"></i></button>
-    </div>
-    <div class="modal-body">
-      <p>Are you sure you want to pause automation? Your accounts will stay connected, but Flowaify will stop sending automated follow-ups until you resume.</p>
-      <div style="margin-top:14px;padding:12px 16px;background:var(--amber-dim);border:1px solid rgba(217,119,6,0.2);border-radius:10px;">
-        <div style="font-size:12px;font-weight:600;color:var(--amber);margin-bottom:4px;">While paused:</div>
-        <div style="font-size:11.5px;color:var(--amber);opacity:0.9;line-height:1.8;">• No automated messages will be sent<br>• Your accounts remain connected<br>• Active sequences resume where they left off</div>
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn-mcancel" onclick="closeModal('modal-pause')">Keep Running</button>
-      <button class="btn-mconfirm amber" onclick="pauseSystem()">Pause Automation</button>
-    </div>
+    <div class="modal-head"><div><div class="modal-title">Pause Automation</div><div class="modal-sub">Temporarily stop automated activity</div></div><button class="modal-close" onclick="closeModal('modal-pause')"><i data-lucide="x"></i></button></div>
+    <div class="modal-body"><p>Are you sure you want to pause automation? Your accounts will stay connected, but Flowaify will stop sending automated follow-ups until you resume.</p></div>
+    <div class="modal-footer"><button class="btn-mc" onclick="closeModal('modal-pause')">Keep Running</button><button class="btn-mok-am" onclick="closeModal('modal-pause');showToast('Automation paused. Your accounts remain connected.')">Pause Automation</button></div>
   </div>
 </div>
 
 <div class="modal-overlay" id="modal-resume">
   <div class="modal">
-    <div class="modal-head">
-      <div><div class="modal-title">Resume Automation</div><div class="modal-sub">Turn your automation back on</div></div>
-      <button class="modal-close" onclick="closeModal('modal-resume')"><i data-lucide="x"></i></button>
-    </div>
-    <div class="modal-body"><p>Resume your automation? Flowaify will pick up where it left off and continue sending follow-ups, capturing leads, and updating your records automatically.</p></div>
-    <div class="modal-footer">
-      <button class="btn-mcancel" onclick="closeModal('modal-resume')">Cancel</button>
-      <button class="btn-mconfirm green" onclick="resumeSystem()">Resume Now</button>
-    </div>
+    <div class="modal-head"><div><div class="modal-title">Resume Automation</div><div class="modal-sub">Turn your automation back on</div></div><button class="modal-close" onclick="closeModal('modal-resume')"><i data-lucide="x"></i></button></div>
+    <div class="modal-body"><p>Resume your automation? Flowaify will pick up where it left off and continue sending follow-ups, capturing leads, and updating your records.</p></div>
+    <div class="modal-footer"><button class="btn-mc" onclick="closeModal('modal-resume')">Cancel</button><button class="btn-mok-gr" onclick="closeModal('modal-resume');showToast('Automation resumed — Flowaify is back online.')">Resume Now</button></div>
   </div>
 </div>
 
 <div class="modal-overlay" id="modal-changes">
   <div class="modal">
-    <div class="modal-head">
-      <div><div class="modal-title">Request Changes</div><div class="modal-sub">Ask Flowaify to update your system settings</div></div>
-      <button class="modal-close" onclick="closeModal('modal-changes')"><i data-lucide="x"></i></button>
-    </div>
-    <div class="modal-body">
-      <div class="field"><label>What would you like to change?</label><select><option>Follow-up message content</option><option>Lead routing rules</option><option>Business hours / schedule</option><option>Automation sequence settings</option><option>CRM pipeline configuration</option><option>Other</option></select></div>
-      <div class="field"><label>Describe the change you need</label><textarea placeholder="Please describe what you'd like updated…"></textarea></div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn-mcancel" onclick="closeModal('modal-changes')">Cancel</button>
-      <button class="btn-mconfirm blue" onclick="submitForm('modal-changes','Change request submitted! Our team will make updates within 1–2 business days.')">Submit Request</button>
-    </div>
+    <div class="modal-head"><div><div class="modal-title">Request Changes</div><div class="modal-sub">Ask Flowaify to update your system settings</div></div><button class="modal-close" onclick="closeModal('modal-changes')"><i data-lucide="x"></i></button></div>
+    <div class="modal-body"><div class="field"><label>What would you like to change?</label><select><option>Follow-up message content</option><option>Lead routing rules</option><option>Business hours / schedule</option><option>Automation sequence settings</option><option>CRM pipeline configuration</option><option>Other</option></select></div><div class="field"><label>Describe the change you need</label><textarea placeholder="Please describe what you'd like updated…"></textarea></div></div>
+    <div class="modal-footer"><button class="btn-mc" onclick="closeModal('modal-changes')">Cancel</button><button class="btn-mok" onclick="submitForm('modal-changes','Change request submitted! Our team will make updates within 1–2 business days.')">Submit Request</button></div>
   </div>
 </div>
 
 <div class="modal-overlay" id="modal-request-setup">
   <div class="modal">
-    <div class="modal-head">
-      <div><div class="modal-title">Request Setup</div><div class="modal-sub">We'll help connect and configure your accounts</div></div>
-      <button class="modal-close" onclick="closeModal('modal-request-setup')"><i data-lucide="x"></i></button>
-    </div>
-    <div class="modal-body">
-      <div class="field"><label>Which accounts need setup?</label><input type="text" placeholder="e.g. Email, CRM, Calendar" /></div>
-      <div class="field"><label>Best time to connect</label><input type="text" placeholder="e.g. Weekdays after 2PM EST" /></div>
-      <div class="field"><label>Additional notes (optional)</label><textarea placeholder="Any details that would help our team get started…"></textarea></div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn-mcancel" onclick="closeModal('modal-request-setup')">Cancel</button>
-      <button class="btn-mconfirm blue" onclick="submitForm('modal-request-setup','Setup request submitted! Our team will reach out within 1 business day.')">Submit Request</button>
-    </div>
+    <div class="modal-head"><div><div class="modal-title">Request Setup</div><div class="modal-sub">We'll help connect and configure your accounts</div></div><button class="modal-close" onclick="closeModal('modal-request-setup')"><i data-lucide="x"></i></button></div>
+    <div class="modal-body"><div class="field"><label>Which accounts need setup?</label><input type="text" placeholder="e.g. Email, Flow CRM, Calendar" /></div><div class="field"><label>Best time to connect</label><input type="text" placeholder="e.g. Weekdays after 2PM EST" /></div><div class="field"><label>Additional notes (optional)</label><textarea placeholder="Any details that would help our team get started…"></textarea></div></div>
+    <div class="modal-footer"><button class="btn-mc" onclick="closeModal('modal-request-setup')">Cancel</button><button class="btn-mok" onclick="submitForm('modal-request-setup','Setup request submitted! Our team will reach out within 1 business day.')">Submit Request</button></div>
   </div>
 </div>
 
 <div class="modal-overlay" id="modal-report-issue">
   <div class="modal">
-    <div class="modal-head">
-      <div><div class="modal-title">Report an Issue</div><div class="modal-sub">Tell us what's not working</div></div>
-      <button class="modal-close" onclick="closeModal('modal-report-issue')"><i data-lucide="x"></i></button>
-    </div>
-    <div class="modal-body">
-      <div class="field"><label>Issue category</label><select><option>Email connection issue</option><option>CRM sync problem</option><option>Lead not captured</option><option>Follow-up not sent</option><option>Calendar / booking issue</option><option>Other</option></select></div>
-      <div class="field"><label>Describe the issue</label><textarea placeholder="What happened? What were you expecting?"></textarea></div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn-mcancel" onclick="closeModal('modal-report-issue')">Cancel</button>
-      <button class="btn-mconfirm blue" onclick="submitForm('modal-report-issue','Issue reported. Our team will investigate and follow up within a few hours.')">Submit Report</button>
-    </div>
+    <div class="modal-head"><div><div class="modal-title">Report an Issue</div><div class="modal-sub">Tell us what's not working</div></div><button class="modal-close" onclick="closeModal('modal-report-issue')"><i data-lucide="x"></i></button></div>
+    <div class="modal-body"><div class="field"><label>Issue category</label><select><option>Email connection issue</option><option>CRM sync problem</option><option>Lead not captured</option><option>Follow-up not sent</option><option>Calendar / booking issue</option><option>Other</option></select></div><div class="field"><label>Describe the issue</label><textarea placeholder="What happened? What were you expecting?"></textarea></div></div>
+    <div class="modal-footer"><button class="btn-mc" onclick="closeModal('modal-report-issue')">Cancel</button><button class="btn-mok" onclick="submitForm('modal-report-issue','Issue reported. Our team will investigate and follow up within a few hours.')">Submit Report</button></div>
   </div>
 </div>
 
 <div class="modal-overlay" id="modal-contact">
   <div class="modal">
-    <div class="modal-head">
-      <div><div class="modal-title">Contact Support</div><div class="modal-sub">We'll get back to you promptly</div></div>
-      <button class="modal-close" onclick="closeModal('modal-contact')"><i data-lucide="x"></i></button>
-    </div>
-    <div class="modal-body">
-      <div class="field"><label>Subject</label><input type="text" placeholder="Brief summary of your question" /></div>
-      <div class="field"><label>Message</label><textarea placeholder="How can we help you?"></textarea></div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn-mcancel" onclick="closeModal('modal-contact')">Cancel</button>
-      <button class="btn-mconfirm blue" onclick="submitForm('modal-contact','Message sent! Our team will reply within a few hours.')">Send Message</button>
-    </div>
+    <div class="modal-head"><div><div class="modal-title">Contact Support</div><div class="modal-sub">We'll get back to you promptly</div></div><button class="modal-close" onclick="closeModal('modal-contact')"><i data-lucide="x"></i></button></div>
+    <div class="modal-body"><div class="field"><label>Subject</label><input type="text" placeholder="Brief summary of your question" /></div><div class="field"><label>Message</label><textarea placeholder="How can we help you?"></textarea></div></div>
+    <div class="modal-footer"><button class="btn-mc" onclick="closeModal('modal-contact')">Cancel</button><button class="btn-mok" onclick="submitForm('modal-contact','Message sent! Our team will reply within a few hours.')">Send Message</button></div>
   </div>
 </div>
 
-<div id="toast">
-  <div class="toast-icon"><i data-lucide="check"></i></div>
-  <div id="toast-msg" style="font-size:12.5px;font-weight:600;color:var(--text-s);line-height:1.45;"></div>
-</div>
+<div id="toast"><div class="toast-icon"><i data-lucide="check"></i></div><div id="toast-msg" style="font-size:12.5px;font-weight:600;color:var(--text-s);line-height:1.45;"></div></div>
 
 <script>
-/* AUTH0 */
 const AUTH0_DOMAIN    = 'auth.flowaify.app';
 const AUTH0_CLIENT_ID = 'tx74Owqn3jVeSaVuxfFHsKloqbPqfAmN';
 let auth0Client;
@@ -1088,144 +682,75 @@ let auth0Client;
 async function initAuth() {
   try {
     auth0Client = await auth0.createAuth0Client({
-      domain: AUTH0_DOMAIN,
-      clientId: AUTH0_CLIENT_ID,
+      domain: AUTH0_DOMAIN, clientId: AUTH0_CLIENT_ID,
       authorizationParams: { redirect_uri: window.location.origin + '/portal.html' }
     });
-
     if (window.location.search.includes('code=') && window.location.search.includes('state=')) {
       await auth0Client.handleRedirectCallback();
       window.history.replaceState({}, document.title, window.location.pathname);
     }
+    const ok = await auth0Client.isAuthenticated();
+    if (!ok) { await auth0Client.loginWithRedirect({ appState: { returnTo: '/portal.html' } }); return; }
+    boot(await auth0Client.getUser());
+  } catch(e) { console.error(e); boot(null); }
+}
 
-    const isAuthenticated = await auth0Client.isAuthenticated();
-    if (!isAuthenticated) {
-      await auth0Client.loginWithRedirect({ appState: { returnTo: '/portal.html' } });
-      return;
-    }
-
-    const user = await auth0Client.getUser();
-    document.getElementById('auth-gate').style.display = 'none';
-    document.getElementById('app-layout').style.display = 'flex';
-
-    if (user) {
-      const init = (user.name || user.email || '?')[0].toUpperCase();
-      document.getElementById('topbar-avatar').textContent = init;
-      document.getElementById('topbar-avatar').title = user.name || user.email;
-      document.getElementById('sidebar-client-name').textContent = user.name || user.email || 'User';
-      document.getElementById('portal-menu-name').textContent  = user.name  || 'User';
-      document.getElementById('portal-menu-email').textContent = user.email || '';
-    }
-    document.getElementById('topbar-sub').textContent = new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
-    lucide.createIcons();
-  } catch (err) {
-    console.error('Auth error:', err);
-    document.getElementById('auth-gate').style.display = 'none';
-    document.getElementById('app-layout').style.display = 'flex';
-    document.getElementById('sidebar-client-name').textContent = 'User';
-    lucide.createIcons();
+function boot(user) {
+  document.getElementById('auth-gate').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  if (user) {
+    const init = (user.name || user.email || '?')[0].toUpperCase();
+    document.getElementById('portal-avatar').textContent = init;
+    document.getElementById('portal-menu-name').textContent  = user.name  || 'User';
+    document.getElementById('portal-menu-email').textContent = user.email || '';
   }
+  lucide.createIcons();
 }
 
 async function portalLogout() {
-  try {
-    await auth0Client.logout({ logoutParams: { returnTo: 'https://flowaify.app' } });
-  } catch(e) { window.location.href = 'https://flowaify.app'; }
+  try { await auth0Client.logout({ logoutParams: { returnTo: 'https://flowaify.app' } }); }
+  catch(e) { window.location.href = 'https://flowaify.app'; }
 }
 
 /* PAGE NAV */
-const PAGE_META = {
-  overview:    { title: 'Overview',           sub: '' },
-  connections: { title: 'Connections',        sub: 'Manage your account integrations' },
-  automation:  { title: 'Automation Control', sub: 'Control your Flowaify system' },
-  settings:    { title: 'Business Settings',  sub: 'Update your business information' },
-  status:      { title: 'System Status',      sub: 'Health of all connected services' },
-  support:     { title: 'Help & Support',     sub: "We're here to help" },
-};
-
 function showPage(id) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  const page = document.getElementById('page-' + id);
-  if (page) page.classList.add('active');
-  const nav = document.querySelector('.nav-item[data-page="' + id + '"]');
-  if (nav) nav.classList.add('active');
-  const m = PAGE_META[id] || {};
-  document.getElementById('topbar-title').textContent = m.title || id;
-  document.getElementById('topbar-sub').textContent = m.sub || new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
-  closeSidebar();
-  window.scrollTo(0, 0);
+  document.querySelectorAll('.nav-tab[data-page]').forEach(t => t.classList.remove('active'));
+  const pg = document.getElementById('page-' + id); if(pg) pg.classList.add('active');
+  document.querySelectorAll('.nav-tab[data-page="' + id + '"]').forEach(t => t.classList.add('active'));
+  window.scrollTo(0,0);
+  closeProfileMenu();
 }
-document.querySelectorAll('.nav-item[data-page]').forEach(el =>
-  el.addEventListener('click', () => showPage(el.dataset.page))
-);
+document.querySelectorAll('.nav-tab[data-page]').forEach(el => el.addEventListener('click', () => showPage(el.dataset.page)));
 
 /* PROFILE MENU */
-function togglePortalProfileMenu() {
-  document.getElementById('portal-profile-menu').classList.toggle('open');
-}
-function closePortalProfileMenu() {
-  document.getElementById('portal-profile-menu').classList.remove('open');
-}
-document.addEventListener('click', e => {
-  const wrap = document.querySelector('.avatar-wrap');
-  if (wrap && !wrap.contains(e.target)) closePortalProfileMenu();
-});
+function toggleProfileMenu() { document.getElementById('profile-menu').classList.toggle('open'); }
+function closeProfileMenu()  { document.getElementById('profile-menu').classList.remove('open'); }
+document.addEventListener('click', e => { const w = document.querySelector('.avatar-wrap'); if(w && !w.contains(e.target)) closeProfileMenu(); });
 
-/* MOBILE SIDEBAR */
-function toggleSidebar() {
-  document.getElementById('sidebar').classList.toggle('open');
-  document.getElementById('sidebar-overlay').classList.toggle('open');
-}
-function closeSidebar() {
-  document.getElementById('sidebar').classList.remove('open');
-  document.getElementById('sidebar-overlay').classList.remove('open');
-}
+/* MOBILE NAV */
+function openMobNav()  { document.getElementById('mob-nav-drawer').classList.add('open'); }
+function closeMobNav(e){ if(!e || e.target===document.getElementById('mob-nav-drawer')) document.getElementById('mob-nav-drawer').classList.remove('open'); }
 
 /* MODALS */
-function openModal(id) {
-  const el = document.getElementById(id);
-  if (el) { el.classList.add('open'); lucide.createIcons(); }
-}
-function closeModal(id) {
-  const el = document.getElementById(id);
-  if (el) el.classList.remove('open');
-}
-document.querySelectorAll('.modal-overlay').forEach(o =>
-  o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); })
-);
+function openModal(id)  { const el = document.getElementById(id); if(el){ el.classList.add('open'); lucide.createIcons(); } }
+function closeModal(id) { const el = document.getElementById(id); if(el) el.classList.remove('open'); }
+document.querySelectorAll('.modal-overlay').forEach(o => o.addEventListener('click', e => { if(e.target===o) o.classList.remove('open'); }));
 
 /* TOAST */
 function showToast(msg) {
   const t = document.getElementById('toast');
   document.getElementById('toast-msg').textContent = msg;
-  t.style.display = 'flex';
-  lucide.createIcons();
-  clearTimeout(t._timer);
-  t._timer = setTimeout(() => { t.style.display = 'none'; }, 3800);
+  t.style.display = 'flex'; lucide.createIcons();
+  clearTimeout(t._t); t._t = setTimeout(() => t.style.display='none', 3800);
 }
 
-/* STATUS */
-const STATE = { systemStatus: 'setup_needed' };
-function pauseSystem()  { closeModal('modal-pause');  STATE.systemStatus = 'paused'; showToast('Automation paused. Your accounts remain connected.'); }
-function resumeSystem() { closeModal('modal-resume'); STATE.systemStatus = 'live';   showToast('Automation resumed — Flowaify is back online.'); }
+function submitForm(modalId, msg) { closeModal(modalId); showToast(msg); }
 
-/* CONNECTIONS */
-function handleConnect(type) {
-  openModal('modal-request-setup');
-}
-
-/* FORM */
-function submitForm(modalId, msg) {
-  closeModal(modalId);
-  showToast(msg);
-}
-
-/* STATUS REFRESH */
 function refreshStatus() {
   const icon = document.getElementById('refresh-icon');
-  if (icon) icon.classList.add('spinning');
-  setTimeout(() => { if (icon) icon.classList.remove('spinning'); showToast('Status refreshed.'); }, 1400);
+  if(icon) icon.classList.add('spinning');
+  setTimeout(() => { if(icon) icon.classList.remove('spinning'); showToast('Status refreshed.'); lucide.createIcons(); }, 1400);
 }
 
 initAuth();
