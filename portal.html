@@ -175,6 +175,13 @@
     .b-optional { background: var(--blue-dim); color: var(--blue); border: 1px solid var(--blue-border); }
     .b-setup    { background: var(--amber-dim); color: var(--amber); border: 1px solid rgba(217,119,6,0.2); }
     .b-live     { background: var(--green-dim); color: var(--green); border: 1px solid rgba(5,150,105,0.2); }
+    .b-required { background: var(--amber-dim); color: var(--amber); border: 1px solid rgba(217,119,6,0.2); }
+    .b-recommended { background: var(--purple-dim); color: var(--purple); border: 1px solid rgba(139,92,246,0.2); }
+    .b-healthy  { background: var(--green-dim); color: var(--green); border: 1px solid rgba(5,150,105,0.2); }
+
+    /* AI BRAND PILL */
+    .ai-pill { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 99px; background: linear-gradient(135deg, rgba(0,87,255,0.10), rgba(139,92,246,0.10)); border: 1px solid var(--blue-border); color: var(--blue); font-size: 10px; font-weight: 700; margin-left: 8px; white-space: nowrap; }
+    .ai-pill i { width: 10px; height: 10px; }
 
     /* STAT CARDS */
     .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px,1fr)); gap: 14px; margin-bottom: 22px; }
@@ -328,6 +335,96 @@
     .mb20 { margin-bottom: 20px; }
     .p20  { padding: 20px; }
 
+    /* ─── AI ASSISTANT HERO ─── */
+    .ai-hero { position: relative; padding: 46px 32px 26px; text-align: center; overflow: hidden; }
+    .ai-hero-glow {
+      position: absolute; top: -140px; left: 50%; transform: translateX(-50%);
+      width: 780px; height: 380px; pointer-events: none; z-index: 0;
+      background: radial-gradient(ellipse at center, rgba(0,87,255,0.16), rgba(139,92,246,0.11) 45%, transparent 72%);
+      filter: blur(38px);
+    }
+    .ai-hero-inner { position: relative; z-index: 1; max-width: 620px; margin: 0 auto; }
+    .ai-hero-badge { display: inline-flex; align-items: center; gap: 6px; padding: 5px 13px; border-radius: 99px; background: var(--blue-dim); border: 1px solid var(--blue-border); color: var(--blue); font-size: 11px; font-weight: 700; margin-bottom: 16px; }
+    .ai-hero-badge i { width: 12px; height: 12px; }
+    .ai-hero-title { font-size: 32px; font-weight: 800; letter-spacing: -1px; color: var(--text); margin-bottom: 10px; }
+    .ai-hero-sub { font-size: 13.5px; color: var(--text-m); line-height: 1.65; max-width: 470px; margin: 0 auto; }
+
+    /* ─── AI LAYOUT ─── */
+    .ai-layout { display: grid; grid-template-columns: 1fr 340px; gap: 20px; padding: 2px 32px 70px; align-items: start; }
+    .ai-panel { display: flex; flex-direction: column; }
+
+    /* CHAT MESSAGES */
+    .ai-chat-scroll { padding: 24px 26px 8px; display: flex; flex-direction: column; gap: 18px; overflow-y: auto; max-height: 430px; }
+    .ai-msg { display: flex; gap: 12px; align-items: flex-start; }
+    .ai-msg-user { flex-direction: row-reverse; }
+    .ai-avatar {
+      width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0; position: relative;
+      background: linear-gradient(135deg, rgba(0,87,255,0.10), rgba(139,92,246,0.10));
+      border: 1px solid var(--blue-border); box-shadow: 0 0 0 4px rgba(0,87,255,0.05);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .ai-avatar img { width: 19px; height: 19px; object-fit: contain; }
+    .ai-avatar .spark { position: absolute; top: -3px; right: -3px; width: 14px; height: 14px; background: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 1px 4px rgba(0,0,0,0.18); }
+    .ai-avatar .spark i { width: 8px; height: 8px; color: var(--purple); }
+    .ai-avatar-user { background: linear-gradient(135deg,#0057FF,#8b5cf6); border: none; box-shadow: none; }
+    .ai-avatar-user span { color: #fff; font-size: 11.5px; font-weight: 800; }
+    .ai-bubble { max-width: 78%; display: flex; flex-direction: column; }
+    .ai-msg-user .ai-bubble { align-items: flex-end; }
+    .ai-bubble-name { font-size: 10.5px; font-weight: 700; color: var(--blue); margin-bottom: 4px; }
+    .ai-bubble-text { padding: 12px 16px; border-radius: 14px; font-size: 13px; line-height: 1.65; }
+    .ai-bubble-bot .ai-bubble-text { background: var(--blue-dim); border: 1px solid var(--blue-border); color: var(--text-s); border-top-left-radius: 4px; }
+    .ai-bubble-user .ai-bubble-text { background: var(--text); color: #fff; border-top-right-radius: 4px; }
+    .ai-bubble-cta { margin-top: 9px; display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; background: var(--blue); color: #fff; border-radius: 8px; font-size: 11px; font-weight: 700; cursor: pointer; border: none; font-family: inherit; box-shadow: 0 3px 10px rgba(0,87,255,0.25); transition: all 0.15s; }
+    .ai-bubble-cta:hover { background: var(--blue-b); transform: translateY(-1px); }
+
+    /* SUGGESTED ACTIONS */
+    .ai-suggested { padding: 14px 26px 6px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; border-top: 1px solid var(--border); }
+    .ai-suggest-card { display: flex; align-items: center; gap: 11px; padding: 11px 13px; border: 1px solid var(--border); border-radius: 11px; cursor: pointer; transition: all 0.15s; background: #fff; }
+    .ai-suggest-card:hover { border-color: var(--blue-border); background: var(--blue-dim); transform: translateY(-1px); }
+    .ai-suggest-icon { width: 32px; height: 32px; border-radius: 9px; background: var(--blue-dim); color: var(--blue); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .ai-suggest-icon i { width: 15px; height: 15px; }
+    .ai-suggest-body { min-width: 0; flex: 1; }
+    .ai-suggest-title { font-size: 12px; font-weight: 700; color: var(--text); }
+    .ai-suggest-sub { font-size: 10.5px; color: var(--text-m); margin-top: 1px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .ai-suggest-chev { color: var(--text-m); width: 14px; height: 14px; flex-shrink: 0; }
+
+    /* COMPOSER */
+    .ai-composer-wrap { padding: 16px 26px 8px; border-top: 1px solid var(--border); margin-top: 4px; }
+    .ai-composer { display: flex; align-items: center; gap: 6px; background: var(--input-bg); border: 1px solid var(--input-border); border-radius: 14px; padding: 7px 7px 7px 14px; }
+    .ai-composer input { flex: 1; border: none; background: transparent; outline: none; font-family: inherit; font-size: 13px; color: var(--text); min-width: 0; }
+    .ai-composer-icon { width: 30px; height: 30px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: var(--text-m); cursor: pointer; flex-shrink: 0; background: none; border: none; transition: all 0.15s; }
+    .ai-composer-icon:hover { background: var(--blue-dim); color: var(--blue); }
+    .ai-composer-icon i { width: 15px; height: 15px; }
+    .ai-send { width: 34px; height: 34px; border-radius: 9px; background: var(--blue); border: none; color: #fff; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; box-shadow: 0 3px 10px rgba(0,87,255,0.3); transition: all 0.15s; }
+    .ai-send:hover { background: var(--blue-b); }
+    .ai-send i { width: 14px; height: 14px; }
+    .ai-disclaimer { text-align: center; font-size: 10px; color: var(--text-m); opacity: 0.7; padding: 9px 0 4px; }
+
+    /* RIGHT RAIL */
+    .ai-rail { display: flex; flex-direction: column; gap: 16px; }
+    .rail-card-head { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border-bottom: 1px solid var(--border); }
+    .rail-card-title { font-size: 12px; font-weight: 700; color: var(--text); display: flex; align-items: center; gap: 6px; }
+    .rail-card-title i { width: 13px; height: 13px; color: var(--blue); }
+    .rail-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; border-bottom: 1px solid var(--border); gap: 8px; }
+    .rail-row:last-child { border-bottom: none; }
+    .rail-row-left { display: flex; align-items: center; gap: 9px; min-width: 0; }
+    .rail-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+    .rail-dot.grey  { background: #94a3b8; }
+    .rail-dot.blue  { background: var(--blue); }
+    .rail-dot.amber { background: var(--amber); }
+    .rail-dot.green { background: var(--green); }
+    .rail-name { font-size: 11.5px; font-weight: 600; color: var(--text-s); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .check-circle { width: 17px; height: 17px; border-radius: 50%; border: 2px solid var(--border); flex-shrink: 0; }
+    .qa-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 14px 16px; }
+    .qa-btn { display: flex; align-items: center; gap: 7px; justify-content: center; padding: 9px 8px; border-radius: 9px; border: 1px solid var(--blue-border); background: var(--blue-dim); color: var(--blue); font-size: 11px; font-weight: 700; cursor: pointer; font-family: inherit; transition: all 0.15s; }
+    .qa-btn:hover { background: rgba(0,87,255,0.12); }
+    .qa-btn i { width: 13px; height: 13px; }
+    .activity-mini { display: flex; align-items: flex-start; gap: 10px; padding: 10px 16px; border-bottom: 1px solid var(--border); }
+    .activity-mini:last-child { border-bottom: none; }
+    .activity-mini-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--blue); margin-top: 5px; flex-shrink: 0; }
+    .activity-mini-text { font-size: 11.5px; color: var(--text-s); font-weight: 500; }
+    .activity-mini-time { font-size: 10px; color: var(--text-m); margin-top: 1px; }
+
     /* MOBILE */
     @media (max-width: 860px) {
       .topnav-tabs { display: none; }
@@ -337,6 +434,17 @@
       .conn-grid,.action-grid,.support-grid,.settings-grid { grid-template-columns: 1fr; }
       .overview-bot,.g2 { grid-template-columns: 1fr; }
       .stats-grid { grid-template-columns: 1fr 1fr; }
+      .ai-hero { padding: 32px 16px 18px; }
+      .ai-hero-title { font-size: 25px; }
+      .ai-layout { grid-template-columns: 1fr; padding: 2px 16px 60px; }
+      .ai-suggested { grid-template-columns: 1fr; padding: 14px 16px 6px; }
+      .ai-chat-scroll { padding: 20px 16px 8px; max-height: 360px; }
+      .ai-composer-wrap { padding: 14px 16px 8px; }
+    }
+    @media (max-width: 480px) {
+      .ai-pill, .topnav-brand-tag { display: none; }
+      .topnav-right .lbl { display: none; }
+      .btn-sync, .topnav-dash-link { padding: 7px 10px; }
     }
   </style>
 </head>
@@ -374,6 +482,7 @@
         <div class="topnav-brand-name">flowaify</div>
         <div class="topnav-brand-tag">Workspace</div>
       </div>
+      <span class="ai-pill"><i data-lucide="sparkles"></i> AI Assistant</span>
     </div>
 
     <button class="mob-nav-btn" onclick="openMobNav()"><i data-lucide="menu"></i></button>
@@ -389,10 +498,10 @@
 
     <div class="topnav-right">
       <button class="btn-sync" onclick="openModal('modal-sync')">
-        <i data-lucide="plug"></i> Connect &amp; Sync
+        <i data-lucide="plug"></i> <span class="lbl">Connect &amp; Sync</span>
       </button>
       <a class="topnav-dash-link" href="dashboard.html">
-        <i data-lucide="bar-chart-2"></i> Dashboard
+        <i data-lucide="bar-chart-2"></i> <span class="lbl">Open Dashboard</span>
       </a>
       <div class="avatar-wrap">
         <div class="avatar" id="portal-avatar" onclick="toggleProfileMenu()">—</div>
@@ -412,56 +521,129 @@
   </div>
 </nav>
 
-<!-- OVERVIEW -->
+<!-- OVERVIEW / AI ASSISTANT -->
 <div class="page active" id="page-overview">
-  <div class="page-head">
-    <div><div class="page-head-title">Workspace Overview</div><div class="page-head-sub">Your Flowaify system at a glance</div></div>
+
+  <div class="ai-hero">
+    <div class="ai-hero-glow"></div>
+    <div class="ai-hero-inner">
+      <div class="ai-hero-badge"><i data-lucide="sparkles"></i> AI Workspace Assistant</div>
+      <div class="ai-hero-title">Flowaify AI Assistant</div>
+      <div class="ai-hero-sub">Your intelligent guide to setup, integrations, automations, and workspace health.</div>
+    </div>
   </div>
 
-  <div class="status-banner sb-setup">
-    <div style="display:flex;align-items:center;gap:12px;">
-      <div class="sb-dot setup"></div>
-      <div>
-        <div style="font-size:14px;font-weight:700;color:var(--amber);">Setup Needed</div>
-        <div style="font-size:11.5px;color:var(--amber);opacity:0.85;margin-top:2px;">Connect your accounts to activate your Flowaify system</div>
+  <div class="ai-layout">
+    <div class="ai-main">
+      <div class="card ai-panel">
+
+        <div class="ai-chat-scroll" id="ai-chat-scroll">
+          <div class="ai-msg ai-msg-bot">
+            <div class="ai-avatar"><img src="logo-transparent.png" alt="" onerror="this.style.display='none'" /><div class="spark"><i data-lucide="sparkle"></i></div></div>
+            <div class="ai-bubble ai-bubble-bot">
+              <div class="ai-bubble-name">Flowy</div>
+              <div class="ai-bubble-text">Hi there! I'm Flowy, your AI Workspace Assistant. I can help you connect your tools, set up automations, and make sure everything in your workspace is running smoothly. What would you like to do today?</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="ai-suggested" id="ai-suggested">
+          <div class="ai-suggest-card" onclick="aiAction('email')">
+            <div class="ai-suggest-icon"><i data-lucide="mail"></i></div>
+            <div class="ai-suggest-body"><div class="ai-suggest-title">Help me connect my email</div><div class="ai-suggest-sub">Set up Gmail or Outlook</div></div>
+            <i data-lucide="chevron-right" class="ai-suggest-chev"></i>
+          </div>
+          <div class="ai-suggest-card" onclick="aiAction('crm')">
+            <div class="ai-suggest-icon"><i data-lucide="database"></i></div>
+            <div class="ai-suggest-body"><div class="ai-suggest-title">Connect my CRM</div><div class="ai-suggest-sub">Sync Flow CRM, HubSpot, Salesforce, or another CRM</div></div>
+            <i data-lucide="chevron-right" class="ai-suggest-chev"></i>
+          </div>
+          <div class="ai-suggest-card" onclick="aiAction('calendar')">
+            <div class="ai-suggest-icon"><i data-lucide="calendar"></i></div>
+            <div class="ai-suggest-body"><div class="ai-suggest-title">Connect my calendar</div><div class="ai-suggest-sub">Add Google Calendar or Outlook Calendar</div></div>
+            <i data-lucide="chevron-right" class="ai-suggest-chev"></i>
+          </div>
+          <div class="ai-suggest-card" onclick="aiAction('automations')">
+            <div class="ai-suggest-icon"><i data-lucide="zap"></i></div>
+            <div class="ai-suggest-body"><div class="ai-suggest-title">Review my automations</div><div class="ai-suggest-sub">See what's set up and what still needs attention</div></div>
+            <i data-lucide="chevron-right" class="ai-suggest-chev"></i>
+          </div>
+          <div class="ai-suggest-card" onclick="aiAction('next')">
+            <div class="ai-suggest-icon"><i data-lucide="list-checks"></i></div>
+            <div class="ai-suggest-body"><div class="ai-suggest-title">What's next in my setup?</div><div class="ai-suggest-sub">Get personalized next steps</div></div>
+            <i data-lucide="chevron-right" class="ai-suggest-chev"></i>
+          </div>
+          <div class="ai-suggest-card" onclick="aiAction('integrations')">
+            <div class="ai-suggest-icon"><i data-lucide="plug"></i></div>
+            <div class="ai-suggest-body"><div class="ai-suggest-title">Show me integration options</div><div class="ai-suggest-sub">Explore supported apps</div></div>
+            <i data-lucide="chevron-right" class="ai-suggest-chev"></i>
+          </div>
+          <div class="ai-suggest-card" onclick="aiAction('how')">
+            <div class="ai-suggest-icon"><i data-lucide="circle-help"></i></div>
+            <div class="ai-suggest-body"><div class="ai-suggest-title">How do automations work?</div><div class="ai-suggest-sub">Learn the basics</div></div>
+            <i data-lucide="chevron-right" class="ai-suggest-chev"></i>
+          </div>
+          <div class="ai-suggest-card" onclick="aiAction('invite')">
+            <div class="ai-suggest-icon"><i data-lucide="user-plus"></i></div>
+            <div class="ai-suggest-body"><div class="ai-suggest-title">Invite my team</div><div class="ai-suggest-sub">Add teammates to collaborate</div></div>
+            <i data-lucide="chevron-right" class="ai-suggest-chev"></i>
+          </div>
+        </div>
+
+        <div class="ai-composer-wrap">
+          <div class="ai-composer">
+            <button class="ai-composer-icon" title="Attach file" onclick="showToast('File attachments are coming soon.')"><i data-lucide="paperclip"></i></button>
+            <button class="ai-composer-icon" title="AI tools" onclick="aiAction('next')"><i data-lucide="sparkles"></i></button>
+            <button class="ai-composer-icon" title="Developer tools" onclick="showToast('Developer tools are coming soon.')"><i data-lucide="code-2"></i></button>
+            <input type="text" id="ai-input" placeholder="Ask me anything about your workspace..." />
+            <button class="ai-send" onclick="sendAiMessage()"><i data-lucide="send"></i></button>
+          </div>
+          <div class="ai-disclaimer">Flowaify AI may make mistakes. Please review important information.</div>
+        </div>
+
       </div>
     </div>
-    <button class="btn-connect bcp" onclick="showPage('connections')">Complete Setup <i data-lucide="arrow-right" style="width:12px;height:12px;margin-left:4px;"></i></button>
-  </div>
 
-  <div class="card mb20">
-    <div class="sec-head"><div class="sec-title"><i data-lucide="check-circle-2"></i>Setup Progress</div><div class="sec-sub">0 of 3 required steps complete</div></div>
-    <div class="p20" style="padding-top:14px;">
-      <div class="progress-bar" style="margin-bottom:16px;"><div class="progress-fill" style="width:0%"></div></div>
-      <div class="check-item"><div class="check-icon ci-none"><i data-lucide="mail"></i></div><div style="flex:1;"><div class="check-name">Email Connection</div><div class="check-sub">Required for automated follow-ups</div></div><div class="badge b-notconn">Not Connected</div></div>
-      <div class="check-item"><div class="check-icon ci-none"><i data-lucide="database"></i></div><div style="flex:1;"><div class="check-name">CRM Connection</div><div class="check-sub">Flow CRM — not connected</div></div><div class="badge b-notconn">Not Connected</div></div>
-      <div class="check-item"><div class="check-icon ci-opt"><i data-lucide="minus"></i></div><div style="flex:1;"><div class="check-name">SMS Connection</div><div class="check-sub">Twilio — optional</div></div><div class="badge b-optional">Optional</div></div>
-      <div class="check-item"><div class="check-icon ci-none"><i data-lucide="calendar"></i></div><div style="flex:1;"><div class="check-name">Calendar Connection</div><div class="check-sub">Required for booking automations</div></div><div class="badge b-notconn">Not Connected</div></div>
-    </div>
-  </div>
+    <div class="ai-rail">
 
-  <div class="stats-grid">
-    <div class="card stat-card"><div class="stat-top"><div class="stat-icon si-blue"><i data-lucide="user-plus"></i></div></div><div class="stat-val">—</div><div class="stat-label">New Leads Captured</div><div class="stat-hint">Sync accounts to start tracking</div></div>
-    <div class="card stat-card"><div class="stat-top"><div class="stat-icon si-green"><i data-lucide="send"></i></div></div><div class="stat-val">—</div><div class="stat-label">Follow-Ups Sent</div><div class="stat-hint">Sync accounts to start tracking</div></div>
-    <div class="card stat-card"><div class="stat-top"><div class="stat-icon si-purple"><i data-lucide="calendar-check"></i></div></div><div class="stat-val">—</div><div class="stat-label">Appointments Booked</div><div class="stat-hint">Sync accounts to start tracking</div></div>
-    <div class="card stat-card"><div class="stat-top"><div class="stat-icon si-amber"><i data-lucide="zap"></i></div></div><div class="stat-val">—</div><div class="stat-label">Avg Response Time</div><div class="stat-hint">Sync accounts to start tracking</div></div>
-  </div>
-
-  <div class="overview-bot">
-    <div class="card">
-      <div class="sec-head"><div class="sec-title"><i data-lucide="plug"></i>Connected Accounts</div><button class="btn-connect bco" style="padding:5px 12px;font-size:11.5px;" onclick="showPage('connections')">Manage</button></div>
-      <div style="padding:0 20px;">
-        <div class="check-item"><div class="check-icon ci-none"><i data-lucide="mail"></i></div><div style="flex:1;"><div class="check-name">Email</div><div class="check-sub">Not connected</div></div><div class="badge b-notconn">Not Connected</div></div>
-        <div class="check-item"><div class="check-icon ci-none"><i data-lucide="database"></i></div><div style="flex:1;"><div class="check-name">Flow CRM</div><div class="check-sub">Not connected</div></div><div class="badge b-notconn">Not Connected</div></div>
-        <div class="check-item"><div class="check-icon ci-opt"><i data-lucide="message-circle"></i></div><div style="flex:1;"><div class="check-name">SMS</div><div class="check-sub">Twilio — optional</div></div><div class="badge b-optional">Optional</div></div>
-        <div class="check-item"><div class="check-icon ci-none"><i data-lucide="calendar"></i></div><div style="flex:1;"><div class="check-name">Calendar</div><div class="check-sub">Not connected</div></div><div class="badge b-notconn">Not Connected</div></div>
+      <div class="card">
+        <div class="rail-card-head"><div class="rail-card-title"><i data-lucide="activity"></i>Workspace Status</div></div>
+        <div class="rail-row"><div class="rail-row-left"><div class="rail-dot grey"></div><div class="rail-name">Email</div></div><div class="badge b-notconn">Not Connected</div></div>
+        <div class="rail-row"><div class="rail-row-left"><div class="rail-dot grey"></div><div class="rail-name">CRM</div></div><div class="badge b-notconn">Not Connected</div></div>
+        <div class="rail-row"><div class="rail-row-left"><div class="rail-dot blue"></div><div class="rail-name">Calendar</div></div><div class="badge b-optional">Optional</div></div>
+        <div class="rail-row"><div class="rail-row-left"><div class="rail-dot amber"></div><div class="rail-name">Automations</div></div><div class="badge b-required">Required</div></div>
+        <div class="rail-row"><div class="rail-row-left"><div class="rail-dot green"></div><div class="rail-name">System Health</div></div><div class="badge b-healthy">Healthy</div></div>
       </div>
-    </div>
-    <div class="card">
-      <div class="sec-head"><div class="sec-title"><i data-lucide="activity"></i>Recent Activity</div></div>
-      <div class="empty-state"><i data-lucide="activity"></i><div class="empty-state-title">No activity yet</div><div class="empty-state-text">Connect and sync your accounts to see live events here.</div></div>
+
+      <div class="card">
+        <div class="rail-card-head"><div class="rail-card-title"><i data-lucide="list-checks"></i>What's Next</div></div>
+        <div class="rail-row"><div class="rail-row-left"><div class="check-circle"></div><div class="rail-name">Connect at least one email account</div></div><div class="badge b-required">Required</div></div>
+        <div class="rail-row"><div class="rail-row-left"><div class="check-circle"></div><div class="rail-name">Connect your CRM</div></div><div class="badge b-required">Required</div></div>
+        <div class="rail-row"><div class="rail-row-left"><div class="check-circle"></div><div class="rail-name">Add a calendar</div></div><div class="badge b-optional">Optional</div></div>
+        <div class="rail-row"><div class="rail-row-left"><div class="check-circle"></div><div class="rail-name">Create your first automation</div></div><div class="badge b-recommended">Recommended</div></div>
+        <div class="rail-row"><div class="rail-row-left"><div class="check-circle"></div><div class="rail-name">Invite your team</div></div><div class="badge b-recommended">Recommended</div></div>
+      </div>
+
+      <div class="card">
+        <div class="rail-card-head"><div class="rail-card-title"><i data-lucide="zap"></i>Quick Actions</div></div>
+        <div class="qa-grid">
+          <button class="qa-btn" onclick="showPage('connections')"><i data-lucide="plug"></i> Add Connection</button>
+          <button class="qa-btn" onclick="showPage('automation')"><i data-lucide="zap"></i> Create Automation</button>
+          <button class="qa-btn" onclick="openModal('modal-invite-team')"><i data-lucide="user-plus"></i> Invite Team</button>
+          <button class="qa-btn" onclick="window.location.href='dashboard.html'"><i data-lucide="bar-chart-2"></i> Open Dashboard</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="rail-card-head"><div class="rail-card-title"><i data-lucide="clock"></i>Workspace Activity</div></div>
+        <div class="activity-mini"><div class="activity-mini-dot"></div><div><div class="activity-mini-text">Workspace created</div><div class="activity-mini-time">Just now</div></div></div>
+        <div class="activity-mini"><div class="activity-mini-dot"></div><div><div class="activity-mini-text">System health check completed</div><div class="activity-mini-time">Just now</div></div></div>
+        <div class="activity-mini"><div class="activity-mini-dot"></div><div><div class="activity-mini-text">No automations yet</div><div class="activity-mini-time">—</div></div></div>
+      </div>
+
     </div>
   </div>
+
 </div>
 
 <!-- CONNECTIONS -->
@@ -672,6 +854,14 @@
   </div>
 </div>
 
+<div class="modal-overlay" id="modal-invite-team">
+  <div class="modal">
+    <div class="modal-head"><div><div class="modal-title">Invite Your Team</div><div class="modal-sub">Add teammates to collaborate in your workspace</div></div><button class="modal-close" onclick="closeModal('modal-invite-team')"><i data-lucide="x"></i></button></div>
+    <div class="modal-body"><div class="field"><label>Teammate Email</label><input type="email" placeholder="teammate@yourbusiness.com" /></div><div class="field"><label>Role</label><select><option>Admin</option><option>Team Member</option><option>Viewer</option></select></div></div>
+    <div class="modal-footer"><button class="btn-mc" onclick="closeModal('modal-invite-team')">Cancel</button><button class="btn-mok" onclick="submitForm('modal-invite-team','Invitation sent! Your teammate will receive an email shortly.')">Send Invite</button></div>
+  </div>
+</div>
+
 <div id="toast"><div class="toast-icon"><i data-lucide="check"></i></div><div id="toast-msg" style="font-size:12.5px;font-weight:600;color:var(--text-s);line-height:1.45;"></div></div>
 
 <script>
@@ -703,6 +893,7 @@ function boot(user) {
     document.getElementById('portal-avatar').textContent = init;
     document.getElementById('portal-menu-name').textContent  = user.name  || 'User';
     document.getElementById('portal-menu-email').textContent = user.email || '';
+    window.__userInitial = init;
   }
   lucide.createIcons();
 }
@@ -752,6 +943,105 @@ function refreshStatus() {
   if(icon) icon.classList.add('spinning');
   setTimeout(() => { if(icon) icon.classList.remove('spinning'); showToast('Status refreshed.'); lucide.createIcons(); }, 1400);
 }
+
+/* AI ASSISTANT CHAT */
+const AI_RESPONSES = {
+  email: {
+    user: 'Help me connect my email',
+    bot: "I'll help you connect your email. Once linked, Flowaify can send and track automated follow-ups on your behalf. Head to Connections to link Gmail or Outlook — it only takes a minute.",
+    cta: { label: 'Go to Connections', page: 'connections' }
+  },
+  crm: {
+    user: 'Connect my CRM',
+    bot: "Let's get your CRM connected. You can sync Flow CRM, HubSpot, Salesforce, or another CRM so leads and pipeline activity stay up to date automatically.",
+    cta: { label: 'Go to Connections', page: 'connections' }
+  },
+  calendar: {
+    user: 'Connect my calendar',
+    bot: "Connecting a calendar lets Flowaify handle booking confirmations and reminders automatically. You can link Google Calendar or Outlook Calendar from Connections.",
+    cta: { label: 'Go to Connections', page: 'connections' }
+  },
+  automations: {
+    user: 'Review my automations',
+    bot: "You don't have any automations running yet. Once your accounts are connected, you can activate things like Instant Lead Reply, Follow-Up Sequences, and Booking Reminders from Automation Control.",
+    cta: { label: 'Go to Automation', page: 'automation' }
+  },
+  next: {
+    user: "What's next in my setup?",
+    bot: "Here's what I'd recommend next: connect at least one email account, then link your CRM — those two are required. After that, add a calendar, create your first automation, and invite your team when you're ready.",
+    cta: null
+  },
+  integrations: {
+    user: 'Show me integration options',
+    bot: "Flowaify supports Email (Gmail or Outlook), CRM (Flow CRM, HubSpot, Salesforce), Calendar, SMS via Twilio, Website Forms, Zapier, and Webhooks. You can explore and connect any of these from the Connections tab.",
+    cta: { label: 'Go to Connections', page: 'connections' }
+  },
+  how: {
+    user: 'How do automations work?',
+    bot: "Automations are triggered by events — like a new lead coming in or a missed call — and respond automatically with replies, follow-ups, or booking reminders. Once your accounts are connected, you can turn each automation on or off from Automation Control.",
+    cta: { label: 'Go to Automation', page: 'automation' }
+  },
+  invite: {
+    user: 'Invite my team',
+    bot: "I can help with that. Add your teammate's email and I'll send them an invite to join your workspace.",
+    cta: { label: 'Invite Team', modal: 'modal-invite-team' }
+  }
+};
+
+function aiAction(key) {
+  const r = AI_RESPONSES[key];
+  if (!r) return;
+  pushAiMessage('user', r.user);
+  setTimeout(() => pushAiMessage('bot', r.bot, r.cta), 350);
+}
+
+function pushAiMessage(role, text, cta) {
+  const scroll = document.getElementById('ai-chat-scroll');
+  const wrap = document.createElement('div');
+  wrap.className = 'ai-msg ' + (role === 'user' ? 'ai-msg-user' : 'ai-msg-bot');
+  if (role === 'user') {
+    wrap.innerHTML = '<div class="ai-avatar ai-avatar-user"><span>' + (window.__userInitial || '?') + '</span></div><div class="ai-bubble ai-bubble-user"><div class="ai-bubble-text"></div></div>';
+  } else {
+    wrap.innerHTML = '<div class="ai-avatar"><img src="logo-transparent.png" alt="" onerror="this.style.display=\'none\'" /><div class="spark"><i data-lucide="sparkle"></i></div></div><div class="ai-bubble ai-bubble-bot"><div class="ai-bubble-name">Flowy</div><div class="ai-bubble-text"></div></div>';
+  }
+  scroll.appendChild(wrap);
+  wrap.querySelector('.ai-bubble-text').textContent = text;
+  if (cta) {
+    const btn = document.createElement('button');
+    btn.className = 'ai-bubble-cta';
+    btn.textContent = cta.label;
+    btn.onclick = () => { if (cta.page) showPage(cta.page); else if (cta.modal) openModal(cta.modal); };
+    wrap.querySelector('.ai-bubble').appendChild(btn);
+  }
+  lucide.createIcons();
+  scroll.scrollTop = scroll.scrollHeight;
+}
+
+function aiFallbackReply(text) {
+  const t = text.toLowerCase();
+  if (t.includes('email')) return "You can connect your email from the Connections tab — that's what powers automated follow-ups.";
+  if (t.includes('crm')) return "You can connect your CRM (Flow CRM, HubSpot, Salesforce, or another) from the Connections tab to keep leads and pipeline data in sync.";
+  if (t.includes('calendar') || t.includes('book')) return "Connecting a calendar lets Flowaify handle booking confirmations and reminders. You can add one from the Connections tab.";
+  if (t.includes('automat')) return "Automations run once your accounts are connected. Visit Automation Control to launch, pause, or request changes to your automations.";
+  if (t.includes('team') || t.includes('invite')) return "I can send a workspace invite to your teammates — just share their email and I'll get it sent.";
+  if (t.includes('dashboard') || t.includes('lead') || t.includes('analytic') || t.includes('revenue')) return "Lead and analytics data lives in your Dashboard — click Open Dashboard in the top right once your accounts are synced.";
+  if (t.includes('support') || t.includes('help')) return "I can help directly, or you can reach the Flowaify team from the Support tab for hands-on setup help.";
+  return "I can help you set up Flowaify — try asking about connecting your email, CRM, or calendar, reviewing automations, or what's next in your setup.";
+}
+
+function sendAiMessage() {
+  const input = document.getElementById('ai-input');
+  const text = input.value.trim();
+  if (!text) return;
+  pushAiMessage('user', text);
+  input.value = '';
+  setTimeout(() => pushAiMessage('bot', aiFallbackReply(text)), 350);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const input = document.getElementById('ai-input');
+  if (input) input.addEventListener('keydown', e => { if (e.key === 'Enter') sendAiMessage(); });
+});
 
 initAuth();
 </script>
