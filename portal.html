@@ -216,23 +216,39 @@
     .auto-status-dot{width:7px;height:7px;border-radius:50%;background:var(--amber);animation:pulse-a 2s infinite;flex-shrink:0}
     @keyframes pulse-a{0%{box-shadow:0 0 0 0 rgba(217,119,6,.4)}70%{box-shadow:0 0 0 5px rgba(217,119,6,0)}100%{box-shadow:0 0 0 0 rgba(217,119,6,0)}}
 
-    /* ── SETTINGS PAGE ── */
-    .settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;width:100%;max-width:900px}
-    .imm-field{margin-bottom:10px}
-    .imm-field:last-of-type{margin-bottom:0}
-    .imm-field label{display:block;font-size:11px;font-weight:600;color:var(--text-m);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.3px}
-    .imm-field input,.imm-field select,.imm-field textarea{width:100%;padding:8px 12px;background:rgba(248,250,255,0.8);border:1px solid var(--input-border);border-radius:9px;color:var(--text);font-size:12.5px;font-family:inherit;outline:none;transition:border-color 0.15s;resize:vertical}
-    .imm-field input:focus,.imm-field select:focus,.imm-field textarea:focus{border-color:var(--blue)}
-    .imm-save{margin-top:14px;padding:9px 22px;background:var(--blue);border:none;border-radius:10px;color:#fff;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 3px 10px rgba(0,87,255,0.25);transition:all 0.15s;display:block;width:100%}
-    .imm-save:hover{background:var(--blue-b);transform:translateY(-1px)}
-    .toggle-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)}
-    .toggle-row:last-of-type{border-bottom:none}
-    .toggle-label{font-size:12.5px;color:var(--text-s);font-weight:500}
-    .toggle-sub{font-size:10.5px;color:var(--text-m);margin-top:1px}
-    .toggle{position:relative;width:36px;height:20px;background:var(--border);border-radius:99px;cursor:pointer;transition:background 0.2s;flex-shrink:0}
-    .toggle.on{background:var(--blue)}
-    .toggle::after{content:'';position:absolute;width:14px;height:14px;border-radius:50%;background:#fff;top:3px;left:3px;transition:left 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.2)}
-    .toggle.on::after{left:19px}
+    /* ── SETTINGS PAGE (Microsoft-style) ── */
+    #page-settings.page.active{display:block;animation:page-enter 0.22s ease}
+    .settings-shell{min-height:calc(100vh - 62px);background:#faf9f8;display:flex;flex-direction:column}
+    .settings-header{background:#fff;border-bottom:1px solid #edebe9;padding:20px 32px 0;flex-shrink:0}
+    .settings-header-back{margin-bottom:14px}
+    .settings-header-title{font-size:22px;font-weight:700;color:#323130;letter-spacing:-0.3px;margin-bottom:3px}
+    .settings-header-sub{font-size:12px;color:#605e5c;margin-bottom:0}
+    .settings-tabs{display:flex;gap:0;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;margin-top:16px}
+    .settings-tabs::-webkit-scrollbar{display:none}
+    .settings-tab{padding:11px 22px;font-size:13px;font-weight:600;color:#605e5c;cursor:pointer;border:none;border-bottom:2px solid transparent;background:none;font-family:inherit;white-space:nowrap;transition:color 0.15s,border-color 0.15s;flex-shrink:0}
+    .settings-tab:hover{color:#0057FF}
+    .settings-tab.active{color:#0057FF;border-bottom-color:#0057FF}
+    .settings-body{padding:24px 32px 60px;width:100%;max-width:720px}
+    .settings-section{display:none}
+    .settings-section.active{display:block;animation:page-enter 0.18s ease}
+    .ms-card{background:#fff;border:1px solid #edebe9;border-radius:4px;padding:24px 28px;margin-bottom:16px}
+    .ms-card-title{font-size:14px;font-weight:700;color:#323130;margin-bottom:18px;padding-bottom:12px;border-bottom:1px solid #f3f2f1}
+    .ms-field{margin-bottom:16px}
+    .ms-field label{display:block;font-size:11.5px;font-weight:600;color:#323130;margin-bottom:5px}
+    .ms-field input,.ms-field select,.ms-field textarea{width:100%;padding:6px 8px;border:1px solid #8a8886;border-radius:2px;color:#323130;font-size:14px;font-family:inherit;outline:none;transition:border-color 0.1s,box-shadow 0.1s;background:#fff;resize:vertical}
+    .ms-field input:focus,.ms-field select:focus,.ms-field textarea:focus{border-color:#0057FF;box-shadow:0 0 0 1px #0057FF}
+    .ms-field textarea{min-height:80px}
+    .ms-field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .ms-save{padding:6px 20px;background:#0057FF;border:1px solid #0057FF;border-radius:2px;color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;transition:background 0.15s,border-color 0.15s;margin-top:20px}
+    .ms-save:hover{background:#004ec2;border-color:#004ec2}
+    .ms-toggle-row{display:flex;align-items:center;justify-content:space-between;padding:13px 0;border-bottom:1px solid #f3f2f1}
+    .ms-toggle-row:last-of-type{border-bottom:none}
+    .ms-toggle-label{font-size:13px;color:#323130;font-weight:600}
+    .ms-toggle-sub{font-size:11px;color:#605e5c;margin-top:2px}
+    .ms-toggle{position:relative;width:40px;height:20px;background:#c8c6c4;border-radius:10px;cursor:pointer;flex-shrink:0;border:none;padding:0;transition:background 0.2s}
+    .ms-toggle.on{background:#0057FF}
+    .ms-toggle::after{content:'';position:absolute;width:16px;height:16px;border-radius:50%;background:#fff;top:2px;left:2px;transition:left 0.15s;box-shadow:0 1px 4px rgba(0,0,0,0.25)}
+    .ms-toggle.on::after{left:22px}
 
     /* ── STATUS PAGE ── */
     .stat-sections{display:flex;flex-direction:column;gap:14px;width:100%;max-width:820px}
@@ -324,6 +340,10 @@
       .portal-lower{padding:0 16px 32px}
       .imm-bg{padding:28px 16px 48px}
       .imm-title{font-size:22px}
+      .settings-header{padding:16px 16px 0}
+      .settings-body{padding:16px 16px 60px}
+      .ms-field-row{grid-template-columns:1fr}
+      .settings-header-title{font-size:18px}
     }
     @media(max-width:480px){
       .ai-pill{display:none}
@@ -552,86 +572,92 @@
      BUSINESS SETTINGS
 ═══════════════════════ -->
 <div class="page" id="page-settings">
-<div class="imm-bg">
+<div class="settings-shell">
 
-  <div class="imm-back">
-    <button class="page-back" onclick="showPage('overview')">
-      <i data-lucide="arrow-left"></i> Back to AI Assistant
-    </button>
+  <!-- Header with tabs -->
+  <div class="settings-header">
+    <div class="settings-header-back">
+      <button class="page-back" onclick="showPage('overview')">
+        <i data-lucide="arrow-left"></i> Back to AI Assistant
+      </button>
+    </div>
+    <div class="settings-header-title">Business Settings</div>
+    <div class="settings-header-sub">Settings are saved per account and persist across sessions</div>
+    <div class="settings-tabs">
+      <button class="settings-tab active" onclick="switchSettingsTab('biz',this)">Business Info</button>
+      <button class="settings-tab" onclick="switchSettingsTab('schedule',this)">Schedule &amp; Hours</button>
+      <button class="settings-tab" onclick="switchSettingsTab('routing',this)">Lead Routing</button>
+      <button class="settings-tab" onclick="switchSettingsTab('notif',this)">Notifications</button>
+    </div>
   </div>
 
-  <div class="imm-header">
-    <div class="imm-title">Business Settings</div>
-    <div class="imm-sub">Settings are saved per account and persist across sessions</div>
-  </div>
-
-  <div class="settings-grid">
+  <div class="settings-body">
 
     <!-- Business Info -->
-    <div class="g-card">
-      <div class="g-card-title">Business Information</div>
-      <div class="imm-field"><label>Business Name</label><input id="s-biz-name" type="text" placeholder="Your Business Name" /></div>
-      <div class="imm-field"><label>Main Contact Name</label><input id="s-contact-name" type="text" placeholder="Full name" /></div>
-      <div class="imm-field"><label>Business Email</label><input id="s-biz-email" type="email" placeholder="contact@yourbusiness.com" /></div>
-      <div class="imm-field"><label>Business Phone</label><input id="s-biz-phone" type="text" placeholder="(555) 000-0000" /></div>
-      <div class="imm-field"><label>Service Areas</label><input id="s-service-areas" type="text" placeholder="e.g. Miami, FL · South Florida" /></div>
-      <button class="imm-save" onclick="settingsSave('biz')">Save Business Information</button>
+    <div class="settings-section active" id="ss-biz">
+      <div class="ms-card">
+        <div class="ms-card-title">Business Information</div>
+        <div class="ms-field-row">
+          <div class="ms-field"><label>Business Name</label><input id="s-biz-name" type="text" placeholder="Your Business Name" /></div>
+          <div class="ms-field"><label>Main Contact Name</label><input id="s-contact-name" type="text" placeholder="Full name" /></div>
+        </div>
+        <div class="ms-field-row">
+          <div class="ms-field"><label>Business Email</label><input id="s-biz-email" type="email" placeholder="contact@yourbusiness.com" /></div>
+          <div class="ms-field"><label>Business Phone</label><input id="s-biz-phone" type="text" placeholder="(555) 000-0000" /></div>
+        </div>
+        <div class="ms-field"><label>Service Areas</label><input id="s-service-areas" type="text" placeholder="e.g. Miami, FL · South Florida" /></div>
+        <button class="ms-save" onclick="settingsSave('biz')">Save</button>
+      </div>
     </div>
 
     <!-- Schedule -->
-    <div class="g-card">
-      <div class="g-card-title">Schedule &amp; Hours</div>
-      <div class="imm-field"><label>Business Hours</label>
-        <select id="s-hours">
-          <option>Mon–Fri 8AM–8PM</option><option>Mon–Sat 8AM–6PM</option>
-          <option>Every day 9AM–9PM</option><option>24 / 7</option><option>Custom</option>
-        </select>
+    <div class="settings-section" id="ss-schedule">
+      <div class="ms-card">
+        <div class="ms-card-title">Schedule &amp; Hours</div>
+        <div class="ms-field-row">
+          <div class="ms-field"><label>Business Hours</label>
+            <select id="s-hours"><option>Mon–Fri 8AM–8PM</option><option>Mon–Sat 8AM–6PM</option><option>Every day 9AM–9PM</option><option>24 / 7</option><option>Custom</option></select>
+          </div>
+          <div class="ms-field"><label>Time Zone</label>
+            <select id="s-timezone"><option>EST (UTC-5)</option><option>CST (UTC-6)</option><option>MST (UTC-7)</option><option>PST (UTC-8)</option></select>
+          </div>
+        </div>
+        <div class="ms-field"><label>Appointment Booking Link</label><input id="s-booking-link" type="text" placeholder="https://calendly.com/yourbusiness" /></div>
+        <div class="ms-field"><label>Follow-Up Preferences</label>
+          <select id="s-followup-pref"><option>Email + SMS (Recommended)</option><option>Email Only</option><option>SMS Only</option></select>
+        </div>
+        <button class="ms-save" onclick="settingsSave('schedule')">Save</button>
       </div>
-      <div class="imm-field"><label>Time Zone</label>
-        <select id="s-timezone">
-          <option>EST (UTC-5)</option><option>CST (UTC-6)</option>
-          <option>MST (UTC-7)</option><option>PST (UTC-8)</option>
-        </select>
-      </div>
-      <div class="imm-field"><label>Appointment Booking Link</label><input id="s-booking-link" type="text" placeholder="https://calendly.com/yourbusiness" /></div>
-      <div class="imm-field"><label>Follow-Up Preferences</label>
-        <select id="s-followup-pref">
-          <option>Email + SMS (Recommended)</option><option>Email Only</option><option>SMS Only</option>
-        </select>
-      </div>
-      <button class="imm-save" onclick="settingsSave('schedule')">Save Schedule &amp; Hours</button>
     </div>
 
     <!-- Lead Routing -->
-    <div class="g-card">
-      <div class="g-card-title">Lead Routing &amp; CRM</div>
-      <div class="imm-field"><label>Primary CRM Pipeline</label>
-        <select id="s-pipeline">
-          <option>Flowaify Pipeline (Flow CRM)</option><option>Main Sales Pipeline</option><option>Custom Pipeline</option>
-        </select>
+    <div class="settings-section" id="ss-routing">
+      <div class="ms-card">
+        <div class="ms-card-title">Lead Routing &amp; CRM</div>
+        <div class="ms-field"><label>Primary CRM Pipeline</label>
+          <select id="s-pipeline"><option>Flowaify Pipeline (Flow CRM)</option><option>Main Sales Pipeline</option><option>Custom Pipeline</option></select>
+        </div>
+        <div class="ms-field"><label>Lead Routing Rules</label>
+          <select id="s-routing"><option>Auto-assign to owner</option><option>Round-robin distribution</option><option>Manual assignment</option></select>
+        </div>
+        <div class="ms-field"><label>Default Follow-Up Sequence</label>
+          <select id="s-sequence"><option>14-Day Nurture Sequence</option><option>7-Day Intro Sequence</option><option>Quick Follow-Up (3 days)</option></select>
+        </div>
+        <button class="ms-save" onclick="settingsSave('routing')">Save</button>
       </div>
-      <div class="imm-field"><label>Lead Routing Rules</label>
-        <select id="s-routing">
-          <option>Auto-assign to owner</option><option>Round-robin distribution</option><option>Manual assignment</option>
-        </select>
-      </div>
-      <div class="imm-field"><label>Default Follow-Up Sequence</label>
-        <select id="s-sequence">
-          <option>14-Day Nurture Sequence</option><option>7-Day Intro Sequence</option><option>Quick Follow-Up (3 days)</option>
-        </select>
-      </div>
-      <button class="imm-save" onclick="settingsSave('routing')">Save Lead Routing</button>
     </div>
 
     <!-- Notifications -->
-    <div class="g-card">
-      <div class="g-card-title">Notification Preferences</div>
-      <div class="toggle-row"><div><div class="toggle-label">New lead alert</div><div class="toggle-sub">SMS + Email when a new lead arrives</div></div><div class="toggle on" id="t-new-lead" onclick="this.classList.toggle('on')"></div></div>
-      <div class="toggle-row"><div><div class="toggle-label">Follow-up confirmation</div><div class="toggle-sub">Notify when a follow-up is sent</div></div><div class="toggle" id="t-followup-confirm" onclick="this.classList.toggle('on')"></div></div>
-      <div class="toggle-row"><div><div class="toggle-label">Appointment booked</div><div class="toggle-sub">Alert when appointment is confirmed</div></div><div class="toggle on" id="t-appointment" onclick="this.classList.toggle('on')"></div></div>
-      <div class="toggle-row"><div><div class="toggle-label">Daily summary</div><div class="toggle-sub">Morning digest of previous day's activity</div></div><div class="toggle on" id="t-daily" onclick="this.classList.toggle('on')"></div></div>
-      <div class="toggle-row"><div><div class="toggle-label">Weekly report</div><div class="toggle-sub">Performance summary every Monday</div></div><div class="toggle" id="t-weekly" onclick="this.classList.toggle('on')"></div></div>
-      <button class="imm-save" onclick="settingsSave('notif')" style="margin-top:16px;">Save Notifications</button>
+    <div class="settings-section" id="ss-notif">
+      <div class="ms-card">
+        <div class="ms-card-title">Notification Preferences</div>
+        <div class="ms-toggle-row"><div><div class="ms-toggle-label">New lead alert</div><div class="ms-toggle-sub">SMS + Email when a new lead arrives</div></div><button class="ms-toggle on" id="t-new-lead" onclick="this.classList.toggle('on')"></button></div>
+        <div class="ms-toggle-row"><div><div class="ms-toggle-label">Follow-up confirmation</div><div class="ms-toggle-sub">Notify when a follow-up is sent</div></div><button class="ms-toggle" id="t-followup-confirm" onclick="this.classList.toggle('on')"></button></div>
+        <div class="ms-toggle-row"><div><div class="ms-toggle-label">Appointment booked</div><div class="ms-toggle-sub">Alert when appointment is confirmed</div></div><button class="ms-toggle on" id="t-appointment" onclick="this.classList.toggle('on')"></button></div>
+        <div class="ms-toggle-row"><div><div class="ms-toggle-label">Daily summary</div><div class="ms-toggle-sub">Morning digest of previous day's activity</div></div><button class="ms-toggle on" id="t-daily" onclick="this.classList.toggle('on')"></button></div>
+        <div class="ms-toggle-row"><div><div class="ms-toggle-label">Weekly report</div><div class="ms-toggle-sub">Performance summary every Monday</div></div><button class="ms-toggle" id="t-weekly" onclick="this.classList.toggle('on')"></button></div>
+        <button class="ms-save" onclick="settingsSave('notif')" style="margin-top:20px;">Save</button>
+      </div>
     </div>
 
   </div>
@@ -799,18 +825,30 @@ function boot(user) {
   document.getElementById('auth-gate').style.display = 'none';
   document.getElementById('app').style.display = 'block';
   if (user) {
-    window.__userSub     = user.sub || '';
+    window.__userSub     = user.sub   || '';
+    window.__userEmail   = user.email || '';
     window.__userInitial = (user.name || user.email || '?')[0].toUpperCase();
-    document.getElementById('portal-avatar').textContent    = window.__userInitial;
-    document.getElementById('portal-menu-name').textContent = user.name  || 'User';
-    document.getElementById('portal-menu-email').textContent= user.email || '';
-    const firstName = user.name ? user.name.trim().split(' ')[0] : null;
-    document.getElementById('portal-greeting-title').textContent = getTimeGreeting() + (firstName ? ', ' + firstName : '');
+    document.getElementById('portal-avatar').textContent     = window.__userInitial;
+    document.getElementById('portal-menu-name').textContent  = user.name  || 'User';
+    document.getElementById('portal-menu-email').textContent = user.email || '';
     settingsLoad();
+    updateGreeting();
   } else {
     document.getElementById('portal-greeting-title').textContent = getTimeGreeting();
   }
   lucide.createIcons();
+}
+
+function updateGreeting() {
+  const all = JSON.parse(localStorage.getItem(settingsKey()) || '{}');
+  let name = null;
+  if (all.biz && all.biz.contact && all.biz.contact.trim()) {
+    name = all.biz.contact.trim().split(' ')[0];
+  } else if (window.__userEmail) {
+    name = window.__userEmail.split('@')[0];
+  }
+  const el = document.getElementById('portal-greeting-title');
+  if (el) el.textContent = getTimeGreeting() + (name ? ', ' + name : '');
 }
 
 async function portalLogout() {
@@ -873,6 +911,13 @@ function refreshStatus() {
 /* ── SETTINGS PERSISTENCE ── */
 function settingsKey() { return 'flw_settings_' + (window.__userSub || 'default'); }
 
+function switchSettingsTab(section, btn) {
+  document.querySelectorAll('.settings-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.settings-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('ss-' + section).classList.add('active');
+  btn.classList.add('active');
+}
+
 function settingsSave(section) {
   const all = JSON.parse(localStorage.getItem(settingsKey()) || '{}');
   if (section === 'biz') {
@@ -906,6 +951,7 @@ function settingsSave(section) {
     };
   }
   localStorage.setItem(settingsKey(), JSON.stringify(all));
+  if (section === 'biz') updateGreeting();
   showToast('Settings saved.');
 }
 
@@ -946,6 +992,11 @@ function setToggle(id, val) {
   const el = document.getElementById(id);
   if (!el) return;
   val ? el.classList.add('on') : el.classList.remove('on');
+}
+
+/* ── RESPONSIVE ── */
+if (window.innerWidth <= 860) {
+  document.querySelectorAll('.settings-body').forEach(b => { b.style.padding = '20px 16px 60px'; });
 }
 
 /* ── AI CHAT ── */
