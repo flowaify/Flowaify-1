@@ -542,50 +542,50 @@
             <div class="ai-avatar"><img src="logo-transparent.png" alt="" onerror="this.style.display='none'" /><div class="spark"><i data-lucide="sparkle"></i></div></div>
             <div class="ai-bubble ai-bubble-bot">
               <div class="ai-bubble-name">Flowy</div>
-              <div class="ai-bubble-text">Hi there! I'm Flowy, your AI Workspace Assistant. I can help you connect your tools, set up automations, and make sure everything in your workspace is running smoothly. What would you like to do today?</div>
+              <div class="ai-bubble-text">Hi! I'm Flowy, your AI business assistant. I can generate reports for any time period, analyze your lead pipeline, review automation performance, pull CRM data, export your records — or help with anything about your Flowaify account. What would you like to do?</div>
             </div>
           </div>
         </div>
 
         <div class="ai-suggested" id="ai-suggested">
-          <div class="ai-suggest-card" onclick="aiAction('email')">
-            <div class="ai-suggest-icon"><i data-lucide="mail"></i></div>
-            <div class="ai-suggest-body"><div class="ai-suggest-title">Help me connect my email</div><div class="ai-suggest-sub">Set up Gmail or Outlook</div></div>
+          <div class="ai-suggest-card" onclick="aiAction('report')">
+            <div class="ai-suggest-icon"><i data-lucide="file-text"></i></div>
+            <div class="ai-suggest-body"><div class="ai-suggest-title">Generate a report</div><div class="ai-suggest-sub">PDF for any time period</div></div>
             <i data-lucide="chevron-right" class="ai-suggest-chev"></i>
           </div>
-          <div class="ai-suggest-card" onclick="aiAction('crm')">
-            <div class="ai-suggest-icon"><i data-lucide="database"></i></div>
-            <div class="ai-suggest-body"><div class="ai-suggest-title">Connect my CRM</div><div class="ai-suggest-sub">Sync Flow CRM, HubSpot, Salesforce, or another CRM</div></div>
+          <div class="ai-suggest-card" onclick="aiAction('leads')">
+            <div class="ai-suggest-icon"><i data-lucide="users"></i></div>
+            <div class="ai-suggest-body"><div class="ai-suggest-title">Analyze my leads</div><div class="ai-suggest-sub">By source, status, and response rate</div></div>
             <i data-lucide="chevron-right" class="ai-suggest-chev"></i>
           </div>
-          <div class="ai-suggest-card" onclick="aiAction('calendar')">
-            <div class="ai-suggest-icon"><i data-lucide="calendar"></i></div>
-            <div class="ai-suggest-body"><div class="ai-suggest-title">Connect my calendar</div><div class="ai-suggest-sub">Add Google Calendar or Outlook Calendar</div></div>
+          <div class="ai-suggest-card" onclick="aiAction('pipeline')">
+            <div class="ai-suggest-icon"><i data-lucide="trending-up"></i></div>
+            <div class="ai-suggest-body"><div class="ai-suggest-title">Pipeline overview</div><div class="ai-suggest-sub">Where your deals stand right now</div></div>
             <i data-lucide="chevron-right" class="ai-suggest-chev"></i>
           </div>
           <div class="ai-suggest-card" onclick="aiAction('automations')">
             <div class="ai-suggest-icon"><i data-lucide="zap"></i></div>
-            <div class="ai-suggest-body"><div class="ai-suggest-title">Review my automations</div><div class="ai-suggest-sub">See what's set up and what still needs attention</div></div>
+            <div class="ai-suggest-body"><div class="ai-suggest-title">Automation performance</div><div class="ai-suggest-sub">What's running and how it's working</div></div>
             <i data-lucide="chevron-right" class="ai-suggest-chev"></i>
           </div>
-          <div class="ai-suggest-card" onclick="aiAction('next')">
-            <div class="ai-suggest-icon"><i data-lucide="list-checks"></i></div>
-            <div class="ai-suggest-body"><div class="ai-suggest-title">What's next in my setup?</div><div class="ai-suggest-sub">Get personalized next steps</div></div>
+          <div class="ai-suggest-card" onclick="aiAction('compare')">
+            <div class="ai-suggest-icon"><i data-lucide="bar-chart-2"></i></div>
+            <div class="ai-suggest-body"><div class="ai-suggest-title">Compare time periods</div><div class="ai-suggest-sub">This month vs last month</div></div>
             <i data-lucide="chevron-right" class="ai-suggest-chev"></i>
           </div>
-          <div class="ai-suggest-card" onclick="aiAction('integrations')">
-            <div class="ai-suggest-icon"><i data-lucide="plug"></i></div>
-            <div class="ai-suggest-body"><div class="ai-suggest-title">Show me integration options</div><div class="ai-suggest-sub">Explore supported apps</div></div>
+          <div class="ai-suggest-card" onclick="aiAction('export')">
+            <div class="ai-suggest-icon"><i data-lucide="download"></i></div>
+            <div class="ai-suggest-body"><div class="ai-suggest-title">Export my CRM data</div><div class="ai-suggest-sub">Leads, contacts, or deal history</div></div>
             <i data-lucide="chevron-right" class="ai-suggest-chev"></i>
           </div>
-          <div class="ai-suggest-card" onclick="aiAction('how')">
-            <div class="ai-suggest-icon"><i data-lucide="circle-help"></i></div>
-            <div class="ai-suggest-body"><div class="ai-suggest-title">How do automations work?</div><div class="ai-suggest-sub">Learn the basics</div></div>
+          <div class="ai-suggest-card" onclick="aiAction('change')">
+            <div class="ai-suggest-icon"><i data-lucide="edit-3"></i></div>
+            <div class="ai-suggest-body"><div class="ai-suggest-title">Make a change</div><div class="ai-suggest-sub">Update automations, rules, or settings</div></div>
             <i data-lucide="chevron-right" class="ai-suggest-chev"></i>
           </div>
-          <div class="ai-suggest-card" onclick="aiAction('invite')">
-            <div class="ai-suggest-icon"><i data-lucide="user-plus"></i></div>
-            <div class="ai-suggest-body"><div class="ai-suggest-title">Invite my team</div><div class="ai-suggest-sub">Add teammates to collaborate</div></div>
+          <div class="ai-suggest-card" onclick="aiAction('support')">
+            <div class="ai-suggest-icon"><i data-lucide="life-buoy"></i></div>
+            <div class="ai-suggest-body"><div class="ai-suggest-title">I need support</div><div class="ai-suggest-sub">Get help from the Flowaify team</div></div>
             <i data-lucide="chevron-right" class="ai-suggest-chev"></i>
           </div>
         </div>
@@ -607,38 +607,53 @@
     <div class="ai-rail">
 
       <div class="card">
-        <div class="rail-card-head"><div class="rail-card-title"><i data-lucide="activity"></i>Workspace Status</div></div>
-        <div class="rail-row"><div class="rail-row-left"><div class="rail-dot grey"></div><div class="rail-name">Email</div></div><div class="badge b-notconn">Not Connected</div></div>
-        <div class="rail-row"><div class="rail-row-left"><div class="rail-dot grey"></div><div class="rail-name">CRM</div></div><div class="badge b-notconn">Not Connected</div></div>
-        <div class="rail-row"><div class="rail-row-left"><div class="rail-dot blue"></div><div class="rail-name">Calendar</div></div><div class="badge b-optional">Optional</div></div>
-        <div class="rail-row"><div class="rail-row-left"><div class="rail-dot amber"></div><div class="rail-name">Automations</div></div><div class="badge b-required">Required</div></div>
-        <div class="rail-row"><div class="rail-row-left"><div class="rail-dot green"></div><div class="rail-name">System Health</div></div><div class="badge b-healthy">Healthy</div></div>
+        <div class="rail-card-head">
+          <div class="rail-card-title"><i data-lucide="bar-chart-2"></i>Quick Stats</div>
+          <a href="dashboard.html" style="font-size:10.5px;font-weight:700;color:var(--blue);text-decoration:none;">Full Dashboard →</a>
+        </div>
+        <div class="rail-row"><div class="rail-row-left"><div class="rail-dot blue"></div><div class="rail-name">Leads this week</div></div><span style="font-size:13px;font-weight:800;color:var(--text);">—</span></div>
+        <div class="rail-row"><div class="rail-row-left"><div class="rail-dot green"></div><div class="rail-name">Active automations</div></div><span style="font-size:13px;font-weight:800;color:var(--text);">—</span></div>
+        <div class="rail-row"><div class="rail-row-left"><div class="rail-dot blue"></div><div class="rail-name">Avg response time</div></div><span style="font-size:13px;font-weight:800;color:var(--text);">—</span></div>
+        <div class="rail-row"><div class="rail-row-left"><div class="rail-dot green"></div><div class="rail-name">Calls booked</div></div><span style="font-size:13px;font-weight:800;color:var(--text);">—</span></div>
       </div>
 
       <div class="card">
-        <div class="rail-card-head"><div class="rail-card-title"><i data-lucide="list-checks"></i>What's Next</div></div>
-        <div class="rail-row"><div class="rail-row-left"><div class="check-circle"></div><div class="rail-name">Connect at least one email account</div></div><div class="badge b-required">Required</div></div>
-        <div class="rail-row"><div class="rail-row-left"><div class="check-circle"></div><div class="rail-name">Connect your CRM</div></div><div class="badge b-required">Required</div></div>
-        <div class="rail-row"><div class="rail-row-left"><div class="check-circle"></div><div class="rail-name">Add a calendar</div></div><div class="badge b-optional">Optional</div></div>
-        <div class="rail-row"><div class="rail-row-left"><div class="check-circle"></div><div class="rail-name">Create your first automation</div></div><div class="badge b-recommended">Recommended</div></div>
-        <div class="rail-row"><div class="rail-row-left"><div class="check-circle"></div><div class="rail-name">Invite your team</div></div><div class="badge b-recommended">Recommended</div></div>
+        <div class="rail-card-head"><div class="rail-card-title"><i data-lucide="file-text"></i>Generate Report</div></div>
+        <div style="padding:14px 16px;display:flex;flex-direction:column;gap:10px;">
+          <select id="rail-report-range" style="width:100%;padding:8px 10px;border:1px solid var(--input-border);border-radius:8px;font-family:inherit;font-size:12px;color:var(--text-s);background:var(--input-bg);outline:none;cursor:pointer;">
+            <option>This month</option>
+            <option>Last month</option>
+            <option>Last 30 days</option>
+            <option>Last 90 days</option>
+            <option>Last year</option>
+            <option>Custom range</option>
+          </select>
+          <select id="rail-report-type" style="width:100%;padding:8px 10px;border:1px solid var(--input-border);border-radius:8px;font-family:inherit;font-size:12px;color:var(--text-s);background:var(--input-bg);outline:none;cursor:pointer;">
+            <option>Lead Summary</option>
+            <option>Automation Performance</option>
+            <option>Pipeline Report</option>
+            <option>Full Account Report</option>
+            <option>Response Time Analysis</option>
+          </select>
+          <button onclick="generateReport()" style="width:100%;padding:9px;background:var(--blue);border:none;border-radius:8px;color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 3px 10px rgba(0,87,255,0.25);transition:all 0.15s;" onmouseover="this.style.background='#2979FF'" onmouseout="this.style.background='var(--blue)'"><i data-lucide="file-text" style="width:12px;height:12px;display:inline;"></i> Generate PDF</button>
+        </div>
       </div>
 
       <div class="card">
         <div class="rail-card-head"><div class="rail-card-title"><i data-lucide="zap"></i>Quick Actions</div></div>
         <div class="qa-grid">
-          <button class="qa-btn" onclick="showPage('connections')"><i data-lucide="plug"></i> Add Connection</button>
-          <button class="qa-btn" onclick="showPage('automation')"><i data-lucide="zap"></i> Create Automation</button>
-          <button class="qa-btn" onclick="openModal('modal-invite-team')"><i data-lucide="user-plus"></i> Invite Team</button>
-          <button class="qa-btn" onclick="window.location.href='dashboard.html'"><i data-lucide="bar-chart-2"></i> Open Dashboard</button>
+          <button class="qa-btn" onclick="window.location.href='dashboard.html'"><i data-lucide="bar-chart-2"></i> Dashboard</button>
+          <button class="qa-btn" onclick="openModal('modal-export-data')"><i data-lucide="download"></i> Export Data</button>
+          <button class="qa-btn" onclick="openModal('modal-changes')"><i data-lucide="edit-3"></i> Request Change</button>
+          <button class="qa-btn" onclick="showPage('support')"><i data-lucide="life-buoy"></i> Support</button>
         </div>
       </div>
 
       <div class="card">
-        <div class="rail-card-head"><div class="rail-card-title"><i data-lucide="clock"></i>Workspace Activity</div></div>
-        <div class="activity-mini"><div class="activity-mini-dot"></div><div><div class="activity-mini-text">Workspace created</div><div class="activity-mini-time">Just now</div></div></div>
-        <div class="activity-mini"><div class="activity-mini-dot"></div><div><div class="activity-mini-text">System health check completed</div><div class="activity-mini-time">Just now</div></div></div>
-        <div class="activity-mini"><div class="activity-mini-dot"></div><div><div class="activity-mini-text">No automations yet</div><div class="activity-mini-time">—</div></div></div>
+        <div class="rail-card-head"><div class="rail-card-title"><i data-lucide="clock"></i>Recent Activity</div></div>
+        <div class="activity-mini"><div class="activity-mini-dot"></div><div><div class="activity-mini-text">Workspace active</div><div class="activity-mini-time">Ask Flowy for a full activity log</div></div></div>
+        <div class="activity-mini"><div class="activity-mini-dot"></div><div><div class="activity-mini-text">Automations running</div><div class="activity-mini-time">Check Automation tab for details</div></div></div>
+        <div class="activity-mini" style="cursor:pointer;" onclick="aiAction('report')"><div class="activity-mini-dot" style="background:var(--blue);"></div><div><div class="activity-mini-text" style="color:var(--blue);">Generate a report →</div><div class="activity-mini-time">Ask Flowy to pull your stats</div></div></div>
       </div>
 
     </div>
@@ -854,6 +869,32 @@
   </div>
 </div>
 
+<div class="modal-overlay" id="modal-generate-report">
+  <div class="modal">
+    <div class="modal-head"><div><div class="modal-title">Generate Report</div><div class="modal-sub">We'll prepare a PDF and send it to your email</div></div><button class="modal-close" onclick="closeModal('modal-generate-report')"><i data-lucide="x"></i></button></div>
+    <div class="modal-body">
+      <div class="field"><label>Report Type</label><select><option>Lead Summary</option><option>Automation Performance</option><option>Pipeline Report</option><option>Response Time Analysis</option><option>Full Account Report</option></select></div>
+      <div class="field"><label>Time Period</label><select><option>This month</option><option>Last month</option><option>Last 30 days</option><option>Last 90 days</option><option>Last year</option><option>Custom range</option></select></div>
+      <div class="field"><label>Custom Date Range (if selected above)</label><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;"><input type="date" /><input type="date" /></div></div>
+      <div class="field"><label>Deliver to</label><input type="email" id="report-email" placeholder="your@email.com" /></div>
+    </div>
+    <div class="modal-footer"><button class="btn-mc" onclick="closeModal('modal-generate-report')">Cancel</button><button class="btn-mok" onclick="submitForm('modal-generate-report','Your report is being prepared and will be emailed to you within a few minutes.')">Generate PDF</button></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-export-data">
+  <div class="modal">
+    <div class="modal-head"><div><div class="modal-title">Export CRM Data</div><div class="modal-sub">Download your records in your preferred format</div></div><button class="modal-close" onclick="closeModal('modal-export-data')"><i data-lucide="x"></i></button></div>
+    <div class="modal-body">
+      <div class="field"><label>What to export</label><select><option>All Leads</option><option>Contacts</option><option>Deal / Pipeline Records</option><option>Automation Logs</option><option>Full CRM Export</option></select></div>
+      <div class="field"><label>Time Period</label><select><option>All time</option><option>This month</option><option>Last month</option><option>Last 90 days</option><option>Last year</option></select></div>
+      <div class="field"><label>Format</label><select><option>CSV (spreadsheet)</option><option>PDF (formatted report)</option><option>Excel (.xlsx)</option></select></div>
+      <div class="field"><label>Deliver to</label><input type="email" placeholder="your@email.com" /></div>
+    </div>
+    <div class="modal-footer"><button class="btn-mc" onclick="closeModal('modal-export-data')">Cancel</button><button class="btn-mok" onclick="submitForm('modal-export-data','Your export is being prepared and will be emailed to you shortly.')">Export Now</button></div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="modal-invite-team">
   <div class="modal">
     <div class="modal-head"><div><div class="modal-title">Invite Your Team</div><div class="modal-sub">Add teammates to collaborate in your workspace</div></div><button class="modal-close" onclick="closeModal('modal-invite-team')"><i data-lucide="x"></i></button></div>
@@ -946,45 +987,45 @@ function refreshStatus() {
 
 /* AI ASSISTANT CHAT */
 const AI_RESPONSES = {
-  email: {
-    user: 'Help me connect my email',
-    bot: "I'll help you connect your email. Once linked, Flowaify can send and track automated follow-ups on your behalf. Head to Connections to link Gmail or Outlook — it only takes a minute.",
-    cta: { label: 'Go to Connections', page: 'connections' }
+  report: {
+    user: 'Generate a report',
+    bot: "I can generate a report for any time period — this month, last month, last 90 days, or a custom date range. Choose your report type (Lead Summary, Automation Performance, Pipeline Report, or Full Account Report) and I'll prepare a PDF and send it to your email.",
+    cta: { label: 'Generate Report', modal: 'modal-generate-report' }
   },
-  crm: {
-    user: 'Connect my CRM',
-    bot: "Let's get your CRM connected. You can sync Flow CRM, HubSpot, Salesforce, or another CRM so leads and pipeline activity stay up to date automatically.",
-    cta: { label: 'Go to Connections', page: 'connections' }
+  leads: {
+    user: 'Analyze my leads',
+    bot: "I can break down your leads by source, status, response time, and conversion rate for any time period. Want a quick PDF summary, or would you prefer to explore the full lead data in your Dashboard?",
+    cta: { label: 'Open Dashboard', page: null, href: 'dashboard.html' }
   },
-  calendar: {
-    user: 'Connect my calendar',
-    bot: "Connecting a calendar lets Flowaify handle booking confirmations and reminders automatically. You can link Google Calendar or Outlook Calendar from Connections.",
-    cta: { label: 'Go to Connections', page: 'connections' }
+  pipeline: {
+    user: 'Pipeline overview',
+    bot: "Your pipeline overview shows where every deal stands — by stage, value, and activity. I can pull this as a report for any date range, or you can see it live with full filters in your Dashboard.",
+    cta: { label: 'Open Dashboard', page: null, href: 'dashboard.html' }
   },
   automations: {
-    user: 'Review my automations',
-    bot: "You don't have any automations running yet. Once your accounts are connected, you can activate things like Instant Lead Reply, Follow-Up Sequences, and Booking Reminders from Automation Control.",
+    user: 'Automation performance',
+    bot: "I can review your active automations — reply rates, follow-up sequences running, missed triggers, and success rates. Head to Automation Control for live status, or ask me to generate a performance report for a specific period.",
     cta: { label: 'Go to Automation', page: 'automation' }
   },
-  next: {
-    user: "What's next in my setup?",
-    bot: "Here's what I'd recommend next: connect at least one email account, then link your CRM — those two are required. After that, add a calendar, create your first automation, and invite your team when you're ready.",
-    cta: null
+  compare: {
+    user: 'Compare time periods',
+    bot: "Month-over-month comparisons are a great way to spot trends. I can generate a comparison report — just let me know the two periods you want to compare and the metric you care about (leads, response time, bookings, or all of them).",
+    cta: { label: 'Generate Report', modal: 'modal-generate-report' }
   },
-  integrations: {
-    user: 'Show me integration options',
-    bot: "Flowaify supports Email (Gmail or Outlook), CRM (Flow CRM, HubSpot, Salesforce), Calendar, SMS via Twilio, Website Forms, Zapier, and Webhooks. You can explore and connect any of these from the Connections tab.",
-    cta: { label: 'Go to Connections', page: 'connections' }
+  export: {
+    user: 'Export my CRM data',
+    bot: "I can export your leads, contacts, deal records, or automation logs — in CSV, PDF, or Excel format, for any date range. I'll prepare the file and send it to your email.",
+    cta: { label: 'Export Data', modal: 'modal-export-data' }
   },
-  how: {
-    user: 'How do automations work?',
-    bot: "Automations are triggered by events — like a new lead coming in or a missed call — and respond automatically with replies, follow-ups, or booking reminders. Once your accounts are connected, you can turn each automation on or off from Automation Control.",
-    cta: { label: 'Go to Automation', page: 'automation' }
+  change: {
+    user: 'Make a change',
+    bot: "What would you like to update? I can pass a change request to the Flowaify team for: follow-up message content, automation sequence timing, lead routing rules, business hours, or any other workflow setting.",
+    cta: { label: 'Request Change', modal: 'modal-changes' }
   },
-  invite: {
-    user: 'Invite my team',
-    bot: "I can help with that. Add your teammate's email and I'll send them an invite to join your workspace.",
-    cta: { label: 'Invite Team', modal: 'modal-invite-team' }
+  support: {
+    user: 'I need support',
+    bot: "I'm here to help. If I can resolve it directly I will — otherwise I'll connect you with the Flowaify team right away. What's going on?",
+    cta: { label: 'Contact Support', modal: 'modal-contact' }
   }
 };
 
@@ -1010,7 +1051,7 @@ function pushAiMessage(role, text, cta) {
     const btn = document.createElement('button');
     btn.className = 'ai-bubble-cta';
     btn.textContent = cta.label;
-    btn.onclick = () => { if (cta.page) showPage(cta.page); else if (cta.modal) openModal(cta.modal); };
+    btn.onclick = () => { if (cta.href) window.location.href = cta.href; else if (cta.page) showPage(cta.page); else if (cta.modal) openModal(cta.modal); };
     wrap.querySelector('.ai-bubble').appendChild(btn);
   }
   lucide.createIcons();
@@ -1019,14 +1060,25 @@ function pushAiMessage(role, text, cta) {
 
 function aiFallbackReply(text) {
   const t = text.toLowerCase();
-  if (t.includes('email')) return "You can connect your email from the Connections tab — that's what powers automated follow-ups.";
-  if (t.includes('crm')) return "You can connect your CRM (Flow CRM, HubSpot, Salesforce, or another) from the Connections tab to keep leads and pipeline data in sync.";
-  if (t.includes('calendar') || t.includes('book')) return "Connecting a calendar lets Flowaify handle booking confirmations and reminders. You can add one from the Connections tab.";
-  if (t.includes('automat')) return "Automations run once your accounts are connected. Visit Automation Control to launch, pause, or request changes to your automations.";
-  if (t.includes('team') || t.includes('invite')) return "I can send a workspace invite to your teammates — just share their email and I'll get it sent.";
-  if (t.includes('dashboard') || t.includes('lead') || t.includes('analytic') || t.includes('revenue')) return "Lead and analytics data lives in your Dashboard — click Open Dashboard in the top right once your accounts are synced.";
-  if (t.includes('support') || t.includes('help')) return "I can help directly, or you can reach the Flowaify team from the Support tab for hands-on setup help.";
-  return "I can help you set up Flowaify — try asking about connecting your email, CRM, or calendar, reviewing automations, or what's next in your setup.";
+  if (t.includes('report') || t.includes('pdf') || t.includes('summary')) return "I can generate a report for any time period — lead summary, automation performance, pipeline report, or a full account overview. Just let me know the date range and I'll prepare the PDF.";
+  if (t.includes('lead')) return "I can pull a lead breakdown by source, status, response time, and conversion — for any date range. Want a PDF report, or would you like to explore live in the Dashboard?";
+  if (t.includes('pipeline') || t.includes('deal')) return "I can give you a pipeline overview — stages, deal values, and recent activity. I can export this as a report or you can explore it live in your Dashboard.";
+  if (t.includes('automat') || t.includes('sequence') || t.includes('follow')) return "I can review your automations — what's running, reply rates, and how sequences are performing. I can also pass change requests to the team if you want to update anything.";
+  if (t.includes('export') || t.includes('download') || t.includes('csv') || t.includes('excel')) return "I can export your leads, contacts, deal history, or automation logs in CSV, PDF, or Excel — for any date range. I'll send the file to your email.";
+  if (t.includes('compar') || t.includes('month') || t.includes('last') || t.includes('period') || t.includes('trend')) return "I can compare any two time periods — leads, response time, bookings, or full account stats. What would you like to compare?";
+  if (t.includes('chang') || t.includes('updat') || t.includes('edit') || t.includes('modif')) return "I can submit a change request to the Flowaify team — follow-up message content, automation timing, lead routing rules, business hours, or any workflow settings. What needs updating?";
+  if (t.includes('stat') || t.includes('number') || t.includes('how many') || t.includes('analytic')) return "I can pull those numbers for you. What time period are you interested in — this week, this month, last month, or a custom range?";
+  if (t.includes('support') || t.includes('help') || t.includes('issue') || t.includes('problem')) return "I'm here to help. Tell me what's going on and I'll either resolve it directly or connect you with the Flowaify support team right away.";
+  if (t.includes('team') || t.includes('invite')) return "I can send a workspace invite to your teammates. Use the Invite Team option in the Business Settings tab.";
+  if (t.includes('crm') || t.includes('contact')) return "I can pull CRM data, generate contact lists, or export records for any date range. What specifically are you looking for?";
+  if (t.includes('book') || t.includes('calendar') || t.includes('appointment')) return "I can pull your booked calls and appointment data for any period. Want a summary report, or would you like to see it live in the Dashboard?";
+  return "I can help with that. I can generate reports, analyze your data, export CRM records, review automations, make changes, or connect you with support. Can you tell me a bit more about what you need?";
+}
+
+function generateReport() {
+  const range = document.getElementById('rail-report-range')?.value || 'this period';
+  const type  = document.getElementById('rail-report-type')?.value  || 'Report';
+  showToast(type + ' for ' + range + ' is being prepared — check your email shortly.');
 }
 
 function sendAiMessage() {
