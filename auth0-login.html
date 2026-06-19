@@ -293,6 +293,32 @@
       background: rgba(255,255,255,0.85);
       width: 22px;
     }
+    .hero-features {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin-top: 28px;
+      text-align: left;
+    }
+    .hero-feature {
+      display: flex;
+      align-items: flex-start;
+      gap: 11px;
+      font-size: 14px;
+      color: rgba(255,255,255,0.72);
+      font-weight: 500;
+      line-height: 1.5;
+    }
+    .hero-feat-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: rgba(0,87,255,0.9);
+      border: 1px solid rgba(100,160,255,0.6);
+      flex-shrink: 0;
+      margin-top: 6px;
+      box-shadow: 0 0 8px rgba(0,87,255,0.6);
+    }
 
     /* ═══════════════════════════════════════
        Auth0 Lock overrides
@@ -315,9 +341,59 @@
     /* Hide header and tabs */
     .auth0-lock.auth0-lock .auth0-lock-header { display: none !important; }
 
-    /* Hide social */
-    .auth0-lock.auth0-lock .auth0-lock-social-buttons-container { display: none !important; }
-    .auth0-lock.auth0-lock .auth0-lock-socsec-separator          { display: none !important; }
+    /* ─── Social login buttons ─── */
+    .auth0-lock.auth0-lock .auth0-lock-social-buttons-container {
+      padding: 0 24px 6px !important;
+      display: flex !important;
+      flex-direction: column !important;
+      gap: 10px !important;
+    }
+    .auth0-lock.auth0-lock .auth0-lock-social-button {
+      width: 100% !important;
+      height: 44px !important;
+      border-radius: 10px !important;
+      border: 1.5px solid #E2E8F0 !important;
+      background: #ffffff !important;
+      box-shadow: none !important;
+      font-family: 'Plus Jakarta Sans', sans-serif !important;
+      transition: background 0.15s, border-color 0.15s, box-shadow 0.15s !important;
+      margin: 0 !important;
+    }
+    .auth0-lock.auth0-lock .auth0-lock-social-button:hover {
+      background: #F8FAFC !important;
+      border-color: #CBD5E1 !important;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.06) !important;
+    }
+    .auth0-lock.auth0-lock .auth0-lock-social-button-text {
+      font-family: 'Plus Jakarta Sans', sans-serif !important;
+      font-size: 13.5px !important;
+      font-weight: 600 !important;
+      color: #0F172A !important;
+    }
+    /* Separator between social and email/password */
+    .auth0-lock.auth0-lock .auth0-lock-socsec-separator {
+      margin: 6px 24px !important;
+      display: flex !important;
+      align-items: center !important;
+      gap: 10px !important;
+    }
+    .auth0-lock.auth0-lock .auth0-lock-socsec-separator::before,
+    .auth0-lock.auth0-lock .auth0-lock-socsec-separator::after {
+      content: '' !important;
+      flex: 1 !important;
+      height: 1px !important;
+      background: #E2E8F0 !important;
+    }
+    .auth0-lock.auth0-lock .auth0-lock-socsec-separator p,
+    .auth0-lock.auth0-lock .auth0-lock-socsec-separator .auth0-lock-socsec-separator-text {
+      font-family: 'Plus Jakarta Sans', sans-serif !important;
+      font-size: 11px !important;
+      font-weight: 700 !important;
+      color: #94A3B8 !important;
+      text-transform: uppercase !important;
+      letter-spacing: 0.07em !important;
+      white-space: nowrap !important;
+    }
 
     .auth0-lock.auth0-lock .auth0-lock-content {
       background: #FFFFFF !important;
@@ -486,12 +562,23 @@
 
     <div class="hero-content">
       <div class="hero-badge">
-        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="rgba(100,160,255,0.95)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-        </svg>
+        <img src="https://flowaify.app/flowaify-logo.webp" alt="Flowaify" style="width:36px;height:36px;object-fit:contain;" onerror="this.style.display='none'" />
       </div>
-      <h2 class="hero-title">Safe &amp; secure<br/>sign in</h2>
-      <p class="hero-desc">Your data is protected with enterprise-grade encryption. Everything you share stays private.</p>
+      <h2 class="hero-title">Leads in.<br/>Replies out.<br/>Bookings done.</h2>
+      <div class="hero-features">
+        <div class="hero-feature">
+          <span class="hero-feat-dot"></span>
+          <span>AI replies to new leads in seconds — automatically</span>
+        </div>
+        <div class="hero-feature">
+          <span class="hero-feat-dot"></span>
+          <span>Follow-up sequences and CRM sync on autopilot</span>
+        </div>
+        <div class="hero-feature">
+          <span class="hero-feat-dot"></span>
+          <span>Smart booking, calendar automation, and reminders</span>
+        </div>
+      </div>
     </div>
 
   </div>
@@ -566,7 +653,7 @@
         __token_issuer: config.authorizationServer.issuer
       },
       assetsUrl:          config.assetsUrl,
-      allowedConnections: ['Username-Password-Authentication'],
+      allowedConnections: ['google-oauth2', 'windowslive', 'Username-Password-Authentication'],
       allowSignUp:        false,
       initialScreen:      'login',
       rememberLastLogin:  !config.prompt,
