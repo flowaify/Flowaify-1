@@ -145,6 +145,13 @@
       font-weight: 400;
     }
 
+    /* CHAT BACK BUTTON */
+    .portal-chat-back{display:none;width:100%;max-width:680px;margin-bottom:4px}
+    .portal-chat-back.active{display:block;animation:page-enter 0.2s ease}
+    .portal-chat-back-btn{display:inline-flex;align-items:center;gap:6px;padding:7px 16px;border:1px solid var(--border);border-radius:99px;background:rgba(255,255,255,0.82);backdrop-filter:blur(10px);font-size:12px;font-weight:600;color:var(--text-m);cursor:pointer;font-family:inherit;transition:all 0.15s}
+    .portal-chat-back-btn:hover{border-color:var(--blue-border);color:var(--blue);background:rgba(255,255,255,0.96)}
+    .portal-chat-back-btn i{width:12px;height:12px}
+
     /* MESSAGES ZONE (hidden until chat starts) */
     .portal-messages-zone {
       display: none;
@@ -603,6 +610,13 @@
       <div class="portal-greeting-sub">What can Flowy help you with today?</div>
     </div>
 
+    <!-- Chat back button (shows when chat starts) -->
+    <div class="portal-chat-back" id="portal-chat-back">
+      <button class="portal-chat-back-btn" onclick="resetChat()">
+        <i data-lucide="arrow-left"></i> Back to home
+      </button>
+    </div>
+
     <!-- Messages (shows when chat starts) -->
     <div class="portal-messages-zone" id="portal-messages-zone"></div>
 
@@ -947,14 +961,22 @@ let chatStarted = false;
 function startChatMode() {
   if (chatStarted) return;
   chatStarted = true;
-  const greeting = document.getElementById('portal-greeting');
-  const pills    = document.getElementById('portal-pills');
-  const lower    = document.getElementById('portal-lower');
-  const msgZone  = document.getElementById('portal-messages-zone');
-  if (greeting) greeting.classList.add('away');
-  if (pills)    pills.classList.add('away');
-  if (lower)    lower.classList.add('away');
-  if (msgZone)  msgZone.classList.add('active');
+  document.getElementById('portal-greeting').classList.add('away');
+  document.getElementById('portal-pills').classList.add('away');
+  document.getElementById('portal-lower').classList.add('away');
+  document.getElementById('portal-messages-zone').classList.add('active');
+  document.getElementById('portal-chat-back').classList.add('active');
+  lucide.createIcons();
+}
+
+function resetChat() {
+  chatStarted = false;
+  document.getElementById('portal-greeting').classList.remove('away');
+  document.getElementById('portal-pills').classList.remove('away');
+  document.getElementById('portal-lower').classList.remove('away');
+  document.getElementById('portal-messages-zone').classList.remove('active');
+  document.getElementById('portal-chat-back').classList.remove('active');
+  document.getElementById('portal-messages-zone').innerHTML = '';
 }
 
 const AI_RESPONSES = {
