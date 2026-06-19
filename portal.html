@@ -11,535 +11,479 @@
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
   <script src="https://cdn.auth0.com/js/auth0-spa-js/2.18/auth0-spa-js.production.js"></script>
   <style>
-    /* ─── AUTH GATE ─── */
-    #auth-gate {
-      position: fixed; inset: 0; z-index: 9999; background: #fff;
-      display: flex; align-items: center; justify-content: center;
-      flex-direction: column; gap: 14px; font-family: 'Plus Jakarta Sans', sans-serif;
-    }
-    #auth-gate .ag-logo   { width: 40px; height: 40px; object-fit: contain; }
-    #auth-gate .ag-spinner{ width: 26px; height: 26px; border-radius: 50%; border: 2px solid rgba(0,87,255,0.15); border-top-color: #0057FF; animation: ag-spin 0.75s linear infinite; }
-    #auth-gate .ag-label  { font-size: 12px; font-weight: 600; color: rgba(0,87,255,0.6); }
-    @keyframes ag-spin { to { transform: rotate(360deg); } }
+    /* AUTH GATE */
+    #auth-gate { position:fixed;inset:0;z-index:9999;background:#fff;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;font-family:'Plus Jakarta Sans',sans-serif; }
+    #auth-gate .ag-logo { width:40px;height:40px;object-fit:contain; }
+    #auth-gate .ag-spinner { width:26px;height:26px;border-radius:50%;border:2px solid rgba(0,87,255,0.15);border-top-color:#0057FF;animation:ag-spin 0.75s linear infinite; }
+    #auth-gate .ag-label { font-size:12px;font-weight:600;color:rgba(0,87,255,0.6); }
+    @keyframes ag-spin { to{transform:rotate(360deg)} }
   </style>
   <style>
     :root {
-      --blue:       #0057FF;
-      --blue-b:     #2979FF;
-      --blue-soft:  #4d94ff;
-      --purple:     #8b5cf6;
-      --green:      #059669;
-      --amber:      #d97706;
-      --red:        #dc2626;
-      --bg:         #f8fafc;
-      --bg-card:    #ffffff;
-      --topbar-bg:  rgba(255,255,255,0.97);
-      --border:     rgba(15,23,42,0.08);
-      --blue-border:rgba(0,87,255,0.14);
-      --blue-dim:   rgba(0,87,255,0.06);
-      --green-dim:  rgba(5,150,105,0.08);
-      --amber-dim:  rgba(217,119,6,0.08);
-      --red-dim:    rgba(220,38,38,0.08);
-      --purple-dim: rgba(139,92,246,0.08);
-      --text:       #0f172a;
-      --text-m:     rgba(15,23,42,0.44);
-      --text-s:     rgba(15,23,42,0.68);
-      --card-shadow:0 1px 3px rgba(0,0,0,0.05), 0 4px 16px rgba(0,87,255,0.05);
-      --input-bg:   #f8faff;
-      --input-border:rgba(0,87,255,0.15);
+      --blue:#0057FF; --blue-b:#2979FF; --purple:#8b5cf6;
+      --green:#059669; --amber:#d97706; --red:#dc2626;
+      --bg:#f8fafc; --bg-card:#ffffff;
+      --topbar-bg:rgba(255,255,255,0.92);
+      --border:rgba(15,23,42,0.08);
+      --blue-border:rgba(0,87,255,0.14); --blue-dim:rgba(0,87,255,0.06);
+      --green-dim:rgba(5,150,105,0.08); --amber-dim:rgba(217,119,6,0.08);
+      --red-dim:rgba(220,38,38,0.08); --purple-dim:rgba(139,92,246,0.08);
+      --text:#0f172a; --text-m:rgba(15,23,42,0.44); --text-s:rgba(15,23,42,0.68);
+      --card-shadow:0 1px 3px rgba(0,0,0,0.05),0 4px 16px rgba(0,87,255,0.05);
+      --input-bg:#f8faff; --input-border:rgba(0,87,255,0.15);
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html,body{height:100%;font-family:'Plus Jakarta Sans',sans-serif;color:var(--text);font-size:14px;line-height:1.5;overflow-x:hidden}
+    body{background:#fff}
+    a{text-decoration:none;color:inherit}
+    ::-webkit-scrollbar{width:4px;height:4px}
+    ::-webkit-scrollbar-track{background:transparent}
+    ::-webkit-scrollbar-thumb{background:var(--blue-border);border-radius:99px}
+
+    /* TOP NAV */
+    .topnav{position:sticky;top:0;z-index:60;background:var(--topbar-bg);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid var(--border)}
+    .topnav-bar{display:flex;align-items:center;justify-content:space-between;padding:0 32px;height:62px;gap:16px}
+    .topnav-brand{display:flex;align-items:center;gap:10px;flex-shrink:0}
+    .topnav-brand img{width:28px;height:28px;object-fit:contain}
+    .topnav-brand-name{font-size:15px;font-weight:800;letter-spacing:-0.4px;color:var(--text)}
+    .ai-pill{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:99px;background:var(--blue-dim);border:1px solid var(--blue-border);color:var(--blue);font-size:10px;font-weight:700;margin-left:6px;white-space:nowrap}
+    .ai-pill i{width:10px;height:10px}
+    .topnav-right{display:flex;align-items:center;gap:10px;flex-shrink:0}
+    .btn-sync{display:flex;align-items:center;gap:6px;padding:8px 18px;background:var(--blue);border:none;border-radius:9px;color:#fff;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit;box-shadow:0 4px 14px rgba(0,87,255,0.28);transition:all 0.18s;white-space:nowrap}
+    .btn-sync:hover{background:var(--blue-b);transform:translateY(-1px)}
+    .btn-sync i{width:13px;height:13px}
+    .topnav-dash-link{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:#fff;border:1.5px solid var(--border);border-radius:9px;font-size:12.5px;font-weight:600;color:var(--text-s);transition:all 0.18s;white-space:nowrap}
+    .topnav-dash-link:hover{border-color:var(--blue-border);color:var(--blue);background:var(--blue-dim)}
+    .topnav-dash-link i{width:13px;height:13px}
+    .avatar-wrap{position:relative}
+    .avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#0057FF,#8b5cf6);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#fff;cursor:pointer;user-select:none;transition:box-shadow 0.2s;flex-shrink:0}
+    .avatar:hover{box-shadow:0 0 0 3px rgba(0,87,255,0.18)}
+    .profile-menu{position:absolute;right:0;top:calc(100% + 8px);background:#fff;border:1px solid var(--border);border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,0.13);padding:6px;min-width:210px;display:none;z-index:200}
+    .profile-menu.open{display:block;animation:pmenu-in 0.15s ease}
+    @keyframes pmenu-in{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+    .profile-menu-header{padding:10px 12px 8px;border-bottom:1px solid var(--border);margin-bottom:4px}
+    .profile-menu-name{font-size:12.5px;font-weight:700;color:var(--text)}
+    .profile-menu-email{font-size:10.5px;color:var(--text-m);margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .profile-menu-item{display:flex;align-items:center;gap:9px;padding:8px 12px;font-size:12.5px;color:var(--text-s);font-weight:500;cursor:pointer;border-radius:8px;transition:background 0.13s,color 0.13s}
+    .profile-menu-item:hover{background:var(--blue-dim);color:var(--blue)}
+    .profile-menu-item i{width:14px;height:14px}
+    .profile-menu-sep{border:none;border-top:1px solid var(--border);margin:4px 0}
+    .profile-menu-item.danger:hover{background:var(--red-dim);color:var(--red)}
+    .mob-nav-btn{display:none;width:34px;height:34px;border-radius:9px;background:var(--blue-dim);border:1px solid var(--blue-border);color:var(--text-s);cursor:pointer;align-items:center;justify-content:center}
+    .mob-nav-btn i{width:16px;height:16px}
+    .mob-nav-drawer{display:none;position:fixed;inset:0;z-index:100;background:rgba(0,0,0,0.4)}
+    .mob-nav-drawer.open{display:block}
+    .mob-nav-sheet{position:absolute;top:0;left:0;width:260px;height:100%;background:#fff;border-right:1px solid var(--border);padding:20px 16px;display:flex;flex-direction:column;gap:4px}
+    .mob-nav-close{display:flex;align-items:center;gap:8px;margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--border)}
+    .mob-nav-close img{width:24px;height:24px;object-fit:contain}
+    .mob-nav-close span{font-size:14px;font-weight:800;color:var(--text)}
+    .nav-tab{display:flex;align-items:center;gap:7px;padding:9px 14px;border-radius:9px;cursor:pointer;font-size:13px;font-weight:500;color:var(--text-m);transition:background 0.15s,color 0.15s;border:1px solid transparent;user-select:none}
+    .nav-tab i{width:14px;height:14px;flex-shrink:0}
+    .nav-tab:hover{background:var(--blue-dim);color:var(--text-s)}
+    .nav-tab.active{background:var(--blue-dim);color:var(--blue);border-color:var(--blue-border);font-weight:600}
+
+    /* PAGE SYSTEM */
+    .page{display:none}
+    .page.active{display:block}
+
+    /* ═══════════════════════════════════════
+       PORTAL HOME — COPILOT-INSPIRED LAYOUT
+    ═══════════════════════════════════════ */
+    #page-overview.page.active{display:flex;flex-direction:column}
+
+    .portal-home {
+      min-height: calc(100vh - 62px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      background:
+        radial-gradient(ellipse 900px 600px at 50% -80px, rgba(0,87,255,0.07) 0%, transparent 68%),
+        radial-gradient(ellipse 500px 400px at 15% 90%, rgba(139,92,246,0.04) 0%, transparent 60%),
+        radial-gradient(ellipse 400px 300px at 85% 85%, rgba(0,87,255,0.04) 0%, transparent 60%),
+        linear-gradient(175deg, #ffffff 0%, #f5f8ff 45%, #edf2ff 100%);
     }
 
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html, body { height: 100%; font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text); font-size: 14px; line-height: 1.5; overflow-x: hidden; }
-    a { text-decoration: none; color: inherit; }
-    ::-webkit-scrollbar { width: 4px; height: 4px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: var(--blue-border); border-radius: 99px; }
-
-    /* ─── TOP NAV ─── */
-    .topnav {
-      position: sticky; top: 0; z-index: 60;
-      background: var(--topbar-bg); backdrop-filter: blur(18px);
-      border-bottom: 1px solid var(--border);
+    /* upper zone: greeting + messages + input + pills */
+    .portal-upper {
+      flex: 1;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 56px 24px 28px;
+      min-height: 0;
     }
-    .topnav-bar {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 0 32px; height: 62px; gap: 16px;
-    }
-    .topnav-brand { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
-    .topnav-brand img { width: 28px; height: 28px; object-fit: contain; }
-    .topnav-brand-name { font-size: 15px; font-weight: 800; letter-spacing: -0.4px; color: var(--text); }
 
-    .ai-pill { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 99px; background: var(--blue-dim); border: 1px solid var(--blue-border); color: var(--blue); font-size: 10px; font-weight: 700; margin-left: 6px; white-space: nowrap; }
-    .ai-pill i { width: 10px; height: 10px; }
-
-    .topnav-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
-    .btn-sync {
-      display: flex; align-items: center; gap: 6px; padding: 8px 18px;
-      background: var(--blue); border: none; border-radius: 9px; color: #fff;
-      font-size: 12.5px; font-weight: 600; cursor: pointer; font-family: inherit;
-      box-shadow: 0 4px 14px rgba(0,87,255,0.28); transition: all 0.18s; white-space: nowrap;
+    /* GREETING */
+    .portal-greeting {
+      text-align: center;
+      margin-bottom: 32px;
+      transition: opacity 0.35s ease, max-height 0.35s ease, margin 0.35s ease;
+      max-height: 200px;
+      overflow: hidden;
     }
-    .btn-sync:hover { background: var(--blue-b); transform: translateY(-1px); }
-    .btn-sync i { width: 13px; height: 13px; }
-    .topnav-dash-link {
-      display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px;
-      background: #fff; border: 1.5px solid var(--border);
-      border-radius: 9px; font-size: 12.5px; font-weight: 600; color: var(--text-s);
-      transition: all 0.18s; white-space: nowrap;
+    .portal-greeting.away {
+      opacity: 0;
+      max-height: 0;
+      margin-bottom: 0;
+      pointer-events: none;
     }
-    .topnav-dash-link:hover { border-color: var(--blue-border); color: var(--blue); background: var(--blue-dim); }
-    .topnav-dash-link i { width: 13px; height: 13px; }
+    .portal-greeting-title {
+      font-size: 36px;
+      font-weight: 800;
+      letter-spacing: -1px;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+    .portal-greeting-sub {
+      font-size: 16px;
+      color: var(--text-s);
+      font-weight: 400;
+    }
 
-    /* AVATAR + PROFILE MENU */
-    .avatar-wrap { position: relative; }
-    .avatar {
+    /* MESSAGES ZONE (hidden until chat starts) */
+    .portal-messages-zone {
+      display: none;
+      flex-direction: column;
+      gap: 16px;
+      width: 100%;
+      max-width: 680px;
+      max-height: 36vh;
+      overflow-y: auto;
+      margin-bottom: 16px;
+      padding: 4px 0;
+    }
+    .portal-messages-zone.active { display: flex; }
+
+    /* chat message rows */
+    .pmsg { display: flex; gap: 12px; align-items: flex-start; }
+    .pmsg-user { flex-direction: row-reverse; }
+    .pmsg-bot-ava {
+      width: 34px; height: 34px; border-radius: 50%;
+      background: #f1f5f9; border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .pmsg-bot-ava img { width: 20px; height: 20px; object-fit: contain; }
+    .pmsg-user-ava {
       width: 34px; height: 34px; border-radius: 50%;
       background: linear-gradient(135deg,#0057FF,#8b5cf6);
       display: flex; align-items: center; justify-content: center;
-      font-size: 12px; font-weight: 800; color: #fff; cursor: pointer;
-      user-select: none; transition: box-shadow 0.2s; flex-shrink: 0;
+      flex-shrink: 0; font-size: 12px; font-weight: 800; color: #fff;
     }
-    .avatar:hover { box-shadow: 0 0 0 3px rgba(0,87,255,0.18); }
-    .profile-menu {
-      position: absolute; right: 0; top: calc(100% + 8px);
-      background: #fff; border: 1px solid var(--border); border-radius: 12px;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.13); padding: 6px; min-width: 210px;
-      display: none; z-index: 200;
-    }
-    .profile-menu.open { display: block; animation: pmenu-in 0.15s ease; }
-    @keyframes pmenu-in { from{opacity:0;transform:translateY(-6px)} to{opacity:1;transform:translateY(0)} }
-    .profile-menu-header { padding: 10px 12px 8px; border-bottom: 1px solid var(--border); margin-bottom: 4px; }
-    .profile-menu-name  { font-size: 12.5px; font-weight: 700; color: var(--text); }
-    .profile-menu-email { font-size: 10.5px; color: var(--text-m); margin-top: 1px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .profile-menu-item  { display: flex; align-items: center; gap: 9px; padding: 8px 12px; font-size: 12.5px; color: var(--text-s); font-weight: 500; cursor: pointer; border-radius: 8px; transition: background 0.13s, color 0.13s; }
-    .profile-menu-item:hover { background: var(--blue-dim); color: var(--blue); }
-    .profile-menu-item i { width: 14px; height: 14px; }
-    .profile-menu-sep { border: none; border-top: 1px solid var(--border); margin: 4px 0; }
-    .profile-menu-item.danger:hover { background: var(--red-dim); color: var(--red); }
-
-    /* MOBILE NAV */
-    .mob-nav-btn { display: none; width: 34px; height: 34px; border-radius: 9px; background: var(--blue-dim); border: 1px solid var(--blue-border); color: var(--text-s); cursor: pointer; align-items: center; justify-content: center; }
-    .mob-nav-btn i { width: 16px; height: 16px; }
-    .mob-nav-drawer { display: none; position: fixed; inset: 0; z-index: 100; background: rgba(0,0,0,0.4); }
-    .mob-nav-drawer.open { display: block; }
-    .mob-nav-sheet { position: absolute; top: 0; left: 0; width: 260px; height: 100%; background: #fff; border-right: 1px solid var(--border); padding: 20px 16px; display: flex; flex-direction: column; gap: 4px; }
-    .mob-nav-close { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid var(--border); }
-    .mob-nav-close img { width: 24px; height: 24px; object-fit: contain; }
-    .mob-nav-close span { font-size: 14px; font-weight: 800; color: var(--text); }
-    .nav-tab {
-      display: flex; align-items: center; gap: 7px;
-      padding: 9px 14px; border-radius: 9px; cursor: pointer;
-      font-size: 13px; font-weight: 500; color: var(--text-m);
-      transition: background 0.15s, color 0.15s; border: 1px solid transparent; user-select: none;
-    }
-    .nav-tab i { width: 14px; height: 14px; flex-shrink: 0; }
-    .nav-tab:hover { background: var(--blue-dim); color: var(--text-s); }
-    .nav-tab.active { background: var(--blue-dim); color: var(--blue); border-color: var(--blue-border); font-weight: 600; }
-
-    /* PAGE */
-    .page { display: none; }
-    .page.active { display: block; }
-    #page-overview.page.active { background: #fff; min-height: calc(100vh - 62px); }
-
-    /* OTHER PAGES */
-    .inner-page { padding: 28px 32px 80px; }
-    .page-head { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 24px; gap: 16px; flex-wrap: wrap; }
-    .page-head-title { font-size: 21px; font-weight: 800; color: var(--text); letter-spacing: -0.5px; }
-    .page-head-sub { font-size: 12px; color: var(--text-m); margin-top: 3px; }
-    .page-head-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
-
-    /* CARD (other pages) */
-    .card { background: var(--bg-card); border: 1px solid var(--blue-border); border-radius: 14px; box-shadow: var(--card-shadow); overflow: hidden; transition: box-shadow 0.2s, transform 0.2s; }
-    .card:hover { box-shadow: 0 0 0 1px rgba(0,87,255,0.18), var(--card-shadow); transform: translateY(-1px); }
-
-    /* SEC HEAD */
-    .sec-head { display: flex; align-items: center; justify-content: space-between; padding: 15px 20px; border-bottom: 1px solid var(--border); }
-    .sec-title { display: flex; align-items: center; gap: 7px; font-size: 13px; font-weight: 700; color: var(--text); }
-    .sec-title i { width: 14px; height: 14px; color: var(--blue); }
-
-    /* BADGES */
-    .badge { display: inline-flex; align-items: center; padding: 3px 9px; border-radius: 99px; font-size: 10.5px; font-weight: 600; white-space: nowrap; }
-    .b-notconn  { background: rgba(100,116,139,.08); color: #64748b; border: 1px solid rgba(100,116,139,.15); }
-    .b-optional { background: var(--blue-dim); color: var(--blue); border: 1px solid var(--blue-border); }
-    .b-setup    { background: var(--amber-dim); color: var(--amber); border: 1px solid rgba(217,119,6,0.2); }
-    .b-live     { background: var(--green-dim); color: var(--green); border: 1px solid rgba(5,150,105,0.2); }
-    .b-recommended { background: var(--amber-dim); color: var(--amber); border: 1px solid rgba(217,119,6,0.2); }
-
-    /* STAT CARDS */
-    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px,1fr)); gap: 14px; margin-bottom: 22px; }
-    .stat-card { padding: 18px 20px; display: flex; flex-direction: column; gap: 8px; }
-    .stat-top  { display: flex; align-items: center; justify-content: space-between; }
-    .stat-icon { width: 33px; height: 33px; border-radius: 9px; display: flex; align-items: center; justify-content: center; }
-    .stat-icon i { width: 15px; height: 15px; }
-    .si-blue   { background: rgba(0,87,255,.10); color: var(--blue); }
-    .si-green  { background: var(--green-dim);   color: var(--green); }
-    .si-amber  { background: var(--amber-dim);   color: var(--amber); }
-    .si-purple { background: var(--purple-dim);  color: var(--purple); }
-    .stat-val   { font-size: 24px; font-weight: 800; color: var(--text); letter-spacing: -0.8px; line-height: 1; }
-    .stat-label { font-size: 11px; color: var(--text-m); font-weight: 500; }
-
-    /* STATUS BANNER */
-    .status-banner { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-radius: 14px; margin-bottom: 22px; border: 1px solid; gap: 16px; flex-wrap: wrap; }
-    .sb-setup  { background: var(--amber-dim); border-color: rgba(217,119,6,0.22); }
-    .sb-dot    { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
-    .sb-dot.setup { background: var(--amber); animation: pulse-a 2s infinite; }
-    @keyframes pulse-a { 0%{box-shadow:0 0 0 0 rgba(217,119,6,.4)} 70%{box-shadow:0 0 0 5px rgba(217,119,6,0)} 100%{box-shadow:0 0 0 0 rgba(217,119,6,0)} }
-    @keyframes spin { to{transform:rotate(360deg)} }
-    .spinning { animation: spin 0.9s linear infinite; }
-
-    /* CONNECTION CARDS */
-    .conn-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(260px,1fr)); gap: 16px; }
-    .conn-card { padding: 22px; display: flex; flex-direction: column; gap: 14px; }
-    .conn-title { font-size: 14px; font-weight: 700; color: var(--text); }
-    .conn-desc  { font-size: 12px; color: var(--text-m); line-height: 1.55; }
-    .conn-footer{ display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 2px; }
-    .btn-connect{ display: inline-flex; align-items: center; gap: 5px; padding: 7px 14px; border: none; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit; transition: all 0.18s; }
-    .btn-connect i { width: 12px; height: 12px; }
-    .bcp { background: var(--blue); color: #fff; box-shadow: 0 3px 10px rgba(0,87,255,0.25); }
-    .bcp:hover { background: var(--blue-b); transform: translateY(-1px); }
-    .bco { background: transparent; color: var(--text-s); border: 1px solid var(--blue-border); }
-    .bco:hover { background: var(--blue-dim); }
-
-    /* ACTION CARDS (automation page) */
-    .action-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); gap: 16px; }
-    .action-card { padding: 24px 22px; display: flex; flex-direction: column; gap: 14px; }
-    .action-card-icon { width: 48px; height: 48px; border-radius: 14px; display: flex; align-items: center; justify-content: center; }
-    .action-card-icon i { width: 22px; height: 22px; }
-    .action-card-title { font-size: 15px; font-weight: 800; color: var(--text); letter-spacing: -0.3px; }
-    .action-card-desc  { font-size: 12px; color: var(--text-m); line-height: 1.55; flex: 1; }
-    .acbtn { display: inline-flex; align-items: center; gap: 6px; padding: 9px 18px; border: none; border-radius: 9px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit; transition: all 0.18s; align-self: flex-start; }
-    .acbtn i { width: 14px; height: 14px; }
-    .acbtn-green  { background: var(--green); color: #fff; box-shadow: 0 4px 14px rgba(5,150,105,0.3); }
-    .acbtn-green:hover { filter: brightness(1.1); transform: translateY(-1px); }
-    .acbtn-amber  { background: var(--amber); color: #fff; }
-    .acbtn-amber:hover { filter: brightness(1.1); transform: translateY(-1px); }
-    .acbtn-blue   { background: var(--blue); color: #fff; box-shadow: 0 4px 14px rgba(0,87,255,0.3); }
-    .acbtn-blue:hover { background: var(--blue-b); transform: translateY(-1px); }
-    .acbtn-purple { background: var(--purple); color: #fff; }
-    .acbtn-purple:hover { filter: brightness(1.1); transform: translateY(-1px); }
-
-    /* STATUS ROWS */
-    .status-row { display: flex; align-items: center; justify-content: space-between; padding: 13px 20px; border-bottom: 1px solid var(--border); }
-    .status-row:last-child { border-bottom: none; }
-    .status-row-left { display: flex; align-items: center; gap: 10px; }
-    .status-row-icon { width: 30px; height: 30px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-    .status-row-icon i { width: 13px; height: 13px; }
-    .status-row-name { font-size: 12.5px; font-weight: 600; color: var(--text-s); }
-    .status-row-sub  { font-size: 10.5px; color: var(--text-m); margin-top: 1px; }
-
-    /* SETTINGS */
-    .settings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-    .settings-sec { padding: 20px; }
-    .field { margin-bottom: 14px; }
-    .field label { display: block; font-size: 11px; font-weight: 600; color: var(--text-m); margin-bottom: 5px; }
-    .field input,.field select,.field textarea { width: 100%; padding: 8px 12px; background: var(--input-bg); border: 1px solid var(--input-border); border-radius: 8px; color: var(--text); font-size: 12.5px; font-family: inherit; outline: none; transition: border-color 0.15s; resize: vertical; }
-    .field input:focus,.field select:focus { border-color: var(--blue); }
-    .toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); }
-    .toggle-row:last-child { border-bottom: none; }
-    .toggle-label { font-size: 12.5px; color: var(--text-s); font-weight: 500; }
-    .toggle-sub   { font-size: 10.5px; color: var(--text-m); margin-top: 1px; }
-    .toggle { position: relative; width: 36px; height: 20px; background: var(--border); border-radius: 99px; cursor: pointer; transition: background 0.2s; flex-shrink: 0; }
-    .toggle.on { background: var(--blue); }
-    .toggle::after { content:''; position: absolute; width: 14px; height: 14px; border-radius: 50%; background: #fff; top: 3px; left: 3px; transition: left 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
-    .toggle.on::after { left: 19px; }
-
-    /* SUPPORT CARDS */
-    .support-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(240px,1fr)); gap: 16px; }
-    .support-card { padding: 24px 22px; display: flex; flex-direction: column; gap: 12px; cursor: pointer; transition: all 0.2s; }
-    .support-card:hover { transform: translateY(-2px); }
-    .support-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; }
-    .support-icon i { width: 20px; height: 20px; }
-    .support-title { font-size: 14px; font-weight: 700; color: var(--text); }
-    .support-desc  { font-size: 12px; color: var(--text-m); line-height: 1.55; flex: 1; }
-    .support-btn   { display: inline-flex; align-items: center; gap: 5px; padding: 7px 14px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit; transition: all 0.18s; align-self: flex-start; border: none; }
-    .support-btn i { width: 12px; height: 12px; }
-
-    /* EMPTY STATE */
-    .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 36px 20px; gap: 12px; text-align: center; }
-    .empty-state i { width: 32px; height: 32px; color: rgba(15,23,42,0.14); }
-    .empty-state-title { font-size: 13px; font-weight: 700; color: var(--text-s); }
-    .empty-state-text  { font-size: 12px; color: var(--text-m); line-height: 1.6; max-width: 280px; }
-
-    /* MODAL */
-    .modal-overlay { position: fixed; inset: 0; z-index: 200; background: rgba(15,23,42,0.45); backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; padding: 16px; }
-    .modal-overlay.open { display: flex; }
-    .modal { background: #fff; border: 1px solid var(--blue-border); border-radius: 16px; box-shadow: 0 24px 64px rgba(0,0,0,0.18); width: 100%; max-width: 480px; overflow: hidden; animation: modal-in 0.2s ease; }
-    @keyframes modal-in { from{opacity:0;transform:scale(0.95) translateY(10px)} to{opacity:1;transform:scale(1) translateY(0)} }
-    .modal-head { display: flex; align-items: flex-start; justify-content: space-between; padding: 20px 22px 16px; border-bottom: 1px solid var(--border); gap: 12px; }
-    .modal-title { font-size: 15px; font-weight: 800; color: var(--text); }
-    .modal-sub   { font-size: 11.5px; color: var(--text-m); margin-top: 3px; }
-    .modal-close { width: 28px; height: 28px; border-radius: 7px; background: var(--blue-dim); border: none; cursor: pointer; color: var(--text-m); display: flex; align-items: center; justify-content: center; }
-    .modal-close:hover { background: var(--blue-border); }
-    .modal-close i { width: 14px; height: 14px; }
-    .modal-body { padding: 20px 22px; }
-    .modal-body p { font-size: 13px; color: var(--text-s); line-height: 1.65; }
-    .modal-body .field { margin-bottom: 12px; }
-    .modal-body .field:last-child { margin-bottom: 0; }
-    .modal-body textarea { min-height: 90px; }
-    .modal-footer { padding: 14px 22px 20px; display: flex; gap: 10px; justify-content: flex-end; }
-    .btn-mc  { padding: 8px 18px; background: transparent; border: 1px solid var(--blue-border); border-radius: 8px; color: var(--text-s); font-size: 12.5px; font-weight: 600; cursor: pointer; font-family: inherit; }
-    .btn-mc:hover { background: var(--blue-dim); }
-    .btn-mok { padding: 8px 18px; border: none; border-radius: 8px; background: var(--blue); color: #fff; font-size: 12.5px; font-weight: 700; cursor: pointer; font-family: inherit; box-shadow: 0 3px 10px rgba(0,87,255,0.3); }
-    .btn-mok-am { padding: 8px 18px; border: none; border-radius: 8px; background: var(--amber); color: #fff; font-size: 12.5px; font-weight: 700; cursor: pointer; font-family: inherit; }
-    .btn-mok-gr { padding: 8px 18px; border: none; border-radius: 8px; background: var(--green); color: #fff; font-size: 12.5px; font-weight: 700; cursor: pointer; font-family: inherit; }
-    .sync-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border); }
-    .sync-row:last-child { border-bottom: none; }
-    .sync-row-left { display: flex; align-items: center; gap: 10px; }
-    .sync-icon-wrap { width: 32px; height: 32px; border-radius: 9px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-    .sync-icon-wrap i { width: 14px; height: 14px; }
-
-    /* TOAST */
-    #toast { position: fixed; bottom: 24px; right: 24px; z-index: 300; background: #fff; border: 1px solid rgba(5,150,105,0.22); border-radius: 12px; padding: 14px 18px; box-shadow: 0 8px 30px rgba(0,0,0,0.1); display: none; align-items: center; gap: 10px; max-width: 340px; animation: toast-in 0.2s ease; }
-    .toast-icon { width: 28px; height: 28px; border-radius: 50%; background: var(--green-dim); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-    .toast-icon i { width: 13px; height: 13px; color: var(--green); }
-    @keyframes toast-in { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
-
-    .g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-    .mb20 { margin-bottom: 20px; }
-    .p20  { padding: 20px; }
-    .check-item { display: flex; align-items: center; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--border); }
-    .check-item:last-child { border-bottom: none; }
-    .check-icon { width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-    .check-icon i { width: 11px; height: 11px; }
-    .ci-done { background: var(--green-dim); color: var(--green); }
-    .ci-none { background: var(--border); color: var(--text-m); }
-    .check-name { font-size: 12.5px; font-weight: 600; color: var(--text-s); }
-    .check-sub  { font-size: 10.5px; color: var(--text-m); margin-top: 1px; }
-
-    /* ─────────────────────────────────────────
-       PORTAL HOME PAGE STYLES (new design)
-    ───────────────────────────────────────── */
-
-    /* Hero */
-    .portal-hero {
-      text-align: center;
-      padding: 52px 32px 36px;
-      background: #fff;
-      border-bottom: 1px solid var(--border);
-    }
-    .portal-hero-logo {
-      width: 52px; height: 52px; object-fit: contain;
-      display: block; margin: 0 auto 20px;
-    }
-    .portal-hero-title {
-      font-size: 30px; font-weight: 800; letter-spacing: -0.8px;
-      color: var(--text); margin-bottom: 12px;
-    }
-    .portal-hero-sub {
-      font-size: 14.5px; color: var(--text-m); line-height: 1.65;
-      max-width: 440px; margin: 0 auto;
-    }
-
-    /* Centered container */
-    .portal-center {
-      max-width: 760px;
-      margin: 0 auto;
-      padding: 36px 24px 80px;
-    }
-
-    /* Main AI card */
-    .portal-card {
-      background: #fff;
-      border: 1px solid rgba(15,23,42,0.09);
-      border-radius: 20px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.04), 0 16px 48px rgba(0,0,0,0.07);
-      overflow: hidden;
-      margin-bottom: 20px;
-    }
-
-    /* Message thread */
-    .portal-messages {
-      padding: 28px 28px 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-      max-height: 380px;
-      overflow-y: auto;
-    }
-    .portal-msg-row {
-      display: flex;
-      gap: 14px;
-      align-items: flex-start;
-    }
-    .portal-msg-user {
-      flex-direction: row-reverse;
-    }
-
-    /* Bot avatar */
-    .portal-bot-ava {
-      width: 38px; height: 38px; border-radius: 50%;
-      background: #f1f5f9; border: 1px solid var(--border);
-      display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0;
-    }
-    .portal-bot-ava img { width: 22px; height: 22px; object-fit: contain; }
-
-    /* User avatar */
-    .portal-user-ava {
-      width: 38px; height: 38px; border-radius: 50%;
-      background: linear-gradient(135deg, #0057FF, #8b5cf6);
-      display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0; font-size: 13px; font-weight: 800; color: #fff;
-    }
-
-    /* Bot message content */
-    .portal-msg-content { flex: 1; max-width: 85%; }
-    .portal-msg-head {
-      display: flex; align-items: center; gap: 8px; margin-bottom: 7px;
-    }
-    .portal-msg-name { font-size: 13px; font-weight: 700; color: var(--text); }
-    .portal-msg-time { font-size: 11px; color: var(--text-m); }
-    .portal-msg-text {
-      font-size: 14px; color: var(--text-s); line-height: 1.7;
-      background: #f8fafc; border: 1px solid var(--border);
+    .pmsg-content { flex: 1; max-width: 85%; }
+    .pmsg-content-user { display: flex; flex-direction: column; align-items: flex-end; flex: 1; }
+    .pmsg-head { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+    .pmsg-name { font-size: 12.5px; font-weight: 700; color: var(--text); }
+    .pmsg-time { font-size: 11px; color: var(--text-m); }
+    .pmsg-text {
+      font-size: 13.5px; color: var(--text-s); line-height: 1.68;
+      background: rgba(255,255,255,0.9); border: 1px solid var(--border);
       border-radius: 14px; border-top-left-radius: 4px;
-      padding: 14px 18px;
+      padding: 12px 16px;
+      backdrop-filter: blur(8px);
     }
-
-    /* User message content */
-    .portal-msg-content-user { display: flex; flex-direction: column; align-items: flex-end; flex: 1; }
-    .portal-msg-bubble-user {
-      font-size: 14px; color: #fff; line-height: 1.65;
+    .pmsg-bubble-user {
+      font-size: 13.5px; color: #fff; line-height: 1.65;
       background: #0f172a; border-radius: 14px; border-top-right-radius: 4px;
-      padding: 14px 18px; max-width: 100%;
+      padding: 12px 16px; max-width: 100%;
     }
-
-    /* CTA button (in bot response) */
-    .portal-cta-btn {
+    .pmsg-cta {
       display: inline-flex; align-items: center; gap: 6px;
-      margin-top: 12px; padding: 9px 18px;
+      margin-top: 10px; padding: 8px 16px;
       background: var(--blue); color: #fff; border: none;
-      border-radius: 9px; font-size: 12.5px; font-weight: 700;
+      border-radius: 9px; font-size: 12px; font-weight: 700;
       cursor: pointer; font-family: inherit;
-      box-shadow: 0 3px 10px rgba(0,87,255,0.25);
-      transition: all 0.15s;
+      box-shadow: 0 3px 10px rgba(0,87,255,0.25); transition: all 0.15s;
     }
-    .portal-cta-btn:hover { background: var(--blue-b); transform: translateY(-1px); }
+    .pmsg-cta:hover { background: var(--blue-b); transform: translateY(-1px); }
 
-    /* 3 Action cards */
-    .portal-action-grid {
-      display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
-      padding: 0 28px 22px;
-      transition: opacity 0.2s;
+    /* MAIN INPUT CARD */
+    .portal-input-wrap {
+      width: 100%;
+      max-width: 680px;
+      margin-bottom: 18px;
     }
-    .portal-action-btn {
-      display: flex; flex-direction: column; gap: 5px;
-      padding: 16px 18px; background: #fff;
-      border: 1.5px solid rgba(15,23,42,0.09); border-radius: 13px;
-      cursor: pointer; text-align: left; font-family: inherit;
-      transition: border-color 0.15s, background 0.15s, transform 0.15s;
+    .portal-input-card {
+      background: rgba(255,255,255,0.92);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1.5px solid rgba(15,23,42,0.09);
+      border-radius: 20px;
+      box-shadow:
+        0 4px 24px rgba(0,0,0,0.07),
+        0 1px 4px rgba(0,0,0,0.04),
+        inset 0 1px 0 rgba(255,255,255,0.8);
+      padding: 18px 18px 14px 22px;
+      transition: border-color 0.15s, box-shadow 0.15s;
     }
-    .portal-action-btn:hover {
-      border-color: rgba(0,87,255,0.28);
-      background: rgba(0,87,255,0.025);
-      transform: translateY(-1px);
+    .portal-input-card:focus-within {
+      border-color: rgba(0,87,255,0.22);
+      box-shadow: 0 4px 28px rgba(0,87,255,0.09), 0 1px 4px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.8);
     }
-    .portal-action-name { font-size: 13px; font-weight: 700; color: var(--text); display: block; }
-    .portal-action-sub  { font-size: 11.5px; color: var(--text-m); display: block; }
-
-    /* Composer */
-    .portal-composer-wrap {
-      border-top: 1px solid var(--border);
-      padding: 16px 28px 20px;
+    .portal-textarea {
+      width: 100%; border: none; background: transparent; outline: none;
+      font-family: inherit; font-size: 15px; color: var(--text);
+      resize: none; min-height: 26px; max-height: 120px; line-height: 1.6;
+      display: block;
     }
-    .portal-composer {
-      display: flex; align-items: center; gap: 10px;
-      background: #f8fafc; border: 1.5px solid rgba(15,23,42,0.09);
-      border-radius: 14px; padding: 10px 10px 10px 20px;
-      transition: border-color 0.15s;
+    .portal-textarea::placeholder { color: rgba(15,23,42,0.33); }
+    .portal-input-footer {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-top: 14px;
     }
-    .portal-composer:focus-within { border-color: rgba(0,87,255,0.25); }
-    .portal-composer-input {
-      flex: 1; border: none; background: transparent; outline: none;
-      font-family: inherit; font-size: 14px; color: var(--text); min-width: 0;
+    .portal-mode-pill {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 5px 13px;
+      background: var(--blue-dim); border: 1px solid var(--blue-border);
+      border-radius: 99px; font-size: 11px; font-weight: 600; color: var(--blue);
+      cursor: default; user-select: none;
     }
-    .portal-composer-input::placeholder { color: rgba(15,23,42,0.35); }
-    .portal-composer-send {
-      width: 38px; height: 38px; border-radius: 10px;
+    .portal-mode-pill i { width: 11px; height: 11px; }
+    .portal-send {
+      width: 40px; height: 40px; border-radius: 12px;
       background: var(--blue); border: none; color: #fff;
       display: flex; align-items: center; justify-content: center;
       cursor: pointer; flex-shrink: 0;
-      box-shadow: 0 3px 10px rgba(0,87,255,0.3);
+      box-shadow: 0 4px 14px rgba(0,87,255,0.32);
       transition: all 0.15s;
     }
-    .portal-composer-send:hover { background: var(--blue-b); }
-    .portal-composer-send i { width: 16px; height: 16px; }
+    .portal-send:hover { background: var(--blue-b); transform: scale(1.06); }
+    .portal-send i { width: 18px; height: 18px; }
 
-    /* 3 Lower cards */
+    /* PROMPT PILLS */
+    .portal-pills {
+      display: flex; gap: 8px; flex-wrap: wrap; justify-content: center;
+      max-width: 680px; width: 100%;
+      transition: opacity 0.3s, max-height 0.3s;
+      max-height: 80px; overflow: hidden;
+    }
+    .portal-pills.away { opacity: 0; max-height: 0; pointer-events: none; }
+    .portal-pill {
+      padding: 7px 16px;
+      background: rgba(255,255,255,0.8);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(15,23,42,0.1);
+      border-radius: 99px; font-size: 12.5px; font-weight: 500;
+      color: var(--text-s); cursor: pointer; font-family: inherit;
+      transition: all 0.15s; white-space: nowrap;
+    }
+    .portal-pill:hover {
+      border-color: var(--blue-border); color: var(--blue);
+      background: rgba(255,255,255,0.96); transform: translateY(-1px);
+    }
+
+    /* FLOATING CARDS (bottom section) */
     .portal-lower {
-      display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px;
+      width: 100%; padding: 0 24px 40px;
+      display: flex; justify-content: center;
+      transition: opacity 0.3s, max-height 0.4s;
+      max-height: 400px; overflow: hidden;
     }
-    .portal-lower-card {
-      background: #fff; border: 1px solid rgba(15,23,42,0.08);
-      border-radius: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.04);
-      padding: 22px;
+    .portal-lower.away { opacity: 0; max-height: 0; pointer-events: none; }
+    .portal-cards-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      width: 100%; max-width: 1060px;
     }
-    .portal-lower-heading {
-      font-size: 13px; font-weight: 700; color: var(--text);
-      margin-bottom: 16px;
+    .portal-fcard {
+      background: rgba(255,255,255,0.78);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(255,255,255,0.75);
+      border-radius: 18px;
+      box-shadow:
+        0 4px 20px rgba(0,0,0,0.07),
+        0 1px 4px rgba(0,0,0,0.04),
+        inset 0 1px 0 rgba(255,255,255,0.9);
+      padding: 20px 22px;
     }
-
-    /* Workspace snapshot rows */
-    .portal-info-row {
+    .portal-fcard-header {
+      display: flex; align-items: center; gap: 8px;
+      margin-bottom: 14px;
+    }
+    .portal-fcard-icon {
+      width: 30px; height: 30px; border-radius: 9px;
+      background: var(--blue-dim); display: flex;
+      align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .portal-fcard-icon i { width: 14px; height: 14px; color: var(--blue); }
+    .portal-fcard-title { font-size: 12px; font-weight: 700; color: var(--text-s); }
+    .portal-frow {
       display: flex; align-items: center; justify-content: space-between;
-      padding: 9px 0; border-bottom: 1px solid var(--border); font-size: 12.5px;
+      padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 12.5px;
     }
-    .portal-info-row:last-child { border-bottom: none; }
-    .portal-info-label { color: var(--text-m); font-weight: 500; }
-    .portal-info-val   { color: var(--text); font-weight: 600; }
-    .portal-status-active {
-      display: inline-flex; align-items: center; gap: 5px;
-      padding: 2px 9px; background: var(--green-dim);
-      border: 1px solid rgba(5,150,105,0.2); color: var(--green);
-      border-radius: 99px; font-size: 10.5px; font-weight: 700;
+    .portal-frow:last-child { border-bottom: none; }
+    .portal-frow-label { color: var(--text-m); font-weight: 500; }
+    .portal-frow-val   { color: var(--text); font-weight: 600; font-size: 12px; }
+    .portal-frow-tag {
+      display: inline-flex; padding: 1px 7px; border-radius: 99px;
+      font-size: 10px; font-weight: 700;
     }
-
-    /* What's Next rows */
-    .portal-next-item {
+    .tag-amber { background: var(--amber-dim); color: var(--amber); }
+    .tag-blue  { background: var(--blue-dim);  color: var(--blue); }
+    .portal-step-row {
       display: flex; align-items: center; justify-content: space-between;
-      padding: 12px 0; border-bottom: 1px solid var(--border);
+      padding: 10px 0; border-bottom: 1px solid var(--border);
       cursor: pointer; transition: opacity 0.12s;
     }
-    .portal-next-item:last-child { border-bottom: none; }
-    .portal-next-item:hover { opacity: 0.65; }
-    .portal-next-label { font-size: 12.5px; font-weight: 600; color: var(--text-s); margin-bottom: 3px; }
-    .portal-next-badge {
-      font-size: 10px; font-weight: 700; display: inline-block;
-    }
-    .portal-next-badge-amber { color: var(--amber); }
-    .portal-next-badge-blue  { color: var(--blue); }
-    .portal-next-chev { width: 14px; height: 14px; color: var(--text-m); flex-shrink: 0; }
-
-    /* Empty state (recent activity) */
-    .portal-empty-state {
+    .portal-step-row:last-child { border-bottom: none; }
+    .portal-step-row:hover { opacity: 0.65; }
+    .portal-step-label { font-size: 12.5px; font-weight: 600; color: var(--text-s); margin-bottom: 2px; }
+    .portal-step-chev  { width: 13px; height: 13px; color: var(--text-m); flex-shrink: 0; }
+    .portal-fcard-empty {
       display: flex; flex-direction: column; align-items: center;
-      justify-content: center; gap: 10px; padding: 28px 12px; text-align: center;
+      gap: 8px; padding: 18px 0; text-align: center;
     }
-    .portal-empty-state i { width: 24px; height: 24px; color: rgba(15,23,42,0.18); }
-    .portal-empty-state span { font-size: 12.5px; color: var(--text-m); font-weight: 600; }
-    .portal-empty-sub { font-size: 11.5px; color: var(--text-m); opacity: 0.7; margin-top: -4px; }
+    .portal-fcard-empty i { width: 22px; height: 22px; color: rgba(15,23,42,0.18); }
+    .portal-fcard-empty-title { font-size: 12.5px; font-weight: 700; color: var(--text-s); }
+    .portal-fcard-empty-sub   { font-size: 11.5px; color: var(--text-m); line-height: 1.55; }
 
-    /* ─── RESPONSIVE ─── */
-    @media (max-width: 860px) {
-      .mob-nav-btn { display: flex; }
-      .topnav-bar { padding: 0 16px; gap: 10px; }
-      .inner-page { padding: 20px 16px 80px; }
-      .conn-grid,.action-grid,.support-grid,.settings-grid { grid-template-columns: 1fr; }
-      .g2 { grid-template-columns: 1fr; }
-      .stats-grid { grid-template-columns: 1fr 1fr; }
-      .portal-hero { padding: 36px 16px 26px; }
-      .portal-hero-title { font-size: 23px; }
-      .portal-center { padding: 20px 16px 60px; }
-      .portal-messages { padding: 20px 20px 14px; max-height: 300px; }
-      .portal-action-grid { grid-template-columns: 1fr; padding: 0 20px 20px; }
-      .portal-composer-wrap { padding: 14px 20px 18px; }
-      .portal-lower { grid-template-columns: 1fr; }
+    /* ─── OTHER PAGES ─── */
+    .inner-page{padding:28px 32px 80px}
+    .page-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px;gap:16px;flex-wrap:wrap}
+    .page-head-title{font-size:21px;font-weight:800;color:var(--text);letter-spacing:-0.5px}
+    .page-head-sub{font-size:12px;color:var(--text-m);margin-top:3px}
+    .page-head-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    .card{background:var(--bg-card);border:1px solid var(--blue-border);border-radius:14px;box-shadow:var(--card-shadow);overflow:hidden;transition:box-shadow 0.2s,transform 0.2s}
+    .card:hover{box-shadow:0 0 0 1px rgba(0,87,255,0.18),var(--card-shadow);transform:translateY(-1px)}
+    .sec-head{display:flex;align-items:center;justify-content:space-between;padding:15px 20px;border-bottom:1px solid var(--border)}
+    .sec-title{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:700;color:var(--text)}
+    .sec-title i{width:14px;height:14px;color:var(--blue)}
+    .badge{display:inline-flex;align-items:center;padding:3px 9px;border-radius:99px;font-size:10.5px;font-weight:600;white-space:nowrap}
+    .b-notconn{background:rgba(100,116,139,.08);color:#64748b;border:1px solid rgba(100,116,139,.15)}
+    .b-optional{background:var(--blue-dim);color:var(--blue);border:1px solid var(--blue-border)}
+    .b-setup{background:var(--amber-dim);color:var(--amber);border:1px solid rgba(217,119,6,0.2)}
+    .b-live{background:var(--green-dim);color:var(--green);border:1px solid rgba(5,150,105,0.2)}
+    .conn-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+    .conn-card{padding:22px;display:flex;flex-direction:column;gap:14px}
+    .conn-title{font-size:14px;font-weight:700;color:var(--text)}
+    .conn-desc{font-size:12px;color:var(--text-m);line-height:1.55}
+    .conn-footer{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:2px}
+    .btn-connect{display:inline-flex;align-items:center;gap:5px;padding:7px 14px;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:all 0.18s}
+    .btn-connect i{width:12px;height:12px}
+    .bcp{background:var(--blue);color:#fff;box-shadow:0 3px 10px rgba(0,87,255,0.25)}
+    .bcp:hover{background:var(--blue-b);transform:translateY(-1px)}
+    .bco{background:transparent;color:var(--text-s);border:1px solid var(--blue-border)}
+    .bco:hover{background:var(--blue-dim)}
+    .action-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}
+    .action-card{padding:24px 22px;display:flex;flex-direction:column;gap:14px}
+    .action-card-icon{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center}
+    .action-card-icon i{width:22px;height:22px}
+    .action-card-title{font-size:15px;font-weight:800;color:var(--text);letter-spacing:-0.3px}
+    .action-card-desc{font-size:12px;color:var(--text-m);line-height:1.55;flex:1}
+    .acbtn{display:inline-flex;align-items:center;gap:6px;padding:9px 18px;border:none;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;transition:all 0.18s;align-self:flex-start}
+    .acbtn i{width:14px;height:14px}
+    .acbtn-green{background:var(--green);color:#fff;box-shadow:0 4px 14px rgba(5,150,105,0.3)}
+    .acbtn-green:hover{filter:brightness(1.1);transform:translateY(-1px)}
+    .acbtn-amber{background:var(--amber);color:#fff}
+    .acbtn-amber:hover{filter:brightness(1.1);transform:translateY(-1px)}
+    .acbtn-blue{background:var(--blue);color:#fff;box-shadow:0 4px 14px rgba(0,87,255,0.3)}
+    .acbtn-blue:hover{background:var(--blue-b);transform:translateY(-1px)}
+    .acbtn-purple{background:var(--purple);color:#fff}
+    .acbtn-purple:hover{filter:brightness(1.1);transform:translateY(-1px)}
+    .status-banner{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-radius:14px;margin-bottom:22px;border:1px solid;gap:16px;flex-wrap:wrap}
+    .sb-setup{background:var(--amber-dim);border-color:rgba(217,119,6,0.22)}
+    .sb-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+    .sb-dot.setup{background:var(--amber);animation:pulse-a 2s infinite}
+    @keyframes pulse-a{0%{box-shadow:0 0 0 0 rgba(217,119,6,.4)}70%{box-shadow:0 0 0 5px rgba(217,119,6,0)}100%{box-shadow:0 0 0 0 rgba(217,119,6,0)}}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .spinning{animation:spin 0.9s linear infinite}
+    .status-row{display:flex;align-items:center;justify-content:space-between;padding:13px 20px;border-bottom:1px solid var(--border)}
+    .status-row:last-child{border-bottom:none}
+    .status-row-left{display:flex;align-items:center;gap:10px}
+    .status-row-icon{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    .status-row-icon i{width:13px;height:13px}
+    .status-row-name{font-size:12.5px;font-weight:600;color:var(--text-s)}
+    .status-row-sub{font-size:10.5px;color:var(--text-m);margin-top:1px}
+    .si-blue{background:rgba(0,87,255,.10);color:var(--blue)}
+    .si-green{background:var(--green-dim);color:var(--green)}
+    .si-amber{background:var(--amber-dim);color:var(--amber)}
+    .settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+    .settings-sec{padding:20px}
+    .field{margin-bottom:14px}
+    .field label{display:block;font-size:11px;font-weight:600;color:var(--text-m);margin-bottom:5px}
+    .field input,.field select,.field textarea{width:100%;padding:8px 12px;background:var(--input-bg);border:1px solid var(--input-border);border-radius:8px;color:var(--text);font-size:12.5px;font-family:inherit;outline:none;transition:border-color 0.15s;resize:vertical}
+    .field input:focus,.field select:focus{border-color:var(--blue)}
+    .toggle-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)}
+    .toggle-row:last-child{border-bottom:none}
+    .toggle-label{font-size:12.5px;color:var(--text-s);font-weight:500}
+    .toggle-sub{font-size:10.5px;color:var(--text-m);margin-top:1px}
+    .toggle{position:relative;width:36px;height:20px;background:var(--border);border-radius:99px;cursor:pointer;transition:background 0.2s;flex-shrink:0}
+    .toggle.on{background:var(--blue)}
+    .toggle::after{content:'';position:absolute;width:14px;height:14px;border-radius:50%;background:#fff;top:3px;left:3px;transition:left 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.2)}
+    .toggle.on::after{left:19px}
+    .support-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+    .support-card{padding:24px 22px;display:flex;flex-direction:column;gap:12px;cursor:pointer;transition:all 0.2s}
+    .support-card:hover{transform:translateY(-2px)}
+    .support-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center}
+    .support-icon i{width:20px;height:20px}
+    .support-title{font-size:14px;font-weight:700;color:var(--text)}
+    .support-desc{font-size:12px;color:var(--text-m);line-height:1.55;flex:1}
+    .support-btn{display:inline-flex;align-items:center;gap:5px;padding:7px 14px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:all 0.18s;align-self:flex-start;border:none}
+    .support-btn i{width:12px;height:12px}
+    .empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:36px 20px;gap:12px;text-align:center}
+    .empty-state i{width:32px;height:32px;color:rgba(15,23,42,0.14)}
+    .empty-state-title{font-size:13px;font-weight:700;color:var(--text-s)}
+    .empty-state-text{font-size:12px;color:var(--text-m);line-height:1.6;max-width:280px}
+    .modal-overlay{position:fixed;inset:0;z-index:200;background:rgba(15,23,42,0.45);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;padding:16px}
+    .modal-overlay.open{display:flex}
+    .modal{background:#fff;border:1px solid var(--blue-border);border-radius:16px;box-shadow:0 24px 64px rgba(0,0,0,0.18);width:100%;max-width:480px;overflow:hidden;animation:modal-in 0.2s ease}
+    @keyframes modal-in{from{opacity:0;transform:scale(0.95) translateY(10px)}to{opacity:1;transform:scale(1) translateY(0)}}
+    .modal-head{display:flex;align-items:flex-start;justify-content:space-between;padding:20px 22px 16px;border-bottom:1px solid var(--border);gap:12px}
+    .modal-title{font-size:15px;font-weight:800;color:var(--text)}
+    .modal-sub{font-size:11.5px;color:var(--text-m);margin-top:3px}
+    .modal-close{width:28px;height:28px;border-radius:7px;background:var(--blue-dim);border:none;cursor:pointer;color:var(--text-m);display:flex;align-items:center;justify-content:center}
+    .modal-close:hover{background:var(--blue-border)}
+    .modal-close i{width:14px;height:14px}
+    .modal-body{padding:20px 22px}
+    .modal-body p{font-size:13px;color:var(--text-s);line-height:1.65}
+    .modal-body .field{margin-bottom:12px}
+    .modal-body .field:last-child{margin-bottom:0}
+    .modal-body textarea{min-height:90px}
+    .modal-footer{padding:14px 22px 20px;display:flex;gap:10px;justify-content:flex-end}
+    .btn-mc{padding:8px 18px;background:transparent;border:1px solid var(--blue-border);border-radius:8px;color:var(--text-s);font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit}
+    .btn-mc:hover{background:var(--blue-dim)}
+    .btn-mok{padding:8px 18px;border:none;border-radius:8px;background:var(--blue);color:#fff;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 3px 10px rgba(0,87,255,0.3)}
+    .btn-mok-am{padding:8px 18px;border:none;border-radius:8px;background:var(--amber);color:#fff;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit}
+    .btn-mok-gr{padding:8px 18px;border:none;border-radius:8px;background:var(--green);color:#fff;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit}
+    .sync-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border)}
+    .sync-row:last-child{border-bottom:none}
+    .sync-row-left{display:flex;align-items:center;gap:10px}
+    .sync-icon-wrap{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    .sync-icon-wrap i{width:14px;height:14px}
+    #toast{position:fixed;bottom:24px;right:24px;z-index:300;background:#fff;border:1px solid rgba(5,150,105,0.22);border-radius:12px;padding:14px 18px;box-shadow:0 8px 30px rgba(0,0,0,0.1);display:none;align-items:center;gap:10px;max-width:340px;animation:toast-in 0.2s ease}
+    .toast-icon{width:28px;height:28px;border-radius:50%;background:var(--green-dim);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    .toast-icon i{width:13px;height:13px;color:var(--green)}
+    @keyframes toast-in{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+    .g2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+    .mb20{margin-bottom:20px}
+    .p20{padding:20px}
+
+    /* RESPONSIVE */
+    @media(max-width:900px){
+      .portal-cards-grid{grid-template-columns:1fr}
+      .portal-lower{max-height:none}
     }
-    @media (max-width: 480px) {
-      .ai-pill { display: none; }
-      .topnav-right .lbl { display: none; }
-      .btn-sync, .topnav-dash-link { padding: 8px 12px; }
+    @media(max-width:860px){
+      .mob-nav-btn{display:flex}
+      .topnav-bar{padding:0 16px;gap:10px}
+      .inner-page{padding:20px 16px 80px}
+      .conn-grid,.action-grid,.support-grid,.settings-grid{grid-template-columns:1fr}
+      .g2{grid-template-columns:1fr}
+      .portal-upper{padding:36px 16px 24px}
+      .portal-greeting-title{font-size:26px}
+      .portal-greeting-sub{font-size:14px}
+      .portal-lower{padding:0 16px 32px}
+    }
+    @media(max-width:480px){
+      .ai-pill{display:none}
+      .topnav-right .lbl{display:none}
+      .btn-sync,.topnav-dash-link{padding:8px 12px}
+      .portal-pills{gap:6px}
+      .portal-pill{font-size:12px;padding:6px 13px}
     }
   </style>
 </head>
@@ -552,7 +496,7 @@
   <p class="ag-label">Signing you in…</p>
 </div>
 
-<!-- MOBILE NAV DRAWER -->
+<!-- MOBILE DRAWER -->
 <div id="mob-nav-drawer" class="mob-nav-drawer" onclick="closeMobNav(event)">
   <div class="mob-nav-sheet">
     <div class="mob-nav-close">
@@ -570,7 +514,7 @@
 
 <div id="app" style="display:none;">
 
-<!-- TOP NAVIGATION -->
+<!-- TOP NAV -->
 <nav class="topnav">
   <div class="topnav-bar">
     <div class="topnav-brand">
@@ -578,15 +522,13 @@
       <div class="topnav-brand-name">flowaify</div>
       <span class="ai-pill"><i data-lucide="sparkles"></i> AI Assistant</span>
     </div>
-
     <button class="mob-nav-btn" onclick="openMobNav()"><i data-lucide="menu"></i></button>
-
     <div class="topnav-right">
       <button class="btn-sync" onclick="openModal('modal-sync')">
-        <i data-lucide="plug"></i> <span class="lbl">Connect &amp; Sync</span>
+        <i data-lucide="plug"></i><span class="lbl"> Connect &amp; Sync</span>
       </button>
       <a class="topnav-dash-link" href="dashboard.html">
-        <i data-lucide="bar-chart-2"></i> <span class="lbl">Open Dashboard</span>
+        <i data-lucide="bar-chart-2"></i><span class="lbl"> Open Dashboard</span>
       </a>
       <div class="avatar-wrap">
         <div class="avatar" id="portal-avatar" onclick="toggleProfileMenu()">—</div>
@@ -611,127 +553,125 @@
   </div>
 </nav>
 
-<!-- ─── OVERVIEW / AI ASSISTANT ─── -->
+<!-- ═══════════════════════════════════════
+     OVERVIEW — AI ASSISTANT HOME
+═══════════════════════════════════════ -->
 <div class="page active" id="page-overview">
+<div class="portal-home">
 
-  <!-- Hero -->
-  <div class="portal-hero">
-    <img src="logo-transparent.png" class="portal-hero-logo" alt="Flowaify" onerror="this.style.display='none'" />
-    <h1 class="portal-hero-title">Flowaify AI Assistant</h1>
-    <p class="portal-hero-sub">Your workspace is ready. Recommended next steps: connect email, connect CRM, and review automations.</p>
-  </div>
+  <!-- UPPER ZONE: greeting + messages + input + pills -->
+  <div class="portal-upper">
 
-  <!-- Centered content -->
-  <div class="portal-center">
+    <!-- Greeting -->
+    <div class="portal-greeting" id="portal-greeting">
+      <div class="portal-greeting-title" id="portal-greeting-title">Good afternoon</div>
+      <div class="portal-greeting-sub">What can Flowy help you with today?</div>
+    </div>
 
-    <!-- Main AI card -->
-    <div class="portal-card">
+    <!-- Messages (shows when chat starts) -->
+    <div class="portal-messages-zone" id="portal-messages-zone"></div>
 
-      <!-- Message thread -->
-      <div class="portal-messages" id="ai-chat-scroll">
-        <div class="portal-msg-row portal-msg-bot">
-          <div class="portal-bot-ava">
-            <img src="logo-transparent.png" alt="" onerror="this.style.display='none'" />
-          </div>
-          <div class="portal-msg-content">
-            <div class="portal-msg-head">
-              <span class="portal-msg-name">Flowy</span>
-              <span class="portal-msg-time">Just now</span>
-            </div>
-            <div class="portal-msg-text">Hi! I'm Flowy, your AI business assistant. I can help you get set up, connect your tools, and review your automations. What would you like to do first?</div>
-          </div>
+    <!-- Main input -->
+    <div class="portal-input-wrap">
+      <div class="portal-input-card">
+        <textarea
+          id="ai-input"
+          class="portal-textarea"
+          placeholder="Ask Flowy anything about your workspace…"
+          rows="1"
+        ></textarea>
+        <div class="portal-input-footer">
+          <div class="portal-mode-pill"><i data-lucide="sparkles"></i> Workspace Assistant</div>
+          <button class="portal-send" onclick="sendAiMessage()"><i data-lucide="arrow-up"></i></button>
         </div>
       </div>
+    </div>
 
-      <!-- 3 Action cards -->
-      <div class="portal-action-grid" id="portal-action-grid">
-        <button class="portal-action-btn" onclick="aiAction('email')">
-          <span class="portal-action-name">Connect email</span>
-          <span class="portal-action-sub">Link your email account</span>
-        </button>
-        <button class="portal-action-btn" onclick="aiAction('crm')">
-          <span class="portal-action-name">Connect CRM</span>
-          <span class="portal-action-sub">Sync your CRM to Flowaify</span>
-        </button>
-        <button class="portal-action-btn" onclick="aiAction('automations')">
-          <span class="portal-action-name">Review automations</span>
-          <span class="portal-action-sub">See what's running and improve</span>
-        </button>
-      </div>
+    <!-- Prompt pills -->
+    <div class="portal-pills" id="portal-pills">
+      <button class="portal-pill" onclick="pillAction('email')">Connect my email</button>
+      <button class="portal-pill" onclick="pillAction('automations')">Review my automations</button>
+      <button class="portal-pill" onclick="pillAction('next')">Show what's next</button>
+      <button class="portal-pill" onclick="window.location.href='dashboard.html'">Open my dashboard</button>
+      <button class="portal-pill" onclick="openModal('modal-invite-team')">Invite my team</button>
+    </div>
 
-      <!-- Chat input -->
-      <div class="portal-composer-wrap">
-        <div class="portal-composer">
-          <input type="text" id="ai-input" class="portal-composer-input" placeholder="Ask Flowy anything about your workspace…" />
-          <button class="portal-composer-send" onclick="sendAiMessage()"><i data-lucide="arrow-up"></i></button>
-        </div>
-      </div>
+  </div><!-- /portal-upper -->
 
-    </div><!-- /portal-card -->
-
-    <!-- 3 Lower cards -->
-    <div class="portal-lower">
+  <!-- LOWER ZONE: floating cards -->
+  <div class="portal-lower" id="portal-lower">
+    <div class="portal-cards-grid">
 
       <!-- Workspace Snapshot -->
-      <div class="portal-lower-card">
-        <div class="portal-lower-heading">Workspace Snapshot</div>
-        <div class="portal-info-row">
-          <span class="portal-info-label">Workspace</span>
-          <span class="portal-info-val" id="snapshot-name">—</span>
+      <div class="portal-fcard">
+        <div class="portal-fcard-header">
+          <div class="portal-fcard-icon"><i data-lucide="layout-grid"></i></div>
+          <div class="portal-fcard-title">Workspace Snapshot</div>
         </div>
-        <div class="portal-info-row">
-          <span class="portal-info-label">Status</span>
-          <span class="portal-status-active">Active</span>
+        <div class="portal-frow">
+          <span class="portal-frow-label">Email connection</span>
+          <span class="portal-frow-val">Not connected</span>
         </div>
-        <div class="portal-info-row">
-          <span class="portal-info-label">Connected tools</span>
-          <span class="portal-info-val">—</span>
+        <div class="portal-frow">
+          <span class="portal-frow-label">CRM sync</span>
+          <span class="portal-frow-val">Not connected</span>
         </div>
-        <div class="portal-info-row">
-          <span class="portal-info-label">Active automations</span>
-          <span class="portal-info-val">—</span>
+        <div class="portal-frow">
+          <span class="portal-frow-label">Automations</span>
+          <span class="portal-frow-val">—</span>
+        </div>
+        <div class="portal-frow" style="border:none;">
+          <span class="portal-frow-label">Team members</span>
+          <span class="portal-frow-val">—</span>
         </div>
       </div>
 
-      <!-- What's Next -->
-      <div class="portal-lower-card">
-        <div class="portal-lower-heading">What's Next</div>
-        <div class="portal-next-item" onclick="openModal('modal-request-setup')">
-          <div>
-            <div class="portal-next-label">Connect your email</div>
-            <div class="portal-next-badge portal-next-badge-amber">Recommended</div>
-          </div>
-          <i data-lucide="chevron-right" class="portal-next-chev"></i>
+      <!-- Recommended Next Steps -->
+      <div class="portal-fcard">
+        <div class="portal-fcard-header">
+          <div class="portal-fcard-icon"><i data-lucide="list-checks"></i></div>
+          <div class="portal-fcard-title">Recommended Next Steps</div>
         </div>
-        <div class="portal-next-item" onclick="openModal('modal-request-setup')">
+        <div class="portal-step-row" onclick="openModal('modal-request-setup')">
           <div>
-            <div class="portal-next-label">Connect your CRM</div>
-            <div class="portal-next-badge portal-next-badge-amber">Recommended</div>
+            <div class="portal-step-label">Connect your email</div>
+            <span class="portal-frow-tag tag-amber">Recommended</span>
           </div>
-          <i data-lucide="chevron-right" class="portal-next-chev"></i>
+          <i data-lucide="chevron-right" class="portal-step-chev"></i>
         </div>
-        <div class="portal-next-item" onclick="showPage('automation')">
+        <div class="portal-step-row" onclick="openModal('modal-request-setup')">
           <div>
-            <div class="portal-next-label">Review automation performance</div>
-            <div class="portal-next-badge portal-next-badge-blue">Suggested</div>
+            <div class="portal-step-label">Connect your CRM</div>
+            <span class="portal-frow-tag tag-amber">Recommended</span>
           </div>
-          <i data-lucide="chevron-right" class="portal-next-chev"></i>
+          <i data-lucide="chevron-right" class="portal-step-chev"></i>
+        </div>
+        <div class="portal-step-row" onclick="showPage('automation')" style="border:none;">
+          <div>
+            <div class="portal-step-label">Review automation setup</div>
+            <span class="portal-frow-tag tag-blue">Suggested</span>
+          </div>
+          <i data-lucide="chevron-right" class="portal-step-chev"></i>
         </div>
       </div>
 
       <!-- Recent Activity -->
-      <div class="portal-lower-card">
-        <div class="portal-lower-heading">Recent Activity</div>
-        <div class="portal-empty-state">
+      <div class="portal-fcard">
+        <div class="portal-fcard-header">
+          <div class="portal-fcard-icon"><i data-lucide="clock"></i></div>
+          <div class="portal-fcard-title">Recent Workspace Activity</div>
+        </div>
+        <div class="portal-fcard-empty">
           <i data-lucide="clock"></i>
-          <span>No activity yet</span>
-          <span class="portal-empty-sub">Your recent activity will appear here</span>
+          <div class="portal-fcard-empty-title">No recent activity yet</div>
+          <div class="portal-fcard-empty-sub">Once your tools are connected, Flowy will show updates here.</div>
         </div>
       </div>
 
-    </div><!-- /portal-lower -->
+    </div>
+  </div><!-- /portal-lower -->
 
-  </div><!-- /portal-center -->
+</div><!-- /portal-home -->
 </div><!-- /page-overview -->
 
 <!-- ─── CONNECTIONS ─── -->
@@ -745,56 +685,29 @@
       </div>
     </div>
     <div class="conn-grid">
-      <div class="card conn-card">
-        <div style="display:flex;align-items:center;justify-content:space-between;"><div style="width:44px;height:44px;border-radius:12px;background:rgba(0,87,255,.10);display:flex;align-items:center;justify-content:center;"><i data-lucide="mail" style="color:var(--blue);width:20px;height:20px;"></i></div><div class="badge b-notconn">Not Connected</div></div>
-        <div><div class="conn-title">Email Connection</div><div class="conn-desc">Connect Google Workspace or Microsoft Outlook so Flowaify can send and track automated email follow-ups on your behalf.</div></div>
-        <div class="conn-footer"><div style="font-size:11px;color:var(--text-m);">Not connected</div><button class="btn-connect bcp" onclick="openModal('modal-request-setup')"><i data-lucide="plus" style="width:11px;height:11px;"></i> Connect Email</button></div>
-      </div>
-      <div class="card conn-card">
-        <div style="display:flex;align-items:center;justify-content:space-between;"><div style="width:44px;height:44px;border-radius:12px;background:rgba(139,92,246,.10);display:flex;align-items:center;justify-content:center;"><i data-lucide="database" style="color:var(--purple);width:20px;height:20px;"></i></div><div class="badge b-notconn">Not Connected</div></div>
-        <div><div class="conn-title">Flow CRM</div><div class="conn-desc">Connect Flow CRM so leads, notes, and pipeline updates stay organized automatically. Flowaify syncs lead data, deals, and activity in real time.</div></div>
-        <div class="conn-footer"><div style="font-size:11px;color:var(--text-m);">Flow CRM · Not connected</div><button class="btn-connect bcp" onclick="openModal('modal-request-setup')"><i data-lucide="plus" style="width:11px;height:11px;"></i> Connect CRM</button></div>
-      </div>
-      <div class="card conn-card">
-        <div style="display:flex;align-items:center;justify-content:space-between;"><div style="width:44px;height:44px;border-radius:12px;background:var(--green-dim);display:flex;align-items:center;justify-content:center;"><i data-lucide="message-circle" style="color:var(--green);width:20px;height:20px;"></i></div><div class="badge b-optional">Optional</div></div>
-        <div><div class="conn-title">SMS Connection</div><div class="conn-desc">Enable SMS automation and instant lead alerts through Twilio. Optional but recommended — text messages get faster responses than email alone.</div></div>
-        <div class="conn-footer"><div style="font-size:11px;color:var(--text-m);">Twilio · Optional</div><button class="btn-connect bcp" onclick="openModal('modal-request-setup')"><i data-lucide="plus" style="width:11px;height:11px;"></i> Connect SMS</button></div>
-      </div>
-      <div class="card conn-card">
-        <div style="display:flex;align-items:center;justify-content:space-between;"><div style="width:44px;height:44px;border-radius:12px;background:var(--amber-dim);display:flex;align-items:center;justify-content:center;"><i data-lucide="calendar" style="color:var(--amber);width:20px;height:20px;"></i></div><div class="badge b-notconn">Not Connected</div></div>
-        <div><div class="conn-title">Calendar Connection</div><div class="conn-desc">Connect a calendar for booking, appointment tracking, and scheduling automations. Flowaify can send confirmation and reminder messages automatically.</div></div>
-        <div class="conn-footer"><div style="font-size:11px;color:var(--text-m);">Not connected</div><button class="btn-connect bcp" onclick="openModal('modal-request-setup')"><i data-lucide="plus" style="width:11px;height:11px;"></i> Connect Calendar</button></div>
-      </div>
+      <div class="card conn-card"><div style="display:flex;align-items:center;justify-content:space-between;"><div style="width:44px;height:44px;border-radius:12px;background:rgba(0,87,255,.10);display:flex;align-items:center;justify-content:center;"><i data-lucide="mail" style="color:var(--blue);width:20px;height:20px;"></i></div><div class="badge b-notconn">Not Connected</div></div><div><div class="conn-title">Email Connection</div><div class="conn-desc">Connect Google Workspace or Microsoft Outlook so Flowaify can send and track automated email follow-ups on your behalf.</div></div><div class="conn-footer"><div style="font-size:11px;color:var(--text-m);">Not connected</div><button class="btn-connect bcp" onclick="openModal('modal-request-setup')"><i data-lucide="plus" style="width:11px;height:11px;"></i> Connect Email</button></div></div>
+      <div class="card conn-card"><div style="display:flex;align-items:center;justify-content:space-between;"><div style="width:44px;height:44px;border-radius:12px;background:rgba(139,92,246,.10);display:flex;align-items:center;justify-content:center;"><i data-lucide="database" style="color:var(--purple);width:20px;height:20px;"></i></div><div class="badge b-notconn">Not Connected</div></div><div><div class="conn-title">Flow CRM</div><div class="conn-desc">Connect Flow CRM so leads, notes, and pipeline updates stay organized automatically. Flowaify syncs lead data, deals, and activity in real time.</div></div><div class="conn-footer"><div style="font-size:11px;color:var(--text-m);">Flow CRM · Not connected</div><button class="btn-connect bcp" onclick="openModal('modal-request-setup')"><i data-lucide="plus" style="width:11px;height:11px;"></i> Connect CRM</button></div></div>
+      <div class="card conn-card"><div style="display:flex;align-items:center;justify-content:space-between;"><div style="width:44px;height:44px;border-radius:12px;background:var(--green-dim);display:flex;align-items:center;justify-content:center;"><i data-lucide="message-circle" style="color:var(--green);width:20px;height:20px;"></i></div><div class="badge b-optional">Optional</div></div><div><div class="conn-title">SMS Connection</div><div class="conn-desc">Enable SMS automation and instant lead alerts through Twilio. Optional but recommended — text messages get faster responses than email alone.</div></div><div class="conn-footer"><div style="font-size:11px;color:var(--text-m);">Twilio · Optional</div><button class="btn-connect bcp" onclick="openModal('modal-request-setup')"><i data-lucide="plus" style="width:11px;height:11px;"></i> Connect SMS</button></div></div>
+      <div class="card conn-card"><div style="display:flex;align-items:center;justify-content:space-between;"><div style="width:44px;height:44px;border-radius:12px;background:var(--amber-dim);display:flex;align-items:center;justify-content:center;"><i data-lucide="calendar" style="color:var(--amber);width:20px;height:20px;"></i></div><div class="badge b-notconn">Not Connected</div></div><div><div class="conn-title">Calendar Connection</div><div class="conn-desc">Connect a calendar for booking, appointment tracking, and scheduling automations. Flowaify can send confirmation and reminder messages automatically.</div></div><div class="conn-footer"><div style="font-size:11px;color:var(--text-m);">Not connected</div><button class="btn-connect bcp" onclick="openModal('modal-request-setup')"><i data-lucide="plus" style="width:11px;height:11px;"></i> Connect Calendar</button></div></div>
     </div>
   </div>
 </div>
 
-<!-- ─── AUTOMATION CONTROL ─── -->
+<!-- ─── AUTOMATION ─── -->
 <div class="page" id="page-automation">
   <div class="inner-page">
-    <div class="page-head">
-      <div><div class="page-head-title">Automation Control</div><div class="page-head-sub">Manage your Flowaify system without touching any technical settings</div></div>
-      <div class="badge b-setup" style="font-size:11.5px;padding:5px 12px;margin-top:4px;">Setup Needed</div>
-    </div>
-    <div class="status-banner sb-setup mb20">
-      <div style="display:flex;align-items:center;gap:12px;">
-        <div class="sb-dot setup"></div>
-        <div>
-          <div style="font-size:14px;font-weight:700;color:var(--amber);">System is not live yet</div>
-          <div style="font-size:11.5px;color:var(--amber);opacity:0.85;margin-top:2px;">Complete your account connections, then click Launch System to go live</div>
-        </div>
-      </div>
-    </div>
+    <div class="page-head"><div><div class="page-head-title">Automation Control</div><div class="page-head-sub">Manage your Flowaify system without touching any technical settings</div></div><div class="badge b-setup" style="font-size:11.5px;padding:5px 12px;margin-top:4px;">Setup Needed</div></div>
+    <div class="status-banner sb-setup mb20"><div style="display:flex;align-items:center;gap:12px;"><div class="sb-dot setup"></div><div><div style="font-size:14px;font-weight:700;color:var(--amber);">System is not live yet</div><div style="font-size:11.5px;color:var(--amber);opacity:0.85;margin-top:2px;">Complete your account connections, then click Launch System to go live</div></div></div></div>
     <div class="action-grid">
-      <div class="card action-card"><div class="action-card-icon" style="background:var(--green-dim);"><i data-lucide="rocket" style="color:var(--green);"></i></div><div class="action-card-title">Launch System</div><div class="action-card-desc">Ready to go live? Launch your Flowaify automation once your accounts are connected. Flowaify will start capturing leads and sending follow-ups automatically.</div><button class="acbtn acbtn-green" onclick="openModal('modal-launch')"><i data-lucide="rocket"></i> Launch System</button></div>
-      <div class="card action-card"><div class="action-card-icon" style="background:var(--amber-dim);"><i data-lucide="pause-circle" style="color:var(--amber);"></i></div><div class="action-card-title">Pause Automation</div><div class="action-card-desc">Temporarily pause all automations without disconnecting your accounts. Flowaify will stop sending follow-ups until you choose to resume.</div><button class="acbtn acbtn-amber" onclick="openModal('modal-pause')"><i data-lucide="pause-circle"></i> Pause Automation</button></div>
-      <div class="card action-card"><div class="action-card-icon" style="background:var(--blue-dim);"><i data-lucide="play-circle" style="color:var(--blue);"></i></div><div class="action-card-title">Resume Automation</div><div class="action-card-desc">Turn your automations back on after a pause. Flowaify will pick up where it left off and continue your active sequences from where they stopped.</div><button class="acbtn acbtn-blue" onclick="openModal('modal-resume')"><i data-lucide="play-circle"></i> Resume Automation</button></div>
-      <div class="card action-card"><div class="action-card-icon" style="background:var(--purple-dim);"><i data-lucide="edit-3" style="color:var(--purple);"></i></div><div class="action-card-title">Request Changes</div><div class="action-card-desc">Need to update your follow-up messages, routing rules, business hours, or workflow settings? Send a change request to the Flowaify team.</div><button class="acbtn acbtn-purple" onclick="openModal('modal-changes')"><i data-lucide="edit-3"></i> Request Changes</button></div>
+      <div class="card action-card"><div class="action-card-icon" style="background:var(--green-dim);"><i data-lucide="rocket" style="color:var(--green);"></i></div><div class="action-card-title">Launch System</div><div class="action-card-desc">Ready to go live? Launch your Flowaify automation once your accounts are connected.</div><button class="acbtn acbtn-green" onclick="openModal('modal-launch')"><i data-lucide="rocket"></i> Launch System</button></div>
+      <div class="card action-card"><div class="action-card-icon" style="background:var(--amber-dim);"><i data-lucide="pause-circle" style="color:var(--amber);"></i></div><div class="action-card-title">Pause Automation</div><div class="action-card-desc">Temporarily pause all automations without disconnecting your accounts.</div><button class="acbtn acbtn-amber" onclick="openModal('modal-pause')"><i data-lucide="pause-circle"></i> Pause Automation</button></div>
+      <div class="card action-card"><div class="action-card-icon" style="background:var(--blue-dim);"><i data-lucide="play-circle" style="color:var(--blue);"></i></div><div class="action-card-title">Resume Automation</div><div class="action-card-desc">Turn your automations back on after a pause. Flowaify will pick up where it left off.</div><button class="acbtn acbtn-blue" onclick="openModal('modal-resume')"><i data-lucide="play-circle"></i> Resume Automation</button></div>
+      <div class="card action-card"><div class="action-card-icon" style="background:var(--purple-dim);"><i data-lucide="edit-3" style="color:var(--purple);"></i></div><div class="action-card-title">Request Changes</div><div class="action-card-desc">Need to update follow-up messages, routing rules, or workflow settings? Send us a request.</div><button class="acbtn acbtn-purple" onclick="openModal('modal-changes')"><i data-lucide="edit-3"></i> Request Changes</button></div>
     </div>
   </div>
 </div>
 
-<!-- ─── BUSINESS SETTINGS ─── -->
+<!-- ─── SETTINGS ─── -->
 <div class="page" id="page-settings">
   <div class="inner-page">
     <div class="page-head"><div><div class="page-head-title">Business Settings</div><div class="page-head-sub">Keep your business information up to date</div></div></div>
@@ -802,41 +715,19 @@
       <div class="card"><div class="sec-head"><div class="sec-title"><i data-lucide="building-2"></i>Business Information</div></div><div class="settings-sec"><div class="field"><label>Business Name</label><input type="text" placeholder="Your Business Name" /></div><div class="field"><label>Main Contact Name</label><input type="text" placeholder="Full name" /></div><div class="field"><label>Business Email</label><input type="email" placeholder="contact@yourbusiness.com" /></div><div class="field"><label>Business Phone</label><input type="text" placeholder="(555) 000-0000" /></div><div class="field"><label>Service Areas</label><input type="text" placeholder="e.g. Miami, FL · South Florida" /></div></div></div>
       <div class="card"><div class="sec-head"><div class="sec-title"><i data-lucide="clock"></i>Schedule &amp; Hours</div></div><div class="settings-sec"><div class="field"><label>Business Hours</label><select><option>Mon–Fri 8AM–8PM</option><option>Mon–Sat 8AM–6PM</option><option>Every day 9AM–9PM</option><option>24 / 7</option><option>Custom</option></select></div><div class="field"><label>Time Zone</label><select><option>EST (UTC-5)</option><option>CST (UTC-6)</option><option>MST (UTC-7)</option><option>PST (UTC-8)</option></select></div><div class="field"><label>Appointment Booking Link</label><input type="text" placeholder="https://calendly.com/yourbusiness" /></div><div class="field"><label>Follow-Up Preferences</label><select><option>Email + SMS (Recommended)</option><option>Email Only</option><option>SMS Only</option></select></div></div></div>
       <div class="card"><div class="sec-head"><div class="sec-title"><i data-lucide="git-branch"></i>Lead Routing &amp; CRM</div></div><div class="settings-sec"><div class="field"><label>Primary CRM Pipeline</label><select><option>Flowaify Pipeline (Flow CRM)</option><option>Main Sales Pipeline</option><option>Custom Pipeline</option></select></div><div class="field"><label>Lead Routing Rules</label><select><option>Auto-assign to owner</option><option>Round-robin distribution</option><option>Manual assignment</option></select></div><div class="field"><label>Default Follow-Up Sequence</label><select><option>14-Day Nurture Sequence</option><option>7-Day Intro Sequence</option><option>Quick Follow-Up (3 days)</option></select></div></div></div>
-      <div class="card"><div class="sec-head"><div class="sec-title"><i data-lucide="bell"></i>Notification Preferences</div></div><div class="settings-sec"><div class="toggle-row"><div><div class="toggle-label">New lead alert</div><div class="toggle-sub">SMS + Email when a new lead arrives</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div><div class="toggle-row"><div><div class="toggle-label">Follow-up confirmation</div><div class="toggle-sub">Notify when a follow-up is sent</div></div><div class="toggle" onclick="this.classList.toggle('on')"></div></div><div class="toggle-row"><div><div class="toggle-label">Appointment booked</div><div class="toggle-sub">Alert when appointment is confirmed</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div><div class="toggle-row"><div><div class="toggle-label">Daily summary</div><div class="toggle-sub">Morning digest of previous day's activity</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div><div class="toggle-row"><div><div class="toggle-label">Weekly report</div><div class="toggle-sub">Performance summary every Monday</div></div><div class="toggle" onclick="this.classList.toggle('on')"></div></div><div style="margin-top:16px;"><button onclick="showToast('Settings saved.')" style="width:100%;padding:9px;background:var(--blue);border:none;border-radius:8px;color:#fff;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 4px 14px rgba(0,87,255,0.25);">Save Business Settings</button></div></div></div>
+      <div class="card"><div class="sec-head"><div class="sec-title"><i data-lucide="bell"></i>Notification Preferences</div></div><div class="settings-sec"><div class="toggle-row"><div><div class="toggle-label">New lead alert</div><div class="toggle-sub">SMS + Email when a new lead arrives</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div><div class="toggle-row"><div><div class="toggle-label">Follow-up confirmation</div><div class="toggle-sub">Notify when a follow-up is sent</div></div><div class="toggle" onclick="this.classList.toggle('on')"></div></div><div class="toggle-row"><div><div class="toggle-label">Appointment booked</div><div class="toggle-sub">Alert when appointment is confirmed</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div><div class="toggle-row"><div><div class="toggle-label">Daily summary</div><div class="toggle-sub">Morning digest of previous day's activity</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div><div class="toggle-row"><div><div class="toggle-label">Weekly report</div><div class="toggle-sub">Performance summary every Monday</div></div><div class="toggle" onclick="this.classList.toggle('on')"></div></div><div style="margin-top:16px;"><button onclick="showToast('Settings saved.')" style="width:100%;padding:9px;background:var(--blue);border:none;border-radius:8px;color:#fff;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit;">Save Business Settings</button></div></div></div>
     </div>
   </div>
 </div>
 
-<!-- ─── SYSTEM STATUS ─── -->
+<!-- ─── STATUS ─── -->
 <div class="page" id="page-status">
   <div class="inner-page">
-    <div class="page-head">
-      <div><div class="page-head-title">System Status</div><div class="page-head-sub">Health of all your connected services and automation</div></div>
-      <button class="btn-sync" onclick="refreshStatus()"><i data-lucide="refresh-cw" id="refresh-icon"></i> Refresh</button>
-    </div>
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;">
-      <div style="display:flex;align-items:center;gap:5px;font-size:10px;font-weight:700;color:var(--amber);background:var(--amber-dim);border:1px solid rgba(217,119,6,0.18);padding:3px 9px;border-radius:99px;"><div style="width:5px;height:5px;border-radius:50%;background:var(--amber);animation:pulse-a 1.5s infinite;"></div> Monitoring</div>
-      <span style="font-size:11.5px;color:var(--text-m);">Awaiting account connections · Last check: just now</span>
-    </div>
-    <div class="card mb20">
-      <div class="sec-head"><div class="sec-title"><i data-lucide="plug"></i>Account Connections</div><div style="font-size:11px;color:var(--text-m);">4 services monitored</div></div>
-      <div class="status-row"><div class="status-row-left"><div class="status-row-icon si-blue"><i data-lucide="mail"></i></div><div><div class="status-row-name">Email Connection</div><div class="status-row-sub">Not connected yet</div></div></div><div class="badge b-notconn">Not Connected</div></div>
-      <div class="status-row"><div class="status-row-left"><div class="status-row-icon" style="background:rgba(139,92,246,.10);color:var(--purple);"><i data-lucide="database"></i></div><div><div class="status-row-name">Flow CRM</div><div class="status-row-sub">Not linked yet</div></div></div><div class="badge b-notconn">Not Connected</div></div>
-      <div class="status-row"><div class="status-row-left"><div class="status-row-icon si-green"><i data-lucide="message-circle"></i></div><div><div class="status-row-name">SMS Connection</div><div class="status-row-sub">Twilio · Optional service</div></div></div><div class="badge b-optional">Optional</div></div>
-      <div class="status-row"><div class="status-row-left"><div class="status-row-icon si-amber"><i data-lucide="calendar"></i></div><div><div class="status-row-name">Calendar Connection</div><div class="status-row-sub">Not connected yet</div></div></div><div class="badge b-notconn">Not Connected</div></div>
-    </div>
-    <div class="card mb20">
-      <div class="sec-head"><div class="sec-title"><i data-lucide="zap"></i>Automation Services</div><div style="font-size:11px;color:var(--text-m);">5 services monitored</div></div>
-      <div class="status-row"><div class="status-row-left"><div class="status-row-icon si-blue"><i data-lucide="user-plus"></i></div><div><div class="status-row-name">Lead Capture</div><div class="status-row-sub">Waiting for account connection</div></div></div><div class="badge b-setup">Pending</div></div>
-      <div class="status-row"><div class="status-row-left"><div class="status-row-icon" style="background:rgba(139,92,246,.10);color:var(--purple);"><i data-lucide="refresh-cw"></i></div><div><div class="status-row-name">CRM Sync</div><div class="status-row-sub">Waiting for Flow CRM connection</div></div></div><div class="badge b-setup">Pending</div></div>
-      <div class="status-row"><div class="status-row-left"><div class="status-row-icon si-green"><i data-lucide="send"></i></div><div><div class="status-row-name">Follow-Up Automation</div><div class="status-row-sub">Waiting for email connection</div></div></div><div class="badge b-setup">Pending</div></div>
-      <div class="status-row"><div class="status-row-left"><div class="status-row-icon si-amber"><i data-lucide="calendar-check"></i></div><div><div class="status-row-name">Appointment Automation</div><div class="status-row-sub">Waiting for calendar connection</div></div></div><div class="badge b-setup">Pending</div></div>
-      <div class="status-row"><div class="status-row-left"><div class="status-row-icon si-green"><i data-lucide="message-circle"></i></div><div><div class="status-row-name">SMS Automation</div><div class="status-row-sub">Waiting for SMS connection</div></div></div><div class="badge b-notconn">Not Connected</div></div>
-    </div>
-    <div class="card">
-      <div class="sec-head"><div class="sec-title"><i data-lucide="clock"></i>Sync History</div></div>
-      <div class="empty-state"><i data-lucide="clock"></i><div class="empty-state-title">No sync history yet</div><div class="empty-state-text">Connect your accounts to start tracking sync events and system activity.</div></div>
-    </div>
+    <div class="page-head"><div><div class="page-head-title">System Status</div><div class="page-head-sub">Health of all your connected services and automation</div></div><button class="btn-sync" onclick="refreshStatus()"><i data-lucide="refresh-cw" id="refresh-icon"></i> Refresh</button></div>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;"><div style="display:flex;align-items:center;gap:5px;font-size:10px;font-weight:700;color:var(--amber);background:var(--amber-dim);border:1px solid rgba(217,119,6,0.18);padding:3px 9px;border-radius:99px;"><div style="width:5px;height:5px;border-radius:50%;background:var(--amber);animation:pulse-a 1.5s infinite;"></div> Monitoring</div><span style="font-size:11.5px;color:var(--text-m);">Awaiting account connections · Last check: just now</span></div>
+    <div class="card mb20"><div class="sec-head"><div class="sec-title"><i data-lucide="plug"></i>Account Connections</div><div style="font-size:11px;color:var(--text-m);">4 services monitored</div></div><div class="status-row"><div class="status-row-left"><div class="status-row-icon si-blue"><i data-lucide="mail"></i></div><div><div class="status-row-name">Email Connection</div><div class="status-row-sub">Not connected yet</div></div></div><div class="badge b-notconn">Not Connected</div></div><div class="status-row"><div class="status-row-left"><div class="status-row-icon" style="background:rgba(139,92,246,.10);color:var(--purple);"><i data-lucide="database"></i></div><div><div class="status-row-name">Flow CRM</div><div class="status-row-sub">Not linked yet</div></div></div><div class="badge b-notconn">Not Connected</div></div><div class="status-row"><div class="status-row-left"><div class="status-row-icon si-green"><i data-lucide="message-circle"></i></div><div><div class="status-row-name">SMS Connection</div><div class="status-row-sub">Twilio · Optional service</div></div></div><div class="badge b-optional">Optional</div></div><div class="status-row"><div class="status-row-left"><div class="status-row-icon si-amber"><i data-lucide="calendar"></i></div><div><div class="status-row-name">Calendar Connection</div><div class="status-row-sub">Not connected yet</div></div></div><div class="badge b-notconn">Not Connected</div></div></div>
+    <div class="card mb20"><div class="sec-head"><div class="sec-title"><i data-lucide="zap"></i>Automation Services</div><div style="font-size:11px;color:var(--text-m);">5 services monitored</div></div><div class="status-row"><div class="status-row-left"><div class="status-row-icon si-blue"><i data-lucide="user-plus"></i></div><div><div class="status-row-name">Lead Capture</div><div class="status-row-sub">Waiting for account connection</div></div></div><div class="badge b-setup">Pending</div></div><div class="status-row"><div class="status-row-left"><div class="status-row-icon" style="background:rgba(139,92,246,.10);color:var(--purple);"><i data-lucide="refresh-cw"></i></div><div><div class="status-row-name">CRM Sync</div><div class="status-row-sub">Waiting for Flow CRM connection</div></div></div><div class="badge b-setup">Pending</div></div><div class="status-row"><div class="status-row-left"><div class="status-row-icon si-green"><i data-lucide="send"></i></div><div><div class="status-row-name">Follow-Up Automation</div><div class="status-row-sub">Waiting for email connection</div></div></div><div class="badge b-setup">Pending</div></div><div class="status-row"><div class="status-row-left"><div class="status-row-icon si-amber"><i data-lucide="calendar-check"></i></div><div><div class="status-row-name">Appointment Automation</div><div class="status-row-sub">Waiting for calendar connection</div></div></div><div class="badge b-setup">Pending</div></div><div class="status-row"><div class="status-row-left"><div class="status-row-icon si-green"><i data-lucide="message-circle"></i></div><div><div class="status-row-name">SMS Automation</div><div class="status-row-sub">Waiting for SMS connection</div></div></div><div class="badge b-notconn">Not Connected</div></div></div>
+    <div class="card"><div class="sec-head"><div class="sec-title"><i data-lucide="clock"></i>Sync History</div></div><div class="empty-state"><i data-lucide="clock"></i><div class="empty-state-title">No sync history yet</div><div class="empty-state-text">Connect your accounts to start tracking sync events and system activity.</div></div></div>
   </div>
 </div>
 
@@ -845,146 +736,29 @@
   <div class="inner-page">
     <div class="page-head"><div><div class="page-head-title">Help &amp; Support</div><div class="page-head-sub">We're here to help — reach out anytime</div></div></div>
     <div class="support-grid mb20">
-      <div class="card support-card" onclick="openModal('modal-request-setup')">
-        <div class="support-icon si-blue"><i data-lucide="settings-2"></i></div>
-        <div class="support-title">Request Setup</div>
-        <div class="support-desc">Need help connecting your accounts? Our team can walk you through or handle the setup for you.</div>
-        <button class="support-btn" style="background:var(--blue);color:#fff;" onclick="event.stopPropagation();openModal('modal-request-setup')"><i data-lucide="arrow-right"></i> Request Setup</button>
-      </div>
-      <div class="card support-card" onclick="openModal('modal-report-issue')">
-        <div class="support-icon" style="background:var(--red-dim);"><i data-lucide="alert-triangle" style="color:var(--red);"></i></div>
-        <div class="support-title">Report an Issue</div>
-        <div class="support-desc">Something not working right? Report a problem with your email, CRM, leads, SMS, calendar, or automation.</div>
-        <button class="support-btn" style="background:var(--red-dim);color:var(--red);" onclick="event.stopPropagation();openModal('modal-report-issue')"><i data-lucide="arrow-right"></i> Report Issue</button>
-      </div>
-      <div class="card support-card" onclick="openModal('modal-changes')">
-        <div class="support-icon" style="background:var(--purple-dim);"><i data-lucide="edit-3" style="color:var(--purple);"></i></div>
-        <div class="support-title">Request Automation Change</div>
-        <div class="support-desc">Need to update follow-up rules, routing, messages, business hours, or workflow settings? Send us a request.</div>
-        <button class="support-btn" style="background:var(--purple-dim);color:var(--purple);" onclick="event.stopPropagation();openModal('modal-changes')"><i data-lucide="arrow-right"></i> Request Change</button>
-      </div>
-      <div class="card support-card" onclick="openModal('modal-contact')">
-        <div class="support-icon si-green"><i data-lucide="message-square"></i></div>
-        <div class="support-title">Contact Support</div>
-        <div class="support-desc">General questions, account management, or anything else — get in touch with the Flowaify support team directly.</div>
-        <button class="support-btn" style="background:var(--green-dim);color:var(--green);" onclick="event.stopPropagation();openModal('modal-contact')"><i data-lucide="arrow-right"></i> Contact Support</button>
-      </div>
+      <div class="card support-card" onclick="openModal('modal-request-setup')"><div class="support-icon si-blue"><i data-lucide="settings-2"></i></div><div class="support-title">Request Setup</div><div class="support-desc">Need help connecting your accounts? Our team can walk you through or handle the setup for you.</div><button class="support-btn" style="background:var(--blue);color:#fff;" onclick="event.stopPropagation();openModal('modal-request-setup')"><i data-lucide="arrow-right"></i> Request Setup</button></div>
+      <div class="card support-card" onclick="openModal('modal-report-issue')"><div class="support-icon" style="background:var(--red-dim);"><i data-lucide="alert-triangle" style="color:var(--red);"></i></div><div class="support-title">Report an Issue</div><div class="support-desc">Something not working right? Report a problem with your email, CRM, leads, SMS, calendar, or automation.</div><button class="support-btn" style="background:var(--red-dim);color:var(--red);" onclick="event.stopPropagation();openModal('modal-report-issue')"><i data-lucide="arrow-right"></i> Report Issue</button></div>
+      <div class="card support-card" onclick="openModal('modal-changes')"><div class="support-icon" style="background:var(--purple-dim);"><i data-lucide="edit-3" style="color:var(--purple);"></i></div><div class="support-title">Request Automation Change</div><div class="support-desc">Need to update follow-up rules, routing, messages, or workflow settings? Send us a request.</div><button class="support-btn" style="background:var(--purple-dim);color:var(--purple);" onclick="event.stopPropagation();openModal('modal-changes')"><i data-lucide="arrow-right"></i> Request Change</button></div>
+      <div class="card support-card" onclick="openModal('modal-contact')"><div class="support-icon si-green"><i data-lucide="message-square"></i></div><div class="support-title">Contact Support</div><div class="support-desc">General questions, account management, or anything else — get in touch with the Flowaify support team directly.</div><button class="support-btn" style="background:var(--green-dim);color:var(--green);" onclick="event.stopPropagation();openModal('modal-contact')"><i data-lucide="arrow-right"></i> Contact Support</button></div>
     </div>
-    <div class="card p20">
-      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;">
-        <div><div style="font-size:13px;font-weight:700;color:var(--text);">Support Hours</div><div style="font-size:11.5px;color:var(--text-m);margin-top:3px;">Monday – Friday · 9AM – 6PM EST</div></div>
-        <div><div style="font-size:13px;font-weight:700;color:var(--text);">Response Time</div><div style="font-size:11.5px;color:var(--text-m);margin-top:3px;">Typically within a few hours</div></div>
-        <div><div style="font-size:13px;font-weight:700;color:var(--text);">Urgent Issues</div><div style="font-size:11.5px;color:var(--text-m);margin-top:3px;">Critical issues escalated within 1 hour</div></div>
-      </div>
-    </div>
+    <div class="card p20"><div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;"><div><div style="font-size:13px;font-weight:700;color:var(--text);">Support Hours</div><div style="font-size:11.5px;color:var(--text-m);margin-top:3px;">Monday – Friday · 9AM – 6PM EST</div></div><div><div style="font-size:13px;font-weight:700;color:var(--text);">Response Time</div><div style="font-size:11.5px;color:var(--text-m);margin-top:3px;">Typically within a few hours</div></div><div><div style="font-size:13px;font-weight:700;color:var(--text);">Urgent Issues</div><div style="font-size:11.5px;color:var(--text-m);margin-top:3px;">Critical issues escalated within 1 hour</div></div></div></div>
   </div>
 </div>
 
 </div><!-- /app -->
 
 <!-- ─── MODALS ─── -->
-<div class="modal-overlay" id="modal-sync">
-  <div class="modal">
-    <div class="modal-head"><div><div class="modal-title">Connect &amp; Sync Accounts</div><div class="modal-sub">Review connection status and link missing accounts</div></div><button class="modal-close" onclick="closeModal('modal-sync')"><i data-lucide="x"></i></button></div>
-    <div class="modal-body">
-      <div class="sync-row"><div class="sync-row-left"><div class="sync-icon-wrap" style="background:rgba(0,87,255,.10);"><i data-lucide="mail" style="color:var(--blue);"></i></div><div><div style="font-size:13px;font-weight:600;color:var(--text-s);">Email</div><div style="font-size:10.5px;color:var(--text-m);">Not connected</div></div></div><div class="badge b-notconn">Not Connected</div></div>
-      <div class="sync-row"><div class="sync-row-left"><div class="sync-icon-wrap" style="background:rgba(139,92,246,.10);"><i data-lucide="database" style="color:var(--purple);"></i></div><div><div style="font-size:13px;font-weight:600;color:var(--text-s);">Flow CRM</div><div style="font-size:10.5px;color:var(--text-m);">Not connected</div></div></div><div class="badge b-notconn">Not Connected</div></div>
-      <div class="sync-row"><div class="sync-row-left"><div class="sync-icon-wrap" style="background:var(--green-dim);"><i data-lucide="message-circle" style="color:var(--green);"></i></div><div><div style="font-size:13px;font-weight:600;color:var(--text-s);">SMS</div><div style="font-size:10.5px;color:var(--text-m);">Twilio · Optional</div></div></div><div class="badge b-optional">Optional</div></div>
-      <div class="sync-row"><div class="sync-row-left"><div class="sync-icon-wrap" style="background:var(--amber-dim);"><i data-lucide="calendar" style="color:var(--amber);"></i></div><div><div style="font-size:13px;font-weight:600;color:var(--text-s);">Calendar</div><div style="font-size:10.5px;color:var(--text-m);">Not connected</div></div></div><div class="badge b-notconn">Not Connected</div></div>
-    </div>
-    <div class="modal-footer"><button class="btn-mc" onclick="closeModal('modal-sync')">Close</button><button class="btn-mok" onclick="closeModal('modal-sync');showPage('connections')">Go to Connections</button></div>
-  </div>
-</div>
-
-<div class="modal-overlay" id="modal-launch">
-  <div class="modal">
-    <div class="modal-head"><div><div class="modal-title">Launch Your System</div><div class="modal-sub">Confirm you're ready to go live</div></div><button class="modal-close" onclick="closeModal('modal-launch')"><i data-lucide="x"></i></button></div>
-    <div class="modal-body"><p>Once launched, Flowaify will begin capturing leads, sending automated follow-ups, and keeping your CRM updated in real time.</p><div style="margin-top:14px;padding:12px 16px;background:var(--amber-dim);border:1px solid rgba(217,119,6,0.2);border-radius:10px;font-size:11.5px;color:var(--amber);line-height:1.8;">Complete your account connections before launching. Go to Connections to set up Email, Flow CRM, and Calendar.</div></div>
-    <div class="modal-footer"><button class="btn-mc" onclick="closeModal('modal-launch')">Cancel</button><button class="btn-mok" onclick="closeModal('modal-launch');showPage('connections')">Go to Connections</button></div>
-  </div>
-</div>
-
-<div class="modal-overlay" id="modal-pause">
-  <div class="modal">
-    <div class="modal-head"><div><div class="modal-title">Pause Automation</div><div class="modal-sub">Temporarily stop automated activity</div></div><button class="modal-close" onclick="closeModal('modal-pause')"><i data-lucide="x"></i></button></div>
-    <div class="modal-body"><p>Are you sure you want to pause automation? Your accounts will stay connected, but Flowaify will stop sending automated follow-ups until you resume.</p></div>
-    <div class="modal-footer"><button class="btn-mc" onclick="closeModal('modal-pause')">Keep Running</button><button class="btn-mok-am" onclick="closeModal('modal-pause');showToast('Automation paused. Your accounts remain connected.')">Pause Automation</button></div>
-  </div>
-</div>
-
-<div class="modal-overlay" id="modal-resume">
-  <div class="modal">
-    <div class="modal-head"><div><div class="modal-title">Resume Automation</div><div class="modal-sub">Turn your automation back on</div></div><button class="modal-close" onclick="closeModal('modal-resume')"><i data-lucide="x"></i></button></div>
-    <div class="modal-body"><p>Resume your automation? Flowaify will pick up where it left off and continue sending follow-ups, capturing leads, and updating your records.</p></div>
-    <div class="modal-footer"><button class="btn-mc" onclick="closeModal('modal-resume')">Cancel</button><button class="btn-mok-gr" onclick="closeModal('modal-resume');showToast('Automation resumed — Flowaify is back online.')">Resume Now</button></div>
-  </div>
-</div>
-
-<div class="modal-overlay" id="modal-changes">
-  <div class="modal">
-    <div class="modal-head"><div><div class="modal-title">Request Changes</div><div class="modal-sub">Ask Flowaify to update your system settings</div></div><button class="modal-close" onclick="closeModal('modal-changes')"><i data-lucide="x"></i></button></div>
-    <div class="modal-body"><div class="field"><label>What would you like to change?</label><select><option>Follow-up message content</option><option>Lead routing rules</option><option>Business hours / schedule</option><option>Automation sequence settings</option><option>CRM pipeline configuration</option><option>Other</option></select></div><div class="field"><label>Describe the change you need</label><textarea placeholder="Please describe what you'd like updated…"></textarea></div></div>
-    <div class="modal-footer"><button class="btn-mc" onclick="closeModal('modal-changes')">Cancel</button><button class="btn-mok" onclick="submitForm('modal-changes','Change request submitted! Our team will make updates within 1–2 business days.')">Submit Request</button></div>
-  </div>
-</div>
-
-<div class="modal-overlay" id="modal-request-setup">
-  <div class="modal">
-    <div class="modal-head"><div><div class="modal-title">Request Setup</div><div class="modal-sub">We'll help connect and configure your accounts</div></div><button class="modal-close" onclick="closeModal('modal-request-setup')"><i data-lucide="x"></i></button></div>
-    <div class="modal-body"><div class="field"><label>Which accounts need setup?</label><input type="text" placeholder="e.g. Email, Flow CRM, Calendar" /></div><div class="field"><label>Best time to connect</label><input type="text" placeholder="e.g. Weekdays after 2PM EST" /></div><div class="field"><label>Additional notes (optional)</label><textarea placeholder="Any details that would help our team get started…"></textarea></div></div>
-    <div class="modal-footer"><button class="btn-mc" onclick="closeModal('modal-request-setup')">Cancel</button><button class="btn-mok" onclick="submitForm('modal-request-setup','Setup request submitted! Our team will reach out within 1 business day.')">Submit Request</button></div>
-  </div>
-</div>
-
-<div class="modal-overlay" id="modal-report-issue">
-  <div class="modal">
-    <div class="modal-head"><div><div class="modal-title">Report an Issue</div><div class="modal-sub">Tell us what's not working</div></div><button class="modal-close" onclick="closeModal('modal-report-issue')"><i data-lucide="x"></i></button></div>
-    <div class="modal-body"><div class="field"><label>Issue category</label><select><option>Email connection issue</option><option>CRM sync problem</option><option>Lead not captured</option><option>Follow-up not sent</option><option>Calendar / booking issue</option><option>Other</option></select></div><div class="field"><label>Describe the issue</label><textarea placeholder="What happened? What were you expecting?"></textarea></div></div>
-    <div class="modal-footer"><button class="btn-mc" onclick="closeModal('modal-report-issue')">Cancel</button><button class="btn-mok" onclick="submitForm('modal-report-issue','Issue reported. Our team will investigate and follow up within a few hours.')">Submit Report</button></div>
-  </div>
-</div>
-
-<div class="modal-overlay" id="modal-contact">
-  <div class="modal">
-    <div class="modal-head"><div><div class="modal-title">Contact Support</div><div class="modal-sub">We'll get back to you promptly</div></div><button class="modal-close" onclick="closeModal('modal-contact')"><i data-lucide="x"></i></button></div>
-    <div class="modal-body"><div class="field"><label>Subject</label><input type="text" placeholder="Brief summary of your question" /></div><div class="field"><label>Message</label><textarea placeholder="How can we help you?"></textarea></div></div>
-    <div class="modal-footer"><button class="btn-mc" onclick="closeModal('modal-contact')">Cancel</button><button class="btn-mok" onclick="submitForm('modal-contact','Message sent! Our team will reply within a few hours.')">Send Message</button></div>
-  </div>
-</div>
-
-<div class="modal-overlay" id="modal-generate-report">
-  <div class="modal">
-    <div class="modal-head"><div><div class="modal-title">Generate Report</div><div class="modal-sub">We'll prepare a PDF and send it to your email</div></div><button class="modal-close" onclick="closeModal('modal-generate-report')"><i data-lucide="x"></i></button></div>
-    <div class="modal-body">
-      <div class="field"><label>Report Type</label><select><option>Lead Summary</option><option>Automation Performance</option><option>Pipeline Report</option><option>Response Time Analysis</option><option>Full Account Report</option></select></div>
-      <div class="field"><label>Time Period</label><select><option>This month</option><option>Last month</option><option>Last 30 days</option><option>Last 90 days</option><option>Last year</option><option>Custom range</option></select></div>
-      <div class="field"><label>Custom Date Range (if selected above)</label><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;"><input type="date" /><input type="date" /></div></div>
-      <div class="field"><label>Deliver to</label><input type="email" placeholder="your@email.com" /></div>
-    </div>
-    <div class="modal-footer"><button class="btn-mc" onclick="closeModal('modal-generate-report')">Cancel</button><button class="btn-mok" onclick="submitForm('modal-generate-report','Your report is being prepared and will be emailed to you within a few minutes.')">Generate PDF</button></div>
-  </div>
-</div>
-
-<div class="modal-overlay" id="modal-export-data">
-  <div class="modal">
-    <div class="modal-head"><div><div class="modal-title">Export CRM Data</div><div class="modal-sub">Download your records in your preferred format</div></div><button class="modal-close" onclick="closeModal('modal-export-data')"><i data-lucide="x"></i></button></div>
-    <div class="modal-body">
-      <div class="field"><label>What to export</label><select><option>All Leads</option><option>Contacts</option><option>Deal / Pipeline Records</option><option>Automation Logs</option><option>Full CRM Export</option></select></div>
-      <div class="field"><label>Time Period</label><select><option>All time</option><option>This month</option><option>Last month</option><option>Last 90 days</option><option>Last year</option></select></div>
-      <div class="field"><label>Format</label><select><option>CSV (spreadsheet)</option><option>PDF (formatted report)</option><option>Excel (.xlsx)</option></select></div>
-      <div class="field"><label>Deliver to</label><input type="email" placeholder="your@email.com" /></div>
-    </div>
-    <div class="modal-footer"><button class="btn-mc" onclick="closeModal('modal-export-data')">Cancel</button><button class="btn-mok" onclick="submitForm('modal-export-data','Your export is being prepared and will be emailed to you shortly.')">Export Now</button></div>
-  </div>
-</div>
-
-<div class="modal-overlay" id="modal-invite-team">
-  <div class="modal">
-    <div class="modal-head"><div><div class="modal-title">Invite Your Team</div><div class="modal-sub">Add teammates to collaborate in your workspace</div></div><button class="modal-close" onclick="closeModal('modal-invite-team')"><i data-lucide="x"></i></button></div>
-    <div class="modal-body"><div class="field"><label>Teammate Email</label><input type="email" placeholder="teammate@yourbusiness.com" /></div><div class="field"><label>Role</label><select><option>Admin</option><option>Team Member</option><option>Viewer</option></select></div></div>
-    <div class="modal-footer"><button class="btn-mc" onclick="closeModal('modal-invite-team')">Cancel</button><button class="btn-mok" onclick="submitForm('modal-invite-team','Invitation sent! Your teammate will receive an email shortly.')">Send Invite</button></div>
-  </div>
-</div>
+<div class="modal-overlay" id="modal-sync"><div class="modal"><div class="modal-head"><div><div class="modal-title">Connect &amp; Sync Accounts</div><div class="modal-sub">Review connection status and link missing accounts</div></div><button class="modal-close" onclick="closeModal('modal-sync')"><i data-lucide="x"></i></button></div><div class="modal-body"><div class="sync-row"><div class="sync-row-left"><div class="sync-icon-wrap" style="background:rgba(0,87,255,.10);"><i data-lucide="mail" style="color:var(--blue);"></i></div><div><div style="font-size:13px;font-weight:600;color:var(--text-s);">Email</div><div style="font-size:10.5px;color:var(--text-m);">Not connected</div></div></div><div class="badge b-notconn">Not Connected</div></div><div class="sync-row"><div class="sync-row-left"><div class="sync-icon-wrap" style="background:rgba(139,92,246,.10);"><i data-lucide="database" style="color:var(--purple);"></i></div><div><div style="font-size:13px;font-weight:600;color:var(--text-s);">Flow CRM</div><div style="font-size:10.5px;color:var(--text-m);">Not connected</div></div></div><div class="badge b-notconn">Not Connected</div></div><div class="sync-row"><div class="sync-row-left"><div class="sync-icon-wrap" style="background:var(--green-dim);"><i data-lucide="message-circle" style="color:var(--green);"></i></div><div><div style="font-size:13px;font-weight:600;color:var(--text-s);">SMS</div><div style="font-size:10.5px;color:var(--text-m);">Twilio · Optional</div></div></div><div class="badge b-optional">Optional</div></div><div class="sync-row"><div class="sync-row-left"><div class="sync-icon-wrap" style="background:var(--amber-dim);"><i data-lucide="calendar" style="color:var(--amber);"></i></div><div><div style="font-size:13px;font-weight:600;color:var(--text-s);">Calendar</div><div style="font-size:10.5px;color:var(--text-m);">Not connected</div></div></div><div class="badge b-notconn">Not Connected</div></div></div><div class="modal-footer"><button class="btn-mc" onclick="closeModal('modal-sync')">Close</button><button class="btn-mok" onclick="closeModal('modal-sync');showPage('connections')">Go to Connections</button></div></div></div>
+<div class="modal-overlay" id="modal-launch"><div class="modal"><div class="modal-head"><div><div class="modal-title">Launch Your System</div><div class="modal-sub">Confirm you're ready to go live</div></div><button class="modal-close" onclick="closeModal('modal-launch')"><i data-lucide="x"></i></button></div><div class="modal-body"><p>Once launched, Flowaify will begin capturing leads, sending automated follow-ups, and keeping your CRM updated in real time.</p><div style="margin-top:14px;padding:12px 16px;background:var(--amber-dim);border:1px solid rgba(217,119,6,0.2);border-radius:10px;font-size:11.5px;color:var(--amber);line-height:1.8;">Complete your account connections before launching.</div></div><div class="modal-footer"><button class="btn-mc" onclick="closeModal('modal-launch')">Cancel</button><button class="btn-mok" onclick="closeModal('modal-launch');showPage('connections')">Go to Connections</button></div></div></div>
+<div class="modal-overlay" id="modal-pause"><div class="modal"><div class="modal-head"><div><div class="modal-title">Pause Automation</div><div class="modal-sub">Temporarily stop automated activity</div></div><button class="modal-close" onclick="closeModal('modal-pause')"><i data-lucide="x"></i></button></div><div class="modal-body"><p>Are you sure you want to pause automation? Your accounts will stay connected, but Flowaify will stop sending automated follow-ups until you resume.</p></div><div class="modal-footer"><button class="btn-mc" onclick="closeModal('modal-pause')">Keep Running</button><button class="btn-mok-am" onclick="closeModal('modal-pause');showToast('Automation paused. Your accounts remain connected.')">Pause Automation</button></div></div></div>
+<div class="modal-overlay" id="modal-resume"><div class="modal"><div class="modal-head"><div><div class="modal-title">Resume Automation</div><div class="modal-sub">Turn your automation back on</div></div><button class="modal-close" onclick="closeModal('modal-resume')"><i data-lucide="x"></i></button></div><div class="modal-body"><p>Resume your automation? Flowaify will pick up where it left off and continue sending follow-ups, capturing leads, and updating your records.</p></div><div class="modal-footer"><button class="btn-mc" onclick="closeModal('modal-resume')">Cancel</button><button class="btn-mok-gr" onclick="closeModal('modal-resume');showToast('Automation resumed — Flowaify is back online.')">Resume Now</button></div></div></div>
+<div class="modal-overlay" id="modal-changes"><div class="modal"><div class="modal-head"><div><div class="modal-title">Request Changes</div><div class="modal-sub">Ask Flowaify to update your system settings</div></div><button class="modal-close" onclick="closeModal('modal-changes')"><i data-lucide="x"></i></button></div><div class="modal-body"><div class="field"><label>What would you like to change?</label><select><option>Follow-up message content</option><option>Lead routing rules</option><option>Business hours / schedule</option><option>Automation sequence settings</option><option>CRM pipeline configuration</option><option>Other</option></select></div><div class="field"><label>Describe the change you need</label><textarea placeholder="Please describe what you'd like updated…"></textarea></div></div><div class="modal-footer"><button class="btn-mc" onclick="closeModal('modal-changes')">Cancel</button><button class="btn-mok" onclick="submitForm('modal-changes','Change request submitted! Our team will make updates within 1–2 business days.')">Submit Request</button></div></div></div>
+<div class="modal-overlay" id="modal-request-setup"><div class="modal"><div class="modal-head"><div><div class="modal-title">Request Setup</div><div class="modal-sub">We'll help connect and configure your accounts</div></div><button class="modal-close" onclick="closeModal('modal-request-setup')"><i data-lucide="x"></i></button></div><div class="modal-body"><div class="field"><label>Which accounts need setup?</label><input type="text" placeholder="e.g. Email, Flow CRM, Calendar" /></div><div class="field"><label>Best time to connect</label><input type="text" placeholder="e.g. Weekdays after 2PM EST" /></div><div class="field"><label>Additional notes (optional)</label><textarea placeholder="Any details that would help our team get started…"></textarea></div></div><div class="modal-footer"><button class="btn-mc" onclick="closeModal('modal-request-setup')">Cancel</button><button class="btn-mok" onclick="submitForm('modal-request-setup','Setup request submitted! Our team will reach out within 1 business day.')">Submit Request</button></div></div></div>
+<div class="modal-overlay" id="modal-report-issue"><div class="modal"><div class="modal-head"><div><div class="modal-title">Report an Issue</div><div class="modal-sub">Tell us what's not working</div></div><button class="modal-close" onclick="closeModal('modal-report-issue')"><i data-lucide="x"></i></button></div><div class="modal-body"><div class="field"><label>Issue category</label><select><option>Email connection issue</option><option>CRM sync problem</option><option>Lead not captured</option><option>Follow-up not sent</option><option>Calendar / booking issue</option><option>Other</option></select></div><div class="field"><label>Describe the issue</label><textarea placeholder="What happened? What were you expecting?"></textarea></div></div><div class="modal-footer"><button class="btn-mc" onclick="closeModal('modal-report-issue')">Cancel</button><button class="btn-mok" onclick="submitForm('modal-report-issue','Issue reported. Our team will investigate and follow up within a few hours.')">Submit Report</button></div></div></div>
+<div class="modal-overlay" id="modal-contact"><div class="modal"><div class="modal-head"><div><div class="modal-title">Contact Support</div><div class="modal-sub">We'll get back to you promptly</div></div><button class="modal-close" onclick="closeModal('modal-contact')"><i data-lucide="x"></i></button></div><div class="modal-body"><div class="field"><label>Subject</label><input type="text" placeholder="Brief summary of your question" /></div><div class="field"><label>Message</label><textarea placeholder="How can we help you?"></textarea></div></div><div class="modal-footer"><button class="btn-mc" onclick="closeModal('modal-contact')">Cancel</button><button class="btn-mok" onclick="submitForm('modal-contact','Message sent! Our team will reply within a few hours.')">Send Message</button></div></div></div>
+<div class="modal-overlay" id="modal-generate-report"><div class="modal"><div class="modal-head"><div><div class="modal-title">Generate Report</div><div class="modal-sub">We'll prepare a PDF and send it to your email</div></div><button class="modal-close" onclick="closeModal('modal-generate-report')"><i data-lucide="x"></i></button></div><div class="modal-body"><div class="field"><label>Report Type</label><select><option>Lead Summary</option><option>Automation Performance</option><option>Pipeline Report</option><option>Response Time Analysis</option><option>Full Account Report</option></select></div><div class="field"><label>Time Period</label><select><option>This month</option><option>Last month</option><option>Last 30 days</option><option>Last 90 days</option><option>Last year</option><option>Custom range</option></select></div><div class="field"><label>Custom Date Range</label><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;"><input type="date" /><input type="date" /></div></div><div class="field"><label>Deliver to</label><input type="email" placeholder="your@email.com" /></div></div><div class="modal-footer"><button class="btn-mc" onclick="closeModal('modal-generate-report')">Cancel</button><button class="btn-mok" onclick="submitForm('modal-generate-report','Your report is being prepared and will be emailed to you within a few minutes.')">Generate PDF</button></div></div></div>
+<div class="modal-overlay" id="modal-export-data"><div class="modal"><div class="modal-head"><div><div class="modal-title">Export CRM Data</div><div class="modal-sub">Download your records in your preferred format</div></div><button class="modal-close" onclick="closeModal('modal-export-data')"><i data-lucide="x"></i></button></div><div class="modal-body"><div class="field"><label>What to export</label><select><option>All Leads</option><option>Contacts</option><option>Deal / Pipeline Records</option><option>Automation Logs</option><option>Full CRM Export</option></select></div><div class="field"><label>Time Period</label><select><option>All time</option><option>This month</option><option>Last month</option><option>Last 90 days</option><option>Last year</option></select></div><div class="field"><label>Format</label><select><option>CSV (spreadsheet)</option><option>PDF (formatted report)</option><option>Excel (.xlsx)</option></select></div><div class="field"><label>Deliver to</label><input type="email" placeholder="your@email.com" /></div></div><div class="modal-footer"><button class="btn-mc" onclick="closeModal('modal-export-data')">Cancel</button><button class="btn-mok" onclick="submitForm('modal-export-data','Your export is being prepared and will be emailed to you shortly.')">Export Now</button></div></div></div>
+<div class="modal-overlay" id="modal-invite-team"><div class="modal"><div class="modal-head"><div><div class="modal-title">Invite Your Team</div><div class="modal-sub">Add teammates to collaborate in your workspace</div></div><button class="modal-close" onclick="closeModal('modal-invite-team')"><i data-lucide="x"></i></button></div><div class="modal-body"><div class="field"><label>Teammate Email</label><input type="email" placeholder="teammate@yourbusiness.com" /></div><div class="field"><label>Role</label><select><option>Admin</option><option>Team Member</option><option>Viewer</option></select></div></div><div class="modal-footer"><button class="btn-mc" onclick="closeModal('modal-invite-team')">Cancel</button><button class="btn-mok" onclick="submitForm('modal-invite-team','Invitation sent! Your teammate will receive an email shortly.')">Send Invite</button></div></div></div>
 
 <div id="toast"><div class="toast-icon"><i data-lucide="check"></i></div><div id="toast-msg" style="font-size:12.5px;font-weight:600;color:var(--text-s);line-height:1.45;"></div></div>
 
@@ -1009,6 +783,13 @@ async function initAuth() {
   } catch(e) { console.error(e); boot(null); }
 }
 
+function getTimeGreeting() {
+  const h = new Date().getHours();
+  if (h < 12) return 'Good morning';
+  if (h < 17) return 'Good afternoon';
+  return 'Good evening';
+}
+
 function boot(user) {
   document.getElementById('auth-gate').style.display = 'none';
   document.getElementById('app').style.display = 'block';
@@ -1018,8 +799,11 @@ function boot(user) {
     document.getElementById('portal-menu-name').textContent  = user.name  || 'User';
     document.getElementById('portal-menu-email').textContent = user.email || '';
     window.__userInitial = init;
-    const snap = document.getElementById('snapshot-name');
-    if (snap && user.name) snap.textContent = user.name + "'s Workspace";
+    const firstName = user.name ? user.name.trim().split(' ')[0] : null;
+    const greet = getTimeGreeting() + (firstName ? ', ' + firstName : '');
+    document.getElementById('portal-greeting-title').textContent = greet;
+  } else {
+    document.getElementById('portal-greeting-title').textContent = getTimeGreeting();
   }
   lucide.createIcons();
 }
@@ -1035,8 +819,7 @@ function showPage(id) {
   document.querySelectorAll('.nav-tab[data-page]').forEach(t => t.classList.remove('active'));
   const pg = document.getElementById('page-' + id); if(pg) pg.classList.add('active');
   document.querySelectorAll('.nav-tab[data-page="' + id + '"]').forEach(t => t.classList.add('active'));
-  window.scrollTo(0,0);
-  closeProfileMenu();
+  window.scrollTo(0,0); closeProfileMenu();
 }
 document.querySelectorAll('.nav-tab[data-page]').forEach(el => el.addEventListener('click', () => showPage(el.dataset.page)));
 
@@ -1069,103 +852,108 @@ function refreshStatus() {
   setTimeout(() => { if(icon) icon.classList.remove('spinning'); showToast('Status refreshed.'); lucide.createIcons(); }, 1400);
 }
 
-/* ─── AI CHAT ─── */
+/* ═══════════════════════════════
+   AI CHAT
+═══════════════════════════════ */
+let chatStarted = false;
+
+function startChatMode() {
+  if (chatStarted) return;
+  chatStarted = true;
+  const greeting = document.getElementById('portal-greeting');
+  const pills    = document.getElementById('portal-pills');
+  const lower    = document.getElementById('portal-lower');
+  const msgZone  = document.getElementById('portal-messages-zone');
+  if (greeting) greeting.classList.add('away');
+  if (pills)    pills.classList.add('away');
+  if (lower)    lower.classList.add('away');
+  if (msgZone)  msgZone.classList.add('active');
+}
+
 const AI_RESPONSES = {
   email: {
-    user: 'Connect email',
-    bot: "To connect your email account, our team handles the entire setup process for you. Just send us a request with your preferred time to connect, and we'll get your email linked so Flowaify can start sending automated follow-ups on your behalf.",
+    user: 'Connect my email',
+    bot: 'To connect your email, our team handles the entire setup for you. Just send us a request with your preferred availability and we\'ll get your inbox linked so Flowaify can send automated follow-ups on your behalf.',
     cta: { label: 'Request Setup', modal: 'modal-request-setup' }
   },
   crm: {
-    user: 'Connect CRM',
-    bot: "Connecting your CRM lets Flowaify sync lead data, deal updates, and activity in real time. Our team will take care of the setup — just let us know when you're available.",
+    user: 'Connect my CRM',
+    bot: 'Connecting your CRM lets Flowaify sync leads, deal updates, and activity in real time. Our team takes care of the setup — just let us know when you\'re available.',
     cta: { label: 'Request Setup', modal: 'modal-request-setup' }
   },
   automations: {
-    user: 'Review automations',
-    bot: "Your automation control panel shows what's running, what's paused, and lets you request changes to any sequences, routing rules, or follow-up timing. Head there now to review your current setup.",
+    user: 'Review my automations',
+    bot: 'Your Automation Control panel shows what\'s live, what\'s paused, and lets you request changes to any sequences, routing rules, or follow-up timing. Head there now to review your setup.',
     cta: { label: 'Go to Automation', page: 'automation' }
+  },
+  next: {
+    user: "Show what's next",
+    bot: 'Here are the recommended next steps: connect your email so follow-ups go out automatically, link your CRM to keep leads organized, then review your automation setup. Our team handles all the technical work — just send a request.',
+    cta: { label: 'Request Setup', modal: 'modal-request-setup' }
   },
   report: {
     user: 'Generate a report',
-    bot: "I can generate a report for any time period — lead summary, automation performance, pipeline report, or a full account overview. Choose your date range and I'll prepare a PDF and send it to your email.",
+    bot: 'I can generate a report for any time period — lead summary, automation performance, pipeline overview, or a full account report. Choose your date range and I\'ll prepare a PDF and email it to you.',
     cta: { label: 'Generate Report', modal: 'modal-generate-report' }
   },
-  leads: {
-    user: 'Analyze my leads',
-    bot: "I can pull a breakdown of your leads by source, status, response time, and conversion rate for any date range. Want a PDF summary, or would you prefer to explore the full data in your Dashboard?",
-    cta: { label: 'Open Dashboard', href: 'dashboard.html' }
-  },
   export: {
-    user: 'Export my CRM data',
-    bot: "I can export your leads, contacts, deal history, or automation logs in CSV, PDF, or Excel format for any date range. I'll prepare the file and send it to your email.",
+    user: 'Export CRM data',
+    bot: 'I can export your leads, contacts, deal history, or automation logs in CSV, PDF, or Excel for any date range. I\'ll send the file to your email.',
     cta: { label: 'Export Data', modal: 'modal-export-data' }
   },
   support: {
     user: 'I need support',
-    bot: "I'm here to help. Tell me what's going on and I'll either resolve it directly or connect you with the Flowaify team right away.",
+    bot: 'I\'m here to help. Tell me what\'s going on and I\'ll either resolve it directly or connect you with the Flowaify team right away.',
     cta: { label: 'Contact Support', modal: 'modal-contact' }
   }
 };
 
-function hideActionCards() {
-  const grid = document.getElementById('portal-action-grid');
-  if (!grid || grid.style.display === 'none') return;
-  grid.style.transition = 'opacity 0.2s';
-  grid.style.opacity = '0';
-  setTimeout(() => { grid.style.display = 'none'; }, 200);
-}
-
-function aiAction(key) {
+function pillAction(key) {
   const r = AI_RESPONSES[key];
   if (!r) return;
-  hideActionCards();
-  pushAiMessage('user', r.user);
-  setTimeout(() => pushAiMessage('bot', r.bot, r.cta), 420);
+  startChatMode();
+  pushMsg('user', r.user);
+  setTimeout(() => pushMsg('bot', r.bot, r.cta), 450);
 }
 
-function pushAiMessage(role, text, cta) {
-  const scroll = document.getElementById('ai-chat-scroll');
+function pushMsg(role, text, cta) {
+  const zone = document.getElementById('portal-messages-zone');
   const row = document.createElement('div');
 
   if (role === 'user') {
-    row.className = 'portal-msg-row portal-msg-user';
+    row.className = 'pmsg pmsg-user';
     const ava = document.createElement('div');
-    ava.className = 'portal-user-ava';
+    ava.className = 'pmsg-user-ava';
     ava.textContent = window.__userInitial || '?';
     const content = document.createElement('div');
-    content.className = 'portal-msg-content-user';
+    content.className = 'pmsg-content-user';
     const bubble = document.createElement('div');
-    bubble.className = 'portal-msg-bubble-user';
+    bubble.className = 'pmsg-bubble-user';
     bubble.textContent = text;
     content.appendChild(bubble);
     row.appendChild(content);
     row.appendChild(ava);
   } else {
-    row.className = 'portal-msg-row portal-msg-bot';
+    row.className = 'pmsg';
     const ava = document.createElement('div');
-    ava.className = 'portal-bot-ava';
+    ava.className = 'pmsg-bot-ava';
     const img = document.createElement('img');
     img.src = 'logo-transparent.png'; img.alt = '';
     img.onerror = function(){ this.style.display='none'; };
     ava.appendChild(img);
     const content = document.createElement('div');
-    content.className = 'portal-msg-content';
+    content.className = 'pmsg-content';
     const head = document.createElement('div');
-    head.className = 'portal-msg-head';
-    const name = document.createElement('span');
-    name.className = 'portal-msg-name'; name.textContent = 'Flowy';
-    const time = document.createElement('span');
-    time.className = 'portal-msg-time'; time.textContent = 'Just now';
+    head.className = 'pmsg-head';
+    const name = document.createElement('span'); name.className = 'pmsg-name'; name.textContent = 'Flowy';
+    const time = document.createElement('span'); time.className = 'pmsg-time'; time.textContent = 'Just now';
     head.appendChild(name); head.appendChild(time);
     const textEl = document.createElement('div');
-    textEl.className = 'portal-msg-text'; textEl.textContent = text;
-    content.appendChild(head);
-    content.appendChild(textEl);
+    textEl.className = 'pmsg-text'; textEl.textContent = text;
+    content.appendChild(head); content.appendChild(textEl);
     if (cta) {
       const btn = document.createElement('button');
-      btn.className = 'portal-cta-btn';
-      btn.textContent = cta.label;
+      btn.className = 'pmsg-cta'; btn.textContent = cta.label;
       btn.onclick = () => {
         if (cta.href)  window.location.href = cta.href;
         else if (cta.page)  showPage(cta.page);
@@ -1173,54 +961,56 @@ function pushAiMessage(role, text, cta) {
       };
       content.appendChild(btn);
     }
-    row.appendChild(ava);
-    row.appendChild(content);
+    row.appendChild(ava); row.appendChild(content);
   }
 
-  scroll.appendChild(row);
-  scroll.scrollTop = scroll.scrollHeight;
+  zone.appendChild(row);
+  zone.scrollTop = zone.scrollHeight;
 }
 
-function aiFallbackReply(text) {
-  const t = text.toLowerCase();
-  if (t.includes('report') || t.includes('pdf') || t.includes('summary'))
-    return "I can generate a report for any time period — lead summary, automation performance, pipeline, or a full account overview. Just let me know the date range.";
-  if (t.includes('lead'))
-    return "I can pull a lead breakdown by source, status, response time, and conversion for any date range. Want a PDF report, or would you like to explore live in the Dashboard?";
-  if (t.includes('pipeline') || t.includes('deal'))
-    return "I can give you a pipeline overview — stages, deal values, and recent activity. I can export this as a report or you can explore it live in your Dashboard.";
-  if (t.includes('automat') || t.includes('sequence') || t.includes('follow'))
+function aiFallback(t) {
+  const s = t.toLowerCase();
+  if (s.includes('report')||s.includes('pdf')||s.includes('summary'))
+    return "I can generate a report for any time period — lead summary, automation performance, or a full account overview. Just let me know the date range.";
+  if (s.includes('lead'))
+    return "I can pull a lead breakdown by source, status, and response time for any date range. Want a PDF, or would you prefer to explore live in the Dashboard?";
+  if (s.includes('automat')||s.includes('sequence')||s.includes('follow'))
     return "I can review your automations — what's running, reply rates, and how sequences are performing. Head to Automation Control for live status, or ask me to generate a performance report.";
-  if (t.includes('export') || t.includes('download') || t.includes('csv') || t.includes('excel'))
-    return "I can export your leads, contacts, deal history, or automation logs in CSV, PDF, or Excel for any date range. I'll send the file to your email.";
-  if (t.includes('connect') || t.includes('email') || t.includes('setup'))
+  if (s.includes('connect')||s.includes('setup')||s.includes('email')||s.includes('crm'))
     return "Our team handles all account connections for you. Just send a setup request and we'll get everything linked — email, CRM, SMS, and calendar.";
-  if (t.includes('crm') || t.includes('contact') || t.includes('sync'))
-    return "I can pull CRM data, generate contact lists, or export records for any date range. What specifically are you looking for?";
-  if (t.includes('support') || t.includes('help') || t.includes('issue') || t.includes('problem'))
+  if (s.includes('export')||s.includes('download')||s.includes('csv'))
+    return "I can export your leads, contacts, deal history, or automation logs in CSV, PDF, or Excel for any date range.";
+  if (s.includes('support')||s.includes('help')||s.includes('issue')||s.includes('problem'))
     return "I'm here to help. Tell me what's going on and I'll either resolve it directly or connect you with the Flowaify team right away.";
-  if (t.includes('book') || t.includes('calendar') || t.includes('appointment'))
-    return "I can pull your booked calls and appointment data for any period. Want a summary report, or would you like to see it live in the Dashboard?";
-  if (t.includes('compar') || t.includes('month') || t.includes('period') || t.includes('trend'))
-    return "I can compare any two time periods — leads, response time, bookings, or full account stats. What would you like to compare?";
-  if (t.includes('team') || t.includes('invite'))
-    return "You can invite teammates to your workspace. Use the Invite Team option in the top-right menu.";
-  return "I can help with that. I can generate reports, analyze your data, export CRM records, review automations, or connect you with support. Can you tell me a bit more about what you need?";
+  if (s.includes('team')||s.includes('invite'))
+    return "You can invite teammates to your workspace using the Invite Team option in the top-right menu.";
+  if (s.includes('dashboard'))
+    return "Your full analytics dashboard is just one click away.";
+  return "I can help with that. I can generate reports, review automations, export CRM data, or connect you with support. Can you tell me a bit more about what you need?";
 }
 
 function sendAiMessage() {
   const input = document.getElementById('ai-input');
-  const text = input.value.trim();
+  const text = (input.value || '').trim();
   if (!text) return;
-  hideActionCards();
-  pushAiMessage('user', text);
+  startChatMode();
+  pushMsg('user', text);
   input.value = '';
-  setTimeout(() => pushAiMessage('bot', aiFallbackReply(text)), 520);
+  input.style.height = 'auto';
+  setTimeout(() => pushMsg('bot', aiFallback(text)), 520);
 }
 
+/* auto-grow textarea */
 document.addEventListener('DOMContentLoaded', () => {
-  const input = document.getElementById('ai-input');
-  if (input) input.addEventListener('keydown', e => { if (e.key === 'Enter') sendAiMessage(); });
+  const ta = document.getElementById('ai-input');
+  if (!ta) return;
+  ta.addEventListener('input', () => {
+    ta.style.height = 'auto';
+    ta.style.height = Math.min(ta.scrollHeight, 120) + 'px';
+  });
+  ta.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendAiMessage(); }
+  });
 });
 
 initAuth();
