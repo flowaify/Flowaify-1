@@ -84,12 +84,14 @@
 
     /* PAGE SYSTEM */
     .page{display:none}
-    .page.active{display:block}
+    .page.active{display:block;animation:page-enter 0.22s ease}
+    #page-overview.page.active{display:flex;flex-direction:column;animation:page-enter 0.22s ease}
+    #page-automation.page.active{display:flex;flex-direction:column;animation:page-enter 0.22s ease}
+    @keyframes page-enter{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
 
     /* ═══════════════════════════════════════
        PORTAL HOME — COPILOT-INSPIRED LAYOUT
     ═══════════════════════════════════════ */
-    #page-overview.page.active{display:flex;flex-direction:column}
 
     .portal-home {
       min-height: calc(100vh - 62px);
@@ -341,6 +343,36 @@
     .portal-fcard-empty-title { font-size: 12.5px; font-weight: 700; color: var(--text-s); }
     .portal-fcard-empty-sub   { font-size: 11.5px; color: var(--text-m); line-height: 1.55; }
 
+    /* ═══════════════════════════════════════
+       AUTOMATION — IMMERSIVE PAGE
+    ═══════════════════════════════════════ */
+    .auto-home{min-height:calc(100vh - 62px);display:flex;flex-direction:column;align-items:center;padding:48px 24px 64px;background:radial-gradient(ellipse 900px 600px at 50% -80px,rgba(0,87,255,0.06) 0%,transparent 68%),radial-gradient(ellipse 500px 400px at 80% 90%,rgba(139,92,246,0.04) 0%,transparent 60%),linear-gradient(175deg,#ffffff 0%,#f5f8ff 45%,#edf2ff 100%)}
+    .auto-back{display:inline-flex;align-items:center;gap:6px;padding:7px 16px;border:1px solid var(--border);border-radius:99px;background:rgba(255,255,255,0.82);backdrop-filter:blur(10px);font-size:12px;font-weight:600;color:var(--text-m);cursor:pointer;font-family:inherit;transition:all 0.15s;margin-bottom:32px;align-self:flex-start}
+    .auto-back:hover{border-color:var(--blue-border);color:var(--blue);background:rgba(255,255,255,0.96)}
+    .auto-back i{width:12px;height:12px}
+    .auto-header{text-align:center;margin-bottom:32px;max-width:680px;width:100%}
+    .auto-title{font-size:32px;font-weight:800;letter-spacing:-0.8px;color:var(--text);margin-bottom:8px}
+    .auto-sub{font-size:15px;color:var(--text-s);font-weight:400}
+    .auto-status-badge{display:inline-flex;align-items:center;gap:8px;padding:8px 18px;border-radius:99px;background:rgba(255,255,255,0.82);backdrop-filter:blur(10px);border:1px solid rgba(217,119,6,0.2);font-size:12px;font-weight:600;color:var(--amber);margin-top:16px}
+    .auto-status-dot{width:7px;height:7px;border-radius:50%;background:var(--amber);animation:pulse-a 2s infinite;flex-shrink:0}
+    .auto-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;width:100%;max-width:800px}
+    .auto-fcard{background:rgba(255,255,255,0.82);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,0.78);border-radius:20px;box-shadow:0 4px 20px rgba(0,0,0,0.07),0 1px 4px rgba(0,0,0,0.04),inset 0 1px 0 rgba(255,255,255,0.9);padding:26px 24px;display:flex;flex-direction:column;gap:14px;transition:box-shadow 0.18s,transform 0.18s}
+    .auto-fcard:hover{box-shadow:0 8px 32px rgba(0,0,0,0.1),0 2px 8px rgba(0,0,0,0.06),inset 0 1px 0 rgba(255,255,255,0.9);transform:translateY(-2px)}
+    .auto-card-icon{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center}
+    .auto-card-icon i{width:22px;height:22px}
+    .auto-card-title{font-size:16px;font-weight:800;color:var(--text);letter-spacing:-0.3px}
+    .auto-card-desc{font-size:12.5px;color:var(--text-m);line-height:1.6;flex:1}
+    .auto-card-btn{display:inline-flex;align-items:center;gap:6px;padding:10px 20px;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;transition:all 0.18s;align-self:flex-start}
+    .auto-card-btn i{width:14px;height:14px}
+    .auto-btn-green{background:var(--green);color:#fff;box-shadow:0 4px 14px rgba(5,150,105,0.3)}
+    .auto-btn-green:hover{filter:brightness(1.1);transform:translateY(-1px)}
+    .auto-btn-amber{background:var(--amber);color:#fff;box-shadow:0 4px 14px rgba(217,119,6,0.25)}
+    .auto-btn-amber:hover{filter:brightness(1.1);transform:translateY(-1px)}
+    .auto-btn-blue{background:var(--blue);color:#fff;box-shadow:0 4px 14px rgba(0,87,255,0.3)}
+    .auto-btn-blue:hover{background:var(--blue-b);transform:translateY(-1px)}
+    .auto-btn-purple{background:var(--purple);color:#fff;box-shadow:0 4px 14px rgba(139,92,246,0.25)}
+    .auto-btn-purple:hover{filter:brightness(1.1);transform:translateY(-1px)}
+
     /* ─── OTHER PAGES ─── */
     .inner-page{padding:28px 32px 80px}
     .page-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px;gap:16px;flex-wrap:wrap}
@@ -477,6 +509,9 @@
       .portal-greeting-title{font-size:26px}
       .portal-greeting-sub{font-size:14px}
       .portal-lower{padding:0 16px 32px}
+      .auto-home{padding:32px 16px 48px}
+      .auto-title{font-size:24px}
+      .auto-grid{grid-template-columns:1fr}
     }
     @media(max-width:480px){
       .ai-pill{display:none}
@@ -695,16 +730,51 @@
 
 <!-- ─── AUTOMATION ─── -->
 <div class="page" id="page-automation">
-  <div class="inner-page">
-    <div class="page-head"><div><div class="page-head-title">Automation Control</div><div class="page-head-sub">Manage your Flowaify system without touching any technical settings</div></div><div class="badge b-setup" style="font-size:11.5px;padding:5px 12px;margin-top:4px;">Setup Needed</div></div>
-    <div class="status-banner sb-setup mb20"><div style="display:flex;align-items:center;gap:12px;"><div class="sb-dot setup"></div><div><div style="font-size:14px;font-weight:700;color:var(--amber);">System is not live yet</div><div style="font-size:11.5px;color:var(--amber);opacity:0.85;margin-top:2px;">Complete your account connections, then click Launch System to go live</div></div></div></div>
-    <div class="action-grid">
-      <div class="card action-card"><div class="action-card-icon" style="background:var(--green-dim);"><i data-lucide="rocket" style="color:var(--green);"></i></div><div class="action-card-title">Launch System</div><div class="action-card-desc">Ready to go live? Launch your Flowaify automation once your accounts are connected.</div><button class="acbtn acbtn-green" onclick="openModal('modal-launch')"><i data-lucide="rocket"></i> Launch System</button></div>
-      <div class="card action-card"><div class="action-card-icon" style="background:var(--amber-dim);"><i data-lucide="pause-circle" style="color:var(--amber);"></i></div><div class="action-card-title">Pause Automation</div><div class="action-card-desc">Temporarily pause all automations without disconnecting your accounts.</div><button class="acbtn acbtn-amber" onclick="openModal('modal-pause')"><i data-lucide="pause-circle"></i> Pause Automation</button></div>
-      <div class="card action-card"><div class="action-card-icon" style="background:var(--blue-dim);"><i data-lucide="play-circle" style="color:var(--blue);"></i></div><div class="action-card-title">Resume Automation</div><div class="action-card-desc">Turn your automations back on after a pause. Flowaify will pick up where it left off.</div><button class="acbtn acbtn-blue" onclick="openModal('modal-resume')"><i data-lucide="play-circle"></i> Resume Automation</button></div>
-      <div class="card action-card"><div class="action-card-icon" style="background:var(--purple-dim);"><i data-lucide="edit-3" style="color:var(--purple);"></i></div><div class="action-card-title">Request Changes</div><div class="action-card-desc">Need to update follow-up messages, routing rules, or workflow settings? Send us a request.</div><button class="acbtn acbtn-purple" onclick="openModal('modal-changes')"><i data-lucide="edit-3"></i> Request Changes</button></div>
+<div class="auto-home">
+
+  <button class="auto-back" onclick="showPage('overview')">
+    <i data-lucide="arrow-left"></i> Back to AI Assistant
+  </button>
+
+  <div class="auto-header">
+    <div class="auto-title">Automation Control</div>
+    <div class="auto-sub">Manage your Flowaify system without touching any technical settings</div>
+    <div style="display:flex;justify-content:center;">
+      <div class="auto-status-badge">
+        <div class="auto-status-dot"></div>
+        System not live yet — complete your connections to launch
+      </div>
     </div>
   </div>
+
+  <div class="auto-grid">
+    <div class="auto-fcard">
+      <div class="auto-card-icon" style="background:var(--green-dim);"><i data-lucide="rocket" style="color:var(--green);"></i></div>
+      <div class="auto-card-title">Launch System</div>
+      <div class="auto-card-desc">Ready to go live? Launch your Flowaify automation once your accounts are connected and your setup is complete.</div>
+      <button class="auto-card-btn auto-btn-green" onclick="openModal('modal-launch')"><i data-lucide="rocket"></i> Launch System</button>
+    </div>
+    <div class="auto-fcard">
+      <div class="auto-card-icon" style="background:var(--amber-dim);"><i data-lucide="pause-circle" style="color:var(--amber);"></i></div>
+      <div class="auto-card-title">Pause Automation</div>
+      <div class="auto-card-desc">Temporarily pause all automations without disconnecting your accounts. Resume at any time with one click.</div>
+      <button class="auto-card-btn auto-btn-amber" onclick="openModal('modal-pause')"><i data-lucide="pause-circle"></i> Pause Automation</button>
+    </div>
+    <div class="auto-fcard">
+      <div class="auto-card-icon" style="background:var(--blue-dim);"><i data-lucide="play-circle" style="color:var(--blue);"></i></div>
+      <div class="auto-card-title">Resume Automation</div>
+      <div class="auto-card-desc">Turn your automations back on after a pause. Flowaify will pick up exactly where it left off.</div>
+      <button class="auto-card-btn auto-btn-blue" onclick="openModal('modal-resume')"><i data-lucide="play-circle"></i> Resume Automation</button>
+    </div>
+    <div class="auto-fcard">
+      <div class="auto-card-icon" style="background:var(--purple-dim);"><i data-lucide="edit-3" style="color:var(--purple);"></i></div>
+      <div class="auto-card-title">Request Changes</div>
+      <div class="auto-card-desc">Need to update follow-up messages, routing rules, or workflow settings? Send us a change request.</div>
+      <button class="auto-card-btn auto-btn-purple" onclick="openModal('modal-changes')"><i data-lucide="edit-3"></i> Request Changes</button>
+    </div>
+  </div>
+
+</div>
 </div>
 
 <!-- ─── SETTINGS ─── -->
@@ -815,11 +885,28 @@ async function portalLogout() {
 
 /* PAGE NAV */
 function showPage(id) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const current = document.querySelector('.page.active');
+  const next = document.getElementById('page-' + id);
+  if (!next || next === current) return;
+
   document.querySelectorAll('.nav-tab[data-page]').forEach(t => t.classList.remove('active'));
-  const pg = document.getElementById('page-' + id); if(pg) pg.classList.add('active');
   document.querySelectorAll('.nav-tab[data-page="' + id + '"]').forEach(t => t.classList.add('active'));
-  window.scrollTo(0,0); closeProfileMenu();
+
+  const swap = () => {
+    if (current) { current.style.transition = ''; current.style.opacity = ''; current.classList.remove('active'); }
+    next.classList.add('active');
+    lucide.createIcons();
+    window.scrollTo(0, 0);
+    closeProfileMenu();
+  };
+
+  if (current) {
+    current.style.transition = 'opacity 0.15s ease';
+    current.style.opacity = '0';
+    setTimeout(swap, 150);
+  } else {
+    swap();
+  }
 }
 document.querySelectorAll('.nav-tab[data-page]').forEach(el => el.addEventListener('click', () => showPage(el.dataset.page)));
 
