@@ -797,38 +797,7 @@
 const AUTH0_DOMAIN    = 'auth.flowaify.app';
 const AUTH0_CLIENT_ID = 'tx74Owqn3jVeSaVuxfFHsKloqbPqfAmN';
 
-const SB_URL = 'https://ozrxuuwhttyfsefqgxcj.supabase.co';
-const SB_KEY = 'sb_publishable_hjcBEb3r5Yj6XV6wQM1Nug_oBFhuhJC';
 
-async function sbSave(data) {
-  console.log('[SB] sbSave called, userSub:', window.__userSub);
-  if (!window.__userSub) { console.warn('[SB] no userSub, skipping'); return; }
-  const body = JSON.stringify({ id: window.__userSub, data });
-  console.log('[SB] posting:', body);
-  const res = await fetch(`${SB_URL}/rest/v1/settings?on_conflict=id`, {
-    method: 'POST',
-    headers: {
-      'apikey': SB_KEY,
-      'Authorization': `Bearer ${SB_KEY}`,
-      'Content-Type': 'application/json',
-      'Prefer': 'resolution=merge-duplicates'
-    },
-    body
-  });
-  const txt = await res.text();
-  console.log('[SB] save response:', res.status, txt);
-}
-
-async function sbLoad() {
-  if (!window.__userSub) return null;
-  const res = await fetch(
-    `${SB_URL}/rest/v1/settings?id=eq.${encodeURIComponent(window.__userSub)}&select=data`,
-    { headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` } }
-  );
-  if (!res.ok) { console.warn('Supabase load failed:', res.status, await res.text()); return null; }
-  const rows = await res.json();
-  return (Array.isArray(rows) && rows.length) ? rows[0].data : null;
-}
 let auth0Client;
 
 async function initAuth() {
@@ -986,10 +955,9 @@ function settingsSave(section) {
   localStorage.setItem(settingsKey(), JSON.stringify(all));
   if (section === 'biz') updateGreeting();
   showToast('Settings saved.');
-  sbSave(all).catch(e => console.warn('Supabase save:', e));
 }
 
-async function settingsLoad() {
+function settingsLoad() {
   const all = JSON.parse(localStorage.getItem(settingsKey()) || '{}');
   if (all.biz) {
     const b = all.biz;
@@ -1021,42 +989,6 @@ async function settingsLoad() {
     setToggle('t-weekly',           n.weekly);
   }
 
-  /* fetch Supabase in background and patch if cloud data exists */
-  sbLoad().then(cloud => {
-    if (!cloud) return;
-    localStorage.setItem(settingsKey(), JSON.stringify(cloud));
-    const c = cloud;
-    if (c.biz) {
-      const b = c.biz;
-      if (b.name)    document.getElementById('s-biz-name').value     = b.name;
-      if (b.contact) document.getElementById('s-contact-name').value = b.contact;
-      if (b.email)   document.getElementById('s-biz-email').value    = b.email;
-      if (b.phone)   document.getElementById('s-biz-phone').value    = b.phone;
-      if (b.areas)   document.getElementById('s-service-areas').value= b.areas;
-    }
-    if (c.schedule) {
-      const s = c.schedule;
-      if (s.hours)    document.getElementById('s-hours').value          = s.hours;
-      if (s.tz)       document.getElementById('s-timezone').value       = s.tz;
-      if (s.booking)  document.getElementById('s-booking-link').value   = s.booking;
-      if (s.followup) document.getElementById('s-followup-pref').value  = s.followup;
-    }
-    if (c.routing) {
-      const r = c.routing;
-      if (r.pipeline) document.getElementById('s-pipeline').value = r.pipeline;
-      if (r.routing)  document.getElementById('s-routing').value  = r.routing;
-      if (r.sequence) document.getElementById('s-sequence').value = r.sequence;
-    }
-    if (c.notif) {
-      const n = c.notif;
-      setToggle('t-new-lead',         n.newLead);
-      setToggle('t-followup-confirm', n.followup);
-      setToggle('t-appointment',      n.appt);
-      setToggle('t-daily',            n.daily);
-      setToggle('t-weekly',           n.weekly);
-    }
-    updateGreeting();
-  }).catch(e => console.warn('Supabase load:', e));
 }
 
 function setToggle(id, val) {
