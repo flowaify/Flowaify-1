@@ -801,7 +801,10 @@ const SB_URL = 'https://ozrxuuwhttyfsefqgxcj.supabase.co';
 const SB_KEY = 'sb_publishable_hjcBEb3r5Yj6XV6wQM1Nug_oBFhuhJC';
 
 async function sbSave(data) {
-  if (!window.__userSub) return;
+  console.log('[SB] sbSave called, userSub:', window.__userSub);
+  if (!window.__userSub) { console.warn('[SB] no userSub, skipping'); return; }
+  const body = JSON.stringify({ id: window.__userSub, data });
+  console.log('[SB] posting:', body);
   const res = await fetch(`${SB_URL}/rest/v1/settings?on_conflict=id`, {
     method: 'POST',
     headers: {
@@ -810,9 +813,10 @@ async function sbSave(data) {
       'Content-Type': 'application/json',
       'Prefer': 'resolution=merge-duplicates'
     },
-    body: JSON.stringify({ id: window.__userSub, data })
+    body
   });
-  if (!res.ok) console.warn('Supabase save failed:', res.status, await res.text());
+  const txt = await res.text();
+  console.log('[SB] save response:', res.status, txt);
 }
 
 async function sbLoad() {
