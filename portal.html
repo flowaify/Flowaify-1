@@ -10,6 +10,23 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
   <script src="https://cdn.auth0.com/js/auth0-spa-js/2.18/auth0-spa-js.production.js"></script>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
+    import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
+    const firebaseConfig = {
+      apiKey: "AIzaSyA25Kdgp8obAf6bMjWgHgdOwQVlImx8HAg",
+      authDomain: "flowaify-3e548.firebaseapp.com",
+      projectId: "flowaify-3e548",
+      storageBucket: "flowaify-3e548.firebasestorage.app",
+      messagingSenderId: "396062499703",
+      appId: "1:396062499703:web:555d57af0115dfb0fbb772"
+    };
+    const app = initializeApp(firebaseConfig);
+    const db  = getFirestore(app);
+    window.__fsFns = { doc, getDoc, setDoc };
+    if (window.__firebaseReadyResolve) window.__firebaseReadyResolve(db);
+    else window.__db = db;
+  </script>
   <style>
     #auth-gate{position:fixed;inset:0;z-index:9999;background:#fff;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;font-family:'Plus Jakarta Sans',sans-serif}
     #auth-gate .ag-logo{width:40px;height:40px;object-fit:contain}
@@ -794,6 +811,11 @@
 <div id="toast"><div class="toast-icon"><i data-lucide="check"></i></div><div id="toast-msg" style="font-size:12.5px;font-weight:600;color:var(--text-s);line-height:1.45;"></div></div>
 
 <script>
+window.__firebaseReadyPromise = new Promise(r => {
+  if (window.__db) { r(window.__db); }
+  else { window.__firebaseReadyResolve = db => { window.__db = db; r(db); }; }
+});
+
 const AUTH0_DOMAIN    = 'auth.flowaify.app';
 const AUTH0_CLIENT_ID = 'tx74Owqn3jVeSaVuxfFHsKloqbPqfAmN';
 let auth0Client;
@@ -918,59 +940,21 @@ function switchSettingsTab(section, btn) {
   btn.classList.add('active');
 }
 
-function settingsSave(section) {
-  const all = JSON.parse(localStorage.getItem(settingsKey()) || '{}');
-  if (section === 'biz') {
-    all.biz = {
-      name:    document.getElementById('s-biz-name').value,
-      contact: document.getElementById('s-contact-name').value,
-      email:   document.getElementById('s-biz-email').value,
-      phone:   document.getElementById('s-biz-phone').value,
-      areas:   document.getElementById('s-service-areas').value,
-    };
-  } else if (section === 'schedule') {
-    all.schedule = {
-      hours:   document.getElementById('s-hours').value,
-      tz:      document.getElementById('s-timezone').value,
-      booking: document.getElementById('s-booking-link').value,
-      followup:document.getElementById('s-followup-pref').value,
-    };
-  } else if (section === 'routing') {
-    all.routing = {
-      pipeline: document.getElementById('s-pipeline').value,
-      routing:  document.getElementById('s-routing').value,
-      sequence: document.getElementById('s-sequence').value,
-    };
-  } else if (section === 'notif') {
-    all.notif = {
-      newLead: document.getElementById('t-new-lead').classList.contains('on'),
-      followup: document.getElementById('t-followup-confirm').classList.contains('on'),
-      appt:    document.getElementById('t-appointment').classList.contains('on'),
-      daily:   document.getElementById('t-daily').classList.contains('on'),
-      weekly:  document.getElementById('t-weekly').classList.contains('on'),
-    };
-  }
-  localStorage.setItem(settingsKey(), JSON.stringify(all));
-  if (section === 'biz') updateGreeting();
-  showToast('Settings saved.');
-}
-
-function settingsLoad() {
-  const all = JSON.parse(localStorage.getItem(settingsKey()) || '{}');
+function applySettings(all) {
   if (all.biz) {
     const b = all.biz;
-    if (b.name)    document.getElementById('s-biz-name').value    = b.name;
-    if (b.contact) document.getElementById('s-contact-name').value= b.contact;
-    if (b.email)   document.getElementById('s-biz-email').value   = b.email;
-    if (b.phone)   document.getElementById('s-biz-phone').value   = b.phone;
+    if (b.name)    document.getElementById('s-biz-name').value     = b.name;
+    if (b.contact) document.getElementById('s-contact-name').value = b.contact;
+    if (b.email)   document.getElementById('s-biz-email').value    = b.email;
+    if (b.phone)   document.getElementById('s-biz-phone').value    = b.phone;
     if (b.areas)   document.getElementById('s-service-areas').value= b.areas;
   }
   if (all.schedule) {
     const s = all.schedule;
-    if (s.hours)    document.getElementById('s-hours').value         = s.hours;
-    if (s.tz)       document.getElementById('s-timezone').value      = s.tz;
-    if (s.booking)  document.getElementById('s-booking-link').value  = s.booking;
-    if (s.followup) document.getElementById('s-followup-pref').value = s.followup;
+    if (s.hours)    document.getElementById('s-hours').value          = s.hours;
+    if (s.tz)       document.getElementById('s-timezone').value       = s.tz;
+    if (s.booking)  document.getElementById('s-booking-link').value   = s.booking;
+    if (s.followup) document.getElementById('s-followup-pref').value  = s.followup;
   }
   if (all.routing) {
     const r = all.routing;
@@ -986,6 +970,71 @@ function settingsLoad() {
     setToggle('t-daily',            n.daily);
     setToggle('t-weekly',           n.weekly);
   }
+}
+
+function settingsSave(section) {
+  const all = JSON.parse(localStorage.getItem(settingsKey()) || '{}');
+  if (section === 'biz') {
+    all.biz = {
+      name:    document.getElementById('s-biz-name').value,
+      contact: document.getElementById('s-contact-name').value,
+      email:   document.getElementById('s-biz-email').value,
+      phone:   document.getElementById('s-biz-phone').value,
+      areas:   document.getElementById('s-service-areas').value,
+    };
+  } else if (section === 'schedule') {
+    all.schedule = {
+      hours:    document.getElementById('s-hours').value,
+      tz:       document.getElementById('s-timezone').value,
+      booking:  document.getElementById('s-booking-link').value,
+      followup: document.getElementById('s-followup-pref').value,
+    };
+  } else if (section === 'routing') {
+    all.routing = {
+      pipeline: document.getElementById('s-pipeline').value,
+      routing:  document.getElementById('s-routing').value,
+      sequence: document.getElementById('s-sequence').value,
+    };
+  } else if (section === 'notif') {
+    all.notif = {
+      newLead:  document.getElementById('t-new-lead').classList.contains('on'),
+      followup: document.getElementById('t-followup-confirm').classList.contains('on'),
+      appt:     document.getElementById('t-appointment').classList.contains('on'),
+      daily:    document.getElementById('t-daily').classList.contains('on'),
+      weekly:   document.getElementById('t-weekly').classList.contains('on'),
+    };
+  }
+  localStorage.setItem(settingsKey(), JSON.stringify(all));
+  if (section === 'biz') updateGreeting();
+  showToast('Settings saved.');
+
+  /* background Firestore sync */
+  if (window.__userSub && window.__fsFns) {
+    window.__firebaseReadyPromise.then(db => {
+      const { doc, setDoc } = window.__fsFns;
+      return setDoc(doc(db, 'settings', window.__userSub), all);
+    }).catch(e => console.warn('Firestore save:', e));
+  }
+}
+
+async function settingsLoad() {
+  /* apply localStorage immediately so the form is never blank */
+  const local = JSON.parse(localStorage.getItem(settingsKey()) || '{}');
+  applySettings(local);
+
+  /* then fetch Firestore for cross-device sync */
+  if (!window.__userSub || !window.__fsFns) return;
+  try {
+    const db = await window.__firebaseReadyPromise;
+    const { doc, getDoc } = window.__fsFns;
+    const snap = await getDoc(doc(db, 'settings', window.__userSub));
+    if (snap.exists()) {
+      const cloud = snap.data();
+      localStorage.setItem(settingsKey(), JSON.stringify(cloud));
+      applySettings(cloud);
+      updateGreeting();
+    }
+  } catch(e) { console.warn('Firestore load:', e); }
 }
 
 function setToggle(id, val) {
