@@ -802,7 +802,7 @@ const SB_KEY = 'sb_publishable_hjcBEb3r5Yj6XV6wQM1Nug_oBFhuhJC';
 
 async function sbSave(data) {
   if (!window.__userSub) return;
-  await fetch(`${SB_URL}/rest/v1/settings`, {
+  const res = await fetch(`${SB_URL}/rest/v1/settings?on_conflict=id`, {
     method: 'POST',
     headers: {
       'apikey': SB_KEY,
@@ -812,6 +812,7 @@ async function sbSave(data) {
     },
     body: JSON.stringify({ id: window.__userSub, data })
   });
+  if (!res.ok) console.warn('Supabase save failed:', res.status, await res.text());
 }
 
 async function sbLoad() {
@@ -820,6 +821,7 @@ async function sbLoad() {
     `${SB_URL}/rest/v1/settings?id=eq.${encodeURIComponent(window.__userSub)}&select=data`,
     { headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` } }
   );
+  if (!res.ok) { console.warn('Supabase load failed:', res.status, await res.text()); return null; }
   const rows = await res.json();
   return (Array.isArray(rows) && rows.length) ? rows[0].data : null;
 }
