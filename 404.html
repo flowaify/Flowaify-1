@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Page Not Found — Flowaify</title>
+  <link rel="icon" type="image/png" href="logo-transparent.png" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html,body{height:100%;font-family:'Plus Jakarta Sans',sans-serif;color:#0f172a}
+    body{
+      display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;
+      background:
+        radial-gradient(ellipse 900px 600px at 50% -80px,rgba(0,87,255,0.07) 0%,transparent 68%),
+        radial-gradient(ellipse 500px 400px at 85% 90%,rgba(139,92,246,0.05) 0%,transparent 60%),
+        linear-gradient(175deg,#ffffff 0%,#f5f8ff 45%,#edf2ff 100%);
+      padding:32px 20px;text-align:center;
+    }
+    .logo{width:44px;height:44px;object-fit:contain;margin-bottom:24px}
+    .code{font-size:96px;font-weight:800;letter-spacing:-4px;color:#0f172a;line-height:1;margin-bottom:8px;opacity:0.08}
+    .title{font-size:28px;font-weight:800;letter-spacing:-0.6px;color:#0f172a;margin-bottom:10px}
+    .sub{font-size:15px;color:rgba(15,23,42,0.55);max-width:380px;line-height:1.65;margin-bottom:36px}
+    .actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+    .btn-primary{display:inline-flex;align-items:center;gap:7px;padding:11px 24px;background:#0057FF;border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;text-decoration:none;box-shadow:0 4px 14px rgba(0,87,255,0.28);transition:all 0.18s}
+    .btn-primary:hover{background:#2979FF;transform:translateY(-1px)}
+    .btn-primary i{width:14px;height:14px}
+    .btn-ghost{display:inline-flex;align-items:center;gap:7px;padding:11px 22px;background:rgba(255,255,255,0.82);border:1px solid rgba(15,23,42,0.1);border-radius:10px;color:rgba(15,23,42,0.6);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;text-decoration:none;transition:all 0.18s;backdrop-filter:blur(10px)}
+    .btn-ghost:hover{border-color:rgba(0,87,255,0.2);color:#0057FF;background:rgba(255,255,255,0.96)}
+    .btn-ghost i{width:14px;height:14px}
+  </style>
+</head>
+<body>
+  <img class="logo" src="logo-transparent.png" alt="Flowaify" onerror="this.style.display='none'" />
+  <div class="code">404</div>
+  <div class="title">Page not found</div>
+  <div class="sub">The page you're looking for doesn't exist or has been moved. Let's get you back on track.</div>
+  <div class="actions">
+    <a class="btn-primary" href="/"><i data-lucide="home"></i> Go Home</a>
+    <a class="btn-ghost" href="portal.html"><i data-lucide="layout-grid"></i> Open Portal</a>
+  </div>
+  <script>lucide.createIcons();</script>
+</body>
+</html>
