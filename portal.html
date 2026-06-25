@@ -319,6 +319,57 @@
     .sync-icon-wrap{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
     .sync-icon-wrap i{width:14px;height:14px}
 
+    /* ── NOTIFICATION BELL ── */
+    .notif-wrap{position:relative}
+    .notif-btn{width:34px;height:34px;border-radius:9px;background:var(--blue-dim);border:1px solid var(--blue-border);color:var(--text-s);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s;position:relative}
+    .notif-btn:hover{background:rgba(0,87,255,0.1);color:var(--blue)}
+    .notif-btn i{width:15px;height:15px}
+    .notif-badge{position:absolute;top:-4px;right:-4px;width:16px;height:16px;border-radius:50%;background:var(--red);color:#fff;font-size:9px;font-weight:800;display:flex;align-items:center;justify-content:center;border:2px solid #fff}
+    .notif-panel{position:absolute;right:0;top:calc(100% + 8px);width:320px;background:#fff;border:1px solid var(--border);border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,0.13);display:none;z-index:200;overflow:hidden;animation:pmenu-in 0.15s ease}
+    .notif-panel.open{display:block}
+    .notif-panel-head{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--border)}
+    .notif-panel-title{font-size:13px;font-weight:800;color:var(--text)}
+    .notif-mark-read{font-size:11px;font-weight:600;color:var(--blue);cursor:pointer;background:none;border:none;font-family:inherit}
+    .notif-mark-read:hover{text-decoration:underline}
+    .notif-item{display:flex;align-items:flex-start;gap:10px;padding:12px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:background 0.12s}
+    .notif-item:last-child{border-bottom:none}
+    .notif-item:hover{background:var(--blue-dim)}
+    .notif-item.unread{background:rgba(0,87,255,0.03)}
+    .notif-dot{width:7px;height:7px;border-radius:50%;background:var(--blue);flex-shrink:0;margin-top:5px}
+    .notif-dot.read{background:transparent}
+    .notif-icon{width:30px;height:30px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    .notif-icon i{width:13px;height:13px}
+    .ni-blue{background:var(--blue-dim);color:var(--blue)}
+    .ni-green{background:var(--green-dim);color:var(--green)}
+    .ni-amber{background:var(--amber-dim);color:var(--amber)}
+    .notif-text{flex:1;min-width:0}
+    .notif-title{font-size:12.5px;font-weight:600;color:var(--text-s);line-height:1.4}
+    .notif-sub{font-size:11px;color:var(--text-m);margin-top:2px}
+    .notif-empty{display:flex;flex-direction:column;align-items:center;gap:8px;padding:32px 20px;text-align:center}
+    .notif-empty i{width:24px;height:24px;color:rgba(15,23,42,0.15)}
+    .notif-empty-text{font-size:12px;color:var(--text-m)}
+
+    /* ── SEARCH (CMD+K) ── */
+    .search-overlay{position:fixed;inset:0;z-index:500;background:rgba(15,23,42,0.4);backdrop-filter:blur(4px);display:none;align-items:flex-start;justify-content:center;padding-top:80px}
+    .search-overlay.open{display:flex;animation:fade-in 0.15s ease}
+    @keyframes fade-in{from{opacity:0}to{opacity:1}}
+    .search-modal{width:100%;max-width:560px;background:#fff;border:1px solid var(--border);border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,0.18);overflow:hidden;animation:search-drop 0.15s ease}
+    @keyframes search-drop{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
+    .search-input-row{display:flex;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid var(--border)}
+    .search-input-row i{width:16px;height:16px;color:var(--text-m);flex-shrink:0}
+    .search-input{flex:1;border:none;outline:none;font-size:15px;font-family:inherit;color:var(--text);background:transparent}
+    .search-input::placeholder{color:var(--text-m)}
+    .search-esc{font-size:10px;font-weight:700;color:var(--text-m);background:var(--border);padding:3px 7px;border-radius:5px;white-space:nowrap}
+    .search-results{max-height:380px;overflow-y:auto}
+    .search-group-label{font-size:10.5px;font-weight:700;color:var(--text-m);text-transform:uppercase;letter-spacing:0.5px;padding:10px 18px 4px}
+    .search-result-item{display:flex;align-items:center;gap:10px;padding:10px 18px;cursor:pointer;transition:background 0.1s}
+    .search-result-item:hover,.search-result-item.selected{background:var(--blue-dim)}
+    .search-result-icon{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    .search-result-icon i{width:13px;height:13px}
+    .search-result-name{font-size:13px;font-weight:600;color:var(--text-s);flex:1}
+    .search-result-hint{font-size:11px;color:var(--text-m)}
+    .search-empty{padding:32px 20px;text-align:center;font-size:13px;color:var(--text-m)}
+
     /* ── TOAST ── */
     #toast{position:fixed;bottom:24px;right:24px;z-index:300;background:#fff;border:1px solid rgba(5,150,105,0.22);border-radius:12px;padding:14px 18px;box-shadow:0 8px 30px rgba(0,0,0,0.1);display:none;align-items:center;gap:10px;max-width:340px;animation:toast-in 0.2s ease}
     .toast-icon{width:28px;height:28px;border-radius:50%;background:var(--green-dim);display:flex;align-items:center;justify-content:center;flex-shrink:0}
@@ -384,18 +435,62 @@
 <nav class="topnav">
   <div class="topnav-bar">
     <div class="topnav-brand">
-      <img src="logo-transparent.png" alt="Flowaify" onerror="this.style.display='none'" />
-      <div class="topnav-brand-name">flowaify</div>
+      <a href="/" style="display:flex;align-items:center;gap:10px;text-decoration:none;color:inherit">
+        <img src="logo-transparent.png" alt="Flowaify" onerror="this.style.display='none'" />
+        <div class="topnav-brand-name">flowaify</div>
+      </a>
       <span class="ai-pill"><i data-lucide="sparkles"></i> AI Assistant</span>
     </div>
     <button class="mob-nav-btn" onclick="openMobNav()"><i data-lucide="menu"></i></button>
     <div class="topnav-right">
+      <button class="notif-btn" onclick="toggleNotifPanel()" id="notif-btn" title="Notifications">
+        <i data-lucide="bell"></i>
+        <span class="notif-badge" id="notif-badge">3</span>
+      </button>
+      <button class="notif-btn" onclick="openSearch()" title="Search (⌘K)" style="margin-right:2px">
+        <i data-lucide="search"></i>
+      </button>
       <button class="btn-sync" onclick="openModal('modal-sync')">
         <i data-lucide="plug"></i><span class="lbl"> Connect &amp; Sync</span>
       </button>
       <a class="topnav-dash-link" href="dashboard.html">
         <i data-lucide="bar-chart-2"></i><span class="lbl"> Open Dashboard</span>
       </a>
+      <div class="notif-wrap">
+        <div class="notif-panel" id="notif-panel">
+          <div class="notif-panel-head">
+            <div class="notif-panel-title">Notifications</div>
+            <button class="notif-mark-read" onclick="markAllRead()">Mark all read</button>
+          </div>
+          <div id="notif-list">
+            <div class="notif-item unread" onclick="closeNotifPanel()">
+              <div class="notif-dot"></div>
+              <div class="notif-icon ni-blue"><i data-lucide="plug"></i></div>
+              <div class="notif-text">
+                <div class="notif-title">Account setup in progress</div>
+                <div class="notif-sub">Your Flowaify account is being configured · Just now</div>
+              </div>
+            </div>
+            <div class="notif-item unread" onclick="closeNotifPanel()">
+              <div class="notif-dot"></div>
+              <div class="notif-icon ni-amber"><i data-lucide="zap"></i></div>
+              <div class="notif-text">
+                <div class="notif-title">Automations ready to activate</div>
+                <div class="notif-sub">Connect your CRM to go live · Today</div>
+              </div>
+            </div>
+            <div class="notif-item unread" onclick="closeNotifPanel()">
+              <div class="notif-dot"></div>
+              <div class="notif-icon ni-green"><i data-lucide="sparkles"></i></div>
+              <div class="notif-text">
+                <div class="notif-title">Welcome to Flowaify</div>
+                <div class="notif-sub">Your workspace is ready to use · Today</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div class="avatar-wrap">
         <div class="avatar" id="portal-avatar" onclick="toggleProfileMenu()">—</div>
         <div class="profile-menu" id="profile-menu">
@@ -793,6 +888,18 @@
 
 <div id="toast"><div class="toast-icon"><i data-lucide="check"></i></div><div id="toast-msg" style="font-size:12.5px;font-weight:600;color:var(--text-s);line-height:1.45;"></div></div>
 
+<!-- SEARCH MODAL -->
+<div class="search-overlay" id="search-overlay" onclick="closeSearchOutside(event)">
+  <div class="search-modal" id="search-modal">
+    <div class="search-input-row">
+      <i data-lucide="search"></i>
+      <input class="search-input" id="search-input" placeholder="Search pages, actions…" oninput="filterSearch(this.value)" />
+      <span class="search-esc" onclick="closeSearch()">ESC</span>
+    </div>
+    <div class="search-results" id="search-results"></div>
+  </div>
+</div>
+
 <script>
 const AUTH0_DOMAIN    = 'auth.flowaify.app';
 const AUTH0_CLIENT_ID = 'tx74Owqn3jVeSaVuxfFHsKloqbPqfAmN';
@@ -1142,6 +1249,82 @@ document.addEventListener('DOMContentLoaded', () => {
   if (!ta) return;
   ta.addEventListener('input', () => { ta.style.height = 'auto'; ta.style.height = Math.min(ta.scrollHeight, 120) + 'px'; });
   ta.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendAiMessage(); } });
+});
+
+/* ── NOTIFICATIONS ── */
+function toggleNotifPanel() {
+  const p = document.getElementById('notif-panel');
+  p.classList.toggle('open');
+  closeProfileMenu();
+}
+function closeNotifPanel() { document.getElementById('notif-panel').classList.remove('open'); }
+function markAllRead() {
+  document.querySelectorAll('.notif-item.unread').forEach(el => el.classList.remove('unread'));
+  document.querySelectorAll('.notif-dot').forEach(el => el.classList.add('read'));
+  const b = document.getElementById('notif-badge');
+  if (b) b.style.display = 'none';
+  closeNotifPanel();
+}
+document.addEventListener('click', e => {
+  const w = document.querySelector('.notif-wrap');
+  if (w && !w.contains(e.target) && !document.getElementById('notif-btn').contains(e.target)) closeNotifPanel();
+});
+
+/* ── SEARCH ── */
+const SEARCH_ITEMS = [
+  { group:'Pages', name:'AI Assistant',       hint:'Home',          icon:'sparkles',   color:'var(--blue-dim)',   color2:'var(--blue)',   action:()=>showPage('overview') },
+  { group:'Pages', name:'Automation Control', hint:'Manage flows',  icon:'zap',        color:'var(--amber-dim)',  color2:'var(--amber)',  action:()=>showPage('automation') },
+  { group:'Pages', name:'Business Settings',  hint:'Edit profile',  icon:'building-2', color:'var(--blue-dim)',   color2:'var(--blue)',   action:()=>showPage('settings') },
+  { group:'Pages', name:'System Status',      hint:'Service health',icon:'activity',   color:'var(--green-dim)',  color2:'var(--green)',  action:()=>showPage('status') },
+  { group:'Pages', name:'Support',            hint:'Get help',      icon:'life-buoy',  color:'var(--purple-dim)', color2:'var(--purple)', action:()=>showPage('support') },
+  { group:'Pages', name:'Dashboard',          hint:'Analytics',     icon:'bar-chart-2',color:'var(--blue-dim)',   color2:'var(--blue)',   action:()=>window.location.href='dashboard.html' },
+  { group:'Actions', name:'Add a connection', hint:'Request setup', icon:'plug',       color:'var(--blue-dim)',   color2:'var(--blue)',   action:()=>pillAction('connection') },
+  { group:'Actions', name:'Generate a report',hint:'Get PDF',       icon:'file-text',  color:'var(--amber-dim)',  color2:'var(--amber)',  action:()=>openModal('modal-generate-report') },
+  { group:'Actions', name:'Export CRM data',  hint:'CSV / Excel',   icon:'download',   color:'var(--green-dim)',  color2:'var(--green)',  action:()=>openModal('modal-export-data') },
+  { group:'Actions', name:'Contact support',  hint:'Get help now',  icon:'life-buoy',  color:'var(--red-dim)',    color2:'var(--red)',    action:()=>openModal('modal-contact') },
+  { group:'Links',   name:'Onboarding Form',  hint:'Client intake', icon:'clipboard',  color:'var(--purple-dim)', color2:'var(--purple)', action:()=>window.open('onboarding.html','_blank') },
+  { group:'Links',   name:"What's New",       hint:'Changelog',     icon:'sparkles',   color:'var(--blue-dim)',   color2:'var(--blue)',   action:()=>window.open('changelog.html','_blank') },
+  { group:'Links',   name:'Team Management',  hint:'Manage access', icon:'users',      color:'var(--green-dim)',  color2:'var(--green)',  action:()=>window.open('team.html','_blank') },
+];
+
+let searchSelectedIdx = 0;
+function openSearch() {
+  document.getElementById('search-overlay').classList.add('open');
+  const input = document.getElementById('search-input');
+  input.value = '';
+  filterSearch('');
+  setTimeout(() => input.focus(), 50);
+}
+function closeSearch() { document.getElementById('search-overlay').classList.remove('open'); }
+function closeSearchOutside(e) { if (e.target === document.getElementById('search-overlay')) closeSearch(); }
+
+function filterSearch(q) {
+  const container = document.getElementById('search-results');
+  const term = q.toLowerCase().trim();
+  const filtered = term ? SEARCH_ITEMS.filter(i => i.name.toLowerCase().includes(term) || i.hint.toLowerCase().includes(term)) : SEARCH_ITEMS;
+  if (!filtered.length) { container.innerHTML = '<div class="search-empty">No results found</div>'; return; }
+  let html = '';
+  let lastGroup = '';
+  filtered.forEach((item, idx) => {
+    if (item.group !== lastGroup) { html += `<div class="search-group-label">${item.group}</div>`; lastGroup = item.group; }
+    html += `<div class="search-result-item${idx===0?' selected':''}" onclick="runSearchItem(${SEARCH_ITEMS.indexOf(item)})">
+      <div class="search-result-icon" style="background:${item.color};color:${item.color2}"><i data-lucide="${item.icon}"></i></div>
+      <div class="search-result-name">${item.name}</div>
+      <div class="search-result-hint">${item.hint}</div>
+    </div>`;
+  });
+  container.innerHTML = html;
+  lucide.createIcons();
+}
+
+function runSearchItem(idx) {
+  closeSearch();
+  SEARCH_ITEMS[idx].action();
+}
+
+document.addEventListener('keydown', e => {
+  if ((e.metaKey || e.ctrlKey) && e.key === 'k') { e.preventDefault(); openSearch(); }
+  if (e.key === 'Escape') closeSearch();
 });
 
 initAuth();
