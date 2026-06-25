@@ -18,7 +18,8 @@
     .demo-bar a:hover{color:#fff}
     body.demo-mode{padding-top:36px}
     body.demo-mode .sidebar{top:36px}
-    body.demo-mode .topbar{top:36px}
+    body.demo-mode .topbar{position:fixed;top:36px;left:var(--sidebar-w);right:0;z-index:50}
+    body.demo-mode .main{padding-top:60px}
     body.demo-mode #app button,
     body.demo-mode #app a:not(.nav-item){pointer-events:none;cursor:default}
     body.demo-mode #app .nav-item{cursor:pointer}
