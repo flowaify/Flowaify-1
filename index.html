@@ -1255,9 +1255,9 @@
     .word-blur {
       display: inline-block;
       opacity: 0;
-      filter: blur(8px);
-      transform: translateY(10px);
-      transition: opacity 0.55s ease, filter 0.55s ease, transform 0.55s cubic-bezier(0.34, 1.3, 0.64, 1);
+      filter: blur(6px);
+      transform: translateY(8px);
+      transition: opacity 0.45s ease, filter 0.45s ease, transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
       will-change: opacity, filter, transform;
     }
     .word-blur.word-in {
@@ -1274,16 +1274,20 @@
       z-index: 0;
     }
 
-    /* ── Flow row entrance (slide from left) ── */
+    /* ── Flow row entrance (slide from left, per-row) ── */
     .flow-row {
       opacity: 0;
-      transform: translateX(-18px);
-      transition: opacity 0.55s ease, transform 0.55s cubic-bezier(.34, 1.26, .64, 1);
+      transform: translateX(-20px);
+      transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+      will-change: opacity, transform;
     }
     .flow-row.flow-in {
       opacity: 1;
       transform: translateX(0);
     }
+
+    /* ── Reveal performance ── */
+    .reveal { will-change: opacity, transform; }
 
     /* ── Stagger grid children start hidden (transform set via JS to avoid hover conflict) ── */
     [data-stagger] > * {
@@ -3494,15 +3498,15 @@
 <script>
 // ─── HERO WORD-BY-WORD ENTRANCE ──────────────────────────────────────────────
 (function() {
-  gsap.to('#hero-logo', { opacity: 1, y: 0, duration: 0.7, ease: 'power3.out', delay: 0.05 });
-  gsap.to('#hero-pill', { opacity: 1, y: 0, duration: 0.7, ease: 'power3.out', delay: 0.22 });
-  const words = document.querySelectorAll('#hero-h1 .word-blur');
-  words.forEach(function(w, i) { setTimeout(function() { w.classList.add('word-in'); }, 400 + i * 68); });
-  var lastDelay = 400 + (words.length - 1) * 68 + 300;
+  gsap.to('#hero-logo', { opacity: 1, y: 0, duration: 0.5, ease: 'power3.out', delay: 0.04 });
+  gsap.to('#hero-pill', { opacity: 1, y: 0, duration: 0.5, ease: 'power3.out', delay: 0.14 });
+  var words = document.querySelectorAll('#hero-h1 .word-blur');
+  words.forEach(function(w, i) { setTimeout(function() { w.classList.add('word-in'); }, 240 + i * 48); });
+  var lastDelay = 240 + (words.length - 1) * 48 + 140;
   setTimeout(function() {
-    gsap.to('#hero-sub',    { opacity: 1, y: 0, duration: 0.7, ease: 'power3.out' });
-    gsap.to('#hero-ctas',   { opacity: 1, y: 0, duration: 0.7, ease: 'power3.out', delay: 0.14 });
-    gsap.to('#hero-visual', { opacity: 1, duration: 0.9, ease: 'power3.out', delay: 0.06 });
+    gsap.to('#hero-sub',    { opacity: 1, y: 0, duration: 0.55, ease: 'power3.out' });
+    gsap.to('#hero-ctas',   { opacity: 1, y: 0, duration: 0.55, ease: 'power3.out', delay: 0.1 });
+    gsap.to('#hero-visual', { opacity: 1,        duration: 0.7,  ease: 'power3.out', delay: 0.04 });
   }, lastDelay);
 })();
 
@@ -4443,26 +4447,26 @@ window.addEventListener('scroll', () => {
 <script>
 // ─── PARTICLE CANVAS ─────────────────────────────────────────────────────────
 (function() {
+  if (window.matchMedia('(max-width:768px)').matches) return; // skip on mobile
   var canvas = document.getElementById('hero-particles');
-  if (!canvas) return;
+  var hero   = document.getElementById('hero-section');
+  if (!canvas || !hero) return;
   var ctx = canvas.getContext('2d');
-  var W, H, dots = [];
-  function resize() {
-    W = canvas.width = canvas.offsetWidth;
-    H = canvas.height = canvas.offsetHeight;
-  }
+  var W, H, dots = [], raf = null, active = false;
+  function resize() { W = canvas.width = canvas.offsetWidth; H = canvas.height = canvas.offsetHeight; }
   resize();
   window.addEventListener('resize', resize, { passive: true });
-  for (var i = 0; i < 65; i++) {
+  for (var i = 0; i < 28; i++) {
     dots.push({
       x: Math.random() * W, y: Math.random() * H,
-      r: Math.random() * 1.6 + 0.4,
-      vx: (Math.random() - 0.5) * 0.22,
-      vy: (Math.random() - 0.5) * 0.22,
+      r: Math.random() * 1.4 + 0.4,
+      vx: (Math.random() - 0.5) * 0.18,
+      vy: (Math.random() - 0.5) * 0.18,
       o: Math.random() * 0.07 + 0.03
     });
   }
   function frame() {
+    if (!active) return;
     if (!W) { W = canvas.offsetWidth; H = canvas.offsetHeight; }
     ctx.clearRect(0, 0, W, H);
     for (var i = 0; i < dots.length; i++) {
@@ -4475,9 +4479,16 @@ window.addEventListener('scroll', () => {
       ctx.fillStyle = 'rgba(0,87,255,' + d.o + ')';
       ctx.fill();
     }
-    requestAnimationFrame(frame);
+    raf = requestAnimationFrame(frame);
   }
-  frame();
+  // pause when hero scrolls out of view
+  new IntersectionObserver(function(entries) {
+    active = entries[0].isIntersecting;
+    if (active && !raf) { raf = requestAnimationFrame(frame); }
+    else if (!active && raf) { cancelAnimationFrame(raf); raf = null; }
+  }, { threshold: 0 }).observe(hero);
+  active = true;
+  raf = requestAnimationFrame(frame);
 })();
 
 // ─── SECTION WORD REVEALS (scroll-triggered) ─────────────────────────────────
@@ -4489,39 +4500,32 @@ window.addEventListener('scroll', () => {
       if (!entry.isIntersecting) return;
       var words = entry.target.querySelectorAll('.word-blur');
       words.forEach(function(w, i) {
-        setTimeout(function() { w.classList.add('word-in'); }, i * 68);
+        setTimeout(function() { w.classList.add('word-in'); }, i * 55);
       });
       obs.unobserve(entry.target);
     });
-  }, { threshold: 0.3 });
+  }, { threshold: 0.25 });
   targets.forEach(function(el) { obs.observe(el); });
 })();
 
-// ─── FLOW ROW STAGGERED REVEAL ────────────────────────────────────────────────
+// ─── FLOW ROW STAGGERED REVEAL (per-row observation) ─────────────────────────
 (function() {
   var rows = document.querySelectorAll('.flow-row');
   if (!rows.length) return;
-  var triggered = false;
-  var parent = document.getElementById('flow-timeline') || document.getElementById('system-flow');
-  if (!parent) return;
   var obs = new IntersectionObserver(function(entries) {
     entries.forEach(function(entry) {
-      if (!entry.isIntersecting || triggered) return;
-      triggered = true;
-      rows.forEach(function(row, i) {
-        setTimeout(function() { row.classList.add('flow-in'); }, i * 90);
-      });
-      obs.disconnect();
+      if (!entry.isIntersecting) return;
+      entry.target.classList.add('flow-in');
+      obs.unobserve(entry.target);
     });
-  }, { threshold: 0.05 });
-  obs.observe(parent);
+  }, { threshold: 0.25 });
+  rows.forEach(function(row) { obs.observe(row); });
 })();
 
 // ─── STAGGER GRID CHILDREN ───────────────────────────────────────────────────
 (function() {
   var grids = document.querySelectorAll('[data-stagger]');
   if (!grids.length) return;
-  // Set initial inline state so hover transform won't conflict after reveal
   grids.forEach(function(g) {
     Array.from(g.children).forEach(function(child) {
       child.style.opacity = '0';
@@ -4534,15 +4538,14 @@ window.addEventListener('scroll', () => {
       var children = Array.from(entry.target.children);
       children.forEach(function(child, i) {
         setTimeout(function() {
-          child.style.transition = 'opacity 0.6s ease, transform 0.6s cubic-bezier(.34,1.56,.64,1)';
+          child.style.transition = 'opacity 0.55s ease, transform 0.55s cubic-bezier(.22,1,.36,1)';
           child.style.opacity = '1';
           child.style.transform = 'translateY(0)';
           setTimeout(function() {
             child.style.transition = '';
-            child.style.transform = ''; // clear so CSS :hover works
-            // Keep opacity:1 inline so CSS [data-stagger]>*{opacity:0} doesn't re-hide it
-          }, 750);
-        }, i * 110);
+            child.style.transform = '';
+          }, 700);
+        }, i * 90);
       });
       obs.unobserve(entry.target);
     });
