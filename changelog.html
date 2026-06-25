@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>What's New — Flowaify</title>
+  <link rel="icon" type="image/png" href="logo-transparent.png" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <style>
+    :root{--blue:#0057FF;--blue-dim:rgba(0,87,255,0.06);--blue-border:rgba(0,87,255,0.14);--green:#059669;--green-dim:rgba(5,150,105,0.08);--amber:#d97706;--amber-dim:rgba(217,119,6,0.08);--purple:#8b5cf6;--purple-dim:rgba(139,92,246,0.08);--border:rgba(15,23,42,0.08);--text:#0f172a;--text-s:rgba(15,23,42,0.68);--text-m:rgba(15,23,42,0.44)}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html,body{font-family:'Plus Jakarta Sans',sans-serif;color:var(--text);font-size:14px}
+    body{background:radial-gradient(ellipse 900px 600px at 50% -80px,rgba(0,87,255,0.06) 0%,transparent 68%),radial-gradient(ellipse 500px 400px at 80% 90%,rgba(139,92,246,0.04) 0%,transparent 60%),linear-gradient(175deg,#ffffff 0%,#f5f8ff 45%,#edf2ff 100%);min-height:100vh}
+    a{text-decoration:none;color:inherit}
+
+    .topnav{position:sticky;top:0;z-index:60;background:rgba(255,255,255,0.92);backdrop-filter:blur(20px);border-bottom:1px solid var(--border)}
+    .topnav-bar{display:flex;align-items:center;justify-content:space-between;padding:0 32px;height:62px}
+    .topnav-brand{display:flex;align-items:center;gap:10px;cursor:pointer}
+    .topnav-brand img{width:28px;height:28px;object-fit:contain}
+    .topnav-brand-name{font-size:15px;font-weight:800;letter-spacing:-0.4px}
+    .btn-back{display:inline-flex;align-items:center;gap:6px;padding:7px 16px;border:1px solid var(--border);border-radius:99px;background:rgba(255,255,255,0.82);backdrop-filter:blur(10px);font-size:12px;font-weight:600;color:var(--text-m);cursor:pointer;text-decoration:none;transition:all 0.15s}
+    .btn-back:hover{border-color:var(--blue-border);color:var(--blue)}
+    .btn-back i{width:12px;height:12px}
+
+    .page-wrap{max-width:680px;margin:0 auto;padding:48px 24px 80px}
+    .page-header{margin-bottom:48px}
+    .page-tag{display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:99px;background:var(--blue-dim);border:1px solid var(--blue-border);color:var(--blue);font-size:11px;font-weight:700;margin-bottom:16px}
+    .page-tag i{width:11px;height:11px}
+    .page-title{font-size:32px;font-weight:800;letter-spacing:-0.8px;margin-bottom:10px}
+    .page-sub{font-size:15px;color:var(--text-s);line-height:1.65}
+
+    .entry{display:grid;grid-template-columns:120px 1fr;gap:24px;margin-bottom:40px;padding-bottom:40px;border-bottom:1px solid var(--border)}
+    .entry:last-child{border-bottom:none}
+    .entry-date-col{padding-top:4px}
+    .entry-date{font-size:12px;font-weight:700;color:var(--text-m)}
+    .entry-version{display:inline-flex;padding:3px 8px;border-radius:6px;font-size:10px;font-weight:800;margin-top:6px}
+    .v-major{background:var(--blue-dim);color:var(--blue)}
+    .v-minor{background:var(--green-dim);color:var(--green)}
+    .v-patch{background:rgba(15,23,42,0.06);color:var(--text-m)}
+    .entry-title{font-size:18px;font-weight:800;letter-spacing:-0.3px;margin-bottom:8px}
+    .entry-desc{font-size:13.5px;color:var(--text-s);line-height:1.7;margin-bottom:14px}
+    .entry-items{display:flex;flex-direction:column;gap:6px}
+    .entry-item{display:flex;align-items:flex-start;gap:8px;font-size:13px;color:var(--text-s)}
+    .entry-item-dot{width:18px;height:18px;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+    .entry-item-dot i{width:10px;height:10px}
+    .dot-new{background:var(--blue-dim);color:var(--blue)}
+    .dot-fix{background:var(--green-dim);color:var(--green)}
+    .dot-imp{background:var(--amber-dim);color:var(--amber)}
+
+    @media(max-width:600px){.entry{grid-template-columns:1fr}.entry-date-col{display:flex;align-items:center;gap:8px}.topnav-bar{padding:0 16px}}
+  </style>
+</head>
+<body>
+  <nav class="topnav">
+    <div class="topnav-bar">
+      <a class="topnav-brand" href="/">
+        <img src="logo-transparent.png" alt="" onerror="this.style.display='none'" />
+        <span class="topnav-brand-name">flowaify</span>
+      </a>
+      <a class="btn-back" href="portal.html"><i data-lucide="arrow-left"></i> Back to Portal</a>
+    </div>
+  </nav>
+
+  <div class="page-wrap">
+    <div class="page-header">
+      <div class="page-tag"><i data-lucide="sparkles"></i> Product Updates</div>
+      <div class="page-title">What's New</div>
+      <div class="page-sub">The latest improvements, features, and fixes to your Flowaify workspace.</div>
+    </div>
+
+    <div class="entry">
+      <div class="entry-date-col">
+        <div class="entry-date">Jun 2026</div>
+        <span class="entry-version v-major">v2.0</span>
+      </div>
+      <div>
+        <div class="entry-title">AI Assistant Portal</div>
+        <div class="entry-desc">Your workspace is now powered by an AI-first interface. Ask questions, trigger automations, and manage your account — all from one place.</div>
+        <div class="entry-items">
+          <div class="entry-item"><div class="entry-item-dot dot-new"><i data-lucide="plus"></i></div>New AI chat home with smart suggested actions</div>
+          <div class="entry-item"><div class="entry-item-dot dot-new"><i data-lucide="plus"></i></div>Notification center with real-time alerts</div>
+          <div class="entry-item"><div class="entry-item-dot dot-new"><i data-lucide="plus"></i></div>⌘K search — jump anywhere instantly</div>
+          <div class="entry-item"><div class="entry-item-dot dot-new"><i data-lucide="plus"></i></div>Immersive glass card design across all pages</div>
+          <div class="entry-item"><div class="entry-item-dot dot-imp"><i data-lucide="arrow-up"></i></div>Settings now save per account with cross-device sync coming soon</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="entry">
+      <div class="entry-date-col">
+        <div class="entry-date">May 2026</div>
+        <span class="entry-version v-minor">v1.4</span>
+      </div>
+      <div>
+        <div class="entry-title">Automation Control & Status</div>
+        <div class="entry-desc">New dedicated pages for managing automations and monitoring the health of all connected services.</div>
+        <div class="entry-items">
+          <div class="entry-item"><div class="entry-item-dot dot-new"><i data-lucide="plus"></i></div>Automation Control page with 4 sequence cards</div>
+          <div class="entry-item"><div class="entry-item-dot dot-new"><i data-lucide="plus"></i></div>System Status page with per-service health indicators</div>
+          <div class="entry-item"><div class="entry-item-dot dot-fix"><i data-lucide="check"></i></div>Improved page transition animations</div>
+          <div class="entry-item"><div class="entry-item-dot dot-fix"><i data-lucide="check"></i></div>Mobile navigation drawer added</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="entry">
+      <div class="entry-date-col">
+        <div class="entry-date">Apr 2026</div>
+        <span class="entry-version v-minor">v1.2</span>
+      </div>
+      <div>
+        <div class="entry-title">Business Settings</div>
+        <div class="entry-desc">A full settings panel so you can configure your business profile, schedule, routing rules, and notification preferences.</div>
+        <div class="entry-items">
+          <div class="entry-item"><div class="entry-item-dot dot-new"><i data-lucide="plus"></i></div>Business Info, Schedule, Routing, and Notifications tabs</div>
+          <div class="entry-item"><div class="entry-item-dot dot-new"><i data-lucide="plus"></i></div>Settings persist to localStorage per account</div>
+          <div class="entry-item"><div class="entry-item-dot dot-imp"><i data-lucide="arrow-up"></i></div>Greeting now uses your Main Contact Name from settings</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="entry">
+      <div class="entry-date-col">
+        <div class="entry-date">Mar 2026</div>
+        <span class="entry-version v-patch">v1.0</span>
+      </div>
+      <div>
+        <div class="entry-title">Workspace Launch</div>
+        <div class="entry-desc">Flowaify workspace goes live with Auth0 authentication, dashboard access, and the core portal experience.</div>
+        <div class="entry-items">
+          <div class="entry-item"><div class="entry-item-dot dot-new"><i data-lucide="plus"></i></div>Auth0 PKCE login flow</div>
+          <div class="entry-item"><div class="entry-item-dot dot-new"><i data-lucide="plus"></i></div>Analytics dashboard with sidebar navigation</div>
+          <div class="entry-item"><div class="entry-item-dot dot-new"><i data-lucide="plus"></i></div>Time-based greeting (Good morning / afternoon / evening)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>lucide.createIcons();</script>
+</body>
+</html>
