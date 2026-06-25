@@ -4452,8 +4452,15 @@ window.addEventListener('scroll', () => {
   var hero   = document.getElementById('hero-section');
   if (!canvas || !hero) return;
   var ctx = canvas.getContext('2d');
+  var dpr = window.devicePixelRatio || 1;
   var W, H, dots = [], raf = null, active = false;
-  function resize() { W = canvas.width = canvas.offsetWidth; H = canvas.height = canvas.offsetHeight; }
+  function resize() {
+    var cw = canvas.offsetWidth, ch = canvas.offsetHeight;
+    W = cw; H = ch;
+    canvas.width  = cw * dpr;
+    canvas.height = ch * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
   resize();
   window.addEventListener('resize', resize, { passive: true });
   for (var i = 0; i < 28; i++) {
@@ -4467,7 +4474,6 @@ window.addEventListener('scroll', () => {
   }
   function frame() {
     if (!active) return;
-    if (!W) { W = canvas.offsetWidth; H = canvas.offsetHeight; }
     ctx.clearRect(0, 0, W, H);
     for (var i = 0; i < dots.length; i++) {
       var d = dots[i];
