@@ -1273,7 +1273,7 @@
       <a href="#how-it-works"     class="nav-link" onclick="closeNav()">How It Works</a>
       <a href="#plans"            class="nav-link" onclick="closeNav()">Plans</a>
       <a href="#faq"              class="nav-link" onclick="closeNav()">FAQ</a>
-      <a href="#build-my-plan"    class="nav-link mob-only" onclick="closeNav()">Build My Plan</a>
+      <a href="onboarding.html"    class="nav-link mob-only" onclick="closeNav()">Get Started</a>
     </div>
 
     <div style="display:flex;align-items:center;gap:12px;">
@@ -1284,7 +1284,7 @@
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
         Client Portal
       </a>
-      <a id="navbar-cta" href="#build-my-plan" class="btn btn-primary">Build My Plan</a>
+      <a id="navbar-cta" href="onboarding.html" class="btn btn-primary">Get Started</a>
     </div>
   </nav>
 
@@ -1327,8 +1327,8 @@
         </p>
 
         <div id="hero-ctas" style="opacity:0;transform:translateY(12px);display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:32px;">
-          <a href="#build-my-plan" class="btn btn-primary btn-lg">
-            Build My Plan
+          <a href="onboarding.html" class="btn btn-primary btn-lg">
+            Get Started
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
               <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
             </svg>
@@ -1574,8 +1574,8 @@
             <p style="font-size:14px;color:var(--text-muted);line-height:1.72;margin-bottom:20px;">Pre-approval inquiries need a same-minute response, but brokers are almost always on calls or in consultations. Flowaify acknowledges every inquiry instantly, sends qualification questions, creates the CRM contact, and follows up until they book — without the broker lifting a finger.</p>
             <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap;">
               <div style="font-size:13px;font-weight:600;color:var(--text-soft);">Qualified leads reach the calendar without the broker having to chase them.</div>
-              <a href="#build-my-plan" class="btn btn-primary" style="display:inline-flex;align-items:center;gap:7px;white-space:nowrap;flex-shrink:0;">
-                Build My Plan
+              <a href="onboarding.html" class="btn btn-primary" style="display:inline-flex;align-items:center;gap:7px;white-space:nowrap;flex-shrink:0;">
+                Get Started
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
               </a>
             </div>
@@ -1587,8 +1587,8 @@
       <!-- CTA row -->
       <div class="reveal" style="text-align:center;margin-top:20px;">
         <p style="font-size:15px;color:var(--text-muted);margin-bottom:20px;">Sound like your business? We'll show you exactly how a system would work for you.</p>
-        <a href="#build-my-plan" class="btn btn-primary btn-lg" style="display:inline-flex;align-items:center;gap:8px;">
-          Build My Plan
+        <a href="onboarding.html" class="btn btn-primary btn-lg" style="display:inline-flex;align-items:center;gap:8px;">
+          Get Started
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
         </a>
       </div>
@@ -2566,8 +2566,8 @@
           <p style="font-size:16px;color:var(--text-muted);line-height:1.75;margin-bottom:28px;">
             Flowaify doesn't sell you software to figure out yourself. We build the system, connect it to your tools, and hand it over fully operational.
           </p>
-          <a href="#build-my-plan" class="btn btn-primary" style="display:inline-flex;align-items:center;gap:8px;">
-            Build My Plan
+          <a href="onboarding.html" class="btn btn-primary" style="display:inline-flex;align-items:center;gap:8px;">
+            Get Started
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
           </a>
         </div>
@@ -3457,165 +3457,37 @@
 
         </div>
 
-        <!-- ── RIGHT: Form ─────────────────────────────────────────────────── -->
-        <div class="contact-glass" style="border-radius:18px;padding:18px 20px;">
-          <p style="font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--blue);margin-bottom:10px;">Tell us about your business</p>
-          <p style="font-size:13px;color:var(--text-muted);line-height:1.5;margin-bottom:16px;">Fill this in and we&#8217;ll reach out to schedule your discovery call within 24 hours.</p>
-          <form id="contact-form" style="display:flex;flex-direction:column;gap:13px;" onsubmit="handleSubmit(event)">
-
-            <!-- Section 1: Your business -->
-            <div>
-              <div style="display:flex;align-items:center;gap:7px;margin-bottom:8px;">
-                <div class="form-section-num">1</div>
-                <div>
-                  <span style="font-size:14px;font-weight:800;color:var(--text);letter-spacing:-0.02em;">Your business</span>
-                  <span style="font-size:12px;color:var(--text-muted);margin-left:8px;">Tell us who you are</span>
-                </div>
-              </div>
-              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
-                <div class="form-field">
-                  <label class="form-label">Name</label>
-                  <input type="text" name="name" class="form-input" placeholder="Your name" autocomplete="name"/>
-                </div>
-                <div class="form-field">
-                  <label class="form-label">Email</label>
-                  <input type="email" name="email" class="form-input" placeholder="you@company.com" autocomplete="email"/>
-                </div>
-              </div>
-              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
-                <div class="form-field">
-                  <label class="form-label">Business name</label>
-                  <input type="text" name="business" class="form-input" placeholder="Your business" autocomplete="organization"/>
-                </div>
-                <div class="form-field">
-                  <label class="form-label">Website URL</label>
-                  <input type="text" name="website" class="form-input" placeholder="yoursite.com" autocomplete="url"/>
-                </div>
-              </div>
-              <div class="form-field">
-                <label class="form-label" style="margin-bottom:6px;">What best describes your business?</label>
-                <div class="bubble-group" data-multi="false" data-name="business_type">
-                  <span class="bubble">Agency</span>
-                  <span class="bubble">Consulting</span>
-                  <span class="bubble">Real Estate</span>
-                  <span class="bubble">Ecommerce</span>
-                  <span class="bubble">Home Services</span>
-                  <span class="bubble">Other</span>
-                </div>
-              </div>
+        <!-- ── RIGHT: Get Started ──────────────────────────────────────────── -->
+        <div class="contact-glass" style="border-radius:18px;padding:36px 28px;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;">
+          <p style="font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--blue);margin-bottom:10px;">Client onboarding</p>
+          <h3 style="font-size:24px;font-weight:800;letter-spacing:-0.03em;color:var(--text);line-height:1.2;margin-bottom:12px;">Ready to get started?</h3>
+          <p style="font-size:14px;color:var(--text-muted);line-height:1.65;margin-bottom:28px;">Complete our short onboarding form so we can understand your business, schedule, and goals &#8212; then we&#8217;ll set up your custom automation system.</p>
+          <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:32px;width:100%;">
+            <div style="display:flex;align-items:center;gap:12px;">
+              <div style="width:24px;height:24px;border-radius:7px;background:rgba(0,87,255,0.08);border:1px solid rgba(0,87,255,0.14);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:10px;font-weight:800;color:var(--blue);">1</div>
+              <span style="font-size:13.5px;color:var(--text);">Business info &amp; contact details</span>
             </div>
-
-            <!-- Divider -->
-            <div style="height:1px;background:var(--border);margin:2px 0;"></div>
-
-            <!-- Section 2: Lead flow -->
-            <div>
-              <div style="display:flex;align-items:center;gap:7px;margin-bottom:8px;">
-                <div class="form-section-num">2</div>
-                <div>
-                  <span style="font-size:14px;font-weight:800;color:var(--text);letter-spacing:-0.02em;">Lead flow</span>
-                  <span style="font-size:12px;color:var(--text-muted);margin-left:8px;">How leads find and move through you</span>
-                </div>
-              </div>
-              <div class="form-field" style="margin-bottom:10px;">
-                <label class="form-label" style="margin-bottom:6px;">How do leads find you? <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:11px;opacity:0.7;">(select all that apply)</span></label>
-                <div class="bubble-group" data-multi="true" data-name="lead_source">
-                  <span class="bubble">Website</span>
-                  <span class="bubble">Forms</span>
-                  <span class="bubble">Google Ads</span>
-                  <span class="bubble">Meta Ads</span>
-                  <span class="bubble">Referrals</span>
-                  <span class="bubble">Email</span>
-                  <span class="bubble">Other</span>
-                </div>
-              </div>
+            <div style="display:flex;align-items:center;gap:12px;">
+              <div style="width:24px;height:24px;border-radius:7px;background:rgba(0,87,255,0.08);border:1px solid rgba(0,87,255,0.14);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:10px;font-weight:800;color:var(--blue);">2</div>
+              <span style="font-size:13.5px;color:var(--text);">Schedule &amp; availability</span>
             </div>
-
-            <!-- Divider -->
-            <div style="height:1px;background:var(--border);margin:2px 0;"></div>
-
-            <!-- Section 3: Current CRM -->
-            <div>
-              <div style="display:flex;align-items:center;gap:7px;margin-bottom:8px;">
-                <div class="form-section-num">3</div>
-                <div>
-                  <span style="font-size:14px;font-weight:800;color:var(--text);letter-spacing:-0.02em;">Current CRM</span>
-                  <span style="font-size:12px;color:var(--text-muted);margin-left:8px;">What are you using today?</span>
-                </div>
-              </div>
-              <div class="form-field">
-                <label class="form-label" style="margin-bottom:6px;">Select your CRM</label>
-                <div class="bubble-group" data-multi="false" data-name="crm">
-                  <span class="bubble">HubSpot</span>
-                  <span class="bubble">Salesforce</span>
-                  <span class="bubble">GoHighLevel</span>
-                  <span class="bubble">Other CRM</span>
-                  <span class="bubble">No CRM Yet</span>
-                </div>
-              </div>
+            <div style="display:flex;align-items:center;gap:12px;">
+              <div style="width:24px;height:24px;border-radius:7px;background:rgba(0,87,255,0.08);border:1px solid rgba(0,87,255,0.14);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:10px;font-weight:800;color:var(--blue);">3</div>
+              <span style="font-size:13.5px;color:var(--text);">Goals &amp; challenges</span>
             </div>
-
-            <!-- Divider -->
-            <div style="height:1px;background:var(--border);margin:2px 0;"></div>
-
-            <!-- Section 4: Team Size -->
-            <div>
-              <div style="display:flex;align-items:center;gap:7px;margin-bottom:8px;">
-                <div class="form-section-num">4</div>
-                <div>
-                  <span style="font-size:14px;font-weight:800;color:var(--text);letter-spacing:-0.02em;">Team size</span>
-                  <span style="font-size:12px;color:var(--text-muted);margin-left:8px;">How many people on your team?</span>
-                </div>
-              </div>
-              <div class="form-field">
-                <label class="form-label" style="margin-bottom:6px;">Select your team size</label>
-                <div class="bubble-group" data-multi="false" data-name="team_size">
-                  <span class="bubble">1–2</span>
-                  <span class="bubble">3–5</span>
-                  <span class="bubble">6–10</span>
-                  <span class="bubble">11–25</span>
-                  <span class="bubble">26–50</span>
-                  <span class="bubble">50+</span>
-                </div>
-              </div>
+            <div style="display:flex;align-items:center;gap:12px;">
+              <div style="width:24px;height:24px;border-radius:7px;background:rgba(0,87,255,0.08);border:1px solid rgba(0,87,255,0.14);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:10px;font-weight:800;color:var(--blue);">4</div>
+              <span style="font-size:13.5px;color:var(--text);">Review &amp; submit</span>
             </div>
-
-            <!-- Divider -->
-            <div style="height:1px;background:var(--border);margin:2px 0;"></div>
-
-            <!-- Section 5: Biggest Problems -->
-            <div>
-              <div style="display:flex;align-items:center;gap:7px;margin-bottom:8px;">
-                <div class="form-section-num">5</div>
-                <div>
-                  <span style="font-size:14px;font-weight:800;color:var(--text);letter-spacing:-0.02em;">Biggest problems</span>
-                  <span style="font-size:12px;color:var(--text-muted);margin-left:8px;">Select all that apply</span>
-                </div>
-              </div>
-              <div class="form-field">
-                <div class="bubble-group" data-multi="true" data-name="problems">
-                  <span class="bubble">Slow response time</span>
-                  <span class="bubble">Missed follow-ups</span>
-                  <span class="bubble">Messy CRM</span>
-                  <span class="bubble">Manual data entry</span>
-                  <span class="bubble">No visibility</span>
-                  <span class="bubble">Leads not contacted</span>
-                </div>
-              </div>
-            </div>
-
-            <!-- Submit -->
-            <div>
-              <button type="submit" class="btn-primary" style="width:100%;justify-content:center;font-size:13px;font-weight:800;padding:13px 20px;border-radius:10px;display:flex;align-items:center;gap:7px;border:none;cursor:pointer;letter-spacing:-0.01em;">
-                Build My Plan
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-              </button>
-              <div style="display:flex;align-items:center;justify-content:center;gap:7px;margin-top:12px;">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                <span style="font-size:12px;color:var(--text-muted);">We&#8217;ll reply within 24 hours to schedule. No spam, ever.</span>
-              </div>
-            </div>
-          </form>
+          </div>
+          <a href="onboarding.html" class="btn btn-primary" style="display:inline-flex;align-items:center;gap:8px;font-size:14px;font-weight:800;padding:14px 28px;border-radius:11px;width:100%;justify-content:center;letter-spacing:-0.01em;text-decoration:none;">
+            Get Started
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+          </a>
+          <div style="display:flex;align-items:center;justify-content:center;gap:7px;margin-top:12px;width:100%;">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <span style="font-size:12px;color:var(--text-muted);">Takes about 3&#8211;5 minutes. No commitment required.</span>
+          </div>
         </div>
 
       </div><!-- /2-col -->
@@ -3778,8 +3650,8 @@
           </a>
           <p style="font-size:13px;color:var(--text-muted);line-height:1.7;max-width:280px;margin-bottom:20px;">Lead capture, CRM sync, and follow-up automation for inbound-lead businesses.</p>
           <div style="display:flex;flex-direction:column;gap:10px;">
-            <a href="#build-my-plan" style="display:inline-flex;align-items:center;gap:7px;padding:10px 18px;background:var(--blue);color:white;border-radius:9px;font-size:13px;font-weight:700;text-decoration:none;width:fit-content;">
-              Build My Plan
+            <a href="onboarding.html" style="display:inline-flex;align-items:center;gap:7px;padding:10px 18px;background:var(--blue);color:white;border-radius:9px;font-size:13px;font-weight:700;text-decoration:none;width:fit-content;">
+              Get Started
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
             </a>
             <a href="demo.html" style="display:inline-flex;align-items:center;gap:7px;padding:10px 18px;border:1.5px solid var(--border);color:var(--text);border-radius:9px;font-size:13px;font-weight:600;text-decoration:none;width:fit-content;">
@@ -3796,7 +3668,7 @@
             <a href="#how-it-works" class="nav-link" style="font-size:13.5px;">How It Works</a>
             <a href="#how-it-works" class="nav-link" style="font-size:13.5px;">Workflow Library</a>
             <a href="#faq" class="nav-link" style="font-size:13.5px;">FAQ</a>
-            <a href="#build-my-plan" class="nav-link" style="font-size:13.5px;">Build My Plan</a>
+            <a href="onboarding.html" class="nav-link" style="font-size:13.5px;">Get Started</a>
           </div>
         </div>
 
