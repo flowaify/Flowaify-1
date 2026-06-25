@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Team — Flowaify</title>
+  <link rel="icon" type="image/png" href="logo-transparent.png" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script src="https://cdn.auth0.com/js/auth0-spa-js/2.18/auth0-spa-js.production.js"></script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <style>
+    #auth-gate{position:fixed;inset:0;z-index:9999;background:#fff;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;font-family:'Plus Jakarta Sans',sans-serif}
+    #auth-gate .ag-spinner{width:26px;height:26px;border-radius:50%;border:2px solid rgba(0,87,255,0.15);border-top-color:#0057FF;animation:ag-spin 0.75s linear infinite}
+    #auth-gate .ag-label{font-size:12px;font-weight:600;color:rgba(0,87,255,0.6)}
+    @keyframes ag-spin{to{transform:rotate(360deg)}}
+
+    :root{--blue:#0057FF;--blue-b:#2979FF;--blue-dim:rgba(0,87,255,0.06);--blue-border:rgba(0,87,255,0.14);--green:#059669;--green-dim:rgba(5,150,105,0.08);--red:#dc2626;--red-dim:rgba(220,38,38,0.08);--border:rgba(15,23,42,0.08);--text:#0f172a;--text-s:rgba(15,23,42,0.68);--text-m:rgba(15,23,42,0.44)}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html,body{font-family:'Plus Jakarta Sans',sans-serif;color:var(--text);font-size:14px;min-height:100%}
+    body{background:radial-gradient(ellipse 900px 600px at 50% -80px,rgba(0,87,255,0.06) 0%,transparent 68%),linear-gradient(175deg,#ffffff 0%,#f5f8ff 45%,#edf2ff 100%);min-height:100vh}
+    a{text-decoration:none;color:inherit}
+
+    .topnav{position:sticky;top:0;z-index:60;background:rgba(255,255,255,0.92);backdrop-filter:blur(20px);border-bottom:1px solid var(--border)}
+    .topnav-bar{display:flex;align-items:center;justify-content:space-between;padding:0 32px;height:62px;gap:12px}
+    .topnav-brand{display:flex;align-items:center;gap:10px}
+    .topnav-brand img{width:28px;height:28px;object-fit:contain}
+    .topnav-brand-name{font-size:15px;font-weight:800;letter-spacing:-0.4px}
+    .btn-back{display:inline-flex;align-items:center;gap:6px;padding:7px 16px;border:1px solid var(--border);border-radius:99px;background:rgba(255,255,255,0.82);backdrop-filter:blur(10px);font-size:12px;font-weight:600;color:var(--text-m);cursor:pointer;text-decoration:none;transition:all 0.15s}
+    .btn-back:hover{border-color:var(--blue-border);color:var(--blue)}
+    .btn-back i{width:12px;height:12px}
+    .btn-invite{display:inline-flex;align-items:center;gap:6px;padding:8px 18px;background:var(--blue);border:none;border-radius:9px;color:#fff;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 4px 14px rgba(0,87,255,0.28);transition:all 0.18s}
+    .btn-invite:hover{background:var(--blue-b);transform:translateY(-1px)}
+    .btn-invite i{width:13px;height:13px}
+
+    .page-wrap{max-width:720px;margin:0 auto;padding:40px 24px 80px}
+    .page-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:28px;gap:16px;flex-wrap:wrap}
+    .page-title{font-size:26px;font-weight:800;letter-spacing:-0.6px;margin-bottom:4px}
+    .page-sub{font-size:13.5px;color:var(--text-s)}
+
+    .team-card{background:rgba(255,255,255,0.88);backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,0.78);border-radius:20px;box-shadow:0 4px 20px rgba(0,0,0,0.07),inset 0 1px 0 rgba(255,255,255,0.9);overflow:hidden;margin-bottom:16px}
+    .team-card-head{display:flex;align-items:center;justify-content:space-between;padding:16px 22px;border-bottom:1px solid var(--border)}
+    .team-card-title{font-size:13px;font-weight:800;color:var(--text)}
+    .team-count{font-size:11px;font-weight:700;padding:3px 9px;border-radius:99px;background:var(--blue-dim);color:var(--blue);border:1px solid var(--blue-border)}
+
+    .member-row{display:flex;align-items:center;gap:14px;padding:14px 22px;border-bottom:1px solid var(--border);transition:background 0.12s}
+    .member-row:last-child{border-bottom:none}
+    .member-row:hover{background:rgba(0,87,255,0.02)}
+    .member-avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#0057FF,#8b5cf6);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#fff;flex-shrink:0}
+    .member-avatar.green{background:linear-gradient(135deg,#059669,#0d9488)}
+    .member-avatar.amber{background:linear-gradient(135deg,#d97706,#dc2626)}
+    .member-info{flex:1;min-width:0}
+    .member-name{font-size:13px;font-weight:700;color:var(--text)}
+    .member-email{font-size:11.5px;color:var(--text-m);margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .member-right{display:flex;align-items:center;gap:10px;flex-shrink:0}
+    .role-badge{padding:3px 10px;border-radius:99px;font-size:10.5px;font-weight:700}
+    .role-owner{background:var(--blue-dim);color:var(--blue);border:1px solid var(--blue-border)}
+    .role-admin{background:rgba(139,92,246,0.08);color:#8b5cf6;border:1px solid rgba(139,92,246,0.18)}
+    .role-member{background:rgba(15,23,42,0.05);color:var(--text-m);border:1px solid var(--border)}
+    .member-you{font-size:10px;font-weight:700;color:var(--text-m);background:rgba(15,23,42,0.05);padding:2px 8px;border-radius:99px}
+    .btn-remove{padding:5px 12px;border:1px solid var(--border);border-radius:7px;background:transparent;font-size:11.5px;font-weight:600;color:var(--text-m);cursor:pointer;font-family:inherit;transition:all 0.15s}
+    .btn-remove:hover{background:var(--red-dim);border-color:rgba(220,38,38,0.2);color:var(--red)}
+
+    .pending-row{display:flex;align-items:center;gap:14px;padding:14px 22px;border-bottom:1px solid var(--border)}
+    .pending-row:last-child{border-bottom:none}
+    .pending-avatar{width:36px;height:36px;border-radius:50%;background:rgba(15,23,42,0.05);border:1.5px dashed var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    .pending-avatar i{width:14px;height:14px;color:var(--text-m)}
+    .pending-email{font-size:13px;font-weight:500;color:var(--text-s);flex:1}
+    .pending-badge{padding:3px 10px;border-radius:99px;font-size:10.5px;font-weight:700;background:rgba(217,119,6,0.08);color:#d97706;border:1px solid rgba(217,119,6,0.18)}
+
+    /* Invite modal */
+    .modal-overlay{position:fixed;inset:0;z-index:200;background:rgba(15,23,42,0.4);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;padding:16px}
+    .modal-overlay.open{display:flex}
+    .modal{background:#fff;border:1px solid var(--border);border-radius:18px;box-shadow:0 24px 64px rgba(0,0,0,0.14);width:100%;max-width:440px;overflow:hidden;animation:modal-in 0.2s ease}
+    @keyframes modal-in{from{opacity:0;transform:scale(0.95) translateY(10px)}to{opacity:1;transform:scale(1) translateY(0)}}
+    .modal-head{display:flex;align-items:flex-start;justify-content:space-between;padding:20px 22px 16px;border-bottom:1px solid var(--border)}
+    .modal-title{font-size:15px;font-weight:800;color:var(--text)}
+    .modal-sub{font-size:12px;color:var(--text-m);margin-top:3px}
+    .modal-close{width:28px;height:28px;border-radius:7px;background:var(--blue-dim);border:none;cursor:pointer;color:var(--text-m);display:flex;align-items:center;justify-content:center}
+    .modal-close i{width:14px;height:14px}
+    .modal-body{padding:20px 22px}
+    .modal-field{margin-bottom:16px}
+    .modal-field label{display:block;font-size:11.5px;font-weight:700;color:var(--text-m);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.3px}
+    .modal-field input,.modal-field select{width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:9px;font-size:13.5px;font-family:inherit;color:var(--text);outline:none;transition:border-color 0.15s}
+    .modal-field input:focus,.modal-field select:focus{border-color:var(--blue)}
+    .modal-footer{padding:14px 22px 20px;display:flex;gap:10px;justify-content:flex-end}
+    .btn-cancel{padding:9px 18px;background:transparent;border:1.5px solid var(--border);border-radius:9px;color:var(--text-s);font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit}
+    .btn-send{padding:9px 20px;border:none;border-radius:9px;background:var(--blue);color:#fff;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 3px 10px rgba(0,87,255,0.28)}
+
+    #toast{position:fixed;bottom:24px;right:24px;z-index:400;background:#fff;border:1px solid rgba(5,150,105,0.22);border-radius:12px;padding:14px 18px;box-shadow:0 8px 30px rgba(0,0,0,0.1);display:none;align-items:center;gap:10px;max-width:320px}
+    .toast-icon{width:28px;height:28px;border-radius:50%;background:var(--green-dim);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    .toast-icon i{width:13px;height:13px;color:var(--green)}
+    .toast-msg{font-size:13px;font-weight:600;color:var(--text-s)}
+
+    @media(max-width:600px){.topnav-bar{padding:0 16px}.page-wrap{padding:28px 16px 60px}}
+  </style>
+</head>
+<body>
+
+<div id="auth-gate">
+  <div class="ag-spinner"></div>
+  <p class="ag-label">Loading…</p>
+</div>
+
+<div id="app" style="display:none">
+
+  <nav class="topnav">
+    <div class="topnav-bar">
+      <a class="topnav-brand" href="/">
+        <img src="logo-transparent.png" alt="" onerror="this.style.display='none'" />
+        <span class="topnav-brand-name">flowaify</span>
+      </a>
+      <div style="display:flex;align-items:center;gap:10px">
+        <a class="btn-back" href="portal.html"><i data-lucide="arrow-left"></i> Portal</a>
+        <button class="btn-invite" onclick="openInvite()"><i data-lucide="user-plus"></i> Invite Member</button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="page-wrap">
+    <div class="page-header">
+      <div>
+        <div class="page-title">Team Management</div>
+        <div class="page-sub">Manage who has access to your Flowaify workspace.</div>
+      </div>
+    </div>
+
+    <div class="team-card">
+      <div class="team-card-head">
+        <div class="team-card-title">Active Members</div>
+        <span class="team-count" id="member-count">1 member</span>
+      </div>
+      <div id="members-list">
+        <div class="member-row">
+          <div class="member-avatar" id="team-avatar">—</div>
+          <div class="member-info">
+            <div class="member-name" id="team-name">You</div>
+            <div class="member-email" id="team-email">—</div>
+          </div>
+          <div class="member-right">
+            <span class="role-badge role-owner">Owner</span>
+            <span class="member-you">You</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="team-card" id="pending-card" style="display:none">
+      <div class="team-card-head">
+        <div class="team-card-title">Pending Invites</div>
+      </div>
+      <div id="pending-list"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- INVITE MODAL -->
+<div class="modal-overlay" id="modal-invite" onclick="if(event.target===this)closeInvite()">
+  <div class="modal">
+    <div class="modal-head">
+      <div><div class="modal-title">Invite a team member</div><div class="modal-sub">They'll receive an email to join your workspace.</div></div>
+      <button class="modal-close" onclick="closeInvite()"><i data-lucide="x"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-field"><label>Email Address</label><input id="invite-email" type="email" placeholder="teammate@yourbiz.com" /></div>
+      <div class="modal-field"><label>Role</label>
+        <select id="invite-role">
+          <option value="Admin">Admin — Full access</option>
+          <option value="Member">Member — View only</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeInvite()">Cancel</button>
+      <button class="btn-send" onclick="sendInvite()">Send Invite</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast">
+  <div class="toast-icon"><i data-lucide="check"></i></div>
+  <div class="toast-msg" id="toast-msg">Done.</div>
+</div>
+
+<script>
+  const AUTH0_DOMAIN    = 'auth.flowaify.app';
+  const AUTH0_CLIENT_ID = 'tx74Owqn3jVeSaVuxfFHsKloqbPqfAmN';
+  let auth0Client;
+  let pendingInvites = JSON.parse(localStorage.getItem('flw_pending_invites') || '[]');
+
+  async function initAuth() {
+    auth0Client = await auth0.createAuth0Client({
+      domain: AUTH0_DOMAIN, clientId: AUTH0_CLIENT_ID,
+      authorizationParams: { redirect_uri: window.location.origin + '/team.html' }
+    });
+    if (location.search.includes('code=') && location.search.includes('state=')) {
+      await auth0Client.handleRedirectCallback();
+      history.replaceState({}, document.title, window.location.pathname);
+    }
+    const ok = await auth0Client.isAuthenticated();
+    if (!ok) { await auth0Client.loginWithRedirect({ authorizationParams: { redirect_uri: window.location.origin + '/team.html' } }); return; }
+    const user = await auth0Client.getUser();
+    boot(user);
+  }
+
+  function boot(user) {
+    document.getElementById('auth-gate').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    if (user) {
+      const initial = (user.name || user.email || '?')[0].toUpperCase();
+      document.getElementById('team-avatar').textContent = initial;
+      document.getElementById('team-name').textContent   = user.name || 'You';
+      document.getElementById('team-email').textContent  = user.email || '';
+    }
+    renderPending();
+    lucide.createIcons();
+  }
+
+  function renderPending() {
+    const list = document.getElementById('pending-list');
+    const card = document.getElementById('pending-card');
+    if (!pendingInvites.length) { card.style.display = 'none'; return; }
+    card.style.display = 'block';
+    list.innerHTML = pendingInvites.map((inv, i) => `
+      <div class="pending-row">
+        <div class="pending-avatar"><i data-lucide="mail"></i></div>
+        <div class="pending-email">${inv.email}</div>
+        <span class="pending-badge">${inv.role}</span>
+        <button class="btn-remove" onclick="cancelInvite(${i})">Cancel</button>
+      </div>`).join('');
+    const total = 1 + pendingInvites.length;
+    document.getElementById('member-count').textContent = total + ' member' + (total !== 1 ? 's' : '');
+    lucide.createIcons();
+  }
+
+  function openInvite()  { document.getElementById('modal-invite').classList.add('open'); lucide.createIcons(); }
+  function closeInvite() { document.getElementById('modal-invite').classList.remove('open'); }
+
+  function sendInvite() {
+    const email = document.getElementById('invite-email').value.trim();
+    const role  = document.getElementById('invite-role').value;
+    if (!email || !email.includes('@')) { alert('Please enter a valid email.'); return; }
+    pendingInvites.push({ email, role });
+    localStorage.setItem('flw_pending_invites', JSON.stringify(pendingInvites));
+    closeInvite();
+    document.getElementById('invite-email').value = '';
+    renderPending();
+    showToast('Invite sent to ' + email);
+  }
+
+  function cancelInvite(i) {
+    pendingInvites.splice(i, 1);
+    localStorage.setItem('flw_pending_invites', JSON.stringify(pendingInvites));
+    renderPending();
+    showToast('Invite cancelled.');
+  }
+
+  let toastTimer;
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    document.getElementById('toast-msg').textContent = msg;
+    t.style.display = 'flex'; lucide.createIcons();
+    clearTimeout(toastTimer); toastTimer = setTimeout(() => t.style.display = 'none', 3400);
+  }
+
+  initAuth();
+</script>
+</body>
+</html>
