@@ -6,13 +6,8 @@
   <title>Team — Flowaify</title>
   <link rel="icon" type="image/png" href="logo-transparent.png" />
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <script src="https://cdn.auth0.com/js/auth0-spa-js/2.18/auth0-spa-js.production.js"></script>
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
   <style>
-    #auth-gate{position:fixed;inset:0;z-index:9999;background:#fff;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;font-family:'Plus Jakarta Sans',sans-serif}
-    #auth-gate .ag-spinner{width:26px;height:26px;border-radius:50%;border:2px solid rgba(0,87,255,0.15);border-top-color:#0057FF;animation:ag-spin 0.75s linear infinite}
-    #auth-gate .ag-label{font-size:12px;font-weight:600;color:rgba(0,87,255,0.6)}
-    @keyframes ag-spin{to{transform:rotate(360deg)}}
 
     :root{--blue:#0057FF;--blue-b:#2979FF;--blue-dim:rgba(0,87,255,0.06);--blue-border:rgba(0,87,255,0.14);--green:#059669;--green-dim:rgba(5,150,105,0.08);--red:#dc2626;--red-dim:rgba(220,38,38,0.08);--border:rgba(15,23,42,0.08);--text:#0f172a;--text-s:rgba(15,23,42,0.68);--text-m:rgba(15,23,42,0.44)}
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -96,12 +91,7 @@
 </head>
 <body>
 
-<div id="auth-gate">
-  <div class="ag-spinner"></div>
-  <p class="ag-label">Loading…</p>
-</div>
-
-<div id="app" style="display:none">
+<div id="app">
 
   <nav class="topnav">
     <div class="topnav-bar">
@@ -184,35 +174,9 @@
 </div>
 
 <script>
-  const AUTH0_DOMAIN    = 'auth.flowaify.app';
-  const AUTH0_CLIENT_ID = 'tx74Owqn3jVeSaVuxfFHsKloqbPqfAmN';
-  let auth0Client;
   let pendingInvites = JSON.parse(localStorage.getItem('flw_pending_invites') || '[]');
 
-  async function initAuth() {
-    auth0Client = await auth0.createAuth0Client({
-      domain: AUTH0_DOMAIN, clientId: AUTH0_CLIENT_ID,
-      authorizationParams: { redirect_uri: window.location.origin + '/team.html' }
-    });
-    if (location.search.includes('code=') && location.search.includes('state=')) {
-      await auth0Client.handleRedirectCallback();
-      history.replaceState({}, document.title, window.location.pathname);
-    }
-    const ok = await auth0Client.isAuthenticated();
-    if (!ok) { await auth0Client.loginWithRedirect({ authorizationParams: { redirect_uri: window.location.origin + '/team.html' } }); return; }
-    const user = await auth0Client.getUser();
-    boot(user);
-  }
-
-  function boot(user) {
-    document.getElementById('auth-gate').style.display = 'none';
-    document.getElementById('app').style.display = 'block';
-    if (user) {
-      const initial = (user.name || user.email || '?')[0].toUpperCase();
-      document.getElementById('team-avatar').textContent = initial;
-      document.getElementById('team-name').textContent   = user.name || 'You';
-      document.getElementById('team-email').textContent  = user.email || '';
-    }
+  function boot() {
     renderPending();
     lucide.createIcons();
   }
@@ -264,7 +228,7 @@
     clearTimeout(toastTimer); toastTimer = setTimeout(() => t.style.display = 'none', 3400);
   }
 
-  initAuth();
+  boot();
 </script>
 </body>
 </html>
