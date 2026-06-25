@@ -17,10 +17,11 @@
     .demo-bar a{color:#93b4ff;text-decoration:none;border-bottom:1px solid rgba(147,180,255,0.4);transition:color 0.15s}
     .demo-bar a:hover{color:#fff}
     body.demo-mode{padding-top:36px}
+    body.demo-mode .sidebar{top:36px}
+    body.demo-mode .topbar{top:36px}
     body.demo-mode #app button,
     body.demo-mode #app a:not(.nav-item){pointer-events:none;cursor:default}
     body.demo-mode #app .nav-item{cursor:pointer}
-    /* hide logout/settings actions that shouldn't exist in demo */
     body.demo-mode .profile-card{display:none!important}
   </style>
   <style>
@@ -380,11 +381,16 @@
 </head>
 <body>
 
-<div class="demo-bar">
+<div class="demo-bar" id="demo-bar">
   <span class="demo-bar-badge">DEMO</span>
   <span>This is a preview of the Flowaify client dashboard. Data shown is for illustration only.</span>
   <a href="index.html">← Back to site</a>
 </div>
+<script>
+  if (window.self !== window.top) {
+    document.getElementById('demo-bar').style.display = 'none';
+  }
+</script>
 
 <div id="mob-overlay" onclick="closeMob()"></div>
 
@@ -947,7 +953,7 @@ function initCharts() {
   eLine('an-leads'); eLine('an-resp'); eDough('an-srcperf'); eBar('an-convsrc'); eBar('an-booked'); eBar('an-fuperf'); eBar('an-pipestage');
 }
 
-document.body.classList.add('demo-mode');
+if (window.self === window.top) document.body.classList.add('demo-mode');
 boot({ name: 'Demo User', email: 'demo@flowaify.app' });
 </script>
 </body>
