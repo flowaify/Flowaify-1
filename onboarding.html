@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Client Intake — Flowaify</title>
+  <link rel="icon" type="image/png" href="logo-transparent.png" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <style>
+    :root{--blue:#0057FF;--blue-b:#2979FF;--blue-dim:rgba(0,87,255,0.06);--blue-border:rgba(0,87,255,0.14);--green:#059669;--green-dim:rgba(5,150,105,0.08);--border:rgba(15,23,42,0.08);--text:#0f172a;--text-s:rgba(15,23,42,0.68);--text-m:rgba(15,23,42,0.44)}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html,body{font-family:'Plus Jakarta Sans',sans-serif;color:var(--text);font-size:14px;min-height:100%}
+    body{background:radial-gradient(ellipse 900px 600px at 50% -80px,rgba(0,87,255,0.07) 0%,transparent 68%),radial-gradient(ellipse 500px 400px at 15% 90%,rgba(139,92,246,0.04) 0%,transparent 60%),linear-gradient(175deg,#ffffff 0%,#f5f8ff 45%,#edf2ff 100%);min-height:100vh;padding:40px 20px 80px}
+    a{text-decoration:none;color:inherit}
+
+    .ob-wrap{max-width:600px;margin:0 auto}
+    .ob-header{text-align:center;margin-bottom:40px}
+    .ob-logo{width:40px;height:40px;object-fit:contain;margin-bottom:20px}
+    .ob-title{font-size:28px;font-weight:800;letter-spacing:-0.6px;margin-bottom:8px}
+    .ob-sub{font-size:14px;color:var(--text-s);line-height:1.65}
+
+    /* Steps */
+    .steps{display:flex;align-items:center;justify-content:center;gap:0;margin-bottom:36px}
+    .step{display:flex;align-items:center;gap:8px}
+    .step-num{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;border:2px solid var(--border);color:var(--text-m);background:#fff;transition:all 0.2s;flex-shrink:0}
+    .step.active .step-num{background:var(--blue);border-color:var(--blue);color:#fff}
+    .step.done .step-num{background:var(--green);border-color:var(--green);color:#fff}
+    .step-label{font-size:11.5px;font-weight:600;color:var(--text-m);transition:color 0.2s}
+    .step.active .step-label{color:var(--blue)}
+    .step.done .step-label{color:var(--green)}
+    .step-line{width:36px;height:2px;background:var(--border);margin:0 4px;flex-shrink:0}
+    .step-line.done{background:var(--green)}
+
+    /* Card */
+    .ob-card{background:rgba(255,255,255,0.88);backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,0.78);border-radius:20px;box-shadow:0 4px 20px rgba(0,0,0,0.07),inset 0 1px 0 rgba(255,255,255,0.9);padding:32px}
+
+    .step-content{display:none}
+    .step-content.active{display:block;animation:fade-up 0.22s ease}
+    @keyframes fade-up{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+    .step-title{font-size:18px;font-weight:800;letter-spacing:-0.3px;margin-bottom:4px}
+    .step-desc{font-size:13px;color:var(--text-m);margin-bottom:24px}
+
+    /* Fields */
+    .field{margin-bottom:18px}
+    .field-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    .field label{display:block;font-size:11.5px;font-weight:700;color:var(--text-m);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.3px}
+    .field input,.field select,.field textarea{width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:13.5px;font-family:inherit;color:var(--text);outline:none;transition:border-color 0.15s,box-shadow 0.15s;background:#fff;resize:vertical}
+    .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(0,87,255,0.08)}
+    .field textarea{min-height:80px}
+    .field-hint{font-size:11px;color:var(--text-m);margin-top:4px}
+
+    /* Checkbox group */
+    .check-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .check-item{display:flex;align-items:center;gap:8px;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;cursor:pointer;transition:all 0.15s;user-select:none}
+    .check-item:hover{border-color:var(--blue-border);background:var(--blue-dim)}
+    .check-item.checked{border-color:var(--blue);background:var(--blue-dim)}
+    .check-item input{display:none}
+    .check-box{width:16px;height:16px;border-radius:4px;border:2px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all 0.15s}
+    .check-item.checked .check-box{background:var(--blue);border-color:var(--blue)}
+    .check-item.checked .check-box::after{content:'✓';font-size:10px;color:#fff;font-weight:800}
+    .check-label{font-size:12.5px;font-weight:500;color:var(--text-s)}
+
+    /* Nav */
+    .ob-nav{display:flex;align-items:center;justify-content:space-between;margin-top:28px}
+    .btn-prev{display:inline-flex;align-items:center;gap:6px;padding:10px 20px;border:1.5px solid var(--border);border-radius:10px;background:transparent;font-size:13px;font-weight:600;color:var(--text-m);cursor:pointer;font-family:inherit;transition:all 0.15s}
+    .btn-prev:hover{border-color:var(--blue-border);color:var(--blue)}
+    .btn-prev i{width:13px;height:13px}
+    .btn-next{display:inline-flex;align-items:center;gap:6px;padding:10px 24px;border:none;border-radius:10px;background:var(--blue);color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 4px 14px rgba(0,87,255,0.28);transition:all 0.18s}
+    .btn-next:hover{background:var(--blue-b);transform:translateY(-1px)}
+    .btn-next i{width:13px;height:13px}
+
+    /* Success */
+    .ob-success{display:none;text-align:center;padding:16px 0}
+    .ob-success-icon{width:56px;height:56px;border-radius:18px;background:var(--green-dim);display:flex;align-items:center;justify-content:center;margin:0 auto 20px}
+    .ob-success-icon i{width:26px;height:26px;color:var(--green)}
+    .ob-success-title{font-size:22px;font-weight:800;letter-spacing:-0.4px;margin-bottom:8px}
+    .ob-success-sub{font-size:14px;color:var(--text-s);line-height:1.65;max-width:380px;margin:0 auto 28px}
+
+    @media(max-width:540px){.field-row,.check-grid{grid-template-columns:1fr}.step-label{display:none}}
+  </style>
+</head>
+<body>
+  <div class="ob-wrap">
+    <div class="ob-header">
+      <img class="ob-logo" src="logo-transparent.png" alt="" onerror="this.style.display='none'" />
+      <div class="ob-title">Let's get you set up</div>
+      <div class="ob-sub">Fill out this form so our team can configure your Flowaify automations. Takes about 3 minutes.</div>
+    </div>
+
+    <!-- Step tracker -->
+    <div class="steps" id="steps-bar">
+      <div class="step active" id="step-ind-1"><div class="step-num">1</div><div class="step-label">Business</div></div>
+      <div class="step-line" id="line-1"></div>
+      <div class="step" id="step-ind-2"><div class="step-num">2</div><div class="step-label">Schedule</div></div>
+      <div class="step-line" id="line-2"></div>
+      <div class="step" id="step-ind-3"><div class="step-num">3</div><div class="step-label">Goals</div></div>
+      <div class="step-line" id="line-3"></div>
+      <div class="step" id="step-ind-4"><div class="step-num">4</div><div class="step-label">Review</div></div>
+    </div>
+
+    <div class="ob-card" id="ob-card">
+
+      <!-- STEP 1: Business Info -->
+      <div class="step-content active" id="sc-1">
+        <div class="step-title">Business Info</div>
+        <div class="step-desc">Tell us about your business so we can personalize your automations.</div>
+        <div class="field"><label>Business Name *</label><input id="f-biz-name" type="text" placeholder="Acme Roofing LLC" /></div>
+        <div class="field-row">
+          <div class="field"><label>Your Name *</label><input id="f-contact" type="text" placeholder="Jane Smith" /></div>
+          <div class="field"><label>Your Role</label><input id="f-role" type="text" placeholder="Owner" /></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>Business Email *</label><input id="f-email" type="email" placeholder="you@yourbiz.com" /></div>
+          <div class="field"><label>Phone Number</label><input id="f-phone" type="tel" placeholder="(555) 000-0000" /></div>
+        </div>
+        <div class="field"><label>Industry / Trade</label><input id="f-industry" type="text" placeholder="Roofing, HVAC, Plumbing…" /></div>
+        <div class="field"><label>Service Areas</label><input id="f-areas" type="text" placeholder="Dallas, TX · Fort Worth, TX" /><div class="field-hint">Cities or regions you serve</div></div>
+      </div>
+
+      <!-- STEP 2: Schedule -->
+      <div class="step-content" id="sc-2">
+        <div class="step-title">Your Schedule</div>
+        <div class="step-desc">When do you want automations to run and leads to be followed up?</div>
+        <div class="field-row">
+          <div class="field"><label>Business Hours</label>
+            <select id="f-hours">
+              <option>Mon–Fri, 8am–6pm</option>
+              <option>Mon–Sat, 8am–6pm</option>
+              <option>Mon–Sun, 8am–6pm</option>
+              <option>Custom (we'll reach out)</option>
+            </select>
+          </div>
+          <div class="field"><label>Time Zone</label>
+            <select id="f-tz">
+              <option>Eastern (ET)</option>
+              <option>Central (CT)</option>
+              <option>Mountain (MT)</option>
+              <option>Pacific (PT)</option>
+            </select>
+          </div>
+        </div>
+        <div class="field"><label>Follow-Up Speed</label>
+          <select id="f-followup">
+            <option>Immediately (within 60 seconds)</option>
+            <option>Within 5 minutes</option>
+            <option>Within 15 minutes</option>
+            <option>Within 1 hour</option>
+          </select>
+          <div class="field-hint">How quickly should we contact new leads?</div>
+        </div>
+        <div class="field"><label>Booking / Scheduling Link</label><input id="f-booking" type="url" placeholder="https://calendly.com/yourbusiness" /></div>
+        <div class="field"><label>CRM or Software You Use</label><input id="f-crm" type="text" placeholder="Go High Level, HubSpot, none…" /></div>
+      </div>
+
+      <!-- STEP 3: Goals -->
+      <div class="step-content" id="sc-3">
+        <div class="step-title">Your Goals</div>
+        <div class="step-desc">What do you want Flowaify to help you with most?</div>
+        <div class="field">
+          <label>Primary Goals (select all that apply)</label>
+          <div class="check-grid" id="goals-grid">
+            <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-label">Respond to leads faster</div></div>
+            <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-label">Book more appointments</div></div>
+            <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-label">Follow up automatically</div></div>
+            <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-label">Re-engage old leads</div></div>
+            <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-label">Reduce manual work</div></div>
+            <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-label">Track performance</div></div>
+          </div>
+        </div>
+        <div class="field"><label>Biggest Challenge Right Now</label><textarea id="f-challenge" placeholder="e.g. Leads come in but we miss them, or follow-ups don't happen consistently…"></textarea></div>
+        <div class="field"><label>Anything else we should know?</label><textarea id="f-notes" placeholder="Optional — share any context, special requests, or questions"></textarea></div>
+      </div>
+
+      <!-- STEP 4: Review -->
+      <div class="step-content" id="sc-4">
+        <div class="step-title">Review &amp; Submit</div>
+        <div class="step-desc">Check your details below, then submit. Our team will reach out within 2 hours.</div>
+        <div id="review-content" style="display:flex;flex-direction:column;gap:10px;margin-bottom:8px"></div>
+      </div>
+
+      <!-- Success -->
+      <div class="ob-success" id="ob-success">
+        <div class="ob-success-icon"><i data-lucide="check"></i></div>
+        <div class="ob-success-title">You're all set!</div>
+        <div class="ob-success-sub">We received your intake form. A Flowaify specialist will reach out to <span id="success-email">you</span> within 2 hours to begin setup.</div>
+        <a href="portal.html" style="display:inline-flex;align-items:center;gap:6px;padding:11px 24px;background:var(--blue);border-radius:10px;color:#fff;font-size:13px;font-weight:700;text-decoration:none;box-shadow:0 4px 14px rgba(0,87,255,0.28)"><i data-lucide="layout-grid"></i> Open Your Portal</a>
+      </div>
+
+      <!-- Nav -->
+      <div class="ob-nav" id="ob-nav">
+        <button class="btn-prev" id="btn-prev" onclick="prevStep()" style="visibility:hidden"><i data-lucide="arrow-left"></i> Back</button>
+        <button class="btn-next" id="btn-next" onclick="nextStep()">Continue <i data-lucide="arrow-right"></i></button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentStep = 1;
+    const totalSteps = 4;
+
+    function goToStep(n) {
+      document.querySelectorAll('.step-content').forEach(el => el.classList.remove('active'));
+      document.getElementById('sc-' + n).classList.add('active');
+      for (let i = 1; i <= totalSteps; i++) {
+        const ind = document.getElementById('step-ind-' + i);
+        ind.classList.remove('active','done');
+        if (i < n) ind.classList.add('done');
+        else if (i === n) ind.classList.add('active');
+        if (i < totalSteps) {
+          const line = document.getElementById('line-' + i);
+          if (i < n) line.classList.add('done'); else line.classList.remove('done');
+        }
+      }
+      document.getElementById('btn-prev').style.visibility = n > 1 ? 'visible' : 'hidden';
+      document.getElementById('btn-next').textContent = n === totalSteps ? 'Submit' : 'Continue';
+      if (n === totalSteps) { document.getElementById('btn-next').innerHTML = 'Submit <i data-lucide="send"></i>'; buildReview(); }
+      else document.getElementById('btn-next').innerHTML = 'Continue <i data-lucide="arrow-right"></i>';
+      lucide.createIcons();
+      currentStep = n;
+    }
+
+    function nextStep() {
+      if (currentStep < totalSteps) { goToStep(currentStep + 1); }
+      else { submitForm(); }
+    }
+    function prevStep() { if (currentStep > 1) goToStep(currentStep - 1); }
+
+    function toggleCheck(el) { el.classList.toggle('checked'); }
+
+    function buildReview() {
+      const goals = [...document.querySelectorAll('#goals-grid .check-item.checked')].map(el => el.querySelector('.check-label').textContent).join(', ');
+      const rows = [
+        ['Business Name', document.getElementById('f-biz-name').value || '—'],
+        ['Contact', document.getElementById('f-contact').value || '—'],
+        ['Email', document.getElementById('f-email').value || '—'],
+        ['Phone', document.getElementById('f-phone').value || '—'],
+        ['Industry', document.getElementById('f-industry').value || '—'],
+        ['Service Areas', document.getElementById('f-areas').value || '—'],
+        ['Business Hours', document.getElementById('f-hours').value],
+        ['Time Zone', document.getElementById('f-tz').value],
+        ['Follow-Up Speed', document.getElementById('f-followup').value],
+        ['Goals', goals || '—'],
+      ];
+      document.getElementById('review-content').innerHTML = rows.map(([k,v]) =>
+        `<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(15,23,42,0.06);gap:16px">
+          <span style="font-size:12px;font-weight:600;color:rgba(15,23,42,0.44);flex-shrink:0">${k}</span>
+          <span style="font-size:12.5px;color:rgba(15,23,42,0.68);text-align:right">${v}</span>
+        </div>`
+      ).join('');
+    }
+
+    function submitForm() {
+      const email = document.getElementById('f-email').value;
+      document.getElementById('success-email').textContent = email || 'you';
+      document.querySelectorAll('.step-content').forEach(el => el.classList.remove('active'));
+      document.getElementById('ob-nav').style.display = 'none';
+      document.getElementById('steps-bar').style.display = 'none';
+      document.getElementById('ob-success').style.display = 'block';
+      lucide.createIcons();
+    }
+
+    lucide.createIcons();
+  </script>
+</body>
+</html>
