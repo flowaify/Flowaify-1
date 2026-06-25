@@ -946,12 +946,23 @@ function startSync() {
 }
 
 function initCharts() {
-  const ec = 'rgba(15,23,42,0.06)';
-  const eDough = id => { const el = document.getElementById(id); if(!el) return; new Chart(el,{type:'doughnut',data:{labels:[''],datasets:[{data:[1],backgroundColor:[ec],borderWidth:0}]},options:{cutout:'72%',plugins:{legend:{display:false},tooltip:{enabled:false}},animation:false}}); };
-  const eLine  = id => { const el = document.getElementById(id); if(!el) return; new Chart(el,{type:'line',data:{labels:['','','','','','',''],datasets:[{data:[0,0,0,0,0,0,0],borderColor:ec,fill:false,pointRadius:0}]},options:{plugins:{legend:{display:false},tooltip:{enabled:false}},scales:{x:{display:false},y:{display:false}},animation:false}}); };
-  const eBar   = id => { const el = document.getElementById(id); if(!el) return; new Chart(el,{type:'bar',data:{labels:['','','','','',''],datasets:[{data:[0,0,0,0,0,0],backgroundColor:ec}]},options:{plugins:{legend:{display:false},tooltip:{enabled:false}},scales:{x:{display:false},y:{display:false}},animation:false}}); };
-  eDough('ch-src'); eLine('ch-resp');
-  eLine('an-leads'); eLine('an-resp'); eDough('an-srcperf'); eBar('an-convsrc'); eBar('an-booked'); eBar('an-fuperf'); eBar('an-pipestage');
+  const blue = '#0057FF', blueA = 'rgba(0,87,255,0.12)', green = '#059669', greenA = 'rgba(5,150,105,0.12)', amber = '#d97706', amberA = 'rgba(217,119,6,0.12)', purple = '#8b5cf6';
+  const weeks = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const months = ['Jan','Feb','Mar','Apr','May','Jun'];
+
+  const doDough = (id, vals, colors) => { const el = document.getElementById(id); if(!el) return; new Chart(el,{type:'doughnut',data:{labels:['Website','Referral','Ads','Other'],datasets:[{data:vals,backgroundColor:colors,borderWidth:0}]},options:{cutout:'72%',plugins:{legend:{display:false},tooltip:{enabled:false}},animation:{duration:800}}}); };
+  const doLine  = (id, vals, color) => { const el = document.getElementById(id); if(!el) return; new Chart(el,{type:'line',data:{labels:weeks,datasets:[{data:vals,borderColor:color,backgroundColor:color.replace('FF','26').replace('#','rgba(').replace('rgba(0057FF','rgba(0,87,255'),fill:true,tension:0.4,pointRadius:3,pointBackgroundColor:color,borderWidth:2}]},options:{plugins:{legend:{display:false},tooltip:{enabled:false}},scales:{x:{display:false},y:{display:false}},animation:{duration:800}}}); };
+  const doBar   = (id, vals, color) => { const el = document.getElementById(id); if(!el) return; new Chart(el,{type:'bar',data:{labels:months,datasets:[{data:vals,backgroundColor:color,borderRadius:4}]},options:{plugins:{legend:{display:false},tooltip:{enabled:false}},scales:{x:{display:false},y:{display:false}},animation:{duration:800}}}); };
+
+  doDough('ch-src',  [42,28,18,12], [blue, green, amber, purple]);
+  doLine('ch-resp',  [6.2,5.8,4.1,3.9,3.2,2.8,2.4], blue);
+  doLine('an-leads', [18,24,19,31,27,35,42], blue);
+  doLine('an-resp',  [5.8,5.1,4.4,3.9,3.5,3.1,2.7], green);
+  doDough('an-srcperf', [38,25,22,15], [blue, green, amber, purple]);
+  doBar('an-convsrc',  [22,15,18,8,12,19], blue);
+  doBar('an-booked',   [8,6,9,5,11,14], green);
+  doBar('an-fuperf',   [72,68,81,75,88,91], amber);
+  doBar('an-pipestage',[31,24,18,12,8,5], purple);
 }
 
 if (window.self === window.top) document.body.classList.add('demo-mode');
