@@ -7,6 +7,8 @@
   <link rel="icon" type="image/png" href="logo-transparent.png" />
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <script>emailjs.init('K8h7HdhcJxPejdDHU');</script>
   <style>
     :root{--blue:#0057FF;--blue-b:#2979FF;--blue-dim:rgba(0,87,255,0.06);--blue-border:rgba(0,87,255,0.14);--green:#059669;--green-dim:rgba(5,150,105,0.08);--border:rgba(15,23,42,0.08);--text:#0f172a;--text-s:rgba(15,23,42,0.68);--text-m:rgba(15,23,42,0.44)}
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -252,13 +254,52 @@
     }
 
     function submitForm() {
-      const email = document.getElementById('f-email').value;
-      document.getElementById('success-email').textContent = email || 'you';
-      document.querySelectorAll('.step-content').forEach(el => el.classList.remove('active'));
-      document.getElementById('ob-nav').style.display = 'none';
-      document.getElementById('steps-bar').style.display = 'none';
-      document.getElementById('ob-success').style.display = 'block';
-      lucide.createIcons();
+      const btn = document.getElementById('btn-next');
+      btn.disabled = true;
+      btn.innerHTML = 'Sending…';
+
+      const goals = [...document.querySelectorAll('#goals-grid .check-item.checked')]
+        .map(el => el.querySelector('.check-label').textContent).join(', ') || '—';
+
+      const params = {
+        client_name:  document.getElementById('f-contact').value   || '—',
+        client_email: document.getElementById('f-email').value     || '—',
+        biz_name:     document.getElementById('f-biz-name').value  || '—',
+        phone:        document.getElementById('f-phone').value     || '—',
+        role:         document.getElementById('f-role').value      || '—',
+        industry:     document.getElementById('f-industry').value  || '—',
+        areas:        document.getElementById('f-areas').value     || '—',
+        hours:        document.getElementById('f-hours').value     || '—',
+        timezone:     document.getElementById('f-tz').value        || '—',
+        followup:     document.getElementById('f-followup').value  || '—',
+        booking:      document.getElementById('f-booking').value   || '—',
+        crm:          document.getElementById('f-crm').value       || '—',
+        goals:        goals,
+        challenge:    document.getElementById('f-challenge').value || '—',
+        notes:        document.getElementById('f-notes').value     || '—',
+      };
+
+      const SVC = 'service_aqrvo3f';
+
+      Promise.all([
+        emailjs.send(SVC, 'template_dwwiqs7', params), // client confirmation
+        emailjs.send(SVC, 'template_gq3lspb', params), // internal alert
+      ])
+      .then(function() {
+        document.getElementById('success-email').textContent = params.client_email;
+        document.querySelectorAll('.step-content').forEach(el => el.classList.remove('active'));
+        document.getElementById('ob-nav').style.display = 'none';
+        document.getElementById('steps-bar').style.display = 'none';
+        document.getElementById('ob-success').style.display = 'block';
+        lucide.createIcons();
+      })
+      .catch(function(err) {
+        console.error('EmailJS error:', err);
+        btn.disabled = false;
+        btn.innerHTML = 'Submit <i data-lucide="send"></i>';
+        lucide.createIcons();
+        alert('Something went wrong sending your form. Please try again or email us at contact@flowaify.app');
+      });
     }
 
     lucide.createIcons();
