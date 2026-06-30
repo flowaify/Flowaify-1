@@ -916,6 +916,12 @@ async function initAuth() {
       domain: AUTH0_DOMAIN, clientId: AUTH0_CLIENT_ID,
       authorizationParams: { redirect_uri: window.location.origin + '/portal.html', audience: WORKER_URL }
     });
+    if (window.location.search.includes('error=')) {
+      console.error('Auth0 error:', new URLSearchParams(window.location.search).get('error_description'));
+      window.history.replaceState({}, document.title, window.location.pathname);
+      boot(null);
+      return;
+    }
     if (window.location.search.includes('code=') && window.location.search.includes('state=')) {
       await auth0Client.handleRedirectCallback();
       window.history.replaceState({}, document.title, window.location.pathname);
