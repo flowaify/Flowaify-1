@@ -479,12 +479,12 @@
     </div>
 
     <div class="stats-grid">
-      <div class="card stat-card"><div class="stat-top"><div class="stat-icon si-blue"><i data-lucide="user-plus"></i></div><div class="skel-spark"><span style="height:40%"></span><span style="height:65%"></span><span style="height:30%"></span><span style="height:80%"></span><span style="height:50%"></span></div></div><div class="stat-val">—</div><div class="stat-label">New Leads Today</div><div class="stat-hint">Connect Flow CRM to start tracking new inbound leads.</div></div>
-      <div class="card stat-card"><div class="stat-top"><div class="stat-icon si-green"><i data-lucide="zap"></i></div><div class="skel-spark"><span style="height:55%"></span><span style="height:35%"></span><span style="height:70%"></span><span style="height:45%"></span><span style="height:60%"></span></div></div><div class="stat-val">—</div><div class="stat-label">Avg Response Time</div><div class="stat-hint">Response speed appears after your first synced lead.</div></div>
-      <div class="card stat-card"><div class="stat-top"><div class="stat-icon si-blue"><i data-lucide="bot"></i></div><div class="skel-spark"><span style="height:30%"></span><span style="height:60%"></span><span style="height:45%"></span><span style="height:75%"></span><span style="height:40%"></span></div></div><div class="stat-val">—</div><div class="stat-label">AI Replies Sent</div><div class="stat-hint">AI reply activity appears once automations are live.</div></div>
-      <div class="card stat-card"><div class="stat-top"><div class="stat-icon si-amber"><i data-lucide="repeat-2"></i></div><div class="skel-spark"><span style="height:65%"></span><span style="height:40%"></span><span style="height:55%"></span><span style="height:30%"></span><span style="height:70%"></span></div></div><div class="stat-val">—</div><div class="stat-label">Follow-Ups Running</div><div class="stat-hint">Active follow-up sequences will appear here.</div></div>
-      <div class="card stat-card"><div class="stat-top"><div class="stat-icon si-purple"><i data-lucide="dollar-sign"></i></div><div class="skel-spark"><span style="height:45%"></span><span style="height:70%"></span><span style="height:35%"></span><span style="height:60%"></span><span style="height:50%"></span></div></div><div class="stat-val">—</div><div class="stat-label">Pipeline Value</div><div class="stat-hint">Pipeline value appears after CRM sync.</div></div>
-      <div class="card stat-card"><div class="stat-top"><div class="stat-icon si-green"><i data-lucide="calendar-check"></i></div><div class="skel-spark"><span style="height:50%"></span><span style="height:30%"></span><span style="height:65%"></span><span style="height:40%"></span><span style="height:55%"></span></div></div><div class="stat-val">—</div><div class="stat-label">Booked Calls</div><div class="stat-hint">Booked meetings appear after CRM or calendar sync.</div></div>
+      <div class="card stat-card"><div class="stat-top"><div class="stat-icon si-blue"><i data-lucide="user-plus"></i></div><div class="skel-spark"><span style="height:40%"></span><span style="height:65%"></span><span style="height:30%"></span><span style="height:80%"></span><span style="height:50%"></span></div></div><div class="stat-val" id="val-new-leads">—</div><div class="stat-label">New Leads Today</div><div class="stat-hint">Connect Flow CRM to start tracking new inbound leads.</div></div>
+      <div class="card stat-card"><div class="stat-top"><div class="stat-icon si-green"><i data-lucide="zap"></i></div><div class="skel-spark"><span style="height:55%"></span><span style="height:35%"></span><span style="height:70%"></span><span style="height:45%"></span><span style="height:60%"></span></div></div><div class="stat-val" id="val-response-time">—</div><div class="stat-label">Avg Response Time</div><div class="stat-hint">Response speed appears after your first synced lead.</div></div>
+      <div class="card stat-card"><div class="stat-top"><div class="stat-icon si-blue"><i data-lucide="bot"></i></div><div class="skel-spark"><span style="height:30%"></span><span style="height:60%"></span><span style="height:45%"></span><span style="height:75%"></span><span style="height:40%"></span></div></div><div class="stat-val" id="val-ai-replies">—</div><div class="stat-label">AI Replies Sent</div><div class="stat-hint">AI reply activity appears once automations are live.</div></div>
+      <div class="card stat-card"><div class="stat-top"><div class="stat-icon si-amber"><i data-lucide="repeat-2"></i></div><div class="skel-spark"><span style="height:65%"></span><span style="height:40%"></span><span style="height:55%"></span><span style="height:30%"></span><span style="height:70%"></span></div></div><div class="stat-val" id="val-follow-ups">—</div><div class="stat-label">Follow-Ups Running</div><div class="stat-hint">Active follow-up sequences will appear here.</div></div>
+      <div class="card stat-card"><div class="stat-top"><div class="stat-icon si-purple"><i data-lucide="dollar-sign"></i></div><div class="skel-spark"><span style="height:45%"></span><span style="height:70%"></span><span style="height:35%"></span><span style="height:60%"></span><span style="height:50%"></span></div></div><div class="stat-val" id="val-pipeline">—</div><div class="stat-label">Pipeline Value</div><div class="stat-hint">Pipeline value appears after CRM sync.</div></div>
+      <div class="card stat-card"><div class="stat-top"><div class="stat-icon si-green"><i data-lucide="calendar-check"></i></div><div class="skel-spark"><span style="height:50%"></span><span style="height:30%"></span><span style="height:65%"></span><span style="height:40%"></span><span style="height:55%"></span></div></div><div class="stat-val" id="val-booked-calls">—</div><div class="stat-label">Booked Calls</div><div class="stat-hint">Booked meetings appear after CRM or calendar sync.</div></div>
     </div>
 
     <div class="g2 mb20">
@@ -504,14 +504,14 @@
         <div class="sec-head"><div class="sec-title"><i data-lucide="inbox"></i>Recent Leads</div><div class="sec-link" onclick="showPage('leads')">View all leads</div></div>
         <div class="table-wrap">
           <table class="skel-table">
-            <thead><tr><th>Lead</th><th>Source</th><th>Status</th><th>Response Time</th><th>Next Follow-Up</th><th>Owner</th></tr></thead>
-            <tbody>
-              <tr><td><div class="skel skel-bar" style="width:120px;"></div></td><td><div class="skel skel-bar" style="width:60px;"></div></td><td><div class="skel skel-bar" style="width:50px;"></div></td><td><div class="skel skel-bar" style="width:40px;"></div></td><td><div class="skel skel-bar" style="width:90px;"></div></td><td><div class="skel skel-bar" style="width:60px;"></div></td></tr>
-              <tr><td><div class="skel skel-bar" style="width:110px;"></div></td><td><div class="skel skel-bar" style="width:55px;"></div></td><td><div class="skel skel-bar" style="width:65px;"></div></td><td><div class="skel skel-bar" style="width:35px;"></div></td><td><div class="skel skel-bar" style="width:95px;"></div></td><td><div class="skel skel-bar" style="width:55px;"></div></td></tr>
-              <tr><td><div class="skel skel-bar" style="width:130px;"></div></td><td><div class="skel skel-bar" style="width:50px;"></div></td><td><div class="skel skel-bar" style="width:55px;"></div></td><td><div class="skel skel-bar" style="width:40px;"></div></td><td><div class="skel skel-bar" style="width:85px;"></div></td><td><div class="skel skel-bar" style="width:65px;"></div></td></tr>
+            <thead><tr><th>Lead</th><th>Source</th><th>Status</th><th>Last Touch</th><th>Date</th></tr></thead>
+            <tbody id="leads-table-body">
+              <tr><td><div class="skel skel-bar" style="width:120px;"></div></td><td><div class="skel skel-bar" style="width:60px;"></div></td><td><div class="skel skel-bar" style="width:50px;"></div></td><td><div class="skel skel-bar" style="width:40px;"></div></td><td><div class="skel skel-bar" style="width:90px;"></div></td></tr>
+              <tr><td><div class="skel skel-bar" style="width:110px;"></div></td><td><div class="skel skel-bar" style="width:55px;"></div></td><td><div class="skel skel-bar" style="width:65px;"></div></td><td><div class="skel skel-bar" style="width:35px;"></div></td><td><div class="skel skel-bar" style="width:95px;"></div></td></tr>
+              <tr><td><div class="skel skel-bar" style="width:130px;"></div></td><td><div class="skel skel-bar" style="width:50px;"></div></td><td><div class="skel skel-bar" style="width:55px;"></div></td><td><div class="skel skel-bar" style="width:40px;"></div></td><td><div class="skel skel-bar" style="width:85px;"></div></td></tr>
             </tbody>
           </table>
-          <div class="table-empty-overlay">
+          <div class="table-empty-overlay" id="leads-empty-state">
             <i data-lucide="users"></i>
             <div class="empty-state-title">No leads synced yet</div>
             <div class="empty-state-sub">Connect Flow CRM to start tracking new leads, source, status, response time, and next follow-up.</div>
@@ -866,15 +866,19 @@
 <div id="toast"><div class="toast-icon"><i data-lucide="check"></i></div><div id="toast-msg" style="font-size:12.5px;font-weight:600;color:var(--text-s);line-height:1.45;"></div></div>
 
 <script>
-const AUTH0_DOMAIN = 'auth.flowaify.app';
+const AUTH0_DOMAIN    = 'auth.flowaify.app';
 const AUTH0_CLIENT_ID = 'tx74Owqn3jVeSaVuxfFHsKloqbPqfAmN';
+const WORKER = 'https://flowaify-crm-proxy.black-glitter-c4cd.workers.dev';
 let auth0Client;
 
 async function initAuth() {
   try {
     auth0Client = await auth0.createAuth0Client({
       domain: AUTH0_DOMAIN, clientId: AUTH0_CLIENT_ID,
-      authorizationParams: { redirect_uri: window.location.origin + '/portal.html' }
+      authorizationParams: {
+        redirect_uri: window.location.origin + '/portal.html',
+        audience: WORKER, // tells Auth0 to issue an access token for the Worker
+      }
     });
     const ok = await auth0Client.isAuthenticated();
     if (!ok) { window.location.href = 'portal.html'; return; }
@@ -882,7 +886,7 @@ async function initAuth() {
   } catch(e) { console.error(e); boot(null); }
 }
 
-function boot(user) {
+async function boot(user) {
   document.getElementById('auth-gate').style.display = 'none';
   document.getElementById('app').style.display = 'block';
   if (user) {
@@ -898,6 +902,66 @@ function boot(user) {
   }
   lucide.createIcons();
   initCharts();
+
+  // Fetch live CRM data — stays in empty state silently if Worker not yet configured.
+  try {
+    const token = await auth0Client.getTokenSilently();
+    await loadDashboardData(token);
+  } catch (e) {
+    console.warn('Could not load CRM data:', e.message);
+  }
+}
+
+// ─── Worker data layer ───────────────────────────────────────────────────────
+
+async function loadDashboardData(token) {
+  try {
+    const res = await fetch(`${WORKER}/data`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!res.ok) {
+      console.warn('Worker responded', res.status, await res.text());
+      return;
+    }
+    renderDashboard(await res.json());
+  } catch (err) {
+    console.warn('CRM load failed:', err.message);
+  }
+}
+
+function setText(id, val) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = val != null ? val : '—';
+}
+
+function renderDashboard({ overview, contacts, deals, needsAttention }) {
+  // Stat cards
+  setText('val-new-leads',    overview.newLeadsToday);
+  setText('val-response-time', overview.avgResponseTimeSecs != null ? `${overview.avgResponseTimeSecs}s` : '—');
+  setText('val-ai-replies',   overview.aiRepliesSent);
+  setText('val-follow-ups',   overview.activeSequences);
+  setText('val-pipeline',     overview.pipelineValue != null ? `$${Number(overview.pipelineValue).toLocaleString()}` : '—');
+  setText('val-booked-calls', overview.bookedCalls);
+
+  // Recent Leads table
+  const tbody = document.getElementById('leads-table-body');
+  const emptyState = document.getElementById('leads-empty-state');
+  if (tbody && contacts.length > 0) {
+    tbody.innerHTML = contacts.slice(0, 10).map(c => `
+      <tr>
+        <td>${escDash(c.name)}</td>
+        <td>${escDash(c.source)}</td>
+        <td><span class="badge b-muted">${escDash(c.status)}</span></td>
+        <td>${escDash(c.lastTouch)}</td>
+        <td>${c.lastTouchAt ? new Date(c.lastTouchAt).toLocaleDateString() : '—'}</td>
+      </tr>`).join('');
+    if (emptyState) emptyState.style.display = 'none';
+  }
+}
+
+function escDash(val) {
+  if (val == null || val === '') return '—';
+  return String(val).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
 async function dashLogout() {
