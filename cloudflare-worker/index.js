@@ -105,10 +105,10 @@ async function handleData(request, env, corsHeaders) {
   }
   const token = authHeader.slice(7).trim();
 
-  // 2. Validate JWT
+  // 2. Validate JWT (ID token — aud = AUTH0_CLIENT_ID)
   let payload;
   try {
-    payload = await verifyJWT(token, env.AUTH0_DOMAIN, env.AUTH0_AUDIENCE);
+    payload = await verifyJWT(token, env.AUTH0_DOMAIN, env.AUTH0_CLIENT_ID);
   } catch (err) {
     console.warn('JWT validation failed:', err.message);
     return json({ error: err.message }, 401, corsHeaders);

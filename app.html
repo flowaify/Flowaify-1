@@ -879,7 +879,6 @@ async function initAuth() {
       cacheLocation: 'localstorage',
       authorizationParams: {
         redirect_uri: window.location.origin + '/portal.html',
-        audience: WORKER,
       }
     });
     const ok = await auth0Client.isAuthenticated();
@@ -906,8 +905,8 @@ async function boot(user) {
   initCharts();
 
   try {
-    const token = await auth0Client.getTokenSilently();
-    await loadDashboardData(token);
+    const claims = await auth0Client.getIdTokenClaims();
+    if (claims && claims.__raw) await loadDashboardData(claims.__raw);
   } catch (e) {
     console.warn('Could not load CRM data:', e.message);
   }

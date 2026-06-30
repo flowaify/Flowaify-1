@@ -905,7 +905,6 @@
 <script>
 const AUTH0_DOMAIN    = 'auth.flowaify.app';
 const AUTH0_CLIENT_ID = 'tx74Owqn3jVeSaVuxfFHsKloqbPqfAmN';
-const WORKER_URL      = 'https://flowaify-crm-proxy.black-glitter-c4cd.workers.dev';
 
 
 let auth0Client;
@@ -915,7 +914,7 @@ async function initAuth() {
     auth0Client = await auth0.createAuth0Client({
       domain: AUTH0_DOMAIN, clientId: AUTH0_CLIENT_ID,
       cacheLocation: 'localstorage',
-      authorizationParams: { redirect_uri: window.location.origin + '/portal.html', audience: WORKER_URL }
+      authorizationParams: { redirect_uri: window.location.origin + '/portal.html' }
     });
     if (window.location.search.includes('error=')) {
       window.history.replaceState({}, document.title, window.location.pathname);
