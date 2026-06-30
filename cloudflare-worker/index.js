@@ -202,7 +202,7 @@ async function verifyJWT(token, domain, audience, jwksDomain) {
   const signingInput = new TextEncoder().encode(`${parts[0]}.${parts[1]}`);
   const signature    = base64UrlDecode(parts[2]);
   const valid = await crypto.subtle.verify('RSASSA-PKCS1-v1_5', cryptoKey, signature, signingInput);
-  if (!valid) throw new Error('JWT key not found'); // generic — don't leak "bad signature"
+  if (!valid) throw new Error('JWT key not found');
 
   // Validate standard claims
   const nowSecs = Math.floor(Date.now() / 1000);
