@@ -918,10 +918,8 @@ async function initAuth() {
       authorizationParams: { redirect_uri: window.location.origin + '/portal.html', audience: WORKER_URL }
     });
     if (window.location.search.includes('error=')) {
-      const desc = new URLSearchParams(window.location.search).get('error_description') || '';
-      console.error('Auth0 error:', desc);
       window.history.replaceState({}, document.title, window.location.pathname);
-      await auth0Client.loginWithRedirect({ appState: { returnTo: '/portal.html' } });
+      boot(null);
       return;
     }
     if (window.location.search.includes('code=') && window.location.search.includes('state=')) {
