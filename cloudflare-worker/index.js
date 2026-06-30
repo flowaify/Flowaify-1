@@ -108,7 +108,7 @@ async function handleData(request, env, corsHeaders) {
   // 2. Validate JWT (ID token — aud = AUTH0_CLIENT_ID)
   let payload;
   try {
-    payload = await verifyJWT(token, env.AUTH0_DOMAIN, env.AUTH0_CLIENT_ID);
+    payload = await verifyJWT(token, env.AUTH0_DOMAIN, env.AUTH0_CLIENT_ID, env.AUTH0_TENANT);
   } catch (err) {
     console.warn('JWT validation failed:', err.message);
     return json({ error: err.message }, 401, corsHeaders);
@@ -165,7 +165,7 @@ async function handleData(request, env, corsHeaders) {
 
 // ─── JWT Validation (Web Crypto API — no external deps) ──────────────────────
 
-async function verifyJWT(token, domain, audience) {
+async function verifyJWT(token, domain, audience, jwksDomain) {
   const parts = token.split('.');
   if (parts.length !== 3) throw new Error('Invalid JWT format');
 
@@ -177,7 +177,7 @@ async function verifyJWT(token, domain, audience) {
   // Fetch JWKS — cached 5 min at module scope
   const nowMs = Date.now();
   if (!jwksCache.keys || nowMs - jwksCache.fetchedAt > 5 * 60 * 1000) {
-    const resp = await fetch(`https://${domain}/.well-known/jwks.json`, {
+    const resp = await fetch(`https://${jwksDomain || domain}/.well-known/jwks.json`, {
       cf: { cacheTtl: 300 },
     });
     if (!resp.ok) throw new Error('Failed to fetch JWKS');
