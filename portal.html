@@ -453,7 +453,7 @@
       <button class="btn-sync" onclick="openModal('modal-sync')">
         <i data-lucide="plug"></i><span class="lbl"> Connect &amp; Sync</span>
       </button>
-      <a class="topnav-dash-link" href="dashboard.html">
+      <a class="topnav-dash-link" href="app.html">
         <i data-lucide="bar-chart-2"></i><span class="lbl"> Open Dashboard</span>
       </a>
       <div class="notif-wrap">
@@ -506,7 +506,7 @@
           <div class="profile-menu-item" onclick="window.open('changelog.html','_blank');closeProfileMenu()"><i data-lucide="sparkles"></i> What's New</div>
           <div class="profile-menu-item" onclick="window.open('team.html','_blank');closeProfileMenu()"><i data-lucide="users"></i> Team</div>
           <div class="profile-menu-item" onclick="openModal('modal-invite-team');closeProfileMenu()"><i data-lucide="user-plus"></i> Invite Team</div>
-          <div class="profile-menu-item" onclick="window.location.href='dashboard.html'"><i data-lucide="bar-chart-2"></i> Dashboard</div>
+          <div class="profile-menu-item" onclick="window.location.href='app.html'"><i data-lucide="bar-chart-2"></i> Dashboard</div>
           <hr class="profile-menu-sep" />
           <div class="profile-menu-item danger" onclick="portalLogout()"><i data-lucide="log-out"></i> Sign Out</div>
         </div>
@@ -554,7 +554,7 @@
       <button class="portal-pill" onclick="pillAction('connection')">Add a connection</button>
       <button class="portal-pill" onclick="pillAction('automations')">Review my automations</button>
       <button class="portal-pill" onclick="pillAction('next')">Show what's next</button>
-      <button class="portal-pill" onclick="window.location.href='dashboard.html'">Open my dashboard</button>
+      <button class="portal-pill" onclick="window.location.href='app.html'">Open my dashboard</button>
       <button class="portal-pill" onclick="openModal('modal-invite-team')">Invite my team</button>
     </div>
 
@@ -1279,7 +1279,7 @@ const SEARCH_ITEMS = [
   { group:'Pages', name:'Business Settings',  hint:'Edit profile',  icon:'building-2', color:'var(--blue-dim)',   color2:'var(--blue)',   action:()=>showPage('settings') },
   { group:'Pages', name:'System Status',      hint:'Service health',icon:'activity',   color:'var(--green-dim)',  color2:'var(--green)',  action:()=>showPage('status') },
   { group:'Pages', name:'Support',            hint:'Get help',      icon:'life-buoy',  color:'var(--purple-dim)', color2:'var(--purple)', action:()=>showPage('support') },
-  { group:'Pages', name:'Dashboard',          hint:'Analytics',     icon:'bar-chart-2',color:'var(--blue-dim)',   color2:'var(--blue)',   action:()=>window.location.href='dashboard.html' },
+  { group:'Pages', name:'Dashboard',          hint:'Analytics',     icon:'bar-chart-2',color:'var(--blue-dim)',   color2:'var(--blue)',   action:()=>window.location.href='app.html' },
   { group:'Actions', name:'Add a connection', hint:'Request setup', icon:'plug',       color:'var(--blue-dim)',   color2:'var(--blue)',   action:()=>pillAction('connection') },
   { group:'Actions', name:'Generate a report',hint:'Get PDF',       icon:'file-text',  color:'var(--amber-dim)',  color2:'var(--amber)',  action:()=>openModal('modal-generate-report') },
   { group:'Actions', name:'Export CRM data',  hint:'CSV / Excel',   icon:'download',   color:'var(--green-dim)',  color2:'var(--green)',  action:()=>openModal('modal-export-data') },
