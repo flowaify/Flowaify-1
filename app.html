@@ -866,10 +866,10 @@
 
 <div id="toast"><div class="toast-icon"><i data-lucide="check"></i></div><div id="toast-msg" style="font-size:12.5px;font-weight:600;color:var(--text-s);line-height:1.45;"></div></div>
 
+<script src="crm.js"></script>
 <script>
 const AUTH0_DOMAIN    = 'auth.flowaify.app';
 const AUTH0_CLIENT_ID = 'tx74Owqn3jVeSaVuxfFHsKloqbPqfAmN';
-const WORKER = 'https://flowaify-crm-proxy.black-glitter-c4cd.workers.dev';
 let auth0Client;
 
 async function initAuth() {
@@ -878,7 +878,7 @@ async function initAuth() {
       domain: AUTH0_DOMAIN, clientId: AUTH0_CLIENT_ID,
       authorizationParams: {
         redirect_uri: window.location.origin + '/portal.html',
-        audience: WORKER, // tells Auth0 to issue an access token for the Worker
+        audience: WORKER,
       }
     });
     const ok = await auth0Client.isAuthenticated();
@@ -904,65 +904,12 @@ async function boot(user) {
   lucide.createIcons();
   initCharts();
 
-  // Fetch live CRM data — stays in empty state silently if Worker not yet configured.
   try {
     const token = await auth0Client.getTokenSilently();
     await loadDashboardData(token);
   } catch (e) {
     console.warn('Could not load CRM data:', e.message);
   }
-}
-
-// ─── Worker data layer ───────────────────────────────────────────────────────
-
-async function loadDashboardData(token) {
-  try {
-    const res = await fetch(`${WORKER}/data`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    if (!res.ok) {
-      console.warn('Worker responded', res.status, await res.text());
-      return;
-    }
-    renderDashboard(await res.json());
-  } catch (err) {
-    console.warn('CRM load failed:', err.message);
-  }
-}
-
-function setText(id, val) {
-  const el = document.getElementById(id);
-  if (el) el.textContent = val != null ? val : '—';
-}
-
-function renderDashboard({ overview, contacts, deals, needsAttention }) {
-  // Stat cards
-  setText('val-new-leads',    overview.newLeadsToday);
-  setText('val-response-time', overview.avgResponseTimeSecs != null ? `${overview.avgResponseTimeSecs}s` : '—');
-  setText('val-ai-replies',   overview.aiRepliesSent);
-  setText('val-follow-ups',   overview.activeSequences);
-  setText('val-pipeline',     overview.pipelineValue != null ? `$${Number(overview.pipelineValue).toLocaleString()}` : '—');
-  setText('val-booked-calls', overview.bookedCalls);
-
-  // Recent Leads table
-  const tbody = document.getElementById('leads-table-body');
-  const emptyState = document.getElementById('leads-empty-state');
-  if (tbody && contacts.length > 0) {
-    tbody.innerHTML = contacts.slice(0, 10).map(c => `
-      <tr>
-        <td>${escDash(c.name)}</td>
-        <td>${escDash(c.source)}</td>
-        <td><span class="badge b-muted">${escDash(c.status)}</span></td>
-        <td>${escDash(c.lastTouch)}</td>
-        <td>${c.lastTouchAt ? new Date(c.lastTouchAt).toLocaleDateString() : '—'}</td>
-      </tr>`).join('');
-    if (emptyState) emptyState.style.display = 'none';
-  }
-}
-
-function escDash(val) {
-  if (val == null || val === '') return '—';
-  return String(val).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
 async function dashLogout() {
