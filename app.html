@@ -410,7 +410,6 @@
 
   <div class="sidebar-sep"></div>
 
-  <div class="nav-item" data-page="integrations"><i data-lucide="plug"></i>Integrations</div>
   <div class="nav-item" data-page="settings"><i data-lucide="settings-2"></i>Settings</div>
 
   <div class="sidebar-bottom">
@@ -679,61 +678,6 @@
   </div>
 
   <!-- INTEGRATIONS -->
-  <div class="page" id="page-integrations">
-    <div class="page-head">
-      <div><div class="page-head-title">Integrations</div><div class="page-head-sub">Connect CRM, email, calendar, forms, and communication tools.</div></div>
-    </div>
-
-    <div class="integration-grid mb20">
-      <div class="card int-card">
-        <div class="int-card-top"><div class="int-card-left"><div class="int-card-icon" style="background:var(--red-dim);color:var(--red);"><i data-lucide="circle"></i></div><div><div class="int-card-name">Zoho CRM</div><div class="int-card-meta">Contacts, Deals, Pipeline</div></div></div><span class="badge b-conn">Connected</span></div>
-        <button class="btn-mini btn-mini-ghost" style="width:100%;" disabled>Managed by Flowaify</button>
-      </div>
-      <div class="card int-card">
-        <div class="int-card-top"><div class="int-card-left"><div class="int-card-icon" style="background:var(--green-dim);color:var(--green);"><i data-lucide="calendar"></i></div><div><div class="int-card-name">Google Calendar</div><div class="int-card-meta">Last sync: —</div></div></div><span class="badge b-notconn">Not Connected</span></div>
-        <button class="btn-mini btn-mini-primary" style="width:100%;" onclick="showToast('Contact your Flowaify agent to enable this integration.')">Request</button>
-      </div>
-      <div class="card int-card">
-        <div class="int-card-top"><div class="int-card-left"><div class="int-card-icon" style="background:var(--amber-dim);color:var(--amber);"><i data-lucide="mail"></i></div><div><div class="int-card-name">Outlook / Gmail</div><div class="int-card-meta">Last sync: —</div></div></div><span class="badge b-notconn">Not Connected</span></div>
-        <button class="btn-mini btn-mini-primary" style="width:100%;" onclick="showToast('Contact your Flowaify agent to enable this integration.')">Request</button>
-      </div>
-      <div class="card int-card">
-        <div class="int-card-top"><div class="int-card-left"><div class="int-card-icon" style="background:var(--purple-dim);color:var(--purple);"><i data-lucide="file-text"></i></div><div><div class="int-card-name">Website Forms</div><div class="int-card-meta">Last sync: —</div></div></div><span class="badge b-notconn">Not Connected</span></div>
-        <button class="btn-mini btn-mini-primary" style="width:100%;" onclick="showToast('Contact your Flowaify agent to enable this integration.')">Request</button>
-      </div>
-      <div class="card int-card">
-        <div class="int-card-top"><div class="int-card-left"><div class="int-card-icon" style="background:rgba(217,119,6,.1);color:var(--amber);"><i data-lucide="zap"></i></div><div><div class="int-card-name">Zapier</div><div class="int-card-meta">Last sync: —</div></div></div><span class="badge b-notconn">Not Connected</span></div>
-        <button class="btn-mini btn-mini-primary" style="width:100%;" onclick="showToast('Contact your Flowaify agent to enable this integration.')">Request</button>
-      </div>
-      <div class="card int-card">
-        <div class="int-card-top"><div class="int-card-left"><div class="int-card-icon" style="background:var(--red-dim);color:#ff7a59;"><i data-lucide="orbit"></i></div><div><div class="int-card-name">HubSpot</div><div class="int-card-meta">Last sync: —</div></div></div><span class="badge b-notconn">Not Connected</span></div>
-        <button class="btn-mini btn-mini-primary" style="width:100%;" onclick="showToast('Contact your Flowaify agent to enable this integration.')">Request</button>
-      </div>
-      <div class="card int-card">
-        <div class="int-card-top"><div class="int-card-left"><div class="int-card-icon" style="background:rgba(0,87,255,.1);color:var(--blue-soft);"><i data-lucide="message-circle"></i></div><div><div class="int-card-name">Twilio SMS</div><div class="int-card-meta">Last sync: —</div></div></div><span class="badge b-notconn">Not Connected</span></div>
-        <button class="btn-mini btn-mini-primary" style="width:100%;" onclick="showToast('Contact your Flowaify agent to enable this integration.')">Request</button>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="sec-head"><div class="sec-title"><i data-lucide="scroll-text"></i>Sync Logs</div></div>
-      <div class="table-wrap">
-        <table class="skel-table">
-          <thead><tr><th>System</th><th>Status</th><th>Last Sync</th><th>Details</th></tr></thead>
-          <tbody>
-            <tr><td><div class="skel skel-bar" style="width:90px;"></div></td><td><div class="skel skel-bar" style="width:60px;"></div></td><td><div class="skel skel-bar" style="width:70px;"></div></td><td><div class="skel skel-bar" style="width:120px;"></div></td></tr>
-            <tr><td><div class="skel skel-bar" style="width:85px;"></div></td><td><div class="skel skel-bar" style="width:55px;"></div></td><td><div class="skel skel-bar" style="width:65px;"></div></td><td><div class="skel skel-bar" style="width:110px;"></div></td></tr>
-          </tbody>
-        </table>
-        <div class="table-empty-overlay">
-          <i data-lucide="scroll-text"></i>
-          <div class="empty-state-title">No sync logs yet</div>
-          <div class="empty-state-sub">Sync activity for every connected system will appear here.</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
   <!-- SETTINGS -->
   <div class="page" id="page-settings">
     <div class="page-head">
@@ -861,7 +805,6 @@ const PAGE_META = {
   conversations: { title:'Conversations',  sub:'Monitor AI replies, human handoffs, and active lead conversations.' },
   automations:   { title:'Automations',    sub:'Pause or resume Flowaify automations for this account.' },
   analytics:     { title:'Analytics',      sub:'Understand lead performance, response speed, source quality, and booked call conversion.' },
-  integrations:  { title:'Integrations',   sub:'Connect CRM, email, calendar, forms, and communication tools.' },
   settings:      { title:'Settings',       sub:'Manage workspace, users, automation rules, CRM settings, and notification preferences.' },
 };
 
