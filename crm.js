@@ -140,6 +140,9 @@ function renderDashboard({ overview, contacts, deals, needsAttention }) {
   }
 
   // ── Pipeline by stage bar chart ──────────────────────────────────────────────
+  var srcCounts2 = {};
+  contacts.forEach(function(c) { var s = c.source || 'Unknown'; srcCounts2[s] = (srcCounts2[s] || 0) + 1; });
+
   if (deals && deals.length > 0 && typeof Chart !== 'undefined') {
     var stageTotals = {};
     deals.forEach(function(d) {
@@ -171,8 +174,84 @@ function renderDashboard({ overview, contacts, deals, needsAttention }) {
           animation: { duration: 400 }
         }
       });
-      var pipeWrap = pipeCanvas.closest('.chart-wrap');
-      if (pipeWrap) { var pce = pipeWrap.querySelector('.chart-empty'); if (pce) pce.style.display = 'none'; }
+    }
+  }
+
+  // ── Analytics page stat cards ────────────────────────────────────────────────
+  setText('val-an-total',    contacts.length);
+  setText('val-an-pipeline', overview.pipelineValue != null ? '$' + Number(overview.pipelineValue).toLocaleString() : '—');
+  setText('val-an-booked',   overview.bookedCalls);
+  setText('val-an-response', overview.avgResponseTimeSecs != null ? overview.avgResponseTimeSecs + 's' : '—');
+  setText('val-an-sources',  Object.keys(srcCounts2).length);
+
+  var convRate = contacts.length > 0 && overview.bookedCalls
+    ? Math.round((overview.bookedCalls / contacts.length) * 100) + '%'
+    : '—';
+  setText('val-an-conv', convRate);
+
+  // ── Analytics: Source Performance donut (an-srcperf) ─────────────────────────
+  if (contacts.length > 0 && typeof Chart !== 'undefined') {
+    var palette2 = ['#0057FF','#8b5cf6','#059669','#d97706','#dc2626','#2979FF','#4d94ff','#64748b'];
+    var srcLabels2 = Object.keys(srcCounts2);
+    var srcData2   = srcLabels2.map(function(k) { return srcCounts2[k]; });
+
+    var srcPerfCanvas = document.getElementById('an-srcperf');
+    if (srcPerfCanvas) {
+      var existingSP = Chart.getChart(srcPerfCanvas);
+      if (existingSP) existingSP.destroy();
+      new Chart(srcPerfCanvas, {
+        type: 'doughnut',
+        data: { labels: srcLabels2, datasets: [{ data: srcData2, backgroundColor: palette2.slice(0, srcLabels2.length), borderWidth: 0 }] },
+        options: { cutout: '68%', plugins: { legend: { display: true, position: 'bottom', labels: { font: { size: 10 }, padding: 8, boxWidth: 10 } } }, animation: { duration: 400 } }
+      });
+    }
+
+    // ── Analytics: Leads by Source bar (an-convsrc) ───────────────────────────
+    var convsrcCanvas = document.getElementById('an-convsrc');
+    if (convsrcCanvas) {
+      var existingCS = Chart.getChart(convsrcCanvas);
+      if (existingCS) existingCS.destroy();
+      new Chart(convsrcCanvas, {
+        type: 'bar',
+        data: { labels: srcLabels2, datasets: [{ data: srcData2, backgroundColor: '#8b5cf6', borderRadius: 4 }] },
+        options: {
+          plugins: { legend: { display: false } },
+          scales: { x: { ticks: { font: { size: 10 } } }, y: { ticks: { font: { size: 10 }, stepSize: 1 } } },
+          animation: { duration: 400 }
+        }
+      });
+    }
+
+    // ── Analytics: Leads Over Time line (an-leads) ────────────────────────────
+    var weekMap = {};
+    contacts.forEach(function(c) {
+      if (!c.createdAt) return;
+      var d = new Date(c.createdAt);
+      var week = d.toISOString().slice(0, 10).replace(/-\d{2}$/, function(m) {
+        var day = parseInt(m.slice(1));
+        return '-' + String(day - (d.getDay() || 7) + 1).padStart(2, '0');
+      });
+      weekMap[week] = (weekMap[week] || 0) + 1;
+    });
+    var weekKeys = Object.keys(weekMap).sort();
+    var weekVals = weekKeys.map(function(k) { return weekMap[k]; });
+
+    var leadsTimeCanvas = document.getElementById('an-leads');
+    if (leadsTimeCanvas && weekKeys.length > 0) {
+      var existingLT = Chart.getChart(leadsTimeCanvas);
+      if (existingLT) existingLT.destroy();
+      new Chart(leadsTimeCanvas, {
+        type: 'line',
+        data: {
+          labels: weekKeys,
+          datasets: [{ data: weekVals, borderColor: '#0057FF', backgroundColor: 'rgba(0,87,255,0.08)', fill: true, tension: 0.3, pointRadius: 3 }]
+        },
+        options: {
+          plugins: { legend: { display: false } },
+          scales: { x: { ticks: { font: { size: 10 } } }, y: { ticks: { font: { size: 10 }, stepSize: 1 } } },
+          animation: { duration: 400 }
+        }
+      });
     }
   }
 }

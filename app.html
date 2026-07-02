@@ -231,6 +231,7 @@
     .badge { display: inline-flex; align-items: center; padding: 3px 9px; border-radius: 99px; font-size: 10.5px; font-weight: 600; white-space: nowrap; }
     .b-muted  { background: rgba(15,23,42,.05); color: var(--text-m); border: 1px solid rgba(15,23,42,.08); }
     .b-notconn{ background: rgba(100,116,139,.08); color: #64748b; border: 1px solid rgba(100,116,139,.16); }
+    .b-conn   { background: var(--green-dim); color: var(--green); border: 1px solid rgba(5,150,105,.2); }
     .b-setup  { background: var(--amber-dim); color: var(--amber); border: 1px solid rgba(217,119,6,0.2); }
     .b-high   { background: var(--red-dim);   color: var(--red);   border: 1px solid rgba(220,38,38,0.2); }
     .b-med    { background: var(--amber-dim); color: var(--amber); border: 1px solid rgba(217,119,6,0.2); }
@@ -405,7 +406,6 @@
   <div class="nav-item" data-page="leads"><i data-lucide="users"></i>Leads</div>
   <div class="nav-item" data-page="conversations"><i data-lucide="message-square"></i>Conversations</div>
   <div class="nav-item" data-page="automations"><i data-lucide="zap"></i>Automations</div>
-  <div class="nav-item" data-page="flows"><i data-lucide="git-branch"></i>Flows</div>
   <div class="nav-item" data-page="analytics"><i data-lucide="bar-chart-2"></i>Analytics</div>
 
   <div class="sidebar-sep"></div>
@@ -414,9 +414,9 @@
   <div class="nav-item" data-page="settings"><i data-lucide="settings-2"></i>Settings</div>
 
   <div class="sidebar-bottom">
-    <div class="preview-badge" onclick="showToast('Setup mode — live data will appear automatically once Flow CRM is connected. No sample data is shown.')">
+    <div class="preview-badge" onclick="showToast('Live data from Zoho CRM. Refresh to sync the latest.')">
       <div class="preview-badge-dot"></div>
-      <div class="preview-badge-text">Preview Mode</div>
+      <div class="preview-badge-text">Live Mode</div>
     </div>
     <div class="profile-card">
       <div class="profile-card-btn" onclick="toggleProfileMenu()">
@@ -456,9 +456,6 @@
         <i data-lucide="calendar" style="width:12px;height:12px;color:var(--blue-soft)"></i>
         <select><option>Last 7 days</option><option>Last 30 days</option><option>Last 90 days</option></select>
       </div>
-      <button class="btn-sync" id="sync-btn" onclick="openModal('modal-sync')">
-        <i data-lucide="refresh-cw" id="sync-icon"></i> Sync Flow CRM
-      </button>
       <a class="topbar-portal-link" href="portal.html">
         <i data-lucide="layout-grid"></i> Workspace
       </a>
@@ -468,24 +465,16 @@
   <!-- OVERVIEW -->
   <div class="page active" id="page-overview">
     <div class="page-head">
-      <div><div class="page-head-title">Command Center</div><div class="page-head-sub">Live view of your lead flow, response speed, CRM sync, and automation health.</div></div>
-      <div class="card crm-status">
-        <div class="crm-status-icon" style="background:rgba(100,116,139,.1);color:#64748b;"><i data-lucide="plug"></i></div>
-        <div style="flex:1;">
-          <div style="display:flex;align-items:center;gap:8px;"><div class="crm-status-title">Flow CRM not connected</div><span class="badge b-setup">Setup required</span></div>
-          <div class="crm-status-sub">Connect your CRM to unlock live metrics, lead tracking, automation activity, and booked call reporting.</div>
-        </div>
-        <button class="btn-connect" style="margin:0;flex-shrink:0;" onclick="openModal('modal-sync')"><i data-lucide="plug"></i> Connect</button>
-      </div>
+      <div><div class="page-head-title">Command Center</div><div class="page-head-sub">Live view of your lead flow, response speed, and automation health.</div></div>
     </div>
 
     <div class="stats-grid">
-      <div class="card stat-card"><div class="stat-top"><div class="stat-icon si-blue"><i data-lucide="user-plus"></i></div><div class="skel-spark"><span style="height:40%"></span><span style="height:65%"></span><span style="height:30%"></span><span style="height:80%"></span><span style="height:50%"></span></div></div><div class="stat-val" id="val-new-leads">—</div><div class="stat-label">New Leads Today</div><div class="stat-hint">Connect Flow CRM to start tracking new inbound leads.</div></div>
-      <div class="card stat-card"><div class="stat-top"><div class="stat-icon si-green"><i data-lucide="zap"></i></div><div class="skel-spark"><span style="height:55%"></span><span style="height:35%"></span><span style="height:70%"></span><span style="height:45%"></span><span style="height:60%"></span></div></div><div class="stat-val" id="val-response-time">—</div><div class="stat-label">Avg Response Time</div><div class="stat-hint">Response speed appears after your first synced lead.</div></div>
-      <div class="card stat-card"><div class="stat-top"><div class="stat-icon si-blue"><i data-lucide="bot"></i></div><div class="skel-spark"><span style="height:30%"></span><span style="height:60%"></span><span style="height:45%"></span><span style="height:75%"></span><span style="height:40%"></span></div></div><div class="stat-val" id="val-ai-replies">—</div><div class="stat-label">AI Replies Sent</div><div class="stat-hint">AI reply activity appears once automations are live.</div></div>
-      <div class="card stat-card"><div class="stat-top"><div class="stat-icon si-amber"><i data-lucide="repeat-2"></i></div><div class="skel-spark"><span style="height:65%"></span><span style="height:40%"></span><span style="height:55%"></span><span style="height:30%"></span><span style="height:70%"></span></div></div><div class="stat-val" id="val-follow-ups">—</div><div class="stat-label">Follow-Ups Running</div><div class="stat-hint">Active follow-up sequences will appear here.</div></div>
-      <div class="card stat-card"><div class="stat-top"><div class="stat-icon si-purple"><i data-lucide="dollar-sign"></i></div><div class="skel-spark"><span style="height:45%"></span><span style="height:70%"></span><span style="height:35%"></span><span style="height:60%"></span><span style="height:50%"></span></div></div><div class="stat-val" id="val-pipeline">—</div><div class="stat-label">Pipeline Value</div><div class="stat-hint">Pipeline value appears after CRM sync.</div></div>
-      <div class="card stat-card"><div class="stat-top"><div class="stat-icon si-green"><i data-lucide="calendar-check"></i></div><div class="skel-spark"><span style="height:50%"></span><span style="height:30%"></span><span style="height:65%"></span><span style="height:40%"></span><span style="height:55%"></span></div></div><div class="stat-val" id="val-booked-calls">—</div><div class="stat-label">Booked Calls</div><div class="stat-hint">Booked meetings appear after CRM or calendar sync.</div></div>
+      <div class="card stat-card"><div class="stat-top"><div class="stat-icon si-blue"><i data-lucide="user-plus"></i></div><div class="skel-spark"><span style="height:40%"></span><span style="height:65%"></span><span style="height:30%"></span><span style="height:80%"></span><span style="height:50%"></span></div></div><div class="stat-val" id="val-new-leads">—</div><div class="stat-label">New Leads Today</div><div class="stat-hint">Leads created today in Zoho CRM</div></div>
+      <div class="card stat-card"><div class="stat-top"><div class="stat-icon si-green"><i data-lucide="zap"></i></div><div class="skel-spark"><span style="height:55%"></span><span style="height:35%"></span><span style="height:70%"></span><span style="height:45%"></span><span style="height:60%"></span></div></div><div class="stat-val" id="val-response-time">—</div><div class="stat-label">Avg Response Time</div><div class="stat-hint">Populates once Flowaify automations run</div></div>
+      <div class="card stat-card"><div class="stat-top"><div class="stat-icon si-blue"><i data-lucide="bot"></i></div><div class="skel-spark"><span style="height:30%"></span><span style="height:60%"></span><span style="height:45%"></span><span style="height:75%"></span><span style="height:40%"></span></div></div><div class="stat-val" id="val-ai-replies">—</div><div class="stat-label">AI Replies Sent</div><div class="stat-hint">Populates once AI replies go live</div></div>
+      <div class="card stat-card"><div class="stat-top"><div class="stat-icon si-amber"><i data-lucide="repeat-2"></i></div><div class="skel-spark"><span style="height:65%"></span><span style="height:40%"></span><span style="height:55%"></span><span style="height:30%"></span><span style="height:70%"></span></div></div><div class="stat-val" id="val-follow-ups">—</div><div class="stat-label">Active Sequences</div><div class="stat-hint">HOT + WARM leads in follow-up</div></div>
+      <div class="card stat-card"><div class="stat-top"><div class="stat-icon si-purple"><i data-lucide="dollar-sign"></i></div><div class="skel-spark"><span style="height:45%"></span><span style="height:70%"></span><span style="height:35%"></span><span style="height:60%"></span><span style="height:50%"></span></div></div><div class="stat-val" id="val-pipeline">—</div><div class="stat-label">Pipeline Value</div><div class="stat-hint">Total value of all open deals</div></div>
+      <div class="card stat-card"><div class="stat-top"><div class="stat-icon si-green"><i data-lucide="calendar-check"></i></div><div class="skel-spark"><span style="height:50%"></span><span style="height:30%"></span><span style="height:65%"></span><span style="height:40%"></span><span style="height:55%"></span></div></div><div class="stat-val" id="val-booked-calls">—</div><div class="stat-label">Booked Calls</div><div class="stat-hint">Deals or contacts marked as booked</div></div>
     </div>
 
     <div class="g2 mb20">
@@ -514,9 +503,8 @@
           </table>
           <div class="table-empty-overlay" id="leads-empty-state">
             <i data-lucide="users"></i>
-            <div class="empty-state-title">No leads synced yet</div>
-            <div class="empty-state-sub">Connect Flow CRM to start tracking new leads, source, status, response time, and next follow-up.</div>
-            <button class="btn-connect" onclick="openModal('modal-sync')"><i data-lucide="plug"></i> Connect Flow CRM</button>
+            <div class="empty-state-title">No leads yet</div>
+            <div class="empty-state-sub">Leads will appear here once contacts exist in Zoho CRM.</div>
           </div>
         </div>
       </div>
@@ -543,13 +531,11 @@
     <div class="card mb20 p20" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
       <div style="flex:1;min-width:180px;position:relative;">
         <i data-lucide="search" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);width:13px;height:13px;color:var(--text-m);"></i>
-        <input onfocus="notConnected()" type="text" placeholder="Search leads…" style="width:100%;padding:8px 12px 8px 32px;background:var(--input-bg);border:1px solid var(--input-border);border-radius:8px;font-size:12.5px;font-family:inherit;outline:none;" />
+        <input type="text" placeholder="Search leads…" style="width:100%;padding:8px 12px 8px 32px;background:var(--input-bg);border:1px solid var(--input-border);border-radius:8px;font-size:12.5px;font-family:inherit;outline:none;" />
       </div>
-      <select onchange="notConnected()" style="padding:8px 12px;background:var(--input-bg);border:1px solid var(--input-border);border-radius:8px;font-size:12px;font-family:inherit;color:var(--text-s);"><option>All statuses</option></select>
-      <select onchange="notConnected()" style="padding:8px 12px;background:var(--input-bg);border:1px solid var(--input-border);border-radius:8px;font-size:12px;font-family:inherit;color:var(--text-s);"><option>All sources</option></select>
-      <select onchange="notConnected()" style="padding:8px 12px;background:var(--input-bg);border:1px solid var(--input-border);border-radius:8px;font-size:12px;font-family:inherit;color:var(--text-s);"><option>All owners</option></select>
-      <button class="btn-mini btn-mini-ghost" onclick="notConnected()"><i data-lucide="download" style="width:12px;height:12px;vertical-align:-2px;"></i> Export</button>
-      <button class="btn-mini btn-mini-primary" onclick="notConnected()"><i data-lucide="plus" style="width:12px;height:12px;vertical-align:-2px;"></i> Add Lead</button>
+      <select style="padding:8px 12px;background:var(--input-bg);border:1px solid var(--input-border);border-radius:8px;font-size:12px;font-family:inherit;color:var(--text-s);"><option>All statuses</option></select>
+      <select style="padding:8px 12px;background:var(--input-bg);border:1px solid var(--input-border);border-radius:8px;font-size:12px;font-family:inherit;color:var(--text-s);"><option>All sources</option></select>
+      <select style="padding:8px 12px;background:var(--input-bg);border:1px solid var(--input-border);border-radius:8px;font-size:12px;font-family:inherit;color:var(--text-s);"><option>All owners</option></select>
     </div>
 
     <div class="stats-grid">
@@ -575,15 +561,14 @@
           </table>
           <div class="table-empty-overlay" id="full-leads-empty">
             <i data-lucide="users"></i>
-            <div class="empty-state-title">No leads synced yet</div>
-            <div class="empty-state-sub">Connect Flow CRM to start tracking new leads, source, status, response time, and next follow-up.</div>
-            <button class="btn-connect" onclick="openModal('modal-sync')"><i data-lucide="plug"></i> Connect Flow CRM</button>
+            <div class="empty-state-title">No leads yet</div>
+            <div class="empty-state-sub">Leads from your CRM will appear here once data is available.</div>
           </div>
         </div>
       </div>
       <div class="card">
         <div class="sec-head"><div class="sec-title"><i data-lucide="user-circle"></i>Lead Detail</div></div>
-        <div class="empty-state" style="padding:40px 16px;"><i data-lucide="user-circle"></i><div class="empty-state-title">No leads synced yet</div><div class="empty-state-sub">Connect Flow CRM to start tracking lead details, scores, AI summaries, and conversation history.</div></div>
+        <div class="empty-state" style="padding:40px 16px;"><i data-lucide="user-circle"></i><div class="empty-state-title">No lead selected</div><div class="empty-state-sub">Select a lead from the table to view details, status, and contact information.</div></div>
       </div>
     </div>
   </div>
@@ -612,89 +597,53 @@
   <!-- AUTOMATIONS -->
   <div class="page" id="page-automations">
     <div class="page-head">
-      <div><div class="page-head-title">Automations</div><div class="page-head-sub">Manage AI replies, follow-up sequences, and workflow health.</div></div>
+      <div><div class="page-head-title">Automations</div><div class="page-head-sub">Pause or resume Flowaify automations for this account.</div></div>
     </div>
 
-    <div class="stats-grid">
-      <div class="card stat-card"><div class="stat-top"><div class="stat-icon si-blue"><i data-lucide="zap"></i></div></div><div class="stat-val">—</div><div class="stat-label">Active Automations</div><div class="stat-hint">Activate an automation to get started.</div></div>
-      <div class="card stat-card"><div class="stat-top"><div class="stat-icon si-purple"><i data-lucide="bot"></i></div></div><div class="stat-val">—</div><div class="stat-label">AI Replies Sent</div><div class="stat-hint">Appears once AI replies are live.</div></div>
-      <div class="card stat-card"><div class="stat-top"><div class="stat-icon si-amber"><i data-lucide="repeat-2"></i></div></div><div class="stat-val">—</div><div class="stat-label">Follow-Ups Running</div><div class="stat-hint">Appears once sequences are active.</div></div>
-      <div class="card stat-card"><div class="stat-top"><div class="stat-icon si-red"><i data-lucide="alert-triangle"></i></div></div><div class="stat-val">—</div><div class="stat-label">Failed Runs</div><div class="stat-hint">Appears after automations run.</div></div>
-      <div class="card stat-card"><div class="stat-top"><div class="stat-icon si-green"><i data-lucide="percent"></i></div></div><div class="stat-val">—</div><div class="stat-label">Success Rate</div><div class="stat-hint">Appears after automations run.</div></div>
+    <div class="stats-grid mb20">
+      <div class="card stat-card"><div class="stat-top"><div class="stat-icon si-blue"><i data-lucide="zap"></i></div></div><div class="stat-val" id="val-auto-active">6</div><div class="stat-label">Active Automations</div></div>
+      <div class="card stat-card"><div class="stat-top"><div class="stat-icon si-purple"><i data-lucide="bot"></i></div></div><div class="stat-val" id="val-ai-replies-auto">—</div><div class="stat-label">AI Replies Sent</div></div>
+      <div class="card stat-card"><div class="stat-top"><div class="stat-icon si-amber"><i data-lucide="repeat-2"></i></div></div><div class="stat-val" id="val-follow-ups-auto">—</div><div class="stat-label">Active Sequences</div></div>
+      <div class="card stat-card"><div class="stat-top"><div class="stat-icon si-green"><i data-lucide="calendar-check"></i></div></div><div class="stat-val" id="val-booked-auto">—</div><div class="stat-label">Booked Calls</div></div>
     </div>
 
-    <div class="card mb20" style="padding:14px 20px;">
-      <div style="display:flex;align-items:center;gap:7px;"><i data-lucide="info" style="width:13px;height:13px;color:var(--blue);"></i><span style="font-size:12px;font-weight:600;color:var(--text-s);">No automations running</span><span style="font-size:11.5px;color:var(--text-m);">— activate your first automation below to start replying to leads and sending follow-ups.</span></div>
-    </div>
-
-    <div class="automation-grid mb20">
-      <div class="card auto-card">
-        <div class="auto-card-top"><div class="auto-card-icon" style="background:rgba(0,87,255,.1);color:var(--blue);"><i data-lucide="reply"></i></div><span class="badge b-notconn">Not Active</span></div>
-        <div class="auto-card-name">Instant Lead Reply</div>
-        <div class="auto-card-trigger"><b style="color:var(--text-s);">Trigger:</b> New lead captured from any source</div>
-        <div class="auto-card-actions"><button class="btn-mini btn-mini-primary" onclick="notConnected()">Activate</button><button class="btn-mini btn-mini-ghost" onclick="notConnected()">View</button></div>
-      </div>
-      <div class="card auto-card">
-        <div class="auto-card-top"><div class="auto-card-icon" style="background:var(--amber-dim);color:var(--amber);"><i data-lucide="clock"></i></div><span class="badge b-notconn">Not Active</span></div>
-        <div class="auto-card-name">No-Response Follow-Up</div>
-        <div class="auto-card-trigger"><b style="color:var(--text-s);">Trigger:</b> Lead hasn't replied within 24 hours</div>
-        <div class="auto-card-actions"><button class="btn-mini btn-mini-primary" onclick="notConnected()">Activate</button><button class="btn-mini btn-mini-ghost" onclick="notConnected()">View</button></div>
-      </div>
-      <div class="card auto-card">
-        <div class="auto-card-top"><div class="auto-card-icon" style="background:var(--purple-dim);color:var(--purple);"><i data-lucide="calendar-clock"></i></div><span class="badge b-notconn">Not Active</span></div>
-        <div class="auto-card-name">Booking Reminder</div>
-        <div class="auto-card-trigger"><b style="color:var(--text-s);">Trigger:</b> 24 hours and 1 hour before a booked call</div>
-        <div class="auto-card-actions"><button class="btn-mini btn-mini-primary" onclick="notConnected()">Activate</button><button class="btn-mini btn-mini-ghost" onclick="notConnected()">View</button></div>
-      </div>
-      <div class="card auto-card">
-        <div class="auto-card-top"><div class="auto-card-icon" style="background:var(--green-dim);color:var(--green);"><i data-lucide="phone-missed"></i></div><span class="badge b-notconn">Not Active</span></div>
-        <div class="auto-card-name">Missed Call Follow-Up</div>
-        <div class="auto-card-trigger"><b style="color:var(--text-s);">Trigger:</b> Inbound call goes unanswered</div>
-        <div class="auto-card-actions"><button class="btn-mini btn-mini-primary" onclick="notConnected()">Activate</button><button class="btn-mini btn-mini-ghost" onclick="notConnected()">View</button></div>
-      </div>
-      <div class="card auto-card">
-        <div class="auto-card-top"><div class="auto-card-icon" style="background:rgba(0,87,255,.1);color:var(--blue-soft);"><i data-lucide="refresh-ccw"></i></div><span class="badge b-notconn">Not Active</span></div>
-        <div class="auto-card-name">Re-Engagement Sequence</div>
-        <div class="auto-card-trigger"><b style="color:var(--text-s);">Trigger:</b> Lead has gone cold for 14+ days</div>
-        <div class="auto-card-actions"><button class="btn-mini btn-mini-primary" onclick="notConnected()">Activate</button><button class="btn-mini btn-mini-ghost" onclick="notConnected()">View</button></div>
-      </div>
-    </div>
-
-    <div class="card"><div class="sec-head"><div class="sec-title"><i data-lucide="scroll-text"></i>Workflow Activity</div></div><div class="empty-state" style="padding:32px 20px;"><i data-lucide="scroll-text"></i><div class="empty-state-title">No automation activity yet</div><div class="empty-state-sub">A timeline of automation runs, replies, and follow-ups will appear here once activated.</div></div></div>
-  </div>
-
-  <!-- FLOWS -->
-  <div class="page" id="page-flows">
-    <div class="page-head">
-      <div><div class="page-head-title">Flows</div><div class="page-head-sub">View and manage the automation paths that move leads through your system.</div></div>
-      <div class="page-head-actions" style="display:flex;gap:8px;">
-        <button class="btn-mini btn-mini-ghost" onclick="notConnected()"><i data-lucide="terminal" style="width:12px;height:12px;vertical-align:-2px;"></i> View Logs</button>
-        <button class="btn-mini btn-mini-primary" onclick="notConnected()"><i data-lucide="plus" style="width:12px;height:12px;vertical-align:-2px;"></i> Create Flow</button>
-      </div>
-    </div>
-
-    <div class="flow-layout">
-      <div class="card p20" style="height:fit-content;">
-        <div style="font-size:11px;font-weight:700;color:var(--text-m);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:10px;">Available Templates</div>
-        <div class="flow-list-item active">
-          <div class="flow-list-icon"><i data-lucide="user-plus"></i></div>
-          <div><div class="flow-list-name">New Lead Capture Flow</div><div class="flow-list-meta">Template · Not active</div></div>
+    <div class="g2">
+      <div class="card">
+        <div class="sec-head"><div class="sec-title"><i data-lucide="toggle-right"></i>Automation Controls</div><div class="sec-sub">Toggle to pause or resume</div></div>
+        <div class="p20">
+          <div class="toggle-row">
+            <div><div class="toggle-label">SMS Automation</div><div class="toggle-sub">Automated text messages to new leads and follow-ups</div></div>
+            <div class="toggle on" id="tog-sms" onclick="toggleAuto(this,'sms')"></div>
+          </div>
+          <div class="toggle-row">
+            <div><div class="toggle-label">Email Automation</div><div class="toggle-sub">Automated email sequences to leads and clients</div></div>
+            <div class="toggle on" id="tog-email" onclick="toggleAuto(this,'email')"></div>
+          </div>
+          <div class="toggle-row">
+            <div><div class="toggle-label">Auto Response</div><div class="toggle-sub">AI-powered instant reply to new inbound leads</div></div>
+            <div class="toggle on" id="tog-autoreply" onclick="toggleAuto(this,'autoreply')"></div>
+          </div>
+          <div class="toggle-row">
+            <div><div class="toggle-label">Follow-Up Sequences</div><div class="toggle-sub">Multi-step follow-up for unresponsive leads</div></div>
+            <div class="toggle on" id="tog-followup" onclick="toggleAuto(this,'followup')"></div>
+          </div>
+          <div class="toggle-row">
+            <div><div class="toggle-label">Booking Reminders</div><div class="toggle-sub">Remind leads 24h and 1h before scheduled calls</div></div>
+            <div class="toggle on" id="tog-booking" onclick="toggleAuto(this,'booking')"></div>
+          </div>
+          <div class="toggle-row" style="border-bottom:none;">
+            <div><div class="toggle-label">Lead Scoring</div><div class="toggle-sub">Automatically score and prioritize leads by engagement</div></div>
+            <div class="toggle on" id="tog-scoring" onclick="toggleAuto(this,'scoring')"></div>
+          </div>
         </div>
       </div>
 
       <div class="card">
-        <div class="sec-head">
-          <div><div class="sec-title"><i data-lucide="git-branch"></i>New Lead Capture Flow</div><div class="sec-sub" style="margin-top:2px;">7 steps · Template</div></div>
-          <div style="display:flex;gap:8px;"><span class="badge b-notconn">Not Active</span><button class="btn-mini btn-mini-ghost" onclick="notConnected()">Edit Flow</button><button class="btn-mini btn-mini-primary" onclick="notConnected()">Test Flow</button></div>
-        </div>
-        <div>
-          <div class="flow-step"><div class="flow-step-num">1</div><div class="flow-step-icon"><i data-lucide="globe"></i></div><div style="flex:1;"><div class="flow-step-name">Lead captured from website form</div><div class="flow-step-sub">Trigger step</div></div><span class="badge b-muted">Template</span></div>
-          <div class="flow-step"><div class="flow-step-num">2</div><div class="flow-step-icon"><i data-lucide="database"></i></div><div style="flex:1;"><div class="flow-step-name">Contact created in CRM</div><div class="flow-step-sub">Flow CRM</div></div><span class="badge b-muted">Template</span></div>
-          <div class="flow-step"><div class="flow-step-num">3</div><div class="flow-step-icon"><i data-lucide="bot"></i></div><div style="flex:1;"><div class="flow-step-name">AI reply sent</div><div class="flow-step-sub">Instant Lead Reply automation</div></div><span class="badge b-muted">Template</span></div>
-          <div class="flow-step"><div class="flow-step-num">4</div><div class="flow-step-icon"><i data-lucide="repeat-2"></i></div><div style="flex:1;"><div class="flow-step-name">Follow-up sequence started</div><div class="flow-step-sub">No-Response Follow-Up automation</div></div><span class="badge b-muted">Template</span></div>
-          <div class="flow-step"><div class="flow-step-num">5</div><div class="flow-step-icon"><i data-lucide="calendar"></i></div><div style="flex:1;"><div class="flow-step-name">Calendar booking link sent</div><div class="flow-step-sub">Calendar integration</div></div><span class="badge b-muted">Template</span></div>
-          <div class="flow-step"><div class="flow-step-num">6</div><div class="flow-step-icon"><i data-lucide="badge-check"></i></div><div style="flex:1;"><div class="flow-step-name">Lead status updated</div><div class="flow-step-sub">Flow CRM</div></div><span class="badge b-muted">Template</span></div>
-          <div class="flow-step"><div class="flow-step-num">7</div><div class="flow-step-icon"><i data-lucide="bell"></i></div><div style="flex:1;"><div class="flow-step-name">Owner notified</div><div class="flow-step-sub">Notification rules</div></div><span class="badge b-muted">Template</span></div>
+        <div class="sec-head"><div class="sec-title"><i data-lucide="scroll-text"></i>Recent Activity</div></div>
+        <div class="empty-state" style="padding:40px 20px;">
+          <i data-lucide="scroll-text"></i>
+          <div class="empty-state-title">No automation activity yet</div>
+          <div class="empty-state-sub">A live timeline of AI replies, follow-ups, and sequences will appear here once your first lead comes in.</div>
         </div>
       </div>
     </div>
@@ -706,28 +655,27 @@
       <div><div class="page-head-title">Analytics</div><div class="page-head-sub">Understand lead performance, response speed, source quality, and booked call conversion.</div></div>
       <div style="display:flex;gap:8px;align-items:center;">
         <div class="range-sel"><i data-lucide="calendar" style="width:12px;height:12px;color:var(--blue-soft)"></i><select><option>Last 7 days</option><option>Last 30 days</option><option>Last 90 days</option></select></div>
-        <button class="btn-mini btn-mini-ghost" onclick="notConnected()"><i data-lucide="download" style="width:12px;height:12px;vertical-align:-2px;"></i> Export Report</button>
       </div>
     </div>
 
     <div class="stats-grid">
-      <div class="card stat-card"><div class="stat-top"><div class="stat-icon si-blue"><i data-lucide="users"></i></div></div><div class="stat-val">—</div><div class="stat-label">Total Leads</div><div class="stat-hint">Connect Flow CRM to populate</div></div>
-      <div class="card stat-card"><div class="stat-top"><div class="stat-icon si-green"><i data-lucide="percent"></i></div></div><div class="stat-val">—</div><div class="stat-label">Conversion Rate</div><div class="stat-hint">Connect Flow CRM to populate</div></div>
-      <div class="card stat-card"><div class="stat-top"><div class="stat-icon si-amber"><i data-lucide="zap"></i></div></div><div class="stat-val">—</div><div class="stat-label">Avg Response Time</div><div class="stat-hint">Connect Flow CRM to populate</div></div>
-      <div class="card stat-card"><div class="stat-top"><div class="stat-icon si-purple"><i data-lucide="calendar-check"></i></div></div><div class="stat-val">—</div><div class="stat-label">Booked Call Rate</div><div class="stat-hint">Connect Flow CRM to populate</div></div>
-      <div class="card stat-card"><div class="stat-top"><div class="stat-icon si-blue"><i data-lucide="dollar-sign"></i></div></div><div class="stat-val">—</div><div class="stat-label">Pipeline Value</div><div class="stat-hint">Connect Flow CRM to populate</div></div>
-      <div class="card stat-card"><div class="stat-top"><div class="stat-icon si-green"><i data-lucide="bot"></i></div></div><div class="stat-val">—</div><div class="stat-label">AI Reply Rate</div><div class="stat-hint">Connect Flow CRM to populate</div></div>
+      <div class="card stat-card"><div class="stat-top"><div class="stat-icon si-blue"><i data-lucide="users"></i></div></div><div class="stat-val" id="val-an-total">—</div><div class="stat-label">Total Leads</div></div>
+      <div class="card stat-card"><div class="stat-top"><div class="stat-icon si-green"><i data-lucide="percent"></i></div></div><div class="stat-val" id="val-an-conv">—</div><div class="stat-label">Conversion Rate</div></div>
+      <div class="card stat-card"><div class="stat-top"><div class="stat-icon si-amber"><i data-lucide="zap"></i></div></div><div class="stat-val" id="val-an-response">—</div><div class="stat-label">Avg Response Time</div></div>
+      <div class="card stat-card"><div class="stat-top"><div class="stat-icon si-purple"><i data-lucide="calendar-check"></i></div></div><div class="stat-val" id="val-an-booked">—</div><div class="stat-label">Booked Calls</div></div>
+      <div class="card stat-card"><div class="stat-top"><div class="stat-icon si-blue"><i data-lucide="dollar-sign"></i></div></div><div class="stat-val" id="val-an-pipeline">—</div><div class="stat-label">Pipeline Value</div></div>
+      <div class="card stat-card"><div class="stat-top"><div class="stat-icon si-green"><i data-lucide="bot"></i></div></div><div class="stat-val" id="val-an-sources">—</div><div class="stat-label">Lead Sources</div></div>
     </div>
 
     <div class="analytics-charts mb20">
-      <div class="card"><div class="sec-head"><div class="sec-title"><i data-lucide="trending-up"></i>Leads Over Time</div></div><div class="chart-wrap" style="padding:18px;"><canvas id="an-leads"></canvas><div class="chart-empty"><i data-lucide="trending-up"></i><div class="chart-empty-text">No data yet — appears once leads are synced.</div></div></div></div>
-      <div class="card"><div class="sec-head"><div class="sec-title"><i data-lucide="activity"></i>Response Time Trend</div></div><div class="chart-wrap" style="padding:18px;"><canvas id="an-resp"></canvas><div class="chart-empty"><i data-lucide="activity"></i><div class="chart-empty-text">No data yet — appears once leads are synced.</div></div></div></div>
-      <div class="card"><div class="sec-head"><div class="sec-title"><i data-lucide="pie-chart"></i>Source Performance</div></div><div class="chart-wrap" style="padding:18px;"><canvas id="an-srcperf"></canvas><div class="chart-empty"><i data-lucide="pie-chart"></i><div class="chart-empty-text">No data yet — appears once leads are synced.</div></div></div></div>
-      <div class="card"><div class="sec-head"><div class="sec-title"><i data-lucide="bar-chart-2"></i>Conversion by Source</div></div><div class="chart-wrap" style="padding:18px;"><canvas id="an-convsrc"></canvas><div class="chart-empty"><i data-lucide="bar-chart-2"></i><div class="chart-empty-text">No data yet — appears once leads are synced.</div></div></div></div>
-      <div class="card"><div class="sec-head"><div class="sec-title"><i data-lucide="calendar-check"></i>Booked Calls Over Time</div></div><div class="chart-wrap" style="padding:18px;"><canvas id="an-booked"></canvas><div class="chart-empty"><i data-lucide="calendar-check"></i><div class="chart-empty-text">No data yet — appears once calls are booked.</div></div></div></div>
-      <div class="card"><div class="sec-head"><div class="sec-title"><i data-lucide="repeat-2"></i>Follow-Up Performance</div></div><div class="chart-wrap" style="padding:18px;"><canvas id="an-fuperf"></canvas><div class="chart-empty"><i data-lucide="repeat-2"></i><div class="chart-empty-text">No data yet — appears once sequences run.</div></div></div></div>
+      <div class="card"><div class="sec-head"><div class="sec-title"><i data-lucide="trending-up"></i>Leads Over Time</div></div><div class="chart-wrap" style="padding:18px;"><canvas id="an-leads"></canvas></div></div>
+      <div class="card"><div class="sec-head"><div class="sec-title"><i data-lucide="activity"></i>Response Time Trend</div></div><div class="chart-wrap" style="padding:18px;"><canvas id="an-resp"></canvas></div></div>
+      <div class="card"><div class="sec-head"><div class="sec-title"><i data-lucide="pie-chart"></i>Source Performance</div></div><div class="chart-wrap" style="padding:18px;"><canvas id="an-srcperf"></canvas></div></div>
+      <div class="card"><div class="sec-head"><div class="sec-title"><i data-lucide="bar-chart-2"></i>Leads by Source</div></div><div class="chart-wrap" style="padding:18px;"><canvas id="an-convsrc"></canvas></div></div>
+      <div class="card"><div class="sec-head"><div class="sec-title"><i data-lucide="calendar-check"></i>Booked Calls Over Time</div></div><div class="chart-wrap" style="padding:18px;"><canvas id="an-booked-chart"></canvas></div></div>
+      <div class="card"><div class="sec-head"><div class="sec-title"><i data-lucide="repeat-2"></i>Follow-Up Performance</div></div><div class="chart-wrap" style="padding:18px;"><canvas id="an-fuperf"></canvas></div></div>
     </div>
-    <div class="card"><div class="sec-head"><div class="sec-title"><i data-lucide="bar-chart-2"></i>Pipeline Value by Stage</div></div><div class="chart-wrap" style="padding:18px;height:180px;"><canvas id="an-pipestage"></canvas><div class="chart-empty"><i data-lucide="bar-chart-2"></i><div class="chart-empty-text">No data yet — appears once Flow CRM is connected.</div></div></div></div>
+    <div class="card"><div class="sec-head"><div class="sec-title"><i data-lucide="bar-chart-2"></i>Pipeline Value by Stage</div></div><div class="chart-wrap" style="padding:18px;height:180px;"><canvas id="an-pipestage"></canvas></div></div>
   </div>
 
   <!-- INTEGRATIONS -->
@@ -738,36 +686,32 @@
 
     <div class="integration-grid mb20">
       <div class="card int-card">
-        <div class="int-card-top"><div class="int-card-left"><div class="int-card-icon" style="background:rgba(0,87,255,.1);color:var(--blue);"><i data-lucide="database"></i></div><div><div class="int-card-name">Flow CRM</div><div class="int-card-meta">Last sync: —</div></div></div><span class="badge b-notconn">Not Connected</span></div>
-        <button class="btn-mini btn-mini-primary" style="width:100%;" onclick="openModal('modal-sync')">Connect</button>
+        <div class="int-card-top"><div class="int-card-left"><div class="int-card-icon" style="background:var(--red-dim);color:var(--red);"><i data-lucide="circle"></i></div><div><div class="int-card-name">Zoho CRM</div><div class="int-card-meta">Contacts, Deals, Pipeline</div></div></div><span class="badge b-conn">Connected</span></div>
+        <button class="btn-mini btn-mini-ghost" style="width:100%;" disabled>Managed by Flowaify</button>
       </div>
       <div class="card int-card">
         <div class="int-card-top"><div class="int-card-left"><div class="int-card-icon" style="background:var(--green-dim);color:var(--green);"><i data-lucide="calendar"></i></div><div><div class="int-card-name">Google Calendar</div><div class="int-card-meta">Last sync: —</div></div></div><span class="badge b-notconn">Not Connected</span></div>
-        <button class="btn-mini btn-mini-primary" style="width:100%;" onclick="notConnected()">Connect</button>
+        <button class="btn-mini btn-mini-primary" style="width:100%;" onclick="showToast('Contact your Flowaify agent to enable this integration.')">Request</button>
       </div>
       <div class="card int-card">
         <div class="int-card-top"><div class="int-card-left"><div class="int-card-icon" style="background:var(--amber-dim);color:var(--amber);"><i data-lucide="mail"></i></div><div><div class="int-card-name">Outlook / Gmail</div><div class="int-card-meta">Last sync: —</div></div></div><span class="badge b-notconn">Not Connected</span></div>
-        <button class="btn-mini btn-mini-primary" style="width:100%;" onclick="notConnected()">Connect</button>
+        <button class="btn-mini btn-mini-primary" style="width:100%;" onclick="showToast('Contact your Flowaify agent to enable this integration.')">Request</button>
       </div>
       <div class="card int-card">
         <div class="int-card-top"><div class="int-card-left"><div class="int-card-icon" style="background:var(--purple-dim);color:var(--purple);"><i data-lucide="file-text"></i></div><div><div class="int-card-name">Website Forms</div><div class="int-card-meta">Last sync: —</div></div></div><span class="badge b-notconn">Not Connected</span></div>
-        <button class="btn-mini btn-mini-primary" style="width:100%;" onclick="notConnected()">Connect</button>
+        <button class="btn-mini btn-mini-primary" style="width:100%;" onclick="showToast('Contact your Flowaify agent to enable this integration.')">Request</button>
       </div>
       <div class="card int-card">
         <div class="int-card-top"><div class="int-card-left"><div class="int-card-icon" style="background:rgba(217,119,6,.1);color:var(--amber);"><i data-lucide="zap"></i></div><div><div class="int-card-name">Zapier</div><div class="int-card-meta">Last sync: —</div></div></div><span class="badge b-notconn">Not Connected</span></div>
-        <button class="btn-mini btn-mini-primary" style="width:100%;" onclick="notConnected()">Connect</button>
+        <button class="btn-mini btn-mini-primary" style="width:100%;" onclick="showToast('Contact your Flowaify agent to enable this integration.')">Request</button>
       </div>
       <div class="card int-card">
         <div class="int-card-top"><div class="int-card-left"><div class="int-card-icon" style="background:var(--red-dim);color:#ff7a59;"><i data-lucide="orbit"></i></div><div><div class="int-card-name">HubSpot</div><div class="int-card-meta">Last sync: —</div></div></div><span class="badge b-notconn">Not Connected</span></div>
-        <button class="btn-mini btn-mini-primary" style="width:100%;" onclick="notConnected()">Connect</button>
-      </div>
-      <div class="card int-card">
-        <div class="int-card-top"><div class="int-card-left"><div class="int-card-icon" style="background:var(--red-dim);color:var(--red);"><i data-lucide="circle"></i></div><div><div class="int-card-name">Zoho CRM</div><div class="int-card-meta">Last sync: —</div></div></div><span class="badge b-notconn">Not Connected</span></div>
-        <button class="btn-mini btn-mini-primary" style="width:100%;" onclick="notConnected()">Connect</button>
+        <button class="btn-mini btn-mini-primary" style="width:100%;" onclick="showToast('Contact your Flowaify agent to enable this integration.')">Request</button>
       </div>
       <div class="card int-card">
         <div class="int-card-top"><div class="int-card-left"><div class="int-card-icon" style="background:rgba(0,87,255,.1);color:var(--blue-soft);"><i data-lucide="message-circle"></i></div><div><div class="int-card-name">Twilio SMS</div><div class="int-card-meta">Last sync: —</div></div></div><span class="badge b-notconn">Not Connected</span></div>
-        <button class="btn-mini btn-mini-primary" style="width:100%;" onclick="notConnected()">Connect</button>
+        <button class="btn-mini btn-mini-primary" style="width:100%;" onclick="showToast('Contact your Flowaify agent to enable this integration.')">Request</button>
       </div>
     </div>
 
@@ -857,13 +801,6 @@
 </main>
 </div>
 
-<div class="modal-overlay" id="modal-sync">
-  <div class="modal">
-    <div class="modal-head"><div><div class="modal-title">Connect Flow CRM</div><div class="modal-sub">Sync your CRM data to activate the dashboard</div></div><button class="modal-close" onclick="closeModal('modal-sync')"><i data-lucide="x"></i></button></div>
-    <div class="modal-body"><p>Connecting Flow CRM will import your leads, contacts, deals, and pipeline. All dashboard metrics update automatically once connected.</p><div style="margin-top:14px;padding:12px 16px;background:var(--blue-dim);border:1px solid var(--blue-border);border-radius:10px;font-size:11.5px;color:var(--blue);line-height:1.8;">• Leads &amp; Contacts<br>• Deals &amp; Pipeline stages<br>• Activity &amp; Notes<br>• Revenue data</div></div>
-    <div class="modal-footer"><button class="btn-mc" onclick="closeModal('modal-sync')">Cancel</button><button class="btn-mok" onclick="startSync()">Connect &amp; Sync</button></div>
-  </div>
-</div>
 
 <div id="toast"><div class="toast-icon"><i data-lucide="check"></i></div><div id="toast-msg" style="font-size:12.5px;font-weight:600;color:var(--text-s);line-height:1.45;"></div></div>
 
@@ -922,8 +859,7 @@ const PAGE_META = {
   overview:      { title:'Overview',       sub:'Monitor lead flow, automation health, and CRM activity.' },
   leads:         { title:'Leads',          sub:'Track every synced lead, source, status, owner, and next follow-up.' },
   conversations: { title:'Conversations',  sub:'Monitor AI replies, human handoffs, and active lead conversations.' },
-  automations:   { title:'Automations',    sub:'Manage AI replies, follow-up sequences, and workflow health.' },
-  flows:         { title:'Flows',          sub:'View and manage the automation paths that move leads through your system.' },
+  automations:   { title:'Automations',    sub:'Pause or resume Flowaify automations for this account.' },
   analytics:     { title:'Analytics',      sub:'Understand lead performance, response speed, source quality, and booked call conversion.' },
   integrations:  { title:'Integrations',   sub:'Connect CRM, email, calendar, forms, and communication tools.' },
   settings:      { title:'Settings',       sub:'Manage workspace, users, automation rules, CRM settings, and notification preferences.' },
@@ -960,16 +896,13 @@ function showToast(msg) {
   clearTimeout(t._t); t._t = setTimeout(() => t.style.display='none', 4200);
 }
 
-function notConnected() { showToast('Connect Flow CRM to enable this feature.'); }
-
-function startSync() {
-  closeModal('modal-sync');
-  const ic = document.getElementById('sync-icon'), bt = document.getElementById('sync-btn');
-  if(ic) ic.classList.add('spinning'); if(bt) bt.disabled = true;
-  setTimeout(() => {
-    if(ic) ic.classList.remove('spinning'); if(bt) bt.disabled = false;
-    lucide.createIcons(); showToast('Flow CRM connected. Data will appear as it syncs.');
-  }, 2200);
+function toggleAuto(el, name) {
+  el.classList.toggle('on');
+  const isOn = el.classList.contains('on');
+  const active = document.querySelectorAll('#page-automations .toggle.on').length;
+  const valEl = document.getElementById('val-auto-active');
+  if (valEl) valEl.textContent = active;
+  showToast((isOn ? 'Resumed: ' : 'Paused: ') + name.replace(/([A-Z])/g, ' $1').trim());
 }
 
 function initCharts() {
@@ -978,7 +911,7 @@ function initCharts() {
   const eLine  = id => { const el = document.getElementById(id); if(!el) return; new Chart(el,{type:'line',data:{labels:['','','','','','',''],datasets:[{data:[0,0,0,0,0,0,0],borderColor:ec,fill:false,pointRadius:0}]},options:{plugins:{legend:{display:false},tooltip:{enabled:false}},scales:{x:{display:false},y:{display:false}},animation:false}}); };
   const eBar   = id => { const el = document.getElementById(id); if(!el) return; new Chart(el,{type:'bar',data:{labels:['','','','','',''],datasets:[{data:[0,0,0,0,0,0],backgroundColor:ec}]},options:{plugins:{legend:{display:false},tooltip:{enabled:false}},scales:{x:{display:false},y:{display:false}},animation:false}}); };
   eDough('ch-src'); eLine('ch-resp');
-  eLine('an-leads'); eLine('an-resp'); eDough('an-srcperf'); eBar('an-convsrc'); eBar('an-booked'); eBar('an-fuperf'); eBar('an-pipestage');
+  eLine('an-leads'); eLine('an-resp'); eDough('an-srcperf'); eBar('an-convsrc'); eBar('an-booked-chart'); eBar('an-fuperf'); eBar('an-pipestage');
 }
 
 initAuth();
