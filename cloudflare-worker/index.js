@@ -15,6 +15,11 @@ const ALLOWED_ORIGINS = new Set([
   'https://www.flowaify.app',
 ]);
 
+// Auth0 config — not secrets (already in client-side HTML)
+const AUTH0_DOMAIN     = 'auth.flowaify.app';
+const AUTH0_CLIENT_ID  = 'tx74Owqn3jVeSaVuxfFHsKloqbPqfAmN';
+const AUTH0_TENANT     = 'dev-8qaje37awjk3ptzf.us.auth0.com';
+
 // Module-level caches survive across requests within the same isolate instance.
 const jwksCache = { keys: null, fetchedAt: 0 };
 const tokenCache = {}; // { [clientId]: { accessToken, expiresAt } }
@@ -108,14 +113,19 @@ async function handleData(request, env, corsHeaders) {
   // 2. Validate JWT (ID token — aud = AUTH0_CLIENT_ID)
   let payload;
   try {
-    payload = await verifyJWT(token, env.AUTH0_DOMAIN, env.AUTH0_CLIENT_ID, env.AUTH0_TENANT);
+    payload = await verifyJWT(token, AUTH0_DOMAIN, AUTH0_CLIENT_ID, AUTH0_TENANT);
   } catch (err) {
     console.warn('JWT validation failed:', err.message);
     return json({ error: err.message }, 401, corsHeaders);
   }
 
-  // 3. Read custom claims injected by Auth0 Post-Login Action
-  const clientId = payload['https://flowaify.app/clientId'];
+  // 3. Resolve clientId — prefer custom claim, fall back to sub-based env var
+  //    Env var format: CLIENT_{AUTH0_SUB_SANITIZED} e.g. CLIENT_AUTH0_6A2E630CC822B4846155D262
+  let clientId = payload['https://flowaify.app/clientId'];
+  if (!clientId && payload.sub) {
+    const subKey = 'CLIENT_' + payload.sub.replace(/[^A-Z0-9]/gi, '_').toUpperCase();
+    clientId = env[subKey];
+  }
   if (!clientId) {
     return json({ error: 'No clientId in token' }, 403, corsHeaders);
   }
