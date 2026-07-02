@@ -49,10 +49,25 @@ function renderDashboard({ overview, contacts, deals, needsAttention }) {
     if (emptyState) emptyState.style.display = 'none';
   }
 
-  // ── Leads page full table ────────────────────────────────────────────────────
+  // ── Leads page stat cards ────────────────────────────────────────────────────
   setText('val-total-leads', contacts.length);
   const countEl = document.getElementById('leads-page-count');
   if (countEl) countEl.textContent = contacts.length + ' contacts';
+
+  var sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+  var newLeads7d   = contacts.filter(function(c) { return c.createdAt && new Date(c.createdAt).getTime() > sevenDaysAgo; }).length;
+  setText('val-leads-new', newLeads7d);
+
+  var qualified = contacts.filter(function(c) { return c.status && c.status.trim() !== '' && c.status !== '—'; }).length;
+  setText('val-leads-qualified', qualified);
+
+  setText('val-leads-booked', overview.bookedCalls);
+
+  var twoDaysAgo   = Date.now() - 48 * 60 * 60 * 1000;
+  var unresponsive = contacts.filter(function(c) {
+    return c.createdAt && new Date(c.createdAt).getTime() < twoDaysAgo && !c.lastTouchAt;
+  }).length;
+  setText('val-leads-unresponsive', unresponsive);
 
   const fullTbody = document.getElementById('full-leads-tbody');
   const fullEmpty = document.getElementById('full-leads-empty');
