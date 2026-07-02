@@ -295,7 +295,7 @@ const CONTACT_FIELDS = [
 ].join(',');
 
 const DEAL_FIELDS = [
-  'Deal_Name', 'Stage', 'Amount', 'Closing_Date',
+  'Deal_Name', 'Stage', 'Amount', 'Closing_Date', 'Created_Time',
 ].join(',');
 
 async function fetchContacts(datacenter, token) {
@@ -352,6 +352,7 @@ function shapeDeal(d) {
     stage:       d.Stage        || null,
     amount:      d.Amount != null ? Number(d.Amount) : null,
     closingDate: d.Closing_Date || null,
+    createdAt:   d.Created_Time || null,
   };
 }
 
