@@ -40,9 +40,55 @@ async function refreshData() {
 }
 
 /* ── Utilities ──────────────────────────────────────────────────────────────── */
+const REDUCED_MOTION = typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+
 function setText(id, val) {
   const el = document.getElementById(id);
-  if (el) el.textContent = val != null ? val : '—';
+  if (!el) return;
+  const target = val != null ? String(val) : '—';
+  const m = target.match(/^([^0-9-]*)(-?[\d,]+(?:\.\d+)?)(.*)$/);
+  if (!m || REDUCED_MOTION) { el.textContent = target; el._num = m ? parseFloat(m[2].replace(/,/g, '')) : null; return; }
+
+  const end = parseFloat(m[2].replace(/,/g, ''));
+  if (!isFinite(end)) { el.textContent = target; return; }
+  const useCommas = m[2].indexOf(',') !== -1 || Math.abs(end) >= 1000;
+  const decimals = (m[2].split('.')[1] || '').length;
+  const start = typeof el._num === 'number' && isFinite(el._num) ? el._num : 0;
+  el._num = end;
+  if (start === end) { el.textContent = target; return; }
+
+  if (el._raf) cancelAnimationFrame(el._raf);
+  const t0 = performance.now(), dur = 600;
+  function frame(now) {
+    const p = Math.min(1, (now - t0) / dur);
+    const eased = 1 - Math.pow(1 - p, 3);
+    const cur = start + (end - start) * eased;
+    const num = decimals > 0 ? cur.toFixed(decimals) : Math.round(cur);
+    el.textContent = m[1] + (useCommas ? Number(num).toLocaleString() : num) + m[3];
+    if (p < 1) el._raf = requestAnimationFrame(frame);
+    else { el.textContent = target; el._raf = null; }
+  }
+  el._raf = requestAnimationFrame(frame);
+}
+
+function sparkline(id, series, color) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  if (!series || series.length < 2 || series.every(function(v) { return v === 0; })) {
+    el.innerHTML = '';
+    return;
+  }
+  const w = 64, h = 22, pad = 2;
+  const max = Math.max.apply(null, series), min = Math.min.apply(null, series);
+  const span = (max - min) || 1;
+  const pts = series.map(function(v, i) {
+    const x = (i / (series.length - 1)) * (w - 2) + 1;
+    const y = h - pad - ((v - min) / span) * (h - pad * 2);
+    return x.toFixed(1) + ',' + y.toFixed(1);
+  });
+  el.innerHTML = '<svg width="' + w + '" height="' + h + '" viewBox="0 0 ' + w + ' ' + h + '">' +
+    '<polyline points="' + pts.join(' ') + '" fill="none" stroke="' + (color || '#0057FF') + '" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>' +
+    '</svg>';
 }
 
 function escDash(val) {
@@ -162,6 +208,8 @@ function renderSourceList(containerId, counts, emptyTitle, emptySub) {
     return;
   }
   const max = counts[names[0]] || 1;
+  let total = 0;
+  names.forEach(function(n) { total += counts[n]; });
   el.innerHTML = names.map(function(name, i) {
     const n = counts[name];
     const pct = Math.max(3, Math.round((n / max) * 100));
@@ -171,7 +219,8 @@ function renderSourceList(containerId, counts, emptyTitle, emptySub) {
       '<div class="src-track"><div class="src-fill" style="width:' + pct + '%;background:' + color + ';"></div></div>' +
       '<div class="src-count">' + n + '</div>' +
       '</div>';
-  }).join('');
+  }).join('') +
+  '<div class="src-foot">' + total + ' lead' + (total === 1 ? '' : 's') + ' · ' + names.length + ' source' + (names.length === 1 ? '' : 's') + '</div>';
 }
 
 function groupCount(items, keyFn) {
@@ -246,6 +295,13 @@ function rerender() {
   renderCharts(data, ranged, days);
   renderActivitySections(data, days);
   renderAutomationStats(data);
+
+  // Sparklines — real daily counts, never fake data
+  const spark14 = timeBuckets(data.contacts, 14).data;
+  const sparkRange = timeBuckets(ranged, Math.min(days, 30)).data;
+  sparkline('spark-new-leads',   spark14,    '#0057FF');
+  sparkline('spark-leads-total', spark14,    '#0057FF');
+  sparkline('spark-an-total',    sparkRange, '#0057FF');
 
   if (typeof lucide !== 'undefined') lucide.createIcons();
 }
@@ -534,9 +590,10 @@ function feedItemText(ev) {
   return escDash(ev.name);
 }
 
-function feedItemHtml(ev) {
+function feedItemHtml(ev, idx) {
   const meta = FEED_ICON[ev.type] || FEED_ICON.lead_created;
-  return '<div class="feed-item">' +
+  const i = Math.min(idx || 0, 12);
+  return '<div class="feed-item" style="--i:' + i + '">' +
     '<div class="feed-icon" style="background:' + meta.bg + ';color:' + meta.color + ';"><i data-lucide="' + meta.icon + '"></i></div>' +
     '<div class="feed-body"><div class="feed-text">' + feedItemText(ev) + '</div></div>' +
     '<div class="feed-time">' + relTime(ev.ts) + '</div>' +
@@ -578,11 +635,12 @@ function renderActivityFeed(events, containerId, opts) {
       if (lbl !== curLabel) { groups.push({ label: lbl, items: [] }); curLabel = lbl; }
       groups[groups.length - 1].items.push(ev);
     });
+    let n = 0;
     el.innerHTML = groups.map(function(g) {
-      return '<div class="feed-day">' + g.label + '</div>' + g.items.map(feedItemHtml).join('');
+      return '<div class="feed-day">' + g.label + '</div>' + g.items.map(function(ev) { return feedItemHtml(ev, n++); }).join('');
     }).join('');
   } else {
-    el.innerHTML = list.map(feedItemHtml).join('');
+    el.innerHTML = list.map(function(ev, i) { return feedItemHtml(ev, i); }).join('');
   }
 }
 
