@@ -16,7 +16,7 @@
     #auth-gate {
       position: fixed; inset: 0; z-index: 9999; background: #fff;
       display: flex; align-items: center; justify-content: center;
-      flex-direction: column; gap: 14px; font-family: 'Inter', sans-serif;
+      flex-direction: column; gap: 14px; font-family: 'Segoe UI', Inter, -apple-system, sans-serif;
     }
     #auth-gate .ag-logo { width: 40px; height: 40px; object-fit: contain; }
     #auth-gate .ag-spinner {
@@ -36,7 +36,7 @@
       --green:      #059669;
       --amber:      #b45309;
       --red:        #dc2626;
-      --bg:         #f1f2f4;
+      --bg:         #f5f5f5;
       --bg-card:    #ffffff;
       --topbar-bg:  rgba(255,255,255,0.97);
       --sidebar-bg: #f7f7f8;
@@ -58,25 +58,37 @@
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html, body { height: 100%; font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); font-size: 14px; line-height: 1.5; overflow-x: hidden; }
+    html, body { height: 100%; font-family: 'Segoe UI', Inter, -apple-system, sans-serif; background: var(--bg); color: var(--text); font-size: 14px; line-height: 1.5; overflow-x: hidden; }
     a { text-decoration: none; color: inherit; }
     button { font-family: inherit; }
     ::-webkit-scrollbar { width: 4px; height: 4px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: var(--blue-border); border-radius: 99px; }
 
+    /* ───────── SUITE HEADER ───────── */
+    .suite-bar {
+      position: fixed; top: 0; left: 0; right: 0; height: 48px; z-index: 80;
+      background: #16161a; display: flex; align-items: center; justify-content: space-between;
+      padding: 0 16px; gap: 12px;
+    }
+    .suite-left { display: flex; align-items: center; gap: 11px; min-width: 0; }
+    .suite-logo { width: 22px; height: 22px; object-fit: contain; filter: brightness(0) invert(1); }
+    .suite-name { font-size: 14px; font-weight: 600; color: #fff; letter-spacing: -0.2px; white-space: nowrap; }
+    .suite-div  { width: 1px; height: 18px; background: rgba(255,255,255,0.22); }
+    .suite-ctx  { font-size: 12px; color: rgba(255,255,255,0.62); white-space: nowrap; }
+    .suite-avatar-btn { display: flex; align-items: center; gap: 8px; padding: 5px 6px 5px 5px; border-radius: 4px; cursor: pointer; transition: background 0.12s; }
+    .suite-avatar-btn:hover { background: rgba(255,255,255,0.10); }
+    .suite-user { font-size: 12.5px; color: rgba(255,255,255,0.88); font-weight: 500; max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .suite-bar .profile-card-chev { color: rgba(255,255,255,0.55); }
+
     /* ───────── SIDEBAR ───────── */
     .sidebar {
-      position: fixed; left: 0; top: 0; bottom: 0; width: var(--sidebar-w);
+      position: fixed; left: 0; top: 48px; bottom: 0; width: var(--sidebar-w);
       background: var(--sidebar-bg); z-index: 60;
-      display: flex; flex-direction: column; padding: 18px 12px; gap: 1px;
+      display: flex; flex-direction: column; padding: 14px 12px; gap: 1px;
       border-right: 1px solid var(--card-border);
     }
-    .sidebar-brand { display: flex; align-items: center; gap: 9px; padding: 2px 10px 20px; }
-    .sidebar-brand-logo { width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-    .sidebar-brand-logo img { width: 24px; height: 24px; object-fit: contain; }
-    .sidebar-brand-name { font-size: 14.5px; font-weight: 700; color: var(--text); letter-spacing: -0.3px; }
-    .sidebar-brand-tag { font-size: 9px; font-weight: 600; color: var(--text-m); letter-spacing: 0.6px; text-transform: uppercase; }
+    .nav-group-label { padding: 14px 12px 5px; font-size: 10px; font-weight: 600; color: var(--text-m); text-transform: uppercase; letter-spacing: 0.6px; user-select: none; }
 
     .nav-item {
       display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: 4px;
@@ -86,7 +98,7 @@
     .nav-item i { width: 15px; height: 15px; flex-shrink: 0; color: var(--text-m); }
     .nav-item:hover { background: rgba(15,23,42,0.04); color: var(--text); }
     .nav-item.active {
-      background: var(--blue-dim); color: var(--text); font-weight: 600;
+      background: rgba(0,0,0,0.05); color: var(--text); font-weight: 600;
       box-shadow: inset 2px 0 0 var(--blue);
     }
     .nav-item.active i { color: var(--blue); }
@@ -103,29 +115,21 @@
     .preview-badge-text { font-size: 10.5px; font-weight: 600; color: var(--text-s); }
 
     .profile-card { position: relative; }
-    .profile-card-btn {
-      display: flex; align-items: center; gap: 10px; padding: 7px 9px; border-radius: 4px;
-      cursor: pointer; transition: background 0.12s; width: 100%;
-    }
-    .profile-card-btn:hover { background: rgba(15,23,42,0.04); }
     .profile-card-avatar {
       width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
-      background: var(--text); display: flex; align-items: center; justify-content: center;
+      background: var(--blue); display: flex; align-items: center; justify-content: center;
       font-size: 10.5px; font-weight: 700; color: #fff;
     }
-    .profile-card-info { flex: 1; min-width: 0; }
-    .profile-card-name { font-size: 12.5px; font-weight: 600; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .profile-card-role { font-size: 10.5px; color: var(--text-m); }
-    .profile-card-chev { width: 14px; height: 14px; color: var(--text-m); flex-shrink: 0; }
+    .profile-card-chev { width: 14px; height: 14px; flex-shrink: 0; }
 
     .profile-menu {
-      position: absolute; bottom: calc(100% + 8px); left: 0; right: 0;
-      background: #fff; border: 1px solid var(--card-border); border-radius: 6px;
-      box-shadow: 0 8px 24px rgba(15,23,42,0.10); padding: 5px; min-width: 200px;
+      position: absolute; top: calc(100% + 6px); right: 0; left: auto; bottom: auto;
+      background: #fff; border-radius: 8px;
+      box-shadow: 0 0 2px rgba(0,0,0,0.12), 0 8px 16px rgba(0,0,0,0.14); padding: 5px; min-width: 230px;
       display: none; z-index: 300;
     }
     .profile-menu.open { display: block; animation: pmenu-in 0.15s ease; }
-    @keyframes pmenu-in { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+    @keyframes pmenu-in { from{opacity:0;transform:translateY(-6px)} to{opacity:1;transform:translateY(0)} }
     .profile-menu-header { padding: 10px 12px 8px; border-bottom: 1px solid var(--border); margin-bottom: 4px; }
     .profile-menu-name  { font-size: 12.5px; font-weight: 700; color: var(--text); }
     .profile-menu-email { font-size: 10.5px; color: var(--text-m); margin-top: 1px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -136,25 +140,26 @@
     .profile-menu-item.danger:hover { background: var(--red-dim); color: var(--red); }
 
     /* ───────── MAIN / TOPBAR ───────── */
-    .main { margin-left: var(--sidebar-w); min-height: 100vh; display: flex; flex-direction: column; }
+    .main { margin-left: var(--sidebar-w); margin-top: 48px; min-height: calc(100vh - 48px); display: flex; flex-direction: column; }
     .topbar {
-      position: sticky; top: 0; z-index: 40;
+      position: sticky; top: 48px; z-index: 40;
       display: flex; align-items: center; justify-content: space-between;
-      padding: 0 28px; height: 56px;
-      background: var(--topbar-bg); backdrop-filter: blur(18px);
-      border-bottom: 1px solid var(--card-border);
+      padding: 0 20px; height: 46px;
+      background: #fff;
+      border-bottom: 1px solid var(--border);
     }
-    .topbar-left { display: flex; flex-direction: column; }
-    .topbar-title { font-size: 14.5px; font-weight: 700; color: var(--text); letter-spacing: -0.3px; }
-    .topbar-sub   { font-size: 11px; color: var(--text-m); }
-    .topbar-right { display: flex; align-items: center; gap: 8px; }
-    .range-sel { display: flex; align-items: center; gap: 6px; padding: 6px 10px; background: #fff; border: 1px solid var(--input-border); border-radius: 4px; }
-    .range-sel select { background: transparent; border: none; outline: none; color: var(--text-s); font-size: 12px; font-weight: 500; cursor: pointer; font-family: inherit; }
-    .btn-sync { display: flex; align-items: center; gap: 6px; padding: 7px 14px; background: var(--blue); border: none; border-radius: 4px; color: #fff; font-size: 12px; font-weight: 600; cursor: pointer; transition: background 0.12s; }
-    .btn-sync:hover { background: var(--blue-b); }
-    .btn-sync i { width: 13px; height: 13px; }
-    .topbar-portal-link { display: inline-flex; align-items: center; gap: 6px; padding: 7px 12px; background: #fff; border: 1px solid var(--input-border); border-radius: 4px; font-size: 12px; font-weight: 500; color: var(--text-s); transition: background 0.12s, color 0.12s; white-space: nowrap; }
-    .topbar-portal-link:hover { background: rgba(15,23,42,0.03); color: var(--text); }
+    .topbar-left { display: flex; align-items: baseline; gap: 10px; min-width: 0; }
+    .topbar-title { font-size: 13.5px; font-weight: 600; color: var(--text); letter-spacing: -0.2px; white-space: nowrap; }
+    .topbar-sub   { font-size: 11px; color: var(--text-m); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .topbar-right { display: flex; align-items: center; gap: 2px; flex-shrink: 0; }
+    .cmd-btn { display: inline-flex; align-items: center; gap: 7px; padding: 6px 11px; background: transparent; border: none; border-radius: 4px; color: var(--text-s); font-size: 12.5px; font-weight: 500; font-family: inherit; cursor: pointer; transition: background 0.12s, color 0.12s; white-space: nowrap; }
+    .cmd-btn:hover { background: #f2f2f3; color: var(--text); }
+    .cmd-btn i, .cmd-btn svg { width: 14px; height: 14px; color: var(--blue); }
+    .cmd-div { width: 1px; height: 20px; background: var(--border); margin: 0 6px; flex-shrink: 0; }
+    .cmd-range { display: inline-flex; align-items: center; gap: 7px; padding: 6px 8px 6px 11px; border-radius: 4px; transition: background 0.12s; }
+    .cmd-range:hover { background: #f2f2f3; }
+    .cmd-range i, .cmd-range svg { width: 14px; height: 14px; color: var(--blue); }
+    .cmd-range select { background: transparent; border: none; outline: none; color: var(--text-s); font-size: 12.5px; font-weight: 500; cursor: pointer; font-family: inherit; }
 
     /* ───────── PAGE ───────── */
     .page { display: none; padding: 22px 28px 80px; }
@@ -163,8 +168,8 @@
     .pill-muted { background: rgba(100,116,139,.07); color: #64748b; border-color: rgba(100,116,139,.16); }
 
     /* CARD */
-    .card { background: var(--bg-card); border: 1px solid var(--card-border); border-radius: 6px; box-shadow: var(--card-shadow); overflow: hidden; transition: border-color 0.12s; }
-    .card:hover { border-color: rgba(15,23,42,0.18); }
+    .card { background: var(--bg-card); border: none; border-radius: 8px; box-shadow: 0 0 2px rgba(0,0,0,0.12), 0 2px 4px rgba(0,0,0,0.10); overflow: hidden; transition: box-shadow 0.15s; }
+    .card:hover { box-shadow: 0 0 2px rgba(0,0,0,0.12), 0 4px 8px rgba(0,0,0,0.10); }
     .sec-head { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid var(--border); gap: 10px; }
     .sec-title { font-size: 13px; font-weight: 650; color: var(--text); letter-spacing: -0.1px; }
     .sec-sub { font-size: 11px; color: var(--text-m); white-space: nowrap; }
@@ -197,8 +202,8 @@
     /* KPI STRIP — joined segmented block */
     .stats-grid {
       display: grid; grid-template-columns: repeat(auto-fit, minmax(160px,1fr)); gap: 0;
-      background: var(--bg-card); border: 1px solid var(--card-border); border-radius: 6px;
-      box-shadow: var(--card-shadow); overflow: hidden; margin-bottom: 16px;
+      background: var(--bg-card); border: none; border-radius: 8px;
+      box-shadow: 0 0 2px rgba(0,0,0,0.12), 0 2px 4px rgba(0,0,0,0.10); overflow: hidden; margin-bottom: 16px;
     }
     .stats-grid .stat-card, .stats-grid .card {
       border: 0; border-radius: 0; background: transparent;
@@ -249,9 +254,9 @@
     .spinning { animation: spin 0.9s linear infinite; }
 
     /* MOBILE */
-    .mob-ham { display: none; width: 34px; height: 34px; border-radius: 4px; background: #fff; border: 1px solid var(--card-border); color: var(--text-s); cursor: pointer; align-items: center; justify-content: center; position: fixed; top: 11px; left: 14px; z-index: 70; }
+    .mob-ham { display: none; width: 32px; height: 32px; border-radius: 4px; background: transparent; border: none; color: rgba(255,255,255,0.85); cursor: pointer; align-items: center; justify-content: center; margin-right: 2px; }
     .mob-ham i { width: 16px; height: 16px; }
-    #mob-overlay { display: none; position: fixed; inset: 0; z-index: 55; background: rgba(15,23,42,0.35); }
+    #mob-overlay { display: none; position: fixed; left: 0; right: 0; bottom: 0; top: 48px; z-index: 55; background: rgba(15,23,42,0.35); }
     #mob-overlay.open { display: block; }
 
     /* GRID LAYOUTS */
@@ -288,10 +293,10 @@
     .toggle-row:last-child { border-bottom: none; }
     .toggle-label { font-size: 12.5px; color: var(--text-s); font-weight: 500; }
     .toggle-sub   { font-size: 10.5px; color: var(--text-m); margin-top: 1px; }
-    .toggle { position: relative; width: 36px; height: 20px; background: var(--border); border-radius: 99px; cursor: pointer; transition: background 0.2s; flex-shrink: 0; }
-    .toggle.on { background: var(--blue); }
-    .toggle::after { content:''; position: absolute; width: 14px; height: 14px; border-radius: 50%; background: #fff; top: 3px; left: 3px; transition: left 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.25); }
-    .toggle.on::after { left: 19px; }
+    .toggle { position: relative; width: 38px; height: 20px; background: #fff; border: 1px solid rgba(15,23,42,0.40); border-radius: 99px; cursor: pointer; transition: background 0.15s, border-color 0.15s; flex-shrink: 0; }
+    .toggle::after { content:''; position: absolute; width: 12px; height: 12px; border-radius: 50%; background: rgba(15,23,42,0.55); top: 3px; left: 3px; transition: left 0.15s, background 0.15s; }
+    .toggle.on { background: var(--blue); border-color: var(--blue); }
+    .toggle.on::after { background: #fff; left: 21px; }
     .detail-row { display: flex; justify-content: space-between; padding: 7px 0; border-bottom: 1px solid var(--border); }
     .detail-row:last-child { border-bottom: none; }
     .dk { font-size: 11px; color: var(--text-m); }
@@ -340,9 +345,11 @@
     @media (max-width: 900px) {
       :root { --sidebar-w: 0px; }
       .sidebar { transform: translateX(-100%); width: 232px; transition: transform 0.25s; }
-      .sidebar.mob-open { transform: translateX(0); box-shadow: 0 0 40px rgba(15,23,42,0.18); }
+      .sidebar.mob-open { transform: translateX(0); box-shadow: 0 0 40px rgba(15,23,42,0.25); }
       .mob-ham { display: flex; }
-      .topbar { padding: 0 16px 0 56px; }
+      .suite-ctx, .suite-div, .suite-user { display: none; }
+      .topbar { padding: 0 12px; flex-wrap: wrap; height: auto; min-height: 46px; }
+      .topbar-sub { display: none; }
       .page { padding: 16px 14px 80px; }
       .g2, .g3, .ov-bot, .leads-split, .feed-grid, .settings-grid-v2, .analytics-charts { grid-template-columns: 1fr; }
       .stat-hero { grid-column: span 1; }
@@ -362,14 +369,40 @@
 
 <div id="app" style="display:none;">
 
+<!-- SUITE HEADER -->
+<header class="suite-bar">
+  <button class="mob-ham" onclick="toggleMob()"><i data-lucide="menu"></i></button>
+  <div class="suite-left">
+    <img class="suite-logo" src="logo-transparent.png" alt="" onerror="this.style.display='none'" />
+    <span class="suite-name">Flowaify</span>
+    <span class="suite-div"></span>
+    <span class="suite-ctx">Dashboard</span>
+  </div>
+  <div class="profile-card">
+    <div class="suite-avatar-btn" onclick="toggleProfileMenu()">
+      <div class="profile-card-avatar" id="sb-avatar">—</div>
+      <span class="suite-user" id="sb-name">User</span>
+      <i data-lucide="chevron-down" class="profile-card-chev"></i>
+    </div>
+    <div class="profile-menu" id="profile-menu">
+      <div class="profile-menu-header">
+        <div class="profile-menu-name" id="menu-name">User</div>
+        <div class="profile-menu-email" id="menu-email">—</div>
+      </div>
+      <div class="profile-menu-item" onclick="showPage('settings');closeProfileMenu()"><i data-lucide="settings-2"></i> Settings</div>
+      <div class="profile-menu-item" onclick="window.location.href='portal.html'"><i data-lucide="layout-grid"></i> Workspace</div>
+      <div class="profile-menu-item" onclick="window.location.href='portal.html'"><i data-lucide="life-buoy"></i> Support</div>
+      <hr class="profile-menu-sep" />
+      <div class="profile-menu-item danger" onclick="dashLogout()"><i data-lucide="log-out"></i> Sign Out</div>
+    </div>
+  </div>
+</header>
+
 <!-- SIDEBAR -->
 <aside class="sidebar" id="sidebar">
-  <div class="sidebar-brand">
-    <div class="sidebar-brand-logo"><img src="logo-transparent.png" alt="F" onerror="this.style.display='none'" /></div>
-    <div><div class="sidebar-brand-name">flowaify</div><div class="sidebar-brand-tag">Dashboard</div></div>
-  </div>
-
   <div class="nav-item active" data-page="overview"><i data-lucide="layout-dashboard"></i>Overview</div>
+
+  <div class="nav-group-label">Manage</div>
   <div class="nav-item" data-page="leads"><i data-lucide="users"></i>Leads</div>
   <div class="nav-item" data-page="activity"><i data-lucide="activity"></i>Activity</div>
   <div class="nav-item" data-page="automations"><i data-lucide="zap"></i>Automations</div>
@@ -384,48 +417,25 @@
       <div class="preview-badge-dot"></div>
       <div class="preview-badge-text">Live Mode</div>
     </div>
-    <div class="profile-card">
-      <div class="profile-card-btn" onclick="toggleProfileMenu()">
-        <div class="profile-card-avatar" id="sb-avatar">—</div>
-        <div class="profile-card-info">
-          <div class="profile-card-name" id="sb-name">User</div>
-          <div class="profile-card-role">Admin</div>
-        </div>
-        <i data-lucide="chevron-up" class="profile-card-chev"></i>
-      </div>
-      <div class="profile-menu" id="profile-menu">
-        <div class="profile-menu-header">
-          <div class="profile-menu-name" id="menu-name">User</div>
-          <div class="profile-menu-email" id="menu-email">—</div>
-        </div>
-        <div class="profile-menu-item" onclick="showPage('settings');closeProfileMenu()"><i data-lucide="settings-2"></i> Settings</div>
-        <div class="profile-menu-item" onclick="window.location.href='portal.html'"><i data-lucide="layout-grid"></i> Workspace</div>
-        <div class="profile-menu-item" onclick="window.location.href='portal.html'"><i data-lucide="life-buoy"></i> Support</div>
-        <hr class="profile-menu-sep" />
-        <div class="profile-menu-item danger" onclick="dashLogout()"><i data-lucide="log-out"></i> Sign Out</div>
-      </div>
-    </div>
   </div>
 </aside>
 
 <!-- MAIN -->
 <main class="main">
-  <button class="mob-ham" onclick="toggleMob()"><i data-lucide="menu"></i></button>
-
   <header class="topbar">
     <div class="topbar-left">
       <div class="topbar-title" id="topbar-title">Overview</div>
       <div class="topbar-sub" id="topbar-sub">Monitor lead flow, automation health, and CRM activity.</div>
     </div>
     <div class="topbar-right">
-      <div class="range-sel">
+      <button class="cmd-btn" id="btn-refresh" onclick="refreshData()"><i data-lucide="refresh-cw"></i>Refresh</button>
+      <span class="cmd-div"></span>
+      <div class="cmd-range">
+        <i data-lucide="calendar"></i>
         <select id="range-global" onchange="setRange(this.value)"><option value="7">Last 7 days</option><option value="30" selected>Last 30 days</option><option value="90">Last 90 days</option></select>
       </div>
-      <button class="btn-sync" id="btn-refresh" onclick="refreshData()">
-        <i data-lucide="refresh-cw"></i> Refresh
-      </button>
-      <a class="topbar-portal-link" href="portal.html">Workspace
-      </a>
+      <span class="cmd-div"></span>
+      <a class="cmd-btn" href="portal.html"><i data-lucide="layout-grid"></i>Workspace</a>
     </div>
   </header>
 
