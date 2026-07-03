@@ -36,10 +36,10 @@
       --green:      #059669;
       --amber:      #b45309;
       --red:        #dc2626;
-      --bg:         #fafafa;
+      --bg:         #f1f2f4;
       --bg-card:    #ffffff;
       --topbar-bg:  rgba(255,255,255,0.97);
-      --sidebar-bg: #ffffff;
+      --sidebar-bg: #f7f7f8;
       --sidebar-w:  232px;
       --border:     rgba(15,23,42,0.08);
       --blue-border:rgba(15,23,42,0.12);
@@ -49,10 +49,10 @@
       --red-dim:    rgba(220,38,38,0.08);
       --purple-dim: rgba(139,92,246,0.08);
       --text:       #0f172a;
-      --text-m:     rgba(15,23,42,0.52);
+      --text-m:     rgba(15,23,42,0.58);
       --text-s:     rgba(15,23,42,0.72);
-      --card-border:rgba(15,23,42,0.10);
-      --card-shadow:none;
+      --card-border:rgba(15,23,42,0.12);
+      --card-shadow:0 1px 2px rgba(15,23,42,0.05);
       --input-bg:   #ffffff;
       --input-border:rgba(15,23,42,0.14);
     }
@@ -163,10 +163,10 @@
     .pill-muted { background: rgba(100,116,139,.07); color: #64748b; border-color: rgba(100,116,139,.16); }
 
     /* CARD */
-    .card { background: var(--bg-card); border: 1px solid var(--card-border); border-radius: 6px; overflow: hidden; transition: border-color 0.12s; }
+    .card { background: var(--bg-card); border: 1px solid var(--card-border); border-radius: 6px; box-shadow: var(--card-shadow); overflow: hidden; transition: border-color 0.12s; }
     .card:hover { border-color: rgba(15,23,42,0.18); }
     .sec-head { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid var(--border); gap: 10px; }
-    .sec-title { font-size: 12.5px; font-weight: 600; color: var(--text); letter-spacing: -0.1px; }
+    .sec-title { font-size: 13px; font-weight: 650; color: var(--text); letter-spacing: -0.1px; }
     .sec-sub { font-size: 11px; color: var(--text-m); white-space: nowrap; }
     .sec-link { font-size: 11.5px; font-weight: 500; color: var(--blue); cursor: pointer; white-space: nowrap; }
     .sec-link:hover { text-decoration: underline; }
@@ -198,7 +198,7 @@
     .stats-grid {
       display: grid; grid-template-columns: repeat(auto-fit, minmax(160px,1fr)); gap: 0;
       background: var(--bg-card); border: 1px solid var(--card-border); border-radius: 6px;
-      overflow: hidden; margin-bottom: 16px;
+      box-shadow: var(--card-shadow); overflow: hidden; margin-bottom: 16px;
     }
     .stats-grid .stat-card, .stats-grid .card {
       border: 0; border-radius: 0; background: transparent;
@@ -208,8 +208,12 @@
     .stats-grid .card:hover { border-color: var(--border); background: rgba(15,23,42,0.015); }
     .stat-card { padding: 14px 16px; display: flex; flex-direction: column; gap: 7px; }
     .stat-top  { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 15px; }
+    .dot-await { width: 6px; height: 6px; border-radius: 50%; background: var(--amber); display: inline-block; flex-shrink: 0; }
+    .dot-live  { width: 6px; height: 6px; border-radius: 50%; background: var(--green); display: inline-block; flex-shrink: 0; animation: pulse-g 1.6s infinite; }
+    .stat-hero { grid-column: span 2; }
+    .stat-hero .stat-val { font-size: 40px; letter-spacing: -1.4px; }
     .stat-val   { font-size: 30px; font-weight: 700; color: var(--text); letter-spacing: -0.8px; line-height: 1.05; font-variant-numeric: tabular-nums; }
-    .stat-label { font-size: 10px; color: var(--text-m); font-weight: 600; text-transform: uppercase; letter-spacing: 0.6px; }
+    .stat-label { font-size: 10px; color: var(--text-m); font-weight: 600; text-transform: uppercase; letter-spacing: 0.6px; white-space: nowrap; }
     .stat-hint  { font-size: 10px; color: var(--text-m); opacity: 0.75; line-height: 1.4; }
 
     /* DELTAS + STATE PILLS */
@@ -317,6 +321,13 @@
     .feed-summary-label i { width: 13px; height: 13px; color: var(--text-m); }
     .feed-summary-val { font-size: 15px; font-weight: 700; color: var(--text); font-variant-numeric: tabular-nums; }
 
+    /* SOURCE BAR LIST */
+    .src-row { display: flex; align-items: center; gap: 10px; padding: 7px 0; }
+    .src-name { width: 92px; font-size: 12px; color: var(--text-s); font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex-shrink: 0; }
+    .src-track { flex: 1; height: 6px; background: rgba(15,23,42,0.06); border-radius: 2px; overflow: hidden; }
+    .src-fill { height: 100%; border-radius: 2px; }
+    .src-count { width: 34px; text-align: right; font-size: 12px; font-weight: 600; color: var(--text); font-variant-numeric: tabular-nums; flex-shrink: 0; }
+
     /* NEEDS ATTENTION */
     .attn-item { display: flex; align-items: flex-start; gap: 10px; padding: 10px 16px; border-bottom: 1px solid var(--border); }
     .attn-item:last-child { border-bottom: none; }
@@ -334,6 +345,8 @@
       .topbar { padding: 0 16px 0 56px; }
       .page { padding: 16px 14px 80px; }
       .g2, .g3, .ov-bot, .leads-split, .feed-grid, .settings-grid-v2, .analytics-charts { grid-template-columns: 1fr; }
+      .stat-hero { grid-column: span 1; }
+      .stat-hero .stat-val { font-size: 30px; }
     }
   </style>
 </head>
@@ -421,21 +434,21 @@
 
     <div class="stats-grid">
       <div class="card stat-card"><div class="stat-top"><div class="stat-label">New Leads Today</div><div id="delta-new-leads"></div></div><div class="stat-val" id="val-new-leads">—</div><div class="stat-hint">Leads created today in Zoho CRM</div></div>
-      <div class="card stat-card"><div class="stat-top"><div class="stat-label">Avg Response Time</div><div id="await-response"></div></div><div class="stat-val" id="val-response-time">—</div><div class="stat-hint">First-touch speed on new leads</div></div>
-      <div class="card stat-card"><div class="stat-top"><div class="stat-label">AI Replies Sent</div><div id="await-ai-replies"></div></div><div class="stat-val" id="val-ai-replies">—</div><div class="stat-hint">Instant responses sent by Flowaify AI</div></div>
-      <div class="card stat-card"><div class="stat-top"><div class="stat-label">Active Sequences</div><div id="await-follow-ups"></div></div><div class="stat-val" id="val-follow-ups">—</div><div class="stat-hint">HOT + WARM leads in follow-up</div></div>
-      <div class="card stat-card"><div class="stat-top"><div class="stat-label">Pipeline Value</div><div id="delta-pipeline"></div></div><div class="stat-val" id="val-pipeline">—</div><div class="stat-hint">Total value of all open deals</div></div>
+      <div class="card stat-card"><div class="stat-top"><div class="stat-label">Avg Response</div><div id="await-response"></div></div><div class="stat-val" id="val-response-time">—</div><div class="stat-hint" id="hint-response" data-live="First-touch speed on new leads">Awaiting automation</div></div>
+      <div class="card stat-card"><div class="stat-top"><div class="stat-label">AI Replies</div><div id="await-ai-replies"></div></div><div class="stat-val" id="val-ai-replies">—</div><div class="stat-hint" id="hint-ai-replies" data-live="Instant responses sent by Flowaify AI">Awaiting automation</div></div>
+      <div class="card stat-card"><div class="stat-top"><div class="stat-label">Sequences</div><div id="await-follow-ups"></div></div><div class="stat-val" id="val-follow-ups">—</div><div class="stat-hint" id="hint-follow-ups" data-live="HOT + WARM leads in follow-up">Awaiting automation</div></div>
+      <div class="card stat-card stat-hero"><div class="stat-top"><div class="stat-label">Pipeline Value</div></div><div class="stat-val" id="val-pipeline">—</div><div id="delta-pipeline"></div><div class="stat-hint">Total value of all open deals</div></div>
       <div class="card stat-card"><div class="stat-top"><div class="stat-label">Booked Calls</div></div><div class="stat-val" id="val-booked-calls">—</div><div class="stat-hint">Deals or contacts marked as booked</div></div>
     </div>
 
     <div class="g2 mb20">
       <div class="card">
         <div class="sec-head"><div class="sec-title">Lead Sources</div><div class="sec-sub range-label">Last 30 days</div></div>
-        <div class="chart-wrap" style="padding:20px;height:240px;"><canvas id="ch-src"></canvas><div class="chart-empty"><i data-lucide="pie-chart"></i><div class="chart-empty-title">No leads in this period</div><div class="chart-empty-text">Widen the date range, or check back when new leads come in.</div></div></div>
+        <div style="padding:16px 16px 12px;min-height:224px;" id="src-list" class="src-list"><div class="empty-state" style="padding:60px 20px;"><i data-lucide="pie-chart"></i><div class="empty-state-title">No leads in this period</div><div class="empty-state-sub">Widen the date range, or check back when new leads come in.</div></div></div>
       </div>
       <div class="card">
         <div class="sec-head"><div class="sec-title">Response Time</div><span class="state-pill awaiting"><span class="sp-dot"></span>Awaiting automation data</span></div>
-        <div class="chart-wrap" style="padding:20px;height:240px;"><canvas id="ch-resp"></canvas><div class="chart-empty"><i data-lucide="trending-up"></i><div class="chart-empty-title">Awaiting automation data</div><div class="chart-empty-text">Once Flowaify automations respond to leads, first-response speed will chart here automatically.</div></div></div>
+        <div class="chart-wrap" style="padding:20px;height:200px;"><canvas id="ch-resp"></canvas><div class="chart-empty"><i data-lucide="trending-up"></i><div class="chart-empty-title">Awaiting automation data</div><div class="chart-empty-text">Once Flowaify automations respond to leads, first-response speed will chart here automatically.</div></div></div>
         <div class="benchmark-note">Target: under 90 seconds</div>
       </div>
     </div>
@@ -553,8 +566,8 @@
 
     <div class="stats-grid mb20">
       <div class="card stat-card"><div class="stat-top"><div class="stat-label">Active Automations</div></div><div class="stat-val" id="val-auto-active">—</div></div>
-      <div class="card stat-card"><div class="stat-top"><div class="stat-label">AI Replies Sent</div><div id="await-ai-auto"></div></div><div class="stat-val" id="val-ai-replies-auto">—</div></div>
-      <div class="card stat-card"><div class="stat-top"><div class="stat-label">Active Sequences</div><div id="await-fu-auto"></div></div><div class="stat-val" id="val-follow-ups-auto">—</div></div>
+      <div class="card stat-card"><div class="stat-top"><div class="stat-label">AI Replies</div><div id="await-ai-auto"></div></div><div class="stat-val" id="val-ai-replies-auto">—</div></div>
+      <div class="card stat-card"><div class="stat-top"><div class="stat-label">Sequences</div><div id="await-fu-auto"></div></div><div class="stat-val" id="val-follow-ups-auto">—</div></div>
       <div class="card stat-card"><div class="stat-top"><div class="stat-label">Booked Calls</div></div><div class="stat-val" id="val-booked-auto">—</div></div>
     </div>
 
@@ -617,7 +630,7 @@
     <div class="analytics-charts mb20">
       <div class="card"><div class="sec-head"><div class="sec-title">Leads Over Time</div><div class="sec-sub range-label">Last 30 days</div></div><div class="chart-wrap" style="padding:18px;"><canvas id="an-leads"></canvas><div class="chart-empty"><i data-lucide="trending-up"></i><div class="chart-empty-title">No leads in this period</div><div class="chart-empty-text">Widen the date range to see lead volume over time.</div></div></div></div>
       <div class="card"><div class="sec-head"><div class="sec-title">Response Time Trend</div><span class="state-pill awaiting"><span class="sp-dot"></span>Awaiting automation data</span></div><div class="chart-wrap" style="padding:18px;"><canvas id="an-resp"></canvas><div class="chart-empty"><i data-lucide="activity"></i><div class="chart-empty-title">Awaiting automation data</div><div class="chart-empty-text">Fills in automatically once Flowaify automations start responding to leads.</div></div></div></div>
-      <div class="card"><div class="sec-head"><div class="sec-title">Source Performance</div><div class="sec-sub range-label">Last 30 days</div></div><div class="chart-wrap" style="padding:18px;"><canvas id="an-srcperf"></canvas><div class="chart-empty"><i data-lucide="pie-chart"></i><div class="chart-empty-title">No source data in this period</div><div class="chart-empty-text">Widen the date range to compare lead sources.</div></div></div></div>
+      <div class="card"><div class="sec-head"><div class="sec-title">Source Performance</div><div class="sec-sub range-label">Last 30 days</div></div><div style="padding:16px 16px 12px;min-height:200px;" id="an-srclist" class="src-list"><div class="empty-state" style="padding:50px 20px;"><i data-lucide="pie-chart"></i><div class="empty-state-title">No source data in this period</div><div class="empty-state-sub">Widen the date range to compare lead sources.</div></div></div></div>
       <div class="card"><div class="sec-head"><div class="sec-title">Status Breakdown</div><div class="sec-sub range-label">Last 30 days</div></div><div class="chart-wrap" style="padding:18px;"><canvas id="an-status"></canvas><div class="chart-empty"><i data-lucide="bar-chart-2"></i><div class="chart-empty-title">No status data in this period</div><div class="chart-empty-text">Lead statuses (HOT, WARM, BOOKED) will chart here as Flowaify categorizes leads.</div></div></div></div>
       <div class="card"><div class="sec-head"><div class="sec-title">Booked Calls Over Time</div><span class="state-pill awaiting"><span class="sp-dot"></span>Awaiting automation data</span></div><div class="chart-wrap" style="padding:18px;"><canvas id="an-booked-chart"></canvas><div class="chart-empty"><i data-lucide="calendar-check"></i><div class="chart-empty-title">Awaiting automation data</div><div class="chart-empty-text">Booked calls will chart over time once your automations start converting leads.</div></div></div></div>
       <div class="card"><div class="sec-head"><div class="sec-title">New Leads by Day of Week</div><div class="sec-sub range-label">Last 30 days</div></div><div class="chart-wrap" style="padding:18px;"><canvas id="an-dow"></canvas><div class="chart-empty"><i data-lucide="calendar-days"></i><div class="chart-empty-title">No leads in this period</div><div class="chart-empty-text">See which days bring in the most leads — useful for scheduling ads and staffing.</div></div></div></div>
@@ -693,7 +706,7 @@
 
 <div id="toast"><div class="toast-icon"><i data-lucide="check"></i></div><div id="toast-msg" style="font-size:12.5px;font-weight:600;color:var(--text-s);line-height:1.45;"></div></div>
 
-<script src="crm.js?v=4"></script>
+<script src="crm.js?v=5"></script>
 <script>
 const AUTH0_DOMAIN    = 'auth.flowaify.app';
 const AUTH0_CLIENT_ID = 'tx74Owqn3jVeSaVuxfFHsKloqbPqfAmN';
@@ -856,8 +869,8 @@ function initCharts() {
   const eDough = id => { const el = document.getElementById(id); if(!el) return; new Chart(el,{type:'doughnut',data:{labels:[''],datasets:[{data:[1],backgroundColor:[ec],borderWidth:0}]},options:{cutout:'72%',plugins:{legend:{display:false},tooltip:{enabled:false}},animation:false}}); };
   const eLine  = id => { const el = document.getElementById(id); if(!el) return; new Chart(el,{type:'line',data:{labels:['','','','','','',''],datasets:[{data:[0,0,0,0,0,0,0],borderColor:ec,fill:false,pointRadius:0}]},options:{plugins:{legend:{display:false},tooltip:{enabled:false}},scales:{x:{display:false},y:{display:false}},animation:false}}); };
   const eBar   = id => { const el = document.getElementById(id); if(!el) return; new Chart(el,{type:'bar',data:{labels:['','','','','',''],datasets:[{data:[0,0,0,0,0,0],backgroundColor:ec}]},options:{plugins:{legend:{display:false},tooltip:{enabled:false}},scales:{x:{display:false},y:{display:false}},animation:false}}); };
-  eDough('ch-src'); eLine('ch-resp');
-  eLine('an-leads'); eLine('an-resp'); eDough('an-srcperf'); eBar('an-status'); eBar('an-booked-chart'); eBar('an-dow'); eBar('an-pipestage');
+  eLine('ch-resp');
+  eLine('an-leads'); eLine('an-resp'); eBar('an-status'); eBar('an-booked-chart'); eBar('an-dow'); eBar('an-pipestage');
 }
 
 initAuth();

@@ -67,7 +67,7 @@ function relTime(ts) {
 }
 
 function statusBadge(status) {
-  if (!status || !String(status).trim()) return '<span class="badge b-muted">—</span>';
+  if (!status || !String(status).trim()) return '<span style="color:rgba(15,23,42,0.30);">—</span>';
   const s = String(status).toUpperCase();
   let cls = 'b-muted';
   if (s.indexOf('HOT') !== -1)         cls = 'b-high';
@@ -115,8 +115,14 @@ function setAwaitPill(id, isLive) {
   const el = document.getElementById(id);
   if (!el) return;
   el.innerHTML = isLive
-    ? '<span class="state-pill live"><span class="sp-dot"></span>Live</span>'
-    : '<span class="state-pill awaiting"><span class="sp-dot"></span>Awaiting automation data</span>';
+    ? '<span class="dot-live" title="Live"></span>'
+    : '<span class="dot-await" title="Awaiting automation data"></span>';
+  // Swap the hint line if this stat has one (hint id mirrors the await id)
+  const hint = document.getElementById(id.replace('await-', 'hint-'));
+  if (hint) {
+    const liveText = hint.getAttribute('data-live');
+    hint.textContent = isLive && liveText ? liveText : 'Awaiting automation';
+  }
 }
 
 /* ── Chart helpers ──────────────────────────────────────────────────────────── */
@@ -142,6 +148,30 @@ function chartOverlay(id, show) {
   const ov = wrap.querySelector('.chart-empty');
   if (ov) ov.style.display = show ? 'flex' : 'none';
   el.style.opacity = show ? '0' : '1';
+}
+
+function renderSourceList(containerId, counts, emptyTitle, emptySub) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  const names = Object.keys(counts).sort(function(a, b) { return counts[b] - counts[a]; });
+  if (names.length === 0) {
+    el.innerHTML = '<div class="empty-state" style="padding:50px 20px;">' +
+      '<i data-lucide="pie-chart"></i>' +
+      '<div class="empty-state-title">' + escDash(emptyTitle) + '</div>' +
+      '<div class="empty-state-sub">' + escDash(emptySub) + '</div></div>';
+    return;
+  }
+  const max = counts[names[0]] || 1;
+  el.innerHTML = names.map(function(name, i) {
+    const n = counts[name];
+    const pct = Math.max(3, Math.round((n / max) * 100));
+    const color = PALETTE[i % PALETTE.length];
+    return '<div class="src-row">' +
+      '<div class="src-name" title="' + escDash(name) + '">' + escDash(name) + '</div>' +
+      '<div class="src-track"><div class="src-fill" style="width:' + pct + '%;background:' + color + ';"></div></div>' +
+      '<div class="src-count">' + n + '</div>' +
+      '</div>';
+  }).join('');
 }
 
 function groupCount(items, keyFn) {
@@ -485,10 +515,10 @@ function buildActivityFeed(data, days) {
 }
 
 const FEED_ICON = {
-  lead_created: { icon: 'user-plus',      bg: 'rgba(0,87,255,.11)',    color: '#0057FF' },
-  touch:        { icon: 'bot',            bg: 'rgba(139,92,246,.11)',  color: '#8b5cf6' },
-  ai_reply:     { icon: 'bot',            bg: 'rgba(139,92,246,.11)',  color: '#8b5cf6' },
-  deal:         { icon: 'dollar-sign',    bg: 'rgba(5,150,105,.11)',   color: '#059669' },
+  lead_created: { icon: 'user-plus',      bg: 'rgba(0,87,255,.13)',    color: '#0057FF' },
+  touch:        { icon: 'bot',            bg: 'rgba(139,92,246,.13)',  color: '#8b5cf6' },
+  ai_reply:     { icon: 'bot',            bg: 'rgba(139,92,246,.13)',  color: '#8b5cf6' },
+  deal:         { icon: 'dollar-sign',    bg: 'rgba(5,150,105,.13)',   color: '#059669' },
 };
 
 function feedItemText(ev) {
@@ -624,22 +654,10 @@ function renderCharts(data, ranged, days) {
   const deals    = data.deals || [];
   const chartSet = ranged.length > 0 ? ranged : [];
 
-  /* Lead Sources donut (Overview) + Source Performance (Analytics) */
+  /* Lead Sources bar list (Overview) + Source Performance (Analytics) */
   const srcCounts = groupCount(chartSet, function(c) { return c.source; });
-  const srcLabels = Object.keys(srcCounts);
-  const srcData   = srcLabels.map(function(k) { return srcCounts[k]; });
-  const hasSrc    = srcLabels.length > 0;
-
-  ['ch-src', 'an-srcperf'].forEach(function(id) {
-    if (hasSrc) {
-      mkChart(id, {
-        type: 'doughnut',
-        data: { labels: srcLabels, datasets: [{ data: srcData, backgroundColor: PALETTE.slice(0, srcLabels.length), borderWidth: 0 }] },
-        options: { cutout: '72%', plugins: { legend: { display: true, position: 'bottom', labels: { font: { size: 10 }, padding: 8, boxWidth: 8 } } }, animation: { duration: 400 } }
-      });
-    }
-    chartOverlay(id, !hasSrc);
-  });
+  renderSourceList('src-list', srcCounts, 'No leads in this period', 'Widen the date range, or check back when new leads come in.');
+  renderSourceList('an-srclist', srcCounts, 'No source data in this period', 'Widen the date range to compare lead sources.');
 
   /* Response time trend (Overview ch-resp + Analytics an-resp) — real when touches exist */
   const respPoints = contacts.filter(function(c) { return c.createdAt && c.lastTouchAt; })
