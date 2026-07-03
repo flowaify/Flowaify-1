@@ -120,7 +120,7 @@ function setAwaitPill(id, isLive) {
 }
 
 /* ── Chart helpers ──────────────────────────────────────────────────────────── */
-const PALETTE = ['#0057FF','#8b5cf6','#059669','#d97706','#dc2626','#2979FF','#4d94ff','#64748b'];
+const PALETTE = ['#0057FF','#0f172a','#64748b','#94a3b8','#3b82f6','#475569','#cbd5e1','#1e293b'];
 
 function mkChart(id, cfg) {
   const el = document.getElementById(id);
@@ -635,7 +635,7 @@ function renderCharts(data, ranged, days) {
       mkChart(id, {
         type: 'doughnut',
         data: { labels: srcLabels, datasets: [{ data: srcData, backgroundColor: PALETTE.slice(0, srcLabels.length), borderWidth: 0 }] },
-        options: { cutout: '68%', plugins: { legend: { display: true, position: 'bottom', labels: { font: { size: 10 }, padding: 8, boxWidth: 10 } } }, animation: { duration: 400 } }
+        options: { cutout: '72%', plugins: { legend: { display: true, position: 'bottom', labels: { font: { size: 10 }, padding: 8, boxWidth: 8 } } }, animation: { duration: 400 } }
       });
     }
     chartOverlay(id, !hasSrc);
@@ -656,7 +656,7 @@ function renderCharts(data, ranged, days) {
         type: 'line',
         data: {
           labels: respPoints.map(function(p) { return new Date(p.ts).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }); }),
-          datasets: [{ data: respPoints.map(function(p) { return Math.round(p.secs); }), borderColor: '#059669', backgroundColor: 'rgba(5,150,105,0.08)', fill: true, tension: 0.3, pointRadius: 3 }]
+          datasets: [{ data: respPoints.map(function(p) { return Math.round(p.secs); }), borderColor: '#059669', backgroundColor: 'rgba(5,150,105,0.05)', fill: true, tension: 0.3, pointRadius: 2 }]
         },
         options: {
           plugins: { legend: { display: false }, tooltip: { callbacks: { label: function(ctx) { return ctx.raw + 's'; } } } },
@@ -674,7 +674,7 @@ function renderCharts(data, ranged, days) {
   if (hasLeadsTime) {
     mkChart('an-leads', {
       type: 'line',
-      data: { labels: buckets.labels, datasets: [{ data: buckets.data, borderColor: '#0057FF', backgroundColor: 'rgba(0,87,255,0.08)', fill: true, tension: 0.3, pointRadius: 2 }] },
+      data: { labels: buckets.labels, datasets: [{ data: buckets.data, borderColor: '#0057FF', backgroundColor: 'rgba(0,87,255,0.05)', fill: true, tension: 0.3, pointRadius: 2 }] },
       options: {
         plugins: { legend: { display: false } },
         scales: { x: { ticks: { font: { size: 9 }, maxTicksLimit: 10 } }, y: { ticks: { font: { size: 10 }, stepSize: 1 } } },
@@ -699,7 +699,7 @@ function renderCharts(data, ranged, days) {
     });
     mkChart('an-status', {
       type: 'bar',
-      data: { labels: stLabels, datasets: [{ data: stLabels.map(function(k) { return stCounts[k]; }), backgroundColor: stColors, borderRadius: 4 }] },
+      data: { labels: stLabels, datasets: [{ data: stLabels.map(function(k) { return stCounts[k]; }), backgroundColor: stColors, borderRadius: 2 }] },
       options: {
         plugins: { legend: { display: false } },
         scales: { x: { ticks: { font: { size: 10 } } }, y: { ticks: { font: { size: 10 }, stepSize: 1 } } },
@@ -720,7 +720,7 @@ function renderCharts(data, ranged, days) {
   if (hasDow) {
     mkChart('an-dow', {
       type: 'bar',
-      data: { labels: dowNames, datasets: [{ data: dowData, backgroundColor: '#8b5cf6', borderRadius: 4 }] },
+      data: { labels: dowNames, datasets: [{ data: dowData, backgroundColor: '#8b5cf6', borderRadius: 2 }] },
       options: {
         plugins: { legend: { display: false } },
         scales: { x: { ticks: { font: { size: 10 } } }, y: { ticks: { font: { size: 10 }, stepSize: 1 } } },
@@ -737,7 +737,7 @@ function renderCharts(data, ranged, days) {
     const db = timeBuckets(bookedDeals, days);
     mkChart('an-booked-chart', {
       type: 'bar',
-      data: { labels: db.labels, datasets: [{ data: db.data, backgroundColor: '#059669', borderRadius: 4 }] },
+      data: { labels: db.labels, datasets: [{ data: db.data, backgroundColor: '#059669', borderRadius: 2 }] },
       options: {
         plugins: { legend: { display: false } },
         scales: { x: { ticks: { font: { size: 9 }, maxTicksLimit: 10 } }, y: { ticks: { font: { size: 10 }, stepSize: 1 } } },
@@ -758,7 +758,7 @@ function renderCharts(data, ranged, days) {
     const stageLabels = Object.keys(stageTotals);
     mkChart('an-pipestage', {
       type: 'bar',
-      data: { labels: stageLabels, datasets: [{ data: stageLabels.map(function(k) { return stageTotals[k]; }), backgroundColor: '#0057FF', borderRadius: 4 }] },
+      data: { labels: stageLabels, datasets: [{ data: stageLabels.map(function(k) { return stageTotals[k]; }), backgroundColor: '#0057FF', borderRadius: 2 }] },
       options: {
         plugins: {
           legend: { display: false },
