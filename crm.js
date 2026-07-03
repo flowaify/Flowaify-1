@@ -116,7 +116,7 @@ function relTime(ts) {
 }
 
 function statusBadge(status) {
-  if (!status || !String(status).trim()) return '<span style="color:rgba(15,23,42,0.30);">—</span>';
+  if (!status || !String(status).trim()) return '<span style="color:var(--text-m);opacity:.55;">—</span>';
   const s = String(status).toUpperCase();
   let cls = 'b-muted';
   if (s.indexOf('HOT') !== -1)         cls = 'b-high';
@@ -407,7 +407,7 @@ function renderCalendar() {
     const dd = dealsByDay[key] || [];
     dd.slice(0, 2).forEach(function(deal) {
       const col = stageColor(deal.stage);
-      cell += '<span class="cal-chip" style="background:' + col + '1f;color:' + col + ';" title="' + escDash(deal.name) + ' · ' + fmtMoney(deal.amount) + '">' + escDash(deal.name) + '</span>';
+      cell += '<span class="cal-chip" style="background:' + col + '2e;color:' + col + ';" title="' + escDash(deal.name) + ' · ' + fmtMoney(deal.amount) + '">' + escDash(deal.name) + '</span>';
     });
     if (dd.length > 2) cell += '<span class="cal-chip" style="background:var(--hover);color:var(--text-m);">+' + (dd.length - 2) + ' more</span>';
     if (leadsByDay[key]) cell += '<span class="cal-dot-badge">' + leadsByDay[key] + ' lead' + (leadsByDay[key] === 1 ? '' : 's') + '</span>';
@@ -434,7 +434,7 @@ function renderCalendar() {
           '<span class="lead-avatar" style="background:' + stageColor(d.stage) + ';">$</span>' +
           '<div><div class="cal-up-name">' + escDash(d.name) + '</div>' +
           '<div class="cal-up-sub">' + new Date(d.closingDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) + (d.stage ? ' · ' + escDash(d.stage) : '') + '</div></div>' +
-          '<div class="cal-up-amt">' + fmtMoney(d.amount) + '</div>' +
+          (d.amount != null ? '<div class="cal-up-amt">' + fmtMoney(d.amount) + '</div>' : '') +
           '</div>';
       }).join('');
     }
@@ -997,15 +997,15 @@ function renderAnalyticsStats(data, ranged, days) {
   setText('val-an-booked',   overview.bookedCalls);
   setText('val-an-response', overview.avgResponseTimeSecs != null ? overview.avgResponseTimeSecs + 's' : '—');
 
-  const srcCount = Object.keys(groupCount(ranged.filter(function(c){ return c.source; }), function(c){ return c.source; })).length;
+  const srcCount = ranged.length > 0 ? Object.keys(groupCount(ranged, function(c){ return c.source; })).length : 0;
   setText('val-an-sources', srcCount);
 
   // Brand panel inline stats
   setText('bp-leads',  ranged.length);
   setText('bp-booked', overview.bookedCalls);
 
-  const convRate = contacts.length > 0 && overview.bookedCalls
-    ? Math.round((overview.bookedCalls / contacts.length) * 100) + '%'
+  const convRate = contacts.length > 0
+    ? Math.round(((overview.bookedCalls || 0) / contacts.length) * 100) + '%'
     : '—';
   setText('val-an-conv', convRate);
   setText('bp-conv', convRate);
@@ -1035,6 +1035,8 @@ function renderCharts(data, ranged, days) {
     .sort(function(a, b) { return a.ts - b.ts; });
 
   const hasResp = respPoints.length >= 2;
+  const pRespOv = document.getElementById('pill-resp-ov');
+  const pRespAn = document.getElementById('pill-resp-an');
   ['ch-resp', 'an-resp'].forEach(function(id) {
     if (hasResp) {
       mkChart(id, {
@@ -1052,6 +1054,8 @@ function renderCharts(data, ranged, days) {
     }
     chartOverlay(id, !hasResp);
   });
+  if (pRespOv) pRespOv.style.display = hasResp ? 'none' : '';
+  if (pRespAn) pRespAn.style.display = hasResp ? 'none' : '';
 
   /* Leads Over Time (an-leads) — day/week buckets */
   const buckets = timeBuckets(chartSet, days);
@@ -1141,5 +1145,7 @@ function renderCharts(data, ranged, days) {
     });
   }
   chartOverlay('an-booked-chart', !hasBookedTime);
+  const pBooked = document.getElementById('pill-booked');
+  if (pBooked) pBooked.style.display = hasBookedTime ? 'none' : '';
 
 }
