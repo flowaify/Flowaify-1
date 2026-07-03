@@ -87,6 +87,7 @@
       background: var(--sidebar-bg); z-index: 60;
       display: flex; flex-direction: column; padding: 14px 12px; gap: 1px;
       border-right: 1px solid var(--card-border);
+      transition: width 0.15s ease, padding 0.15s ease;
     }
     .nav-group-label { padding: 14px 12px 5px; font-size: 10px; font-weight: 600; color: var(--text-m); text-transform: uppercase; letter-spacing: 0.6px; user-select: none; }
 
@@ -97,10 +98,22 @@
     }
     .nav-item i { width: 15px; height: 15px; flex-shrink: 0; color: var(--text-m); }
     .nav-item:hover { background: rgba(15,23,42,0.04); color: var(--text); }
+    .nav-item { position: relative; }
     .nav-item.active {
       background: rgba(0,0,0,0.05); color: var(--text); font-weight: 600;
-      box-shadow: inset 2px 0 0 var(--blue);
     }
+    .nav-item.active::before {
+      content: ''; position: absolute; left: 0; top: 50%; transform: translateY(-50%);
+      width: 3px; height: 16px; border-radius: 2px; background: var(--blue);
+    }
+    .nav-collapse {
+      display: flex; align-items: center; justify-content: flex-start; width: 100%;
+      background: none; border: none; border-radius: 4px; padding: 8px 12px; margin-bottom: 8px;
+      color: var(--text-s); cursor: pointer; transition: background 0.12s;
+    }
+    .nav-collapse:hover { background: rgba(15,23,42,0.05); }
+    .nav-collapse i, .nav-collapse svg { width: 16px; height: 16px; }
+    .nav-txt { overflow: hidden; white-space: nowrap; }
     .nav-item.active i { color: var(--blue); }
     .sidebar-sep { height: 1px; background: var(--border); margin: 10px 4px; }
 
@@ -140,7 +153,7 @@
     .profile-menu-item.danger:hover { background: var(--red-dim); color: var(--red); }
 
     /* ───────── MAIN / TOPBAR ───────── */
-    .main { margin-left: var(--sidebar-w); margin-top: 48px; min-height: calc(100vh - 48px); display: flex; flex-direction: column; }
+    .main { margin-left: var(--sidebar-w); margin-top: 48px; min-height: calc(100vh - 48px); display: flex; flex-direction: column; transition: margin-left 0.15s ease; }
     .topbar {
       position: sticky; top: 48px; z-index: 40;
       display: flex; align-items: center; justify-content: space-between;
@@ -296,6 +309,17 @@
     @keyframes spin { to { transform: rotate(360deg); } }
     .spinning { animation: spin 0.9s linear infinite; }
 
+    /* NAV RAIL (collapsed) */
+    @media (min-width: 901px) {
+      body.nav-rail { --sidebar-w: 52px; }
+      body.nav-rail .sidebar { padding: 14px 8px; }
+      body.nav-rail .nav-txt, body.nav-rail .nav-group-label { display: none; }
+      body.nav-rail .nav-item { justify-content: center; padding: 9px 0; }
+      body.nav-rail .nav-collapse { justify-content: center; padding: 9px 0; }
+      body.nav-rail .preview-badge { justify-content: center; padding: 7px 0; }
+      body.nav-rail .preview-badge-text { display: none; }
+    }
+
     /* MOBILE */
     .mob-ham { display: none; width: 32px; height: 32px; border-radius: 4px; background: transparent; border: none; color: rgba(255,255,255,0.85); cursor: pointer; align-items: center; justify-content: center; margin-right: 2px; }
     .mob-ham i { width: 16px; height: 16px; }
@@ -390,6 +414,7 @@
       .sidebar { transform: translateX(-100%); width: 232px; transition: transform 0.25s; }
       .sidebar.mob-open { transform: translateX(0); box-shadow: 0 0 40px rgba(15,23,42,0.25); }
       .mob-ham { display: flex; }
+      .nav-collapse { display: none; }
       .suite-ctx, .suite-div, .suite-user { display: none; }
       .topbar { padding: 0 12px; flex-wrap: wrap; height: auto; min-height: 46px; }
       .topbar-sub { display: none; }
@@ -445,19 +470,21 @@
 
 <!-- SIDEBAR -->
 <aside class="sidebar" id="sidebar">
-  <div class="nav-item active" data-page="overview"><i data-lucide="layout-dashboard"></i>Overview</div>
+  <button class="nav-collapse" onclick="toggleNavRail()" title="Collapse navigation"><i data-lucide="menu"></i></button>
+
+  <div class="nav-item active" data-page="overview" title="Overview"><i data-lucide="layout-dashboard"></i><span class="nav-txt">Overview</span></div>
 
   <div class="nav-group-label">Manage</div>
-  <div class="nav-item" data-page="leads"><i data-lucide="users"></i>Leads</div>
-  <div class="nav-item" data-page="activity"><i data-lucide="activity"></i>Activity</div>
-  <div class="nav-item" data-page="automations"><i data-lucide="zap"></i>Automations</div>
+  <div class="nav-item" data-page="leads" title="Leads"><i data-lucide="users"></i><span class="nav-txt">Leads</span></div>
+  <div class="nav-item" data-page="activity" title="Activity"><i data-lucide="activity"></i><span class="nav-txt">Activity</span></div>
+  <div class="nav-item" data-page="automations" title="Automations"><i data-lucide="zap"></i><span class="nav-txt">Automations</span></div>
 
   <div class="nav-group-label">Insights</div>
-  <div class="nav-item" data-page="analytics"><i data-lucide="bar-chart-2"></i>Analytics</div>
+  <div class="nav-item" data-page="analytics" title="Analytics"><i data-lucide="bar-chart-2"></i><span class="nav-txt">Analytics</span></div>
 
   <div class="sidebar-sep"></div>
 
-  <div class="nav-item" data-page="settings"><i data-lucide="settings-2"></i>Settings</div>
+  <div class="nav-item" data-page="settings" title="Settings"><i data-lucide="settings-2"></i><span class="nav-txt">Settings</span></div>
 
   <div class="sidebar-bottom">
     <div class="preview-badge" onclick="showToast('Live data from Zoho CRM. Refresh to sync the latest.')">
@@ -832,6 +859,7 @@ async function boot(user) {
     if (sn) sn.textContent = user.name || 'User';
     if (se) se.textContent = user.email || '';
   }
+  try { if (localStorage.getItem('flw_nav_rail') === '1') document.body.classList.add('nav-rail'); } catch(e) {}
   restoreAutoToggles();
   loadDashSettings();
   lucide.createIcons();
@@ -953,6 +981,11 @@ function saveDashSettings() {
 }
 
 function comingSoon(feature) { showToast(feature + ' is coming soon.'); }
+
+function toggleNavRail() {
+  const on = document.body.classList.toggle('nav-rail');
+  try { localStorage.setItem('flw_nav_rail', on ? '1' : '0'); } catch(e) {}
+}
 
 function showSettingsTab(name) {
   document.querySelectorAll('#page-settings .pivot-pane').forEach(p => p.classList.remove('active'));
