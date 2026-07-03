@@ -6,6 +6,8 @@ window.__rangeDays      = 30;
 window.__selectedLeadId = null;
 window.__leadFilters    = { q: '', status: '', source: '' };
 window.__leadSort       = { key: 'createdAt', dir: -1 };
+window.__leadsShown     = 25;
+window.__leadsFiltered  = [];
 
 /* ── Data loading ───────────────────────────────────────────────────────────── */
 async function loadDashboardData(token) {
@@ -504,7 +506,7 @@ function rerender() {
   });
 
   renderOverviewStats(data, ranged, days);
-  renderRecentLeadsTable(data.contacts);
+  renderTopLeads(data.contacts);
   renderNeedsAttention(data.needsAttention);
   renderLeadsStats(data, ranged, days);
   populateLeadFilterOptions(data.contacts);
@@ -577,27 +579,48 @@ function renderOverviewStats(data, ranged, days) {
   }
 }
 
-function renderRecentLeadsTable(contacts) {
-  const tbody = document.getElementById('leads-table-body');
-  const emptyState = document.getElementById('leads-empty-state');
-  if (!tbody) return;
-  if (contacts.length > 0) {
-    tbody.innerHTML = contacts.slice(0, 10).map(function(c) {
-      return '<tr>' +
-        '<td><div class="lead-cell">' + avatarHtml(c.name) + '<div><div style="font-weight:600;font-size:12.5px;">' + escDash(c.name) + '</div>' +
-        (c.email ? '<div style="font-size:10.5px;color:var(--text-m);">' + escDash(c.email) + '</div>' : '') +
-        (c.phone ? '<div style="font-size:10.5px;color:var(--text-m);">' + escDash(c.phone) + '</div>' : '') +
-        '</div></div></td>' +
-        '<td>' + escDash(c.source) + '</td>' +
-        '<td>' + statusBadge(c.status) + '</td>' +
-        '<td>' + escDash(c.lastTouch) + '</td>' +
-        '<td>' + (c.createdAt ? new Date(c.createdAt).toLocaleDateString() : '—') + '</td>' +
-        '</tr>';
-    }).join('');
-    if (emptyState) emptyState.style.display = 'none';
-  } else if (emptyState) {
-    emptyState.style.display = 'flex';
+function scoreRank(status) {
+  const s = String(status || '').toUpperCase();
+  if (s.indexOf('HOT') !== -1)  return 4;
+  if (s.indexOf('BOOK') !== -1) return 3;
+  if (s.indexOf('WARM') !== -1) return 2;
+  if (s.indexOf('COLD') !== -1) return 1;
+  return 0;
+}
+
+function renderTopLeads(contacts) {
+  const el = document.getElementById('top-leads-list');
+  if (!el) return;
+  if (!contacts || contacts.length === 0) {
+    el.innerHTML = '<div class="empty-state" style="padding:34px 20px;"><i data-lucide="users"></i>' +
+      '<div class="empty-state-title">No leads yet</div>' +
+      '<div class="empty-state-sub">Your top 5 scored leads will rank here once contacts exist in Zoho CRM.</div></div>';
+    return;
   }
+  const top = contacts.slice().sort(function(a, b) {
+    const r = scoreRank(b.status) - scoreRank(a.status);
+    if (r !== 0) return r;
+    const ta = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+    const tb = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+    return tb - ta;
+  }).slice(0, 5);
+
+  el.innerHTML = top.map(function(c, i) {
+    const scored = scoreRank(c.status) > 0;
+    const right = scored
+      ? statusBadge(c.status)
+      : '<span class="state-pill awaiting"><span class="sp-dot"></span>Awaiting score</span>';
+    const sub = [c.source, c.createdAt ? relTime(new Date(c.createdAt).getTime()) : null]
+      .filter(Boolean).map(escDash).join(' · ') || '—';
+    const safeId = c.id ? String(c.id).replace(/[^\w-]/g, '') : '';
+    return '<div class="tl-row" onclick="bellOpenLead(\'' + safeId + '\', \'' + String(c.name || '').replace(/[^\w\s.@-]/g, '') + '\')">' +
+      '<span class="tl-rank">' + (i + 1) + '</span>' +
+      avatarHtml(c.name) +
+      '<div class="tl-body"><div class="tl-name">' + escDash(c.name) + '</div>' +
+      '<div class="tl-sub">' + sub + '</div></div>' +
+      right +
+      '</div>';
+  }).join('');
 }
 
 function renderNeedsAttention(needsAttention) {
@@ -704,8 +727,31 @@ function applyLeadFilters() {
     return va < vb ? -1 * sort.dir : va > vb ? sort.dir : 0;
   });
 
-  renderLeadsTable(filtered);
+  window.__leadsFiltered = filtered;
+  window.__leadsShown = 25;
+  const sc = document.getElementById('leads-scroll');
+  if (sc) sc.scrollTop = 0;
+  renderLeadsTable(filtered.slice(0, window.__leadsShown));
 }
+
+function leadsScrollMore() {
+  const sc = document.getElementById('leads-scroll');
+  if (!sc) return;
+  if (sc.scrollTop + sc.clientHeight < sc.scrollHeight - 120) return;
+  const all = window.__leadsFiltered || [];
+  if (window.__leadsShown >= all.length) return;
+  const from = window.__leadsShown;
+  window.__leadsShown = Math.min(all.length, from + 25);
+  const tbody = document.getElementById('full-leads-tbody');
+  if (tbody) {
+    tbody.insertAdjacentHTML('beforeend', all.slice(from, window.__leadsShown).map(leadRowHtml).join(''));
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+  }
+}
+document.addEventListener('DOMContentLoaded', function() {
+  const sc = document.getElementById('leads-scroll');
+  if (sc) sc.addEventListener('scroll', leadsScrollMore);
+});
 
 function sortLeads(key) {
   const s = window.__leadSort;
@@ -737,21 +783,23 @@ function renderLeadsTable(contacts) {
     return;
   }
   if (empty) empty.style.display = 'none';
-  tbody.innerHTML = contacts.map(function(c) {
-    const sel = c.id === window.__selectedLeadId ? ' class="row-selected"' : '';
-    return '<tr' + sel + ' data-id="' + escDash(c.id) + '" onclick="selectLead(\'' + String(c.id).replace(/[^\w-]/g, '') + '\')">' +
-      '<td><div class="lead-cell">' + avatarHtml(c.name) + '<div style="font-weight:600;font-size:12.5px;">' + escDash(c.name) + '</div></div></td>' +
-      '<td>' +
-      (c.email ? '<div style="font-size:11.5px;">' + escDash(c.email) + '</div>' : '') +
-      (c.phone ? '<div style="font-size:10.5px;color:var(--text-m);">' + escDash(c.phone) + '</div>' : '') +
-      ((!c.email && !c.phone) ? '—' : '') +
-      '</td>' +
-      '<td>' + escDash(c.source) + '</td>' +
-      '<td>' + statusBadge(c.status) + '</td>' +
-      '<td>' + (c.lastTouchAt ? new Date(c.lastTouchAt).toLocaleDateString() : '—') + '</td>' +
-      '<td>' + (c.createdAt ? new Date(c.createdAt).toLocaleDateString() : '—') + '</td>' +
-      '</tr>';
-  }).join('');
+  tbody.innerHTML = contacts.map(leadRowHtml).join('');
+}
+
+function leadRowHtml(c) {
+  const sel = c.id === window.__selectedLeadId ? ' class="row-selected"' : '';
+  return '<tr' + sel + ' data-id="' + escDash(c.id) + '" onclick="selectLead(\'' + String(c.id).replace(/[^\w-]/g, '') + '\')">' +
+    '<td><div class="lead-cell">' + avatarHtml(c.name) + '<div style="font-weight:600;font-size:12.5px;">' + escDash(c.name) + '</div></div></td>' +
+    '<td>' +
+    (c.email ? '<div style="font-size:11.5px;">' + escDash(c.email) + '</div>' : '') +
+    (c.phone ? '<div style="font-size:10.5px;color:var(--text-m);">' + escDash(c.phone) + '</div>' : '') +
+    ((!c.email && !c.phone) ? '—' : '') +
+    '</td>' +
+    '<td>' + escDash(c.source) + '</td>' +
+    '<td>' + statusBadge(c.status) + '</td>' +
+    '<td>' + (c.lastTouchAt ? new Date(c.lastTouchAt).toLocaleDateString() : '—') + '</td>' +
+    '<td>' + (c.createdAt ? new Date(c.createdAt).toLocaleDateString() : '—') + '</td>' +
+    '</tr>';
 }
 
 function selectLead(id) {

@@ -433,6 +433,33 @@
     .cal-up-sub { font-size: 10.5px; color: var(--text-m); }
     .cal-up-amt { margin-left: auto; font-size: 12px; font-weight: 700; color: var(--green); font-variant-numeric: tabular-nums; }
 
+    /* CARD TINTS (minimal color accents) */
+    .card-tint-blue   { background: linear-gradient(135deg, rgba(0,87,255,0.055), var(--bg-card) 60%); }
+    .card-tint-green  { background: linear-gradient(135deg, rgba(5,150,105,0.06), var(--bg-card) 60%); }
+    .card-tint-amber  { background: linear-gradient(135deg, rgba(217,119,6,0.06), var(--bg-card) 60%); }
+    .card-tint-purple { background: linear-gradient(135deg, rgba(139,92,246,0.06), var(--bg-card) 60%); }
+    [data-theme="dark"] .card-tint-blue   { background: linear-gradient(135deg, rgba(59,130,246,0.12), var(--bg-card) 60%); }
+    [data-theme="dark"] .card-tint-green  { background: linear-gradient(135deg, rgba(52,211,153,0.10), var(--bg-card) 60%); }
+    [data-theme="dark"] .card-tint-amber  { background: linear-gradient(135deg, rgba(245,158,11,0.10), var(--bg-card) 60%); }
+    [data-theme="dark"] .card-tint-purple { background: linear-gradient(135deg, rgba(167,139,250,0.10), var(--bg-card) 60%); }
+    .stats-grid .stat-hero { background: linear-gradient(135deg, rgba(5,150,105,0.06), transparent 60%); }
+    [data-theme="dark"] .stats-grid .stat-hero { background: linear-gradient(135deg, rgba(52,211,153,0.10), transparent 60%); }
+
+    /* TOP LEADS */
+    .score-legend { display: inline-flex; align-items: center; gap: 5px; font-size: 10px; color: var(--text-m); font-weight: 500; white-space: nowrap; }
+    .sl-dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; margin-left: 6px; }
+    .tl-row { display: flex; align-items: center; gap: 11px; padding: 10px 16px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.12s; }
+    .tl-row:hover { background: var(--hover); }
+    .tl-row:last-child { border-bottom: none; }
+    .tl-rank { width: 16px; font-size: 11px; font-weight: 700; color: var(--text-m); font-variant-numeric: tabular-nums; flex-shrink: 0; }
+    .tl-body { flex: 1; min-width: 0; }
+    .tl-name { font-size: 12.5px; font-weight: 600; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .tl-sub  { font-size: 10.5px; color: var(--text-m); }
+
+    /* LEADS SCROLL WINDOW (~10 rows) */
+    .table-scroll { max-height: 452px; overflow-y: auto; }
+    .table-scroll thead th { position: sticky; top: 0; background: var(--bg-card); z-index: 2; }
+
     /* NAV RAIL (collapsed) */
     @media (min-width: 901px) {
       body.nav-rail { --sidebar-w: 52px; }
@@ -680,11 +707,11 @@
         <div class="sec-head"><div class="sec-title">Lead Sources</div><div class="sec-sub range-label">Last 30 days</div></div>
         <div style="padding:16px 16px 12px;" id="src-list" class="src-list"><div class="empty-state" style="padding:60px 20px;"><i data-lucide="pie-chart"></i><div class="empty-state-title">No leads in this period</div><div class="empty-state-sub">Widen the date range, or check back when new leads come in.</div></div></div>
       </div>
-      <div class="card">
+      <div class="card card-tint-blue">
         <div class="sec-head"><div class="sec-title">Monthly Lead Goal</div><div class="sec-sub" id="goal-month-label"></div></div>
         <div id="goal-gauge" style="padding:14px 16px;"></div>
       </div>
-      <div class="card">
+      <div class="card card-tint-amber">
         <div class="sec-head"><div class="sec-title">Response Time</div><span class="state-pill awaiting"><span class="sp-dot"></span>Awaiting data</span></div>
         <div class="chart-wrap" style="padding:16px;height:150px;"><canvas id="ch-resp"></canvas><div class="chart-empty"><i data-lucide="trending-up"></i><div class="chart-empty-title">Awaiting automation data</div><div class="chart-empty-text">First-response speed charts here once automations respond to leads.</div></div></div>
         <div class="benchmark-note">Target: under 90 seconds</div>
@@ -693,21 +720,9 @@
 
     <div class="ov-bot">
       <div class="card">
-        <div class="sec-head"><div class="sec-title">Recent Leads</div><div class="sec-link" onclick="showPage('leads')">View all leads</div></div>
-        <div class="table-wrap">
-          <table class="skel-table">
-            <thead><tr><th>Lead</th><th>Source</th><th>Status</th><th>Last Touch</th><th>Date</th></tr></thead>
-            <tbody id="leads-table-body">
-              <tr><td><div class="skel skel-bar" style="width:120px;"></div></td><td><div class="skel skel-bar" style="width:60px;"></div></td><td><div class="skel skel-bar" style="width:50px;"></div></td><td><div class="skel skel-bar" style="width:40px;"></div></td><td><div class="skel skel-bar" style="width:90px;"></div></td></tr>
-              <tr><td><div class="skel skel-bar" style="width:110px;"></div></td><td><div class="skel skel-bar" style="width:55px;"></div></td><td><div class="skel skel-bar" style="width:65px;"></div></td><td><div class="skel skel-bar" style="width:35px;"></div></td><td><div class="skel skel-bar" style="width:95px;"></div></td></tr>
-              <tr><td><div class="skel skel-bar" style="width:130px;"></div></td><td><div class="skel skel-bar" style="width:50px;"></div></td><td><div class="skel skel-bar" style="width:55px;"></div></td><td><div class="skel skel-bar" style="width:40px;"></div></td><td><div class="skel skel-bar" style="width:85px;"></div></td></tr>
-            </tbody>
-          </table>
-          <div class="table-empty-overlay" id="leads-empty-state">
-            <i data-lucide="users"></i>
-            <div class="empty-state-title">No leads yet</div>
-            <div class="empty-state-sub">Leads will appear here once contacts exist in Zoho CRM.</div>
-          </div>
+        <div class="sec-head"><div class="sec-title">Top Leads</div><div style="display:flex;align-items:center;gap:10px;"><span class="score-legend"><i class="sl-dot" style="background:var(--red);"></i>Hot <i class="sl-dot" style="background:#d97706;"></i>Warm <i class="sl-dot" style="background:#64748b;"></i>Cold</span><div class="sec-link" onclick="showPage('leads')">View all leads</div></div></div>
+        <div id="top-leads-list">
+          <div class="empty-state" style="padding:34px 20px;"><i data-lucide="users"></i><div class="empty-state-title">No leads yet</div><div class="empty-state-sub">Your top 5 scored leads will rank here once contacts exist in Zoho CRM.</div></div>
         </div>
       </div>
       <div style="display:flex;flex-direction:column;gap:16px;">
@@ -747,7 +762,7 @@
     <div class="leads-split">
       <div class="card">
         <div class="sec-head"><div class="sec-title">All Leads</div><div class="sec-sub" id="leads-page-count">0 contacts</div></div>
-        <div class="table-wrap">
+        <div class="table-wrap table-scroll" id="leads-scroll">
           <table class="skel-table">
             <thead><tr><th class="th-sort" data-sort="name" onclick="sortLeads('name')">Lead</th><th>Contact</th><th class="th-sort" data-sort="source" onclick="sortLeads('source')">Source</th><th class="th-sort" data-sort="status" onclick="sortLeads('status')">Status</th><th class="th-sort" data-sort="lastTouchAt" onclick="sortLeads('lastTouchAt')">Last Activity</th><th class="th-sort desc" data-sort="createdAt" onclick="sortLeads('createdAt')">Created</th></tr></thead>
             <tbody id="full-leads-tbody">
@@ -820,7 +835,7 @@
             <div class="empty-state" style="padding:30px 16px;"><i data-lucide="calendar-check"></i><div class="empty-state-title">No upcoming closings</div><div class="empty-state-sub">Deals with closing dates will appear here.</div></div>
           </div>
         </div>
-        <div class="card">
+        <div class="card card-tint-purple">
           <div class="sec-head"><div class="sec-title">This Month</div></div>
           <div class="p20" style="padding-top:8px;padding-bottom:8px;">
             <div class="feed-summary-row"><div class="feed-summary-label"><i data-lucide="user-plus"></i>New Leads</div><div class="feed-summary-val" id="cal-count-leads">—</div></div>
@@ -1007,7 +1022,7 @@
 
 <div id="toast"><div class="toast-icon"><i data-lucide="check"></i></div><div id="toast-msg" style="font-size:12.5px;font-weight:600;color:var(--text-s);line-height:1.45;"></div></div>
 
-<script src="crm.js?v=7"></script>
+<script src="crm.js?v=8"></script>
 <script>
 const AUTH0_DOMAIN    = 'auth.flowaify.app';
 const AUTH0_CLIENT_ID = 'tx74Owqn3jVeSaVuxfFHsKloqbPqfAmN';
