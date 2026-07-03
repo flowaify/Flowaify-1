@@ -5,6 +5,7 @@ window.__crmData        = null;
 window.__rangeDays      = 30;
 window.__selectedLeadId = null;
 window.__leadFilters    = { q: '', status: '', source: '' };
+window.__leadSort       = { key: 'createdAt', dir: -1 };
 
 /* ── Data loading ───────────────────────────────────────────────────────────── */
 async function loadDashboardData(token) {
@@ -147,14 +148,25 @@ function setDelta(id, cur, prev, label) {
   if (!el) return;
   if (prev === 0 && cur === 0) { el.innerHTML = ''; return; }
   if (prev === 0) {
-    el.innerHTML = '<span class="stat-delta delta-up">↑ ' + cur + ' new ' + label + '</span>';
+    el.innerHTML = '<span class="stat-delta delta-up">↗ +' + cur + '</span><span class="delta-caption">' + label + '</span>';
     return;
   }
   const pct = Math.round(((cur - prev) / prev) * 100);
-  if (pct === 0) { el.innerHTML = '<span class="stat-delta delta-flat">— flat ' + label + '</span>'; return; }
+  if (pct === 0) { el.innerHTML = '<span class="stat-delta delta-flat">— 0%</span><span class="delta-caption">' + label + '</span>'; return; }
   const up = pct > 0;
   el.innerHTML = '<span class="stat-delta ' + (up ? 'delta-up' : 'delta-down') + '">' +
-    (up ? '↑ ' : '↓ ') + Math.abs(pct) + '% ' + label + '</span>';
+    (up ? '↗ +' : '↘ −') + Math.abs(pct) + '%</span><span class="delta-caption">' + label + '</span>';
+}
+
+/* Deterministic colored initials avatar */
+const AVATAR_HUES = [212, 262, 152, 22, 340, 190, 48, 288];
+function avatarHtml(name) {
+  const n = String(name || '?');
+  let hash = 0;
+  for (let i = 0; i < n.length; i++) hash = (hash * 31 + n.charCodeAt(i)) >>> 0;
+  const hue = AVATAR_HUES[hash % AVATAR_HUES.length];
+  const initials = n.split(/\s+/).slice(0, 2).map(function(w) { return w.charAt(0); }).join('').toUpperCase() || '?';
+  return '<span class="lead-avatar" style="background:hsl(' + hue + ',62%,45%);">' + escDash(initials) + '</span>';
 }
 
 function setAwaitPill(id, isLive) {
@@ -274,6 +286,212 @@ function timeBuckets(contacts, days) {
   return { labels: labels.map(function(l) { return l.label; }), data: labels.map(function(l) { return buckets[l.key]; }) };
 }
 
+/* ── Goal gauge ─────────────────────────────────────────────────────────────── */
+function goalTarget() {
+  try {
+    const all = JSON.parse(localStorage.getItem('flw_settings_' + (window.__userSub || 'anon')) || '{}');
+    const v = parseInt((all.biz || {})['s2-goal-leads'], 10);
+    if (isFinite(v) && v > 0) return v;
+  } catch (e) {}
+  return 50;
+}
+
+function renderGoalGauge(contacts) {
+  const el = document.getElementById('goal-gauge');
+  if (!el) return;
+  const now = new Date();
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
+  const count = contacts.filter(function(c) {
+    return c.createdAt && new Date(c.createdAt).getTime() >= monthStart;
+  }).length;
+  const goal = goalTarget();
+  const pct = Math.min(1, count / goal);
+  const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+  const daysLeft = daysInMonth - now.getDate();
+
+  const r = 70, cx = 90, cy = 84, sw = 13;
+  const circ = Math.PI * r;
+  const off = circ * (1 - pct);
+  el.innerHTML =
+    '<div class="gauge-wrap">' +
+    '<svg width="180" height="96" viewBox="0 0 180 96">' +
+    '<path d="M ' + (cx - r) + ' ' + cy + ' A ' + r + ' ' + r + ' 0 0 1 ' + (cx + r) + ' ' + cy + '" fill="none" stroke="var(--track, rgba(15,23,42,0.09))" stroke-width="' + sw + '" stroke-linecap="round"/>' +
+    '<path d="M ' + (cx - r) + ' ' + cy + ' A ' + r + ' ' + r + ' 0 0 1 ' + (cx + r) + ' ' + cy + '" fill="none" stroke="#0057FF" stroke-width="' + sw + '" stroke-linecap="round" stroke-dasharray="' + circ.toFixed(1) + '" stroke-dashoffset="' + off.toFixed(1) + '" style="transition: stroke-dashoffset .7s ease;"/>' +
+    '</svg>' +
+    '<div class="gauge-center"><div class="gauge-val">' + count + '</div><div class="gauge-sub">of ' + goal + ' leads</div></div>' +
+    '<div class="gauge-foot"><span>' + Math.round(pct * 100) + '% of goal</span><span>' + daysLeft + ' day' + (daysLeft === 1 ? '' : 's') + ' left</span></div>' +
+    '</div>';
+
+  const ml = document.getElementById('goal-month-label');
+  if (ml) ml.textContent = now.toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
+}
+
+/* ── Pipeline stage list ────────────────────────────────────────────────────── */
+function stageColor(stage) {
+  const s = String(stage || '').toUpperCase();
+  if (s.indexOf('WON') !== -1 || s.indexOf('CLOSED W') !== -1) return '#059669';
+  if (s.indexOf('LOST') !== -1)      return '#dc2626';
+  if (s.indexOf('PROPOS') !== -1)    return '#d97706';
+  if (s.indexOf('NEGOTIAT') !== -1)  return '#ea580c';
+  if (s.indexOf('QUALIF') !== -1)    return '#0057FF';
+  if (s.indexOf('BOOK') !== -1)      return '#0d9488';
+  return '#64748b';
+}
+
+function renderStageList(deals) {
+  const el = document.getElementById('stage-list');
+  if (!el) return;
+  if (!deals || deals.length === 0) {
+    el.innerHTML = '<div class="empty-state" style="padding:36px 20px;"><i data-lucide="bar-chart-2"></i>' +
+      '<div class="empty-state-title">No deals yet</div>' +
+      '<div class="empty-state-sub">Pipeline value by stage will appear once deals exist in your CRM.</div></div>';
+    return;
+  }
+  const totals = {};
+  deals.forEach(function(d) {
+    const st = d.stage || 'Unknown';
+    totals[st] = (totals[st] || 0) + (d.amount || 0);
+  });
+  const stages = Object.keys(totals).sort(function(a, b) { return totals[b] - totals[a]; });
+  const max = totals[stages[0]] || 1;
+  el.innerHTML = stages.map(function(st) {
+    const pct = Math.max(3, Math.round((totals[st] / max) * 100));
+    return '<div class="stage-row">' +
+      '<div class="stage-name" title="' + escDash(st) + '">' + escDash(st) + '</div>' +
+      '<div class="stage-track"><div class="stage-fill" style="width:' + pct + '%;background:' + stageColor(st) + ';"></div></div>' +
+      '<div class="stage-amt">' + fmtMoney(totals[st]) + '</div>' +
+      '</div>';
+  }).join('');
+}
+
+/* ── Calendar ───────────────────────────────────────────────────────────────── */
+function renderCalendar() {
+  const data = window.__crmData;
+  const grid = document.getElementById('cal-grid');
+  if (!grid || !data) return;
+  const base = window.__calMonth || new Date();
+  window.__calMonth = base;
+  const y = base.getFullYear(), m = base.getMonth();
+
+  const title = document.getElementById('cal-title');
+  if (title) title.textContent = base.toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
+
+  const dealsByDay = {}, leadsByDay = {};
+  (data.deals || []).forEach(function(d) {
+    if (!d.closingDate) return;
+    const key = String(d.closingDate).slice(0, 10);
+    (dealsByDay[key] = dealsByDay[key] || []).push(d);
+  });
+  (data.contacts || []).forEach(function(c) {
+    if (!c.createdAt) return;
+    const key = new Date(c.createdAt).toISOString().slice(0, 10);
+    leadsByDay[key] = (leadsByDay[key] || 0) + 1;
+  });
+
+  const firstDow = (new Date(y, m, 1).getDay() + 6) % 7; // Mon=0
+  const start = new Date(y, m, 1 - firstDow);
+  const todayKey = new Date().toISOString().slice(0, 10);
+
+  let htmlOut = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map(function(d) {
+    return '<div class="cal-dow">' + d + '</div>';
+  }).join('');
+
+  for (let i = 0; i < 42; i++) {
+    const d = new Date(start.getFullYear(), start.getMonth(), start.getDate() + i);
+    const key = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    const other = d.getMonth() !== m ? ' other' : '';
+    const today = key === todayKey ? ' today' : '';
+    let cell = '<div class="cal-cell' + other + today + '"><span class="cal-daynum">' + d.getDate() + '</span>';
+    const dd = dealsByDay[key] || [];
+    dd.slice(0, 2).forEach(function(deal) {
+      const col = stageColor(deal.stage);
+      cell += '<span class="cal-chip" style="background:' + col + '1f;color:' + col + ';" title="' + escDash(deal.name) + ' · ' + fmtMoney(deal.amount) + '">' + escDash(deal.name) + '</span>';
+    });
+    if (dd.length > 2) cell += '<span class="cal-chip" style="background:var(--hover);color:var(--text-m);">+' + (dd.length - 2) + ' more</span>';
+    if (leadsByDay[key]) cell += '<span class="cal-dot-badge">' + leadsByDay[key] + ' lead' + (leadsByDay[key] === 1 ? '' : 's') + '</span>';
+    cell += '</div>';
+    htmlOut += cell;
+  }
+  grid.innerHTML = htmlOut;
+
+  // Upcoming closings
+  const up = document.getElementById('cal-upcoming');
+  if (up) {
+    const nowT = new Date(); nowT.setHours(0, 0, 0, 0);
+    const upcoming = (data.deals || [])
+      .filter(function(d) { return d.closingDate && new Date(d.closingDate).getTime() >= nowT.getTime(); })
+      .sort(function(a, b) { return new Date(a.closingDate) - new Date(b.closingDate); })
+      .slice(0, 5);
+    if (upcoming.length === 0) {
+      up.innerHTML = '<div class="empty-state" style="padding:30px 16px;"><i data-lucide="calendar-check"></i>' +
+        '<div class="empty-state-title">No upcoming closings</div>' +
+        '<div class="empty-state-sub">Deals with closing dates will appear here.</div></div>';
+    } else {
+      up.innerHTML = upcoming.map(function(d) {
+        return '<div class="cal-up-item">' +
+          '<span class="lead-avatar" style="background:' + stageColor(d.stage) + ';">$</span>' +
+          '<div><div class="cal-up-name">' + escDash(d.name) + '</div>' +
+          '<div class="cal-up-sub">' + new Date(d.closingDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) + (d.stage ? ' · ' + escDash(d.stage) : '') + '</div></div>' +
+          '<div class="cal-up-amt">' + fmtMoney(d.amount) + '</div>' +
+          '</div>';
+      }).join('');
+    }
+  }
+
+  // Month counts
+  const mStart = new Date(y, m, 1).getTime(), mEnd = new Date(y, m + 1, 1).getTime();
+  setText('cal-count-leads', (data.contacts || []).filter(function(c) {
+    if (!c.createdAt) return false;
+    const t = new Date(c.createdAt).getTime();
+    return t >= mStart && t < mEnd;
+  }).length);
+  setText('cal-count-closings', (data.deals || []).filter(function(d) {
+    if (!d.closingDate) return false;
+    const t = new Date(d.closingDate).getTime();
+    return t >= mStart && t < mEnd;
+  }).length);
+
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+window.renderCalendar = renderCalendar;
+
+/* ── Notification bell ──────────────────────────────────────────────────────── */
+function renderBell(needsAttention) {
+  const badge = document.getElementById('bell-badge');
+  const list = document.getElementById('bell-list');
+  const n = (needsAttention || []).length;
+  if (badge) {
+    badge.textContent = n;
+    badge.style.display = n > 0 ? 'flex' : 'none';
+  }
+  if (!list) return;
+  if (n === 0) {
+    list.innerHTML = '<div class="bell-empty">All clear — no leads need attention.</div>';
+    return;
+  }
+  list.innerHTML = needsAttention.slice(0, 6).map(function(c) {
+    const safeName = String(c.name || '').replace(/[^\w\s.@-]/g, '');
+    return '<div class="bell-item" onclick="bellOpenLead(\'' + (c.id ? String(c.id).replace(/[^\w-]/g, '') : '') + '\', \'' + safeName + '\')">' +
+      avatarHtml(c.name) +
+      '<div><div class="bell-item-name">' + escDash(c.name) + '</div>' +
+      '<div class="bell-item-sub">' + escDash(c.status) + ' · No touch in 24h+</div></div>' +
+      '</div>';
+  }).join('');
+}
+
+function bellOpenLead(id, name) {
+  const m = document.getElementById('bell-menu');
+  if (m) m.classList.remove('open');
+  showPage('leads');
+  if (id && window.__crmData && window.__crmData.contacts.some(function(c) { return String(c.id) === id; })) {
+    selectLead(id);
+  } else if (name) {
+    const ls = document.getElementById('lead-search');
+    if (ls) { ls.value = name; applyLeadFilters(); }
+  }
+}
+window.bellOpenLead = bellOpenLead;
+
 /* ── Master rerender ────────────────────────────────────────────────────────── */
 function rerender() {
   const data = window.__crmData;
@@ -302,6 +520,11 @@ function rerender() {
   sparkline('spark-new-leads',   spark14,    '#0057FF');
   sparkline('spark-leads-total', spark14,    '#0057FF');
   sparkline('spark-an-total',    sparkRange, '#0057FF');
+
+  renderGoalGauge(data.contacts || []);
+  renderStageList(data.deals || []);
+  renderBell(data.needsAttention || []);
+  renderCalendar();
 
   if (typeof lucide !== 'undefined') lucide.createIcons();
 }
@@ -361,10 +584,10 @@ function renderRecentLeadsTable(contacts) {
   if (contacts.length > 0) {
     tbody.innerHTML = contacts.slice(0, 10).map(function(c) {
       return '<tr>' +
-        '<td><div style="font-weight:600;font-size:12.5px;">' + escDash(c.name) + '</div>' +
+        '<td><div class="lead-cell">' + avatarHtml(c.name) + '<div><div style="font-weight:600;font-size:12.5px;">' + escDash(c.name) + '</div>' +
         (c.email ? '<div style="font-size:10.5px;color:var(--text-m);">' + escDash(c.email) + '</div>' : '') +
         (c.phone ? '<div style="font-size:10.5px;color:var(--text-m);">' + escDash(c.phone) + '</div>' : '') +
-        '</td>' +
+        '</div></div></td>' +
         '<td>' + escDash(c.source) + '</td>' +
         '<td>' + statusBadge(c.status) + '</td>' +
         '<td>' + escDash(c.lastTouch) + '</td>' +
@@ -463,8 +686,38 @@ function applyLeadFilters() {
       ? data.contacts.length + ' contacts'
       : filtered.length + ' of ' + data.contacts.length + ' contacts';
   }
+
+  const sort = window.__leadSort;
+  const dateKeys = { createdAt: 1, lastTouchAt: 1 };
+  filtered.sort(function(a, b) {
+    let va = a[sort.key], vb = b[sort.key];
+    if (dateKeys[sort.key]) {
+      va = va ? new Date(va).getTime() : null;
+      vb = vb ? new Date(vb).getTime() : null;
+    } else {
+      va = va ? String(va).toLowerCase() : null;
+      vb = vb ? String(vb).toLowerCase() : null;
+    }
+    if (va == null && vb == null) return 0;
+    if (va == null) return 1;
+    if (vb == null) return -1;
+    return va < vb ? -1 * sort.dir : va > vb ? sort.dir : 0;
+  });
+
   renderLeadsTable(filtered);
 }
+
+function sortLeads(key) {
+  const s = window.__leadSort;
+  if (s.key === key) s.dir = -s.dir;
+  else { s.key = key; s.dir = key === 'createdAt' || key === 'lastTouchAt' ? -1 : 1; }
+  document.querySelectorAll('.th-sort').forEach(function(th) {
+    th.classList.remove('asc', 'desc');
+    if (th.getAttribute('data-sort') === s.key) th.classList.add(s.dir === 1 ? 'asc' : 'desc');
+  });
+  applyLeadFilters();
+}
+window.sortLeads = sortLeads;
 
 function renderLeadsTable(contacts) {
   const tbody = document.getElementById('full-leads-tbody');
@@ -487,7 +740,7 @@ function renderLeadsTable(contacts) {
   tbody.innerHTML = contacts.map(function(c) {
     const sel = c.id === window.__selectedLeadId ? ' class="row-selected"' : '';
     return '<tr' + sel + ' data-id="' + escDash(c.id) + '" onclick="selectLead(\'' + String(c.id).replace(/[^\w-]/g, '') + '\')">' +
-      '<td><div style="font-weight:600;font-size:12.5px;">' + escDash(c.name) + '</div></td>' +
+      '<td><div class="lead-cell">' + avatarHtml(c.name) + '<div style="font-weight:600;font-size:12.5px;">' + escDash(c.name) + '</div></div></td>' +
       '<td>' +
       (c.email ? '<div style="font-size:11.5px;">' + escDash(c.email) + '</div>' : '') +
       (c.phone ? '<div style="font-size:10.5px;color:var(--text-m);">' + escDash(c.phone) + '</div>' : '') +
@@ -708,6 +961,9 @@ function renderAnalyticsStats(data, ranged, days) {
 /* ── Charts ─────────────────────────────────────────────────────────────────── */
 function renderCharts(data, ranged, days) {
   if (typeof Chart === 'undefined') return;
+  const darkMode = document.documentElement.getAttribute('data-theme') === 'dark';
+  Chart.defaults.color = darkMode ? 'rgba(232,235,242,0.55)' : '#64748b';
+  Chart.defaults.borderColor = darkMode ? 'rgba(255,255,255,0.07)' : 'rgba(15,23,42,0.08)';
   const contacts = data.contacts || [];
   const deals    = data.deals || [];
   const chartSet = ranged.length > 0 ? ranged : [];
@@ -750,7 +1006,14 @@ function renderCharts(data, ranged, days) {
   if (hasLeadsTime) {
     mkChart('an-leads', {
       type: 'line',
-      data: { labels: buckets.labels, datasets: [{ data: buckets.data, borderColor: '#0057FF', backgroundColor: 'rgba(0,87,255,0.05)', fill: true, tension: 0.3, pointRadius: 2 }] },
+      data: { labels: buckets.labels, datasets: [{ data: buckets.data, borderColor: '#0057FF', backgroundColor: function(ctx) {
+        const area = ctx.chart.chartArea;
+        if (!area) return 'rgba(0,87,255,0.08)';
+        const g = ctx.chart.ctx.createLinearGradient(0, area.top, 0, area.bottom);
+        g.addColorStop(0, 'rgba(0,87,255,0.22)');
+        g.addColorStop(1, 'rgba(0,87,255,0)');
+        return g;
+      }, fill: true, tension: 0.4, pointRadius: 2 }] },
       options: {
         plugins: { legend: { display: false } },
         scales: { x: { ticks: { font: { size: 9 }, maxTicksLimit: 10 } }, y: { ticks: { font: { size: 10 }, stepSize: 1 } } },
@@ -823,30 +1086,4 @@ function renderCharts(data, ranged, days) {
   }
   chartOverlay('an-booked-chart', !hasBookedTime);
 
-  /* Pipeline by Stage (all-time) */
-  const hasDeals = deals.length > 0;
-  if (hasDeals) {
-    const stageTotals = {};
-    deals.forEach(function(d) {
-      const stage = d.stage || 'Unknown';
-      stageTotals[stage] = (stageTotals[stage] || 0) + (d.amount || 0);
-    });
-    const stageLabels = Object.keys(stageTotals);
-    mkChart('an-pipestage', {
-      type: 'bar',
-      data: { labels: stageLabels, datasets: [{ data: stageLabels.map(function(k) { return stageTotals[k]; }), backgroundColor: '#0057FF', borderRadius: 2 }] },
-      options: {
-        plugins: {
-          legend: { display: false },
-          tooltip: { callbacks: { label: function(ctx) { return fmtMoney(ctx.raw); } } }
-        },
-        scales: {
-          x: { ticks: { font: { size: 10 } } },
-          y: { ticks: { callback: function(v) { return '$' + Number(v).toLocaleString(); }, font: { size: 10 } } }
-        },
-        animation: { duration: 400 }
-      }
-    });
-  }
-  chartOverlay('an-pipestage', !hasDeals);
 }
