@@ -873,8 +873,8 @@ function buildActivityFeed(data, days) {
 
 const FEED_ICON = {
   lead_created: { icon: 'user-plus',      bg: 'rgba(0,87,255,.13)',    color: '#0057FF' },
-  touch:        { icon: 'bot',            bg: 'rgba(139,92,246,.13)',  color: '#8b5cf6' },
-  ai_reply:     { icon: 'bot',            bg: 'rgba(139,92,246,.13)',  color: '#8b5cf6' },
+  touch:        { icon: 'sparkles',            bg: 'rgba(139,92,246,.13)',  color: '#8b5cf6' },
+  ai_reply:     { icon: 'sparkles',            bg: 'rgba(139,92,246,.13)',  color: '#8b5cf6' },
   deal:         { icon: 'dollar-sign',    bg: 'rgba(5,150,105,.13)',   color: '#059669' },
 };
 
@@ -1000,10 +1000,15 @@ function renderAnalyticsStats(data, ranged, days) {
   const srcCount = Object.keys(groupCount(ranged.filter(function(c){ return c.source; }), function(c){ return c.source; })).length;
   setText('val-an-sources', srcCount);
 
+  // Brand panel inline stats
+  setText('bp-leads',  ranged.length);
+  setText('bp-booked', overview.bookedCalls);
+
   const convRate = contacts.length > 0 && overview.bookedCalls
     ? Math.round((overview.bookedCalls / contacts.length) * 100) + '%'
     : '—';
   setText('val-an-conv', convRate);
+  setText('bp-conv', convRate);
 }
 
 /* ── Charts ─────────────────────────────────────────────────────────────────── */
@@ -1054,17 +1059,20 @@ function renderCharts(data, ranged, days) {
   if (hasLeadsTime) {
     mkChart('an-leads', {
       type: 'line',
-      data: { labels: buckets.labels, datasets: [{ data: buckets.data, borderColor: '#0057FF', backgroundColor: function(ctx) {
+      data: { labels: buckets.labels, datasets: [{ data: buckets.data, borderColor: '#ffffff', backgroundColor: function(ctx) {
         const area = ctx.chart.chartArea;
-        if (!area) return 'rgba(0,87,255,0.08)';
+        if (!area) return 'rgba(255,255,255,0.15)';
         const g = ctx.chart.ctx.createLinearGradient(0, area.top, 0, area.bottom);
-        g.addColorStop(0, 'rgba(0,87,255,0.22)');
-        g.addColorStop(1, 'rgba(0,87,255,0)');
+        g.addColorStop(0, 'rgba(255,255,255,0.30)');
+        g.addColorStop(1, 'rgba(255,255,255,0)');
         return g;
-      }, fill: true, tension: 0.4, pointRadius: 2 }] },
+      }, fill: true, tension: 0.4, pointRadius: 2, pointBackgroundColor: '#ffffff' }] },
       options: {
         plugins: { legend: { display: false } },
-        scales: { x: { ticks: { font: { size: 9 }, maxTicksLimit: 10 } }, y: { ticks: { font: { size: 10 }, stepSize: 1 } } },
+        scales: {
+          x: { ticks: { font: { size: 9 }, maxTicksLimit: 10, color: 'rgba(255,255,255,0.7)' }, grid: { display: false } },
+          y: { ticks: { font: { size: 10 }, stepSize: 1, color: 'rgba(255,255,255,0.7)' }, grid: { color: 'rgba(255,255,255,0.12)' } }
+        },
         animation: { duration: 400 }
       }
     });
