@@ -1,4 +1,4 @@
-/* Flowaify Workspace hub — live snapshot, service status, setup progress.
+/* Flowaify Workspace hub — live snapshot, service status, activity, closings.
    Lives in a .js file because requests carry an Authorization header. */
 
 var PORTAL_WORKER = 'https://flowaify-crm-proxy.black-glitter-c4cd.workers.dev';
@@ -42,7 +42,7 @@ async function portalHealth() {
   }
 }
 
-/* ── Authenticated snapshot + setup progress ────────────────────────────────── */
+/* ── Authenticated snapshot ─────────────────────────────────────────────────── */
 async function portalBoot(token) {
   var data = null;
   try {
@@ -58,7 +58,10 @@ async function portalBoot(token) {
     pSet('ps-attn', '—');
     pDot('svc-crm', 'warn');
     pSet('svc-crm-state', 'Degraded');
-    pSet('setup-count', 'Couldn’t check your setup right now.');
+    var actEl = document.getElementById('pt-activity');
+    if (actEl) actEl.innerHTML = '<div class="empty-note">Couldn’t load activity right now.</div>';
+    var upEl = document.getElementById('pt-upcoming');
+    if (upEl) upEl.innerHTML = '<div class="empty-note">Couldn’t load your pipeline right now.</div>';
     return;
   }
 
@@ -78,44 +81,71 @@ async function portalBoot(token) {
   pDot('svc-crm', 'ok');
   pSet('svc-crm-state', 'Operational');
 
-  // Setup progress — derived from real signals only
-  var goalSet = false;
-  try {
-    var saved = JSON.parse(localStorage.getItem('flw_settings_' + (window.__userSub || 'anon')) || '{}');
-    var g = parseInt((saved.biz || {})['s2-goal-leads'], 10);
-    goalSet = isFinite(g) && g > 0;
-  } catch (e) {}
+  renderMiniFeed(data);
+  renderUpcoming(data);
+}
 
-  var steps = [
-    { label: 'CRM connected',            done: true,
-      sub: 'Zoho is syncing to your dashboard' },
-    { label: 'Workspace access',         done: true,
-      sub: 'You’re signed in and ready' },
-    { label: 'Monthly lead goal set',    done: goalSet,
-      sub: goalSet ? 'Tracking on your Overview gauge' : 'Set it in Dashboard → Settings → General' },
-    { label: 'Automations live',         done: (overview.aiRepliesSent || 0) > 0 || (overview.activeSequences || 0) > 0,
-      sub: 'AI replies and follow-up sequences running' },
-    { label: 'Lead scoring live',        done: contacts.some(function(c) { return c.status && String(c.status).trim(); }),
-      sub: 'Hot / Warm / Cold labels flowing in' },
-    { label: 'First booked call',        done: (overview.bookedCalls || 0) > 0,
-      sub: 'The moment it all pays off' },
-  ];
+/* ── Latest activity (mini feed) ────────────────────────────────────────────── */
+function pRelTime(ts) {
+  var m = Math.floor((Date.now() - ts) / 60000);
+  if (m < 1) return 'just now';
+  if (m < 60) return m + 'm ago';
+  var h = Math.floor(m / 60);
+  if (h < 24) return h + 'h ago';
+  var d = Math.floor(h / 24);
+  if (d < 7) return d + 'd ago';
+  return new Date(ts).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+}
 
-  var doneCount = steps.filter(function(s) { return s.done; }).length;
-  var fill = document.getElementById('setup-fill');
-  if (fill) fill.style.width = Math.round((doneCount / steps.length) * 100) + '%';
-  pSet('setup-count', doneCount + ' of ' + steps.length + ' complete');
-  pSet('setup-count-head', doneCount === steps.length ? 'All set 🎉' : (steps.length - doneCount) + ' to go');
-
-  var list = document.getElementById('setup-list');
-  if (list) {
-    list.innerHTML = steps.map(function(s) {
-      return '<div class="setup-item' + (s.done ? ' done' : '') + '">' +
-        '<span class="setup-check"><i data-lucide="check"></i></span>' +
-        '<div><div>' + pEsc(s.label) + '</div>' +
-        '<div style="font-size:10.5px;color:var(--text-m);">' + pEsc(s.sub) + '</div></div>' +
-        '</div>';
-    }).join('');
-    if (typeof lucide !== 'undefined') lucide.createIcons();
+function renderMiniFeed(data) {
+  var el = document.getElementById('pt-activity');
+  if (!el) return;
+  var events = [];
+  (data.contacts || []).forEach(function(c) {
+    if (c.createdAt) events.push({ ts: new Date(c.createdAt).getTime(), icon: 'user-plus', bg: 'rgba(0,87,255,.12)', color: '#0057FF',
+      text: '<strong>' + pEsc(c.name) + '</strong> came in' + (c.source ? ' via ' + pEsc(c.source) : '') });
+    if (c.lastTouchAt) events.push({ ts: new Date(c.lastTouchAt).getTime(), icon: 'sparkles', bg: 'rgba(139,92,246,.12)', color: '#8b5cf6',
+      text: (c.lastTouch ? pEsc(c.lastTouch) + ' sent to ' : 'Touch logged for ') + '<strong>' + pEsc(c.name) + '</strong>' });
+  });
+  (data.deals || []).forEach(function(d) {
+    if (d.createdAt) events.push({ ts: new Date(d.createdAt).getTime(), icon: 'dollar-sign', bg: 'rgba(5,150,105,.12)', color: '#059669',
+      text: 'Deal <strong>' + pEsc(d.name) + '</strong>' + (d.stage ? ' · ' + pEsc(d.stage) : '') });
+  });
+  events.sort(function(a, b) { return b.ts - a.ts; });
+  var top = events.slice(0, 5);
+  if (!top.length) {
+    el.innerHTML = '<div class="empty-note">New leads and automation events will appear here.</div>';
+    return;
   }
+  el.innerHTML = top.map(function(ev, i) {
+    return '<div class="act-item" style="animation-delay:' + (i * 45) + 'ms">' +
+      '<div class="act-icon" style="background:' + ev.bg + ';color:' + ev.color + ';"><i data-lucide="' + ev.icon + '"></i></div>' +
+      '<div class="act-text">' + ev.text + '</div>' +
+      '<div class="act-time">' + pRelTime(ev.ts) + '</div>' +
+      '</div>';
+  }).join('');
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+/* ── Upcoming closings ──────────────────────────────────────────────────────── */
+function renderUpcoming(data) {
+  var el = document.getElementById('pt-upcoming');
+  if (!el) return;
+  var today = new Date(); today.setHours(0, 0, 0, 0);
+  var up = (data.deals || [])
+    .filter(function(d) { return d.closingDate && new Date(d.closingDate).getTime() >= today.getTime(); })
+    .sort(function(a, b) { return new Date(a.closingDate) - new Date(b.closingDate); })
+    .slice(0, 3);
+  if (!up.length) {
+    el.innerHTML = '<div class="empty-note">No closings scheduled — deals with closing dates show here.</div>';
+    return;
+  }
+  el.innerHTML = up.map(function(d) {
+    return '<div class="up-item">' +
+      '<div style="min-width:0;"><div class="up-name">' + pEsc(d.name) + '</div>' +
+      '<div class="up-sub">' + new Date(d.closingDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) +
+      (d.stage ? ' · ' + pEsc(d.stage) : '') + '</div></div>' +
+      (d.amount != null ? '<div class="up-amt">' + pMoney(d.amount) + '</div>' : '') +
+      '</div>';
+  }).join('');
 }
