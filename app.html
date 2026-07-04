@@ -61,6 +61,8 @@
       --hover:      rgba(15,23,42,0.05);
       --suite-bg:   #16161a;
       --track:      rgba(15,23,42,0.09);
+      --ease:       cubic-bezier(0.33, 0, 0.2, 1);
+      --dur:        0.28s;
       --chart-tick: #64748b;
       --chart-grid: rgba(15,23,42,0.08);
     }
@@ -126,7 +128,7 @@
       background: var(--sidebar-bg); z-index: 60;
       display: flex; flex-direction: column; padding: 14px 12px; gap: 1px;
       border-right: 1px solid var(--card-border);
-      transition: width 0.15s ease, padding 0.15s ease;
+      transition: width var(--dur) var(--ease), padding var(--dur) var(--ease);
     }
     .nav-group-label { padding: 14px 12px 5px; font-size: 10px; font-weight: 600; color: var(--text-m); text-transform: uppercase; letter-spacing: 0.6px; user-select: none; }
 
@@ -180,7 +182,7 @@
       box-shadow: 0 0 2px rgba(0,0,0,0.12), 0 8px 16px rgba(0,0,0,0.14); padding: 5px; min-width: 230px;
       display: none; z-index: 300;
     }
-    .profile-menu.open { display: block; animation: pmenu-in 0.15s ease; }
+    .profile-menu.open { display: block; animation: pmenu-in var(--dur) var(--ease); }
     @keyframes pmenu-in { from{opacity:0;transform:translateY(-6px)} to{opacity:1;transform:translateY(0)} }
     .profile-menu-header { padding: 10px 12px 8px; border-bottom: 1px solid var(--border); margin-bottom: 4px; }
     .profile-menu-name  { font-size: 12.5px; font-weight: 700; color: var(--text); }
@@ -192,7 +194,7 @@
     .profile-menu-item.danger:hover { background: var(--red-dim); color: var(--red); }
 
     /* ───────── MAIN / TOPBAR ───────── */
-    .main { margin-left: var(--sidebar-w); margin-top: 48px; min-height: calc(100vh - 48px); display: flex; flex-direction: column; transition: margin-left 0.15s ease; }
+    .main { margin-left: var(--sidebar-w); margin-top: 48px; min-height: calc(100vh - 48px); display: flex; flex-direction: column; transition: margin-left var(--dur) var(--ease), margin-right var(--dur) var(--ease); }
     .topbar {
       position: sticky; top: 48px; z-index: 40;
       display: flex; align-items: center; justify-content: space-between;
@@ -253,7 +255,7 @@
 
     /* KPI STRIP — joined segmented block */
     .stats-grid {
-      display: grid; grid-template-columns: repeat(auto-fit, minmax(160px,1fr)); gap: 0;
+      display: grid; gap: 0;
       background: var(--bg-card); border: none; border-radius: 10px;
       box-shadow: 0 0 2px rgba(0,0,0,0.10), 0 2px 6px rgba(0,0,0,0.08); overflow: hidden; margin-bottom: 16px;
     }
@@ -263,13 +265,24 @@
       margin-right: -1px; margin-bottom: -1px;
     }
     .stats-grid .card:hover { border-color: var(--border); background: var(--hover); }
+    .sg-7 { grid-template-columns: repeat(7, minmax(0, 1fr)); }
+    .sg-6 { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+    .sg-5 { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+    .sg-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .stat-card { min-width: 0; }
+    .stat-label, .stat-hint { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .stat-val { font-size: clamp(19px, 1.7vw, 30px); }
+    .stat-hero .stat-val { font-size: clamp(26px, 2.4vw, 40px); }
+    .delta-caption { overflow: hidden; text-overflow: ellipsis; }
+    body.flowy-open .spark { display: none; }
+    .g2 > *, .g3 > *, .ov-mid > *, .analytics-charts > *, .feed-grid > *, .leads-split > * { min-width: 0; }
     .stat-card { padding: 14px 16px; display: flex; flex-direction: column; gap: 7px; }
     .stat-top  { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 15px; }
     .dot-await { width: 6px; height: 6px; border-radius: 50%; background: var(--amber); display: inline-block; flex-shrink: 0; }
     .dot-live  { width: 6px; height: 6px; border-radius: 50%; background: var(--green); display: inline-block; flex-shrink: 0; animation: pulse-g 1.6s infinite; }
     .stat-hero { grid-column: span 2; }
-    .stat-hero .stat-val { font-size: 40px; letter-spacing: -1.4px; }
-    .stat-val   { font-size: 30px; font-weight: 700; color: var(--text); letter-spacing: -0.8px; line-height: 1.05; font-variant-numeric: tabular-nums; }
+    .stat-hero .stat-val { letter-spacing: -1.4px; }
+    .stat-val   { font-weight: 700; color: var(--text); letter-spacing: -0.8px; line-height: 1.05; font-variant-numeric: tabular-nums; }
     .stat-label { font-size: 10px; color: var(--text-m); font-weight: 600; text-transform: uppercase; letter-spacing: 0.6px; white-space: nowrap; }
     .stat-hint  { font-size: 10px; color: var(--text-m); opacity: 0.75; line-height: 1.4; }
 
@@ -361,7 +374,7 @@
     .bell-wrap { position: relative; }
     .bell-badge { position: absolute; top: 3px; right: 3px; min-width: 14px; height: 14px; border-radius: 99px; background: #dc2626; color: #fff; font-size: 9px; font-weight: 700; display: flex; align-items: center; justify-content: center; padding: 0 3px; }
     .bell-menu { position: absolute; top: calc(100% + 6px); right: 0; width: 300px; background: var(--bg-card); border-radius: 10px; box-shadow: 0 0 2px rgba(0,0,0,0.2), 0 8px 20px rgba(0,0,0,0.25); padding: 6px; display: none; z-index: 300; }
-    .bell-menu.open { display: block; animation: pmenu-in 0.15s ease; }
+    .bell-menu.open { display: block; animation: pmenu-in var(--dur) var(--ease); }
     .bell-menu-title { font-size: 11px; font-weight: 700; color: var(--text-m); text-transform: uppercase; letter-spacing: 0.5px; padding: 8px 10px 6px; }
     .bell-item { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 6px; cursor: pointer; transition: background 0.12s; }
     .bell-item:hover { background: var(--hover); }
@@ -551,7 +564,7 @@
     /* COMMAND PALETTE */
     .suite-search { position: relative; }
     .palette { position: absolute; top: calc(100% + 6px); left: 0; right: 0; background: var(--bg-card); border-radius: 10px; box-shadow: 0 0 2px rgba(0,0,0,0.2), 0 12px 28px rgba(0,0,0,0.28); padding: 5px; display: none; z-index: 300; max-height: 380px; overflow-y: auto; }
-    .palette.open { display: block; animation: pmenu-in 0.12s ease; }
+    .palette.open { display: block; animation: pmenu-in var(--dur) var(--ease); }
     .pal-group { font-size: 10px; font-weight: 700; color: var(--text-m); text-transform: uppercase; letter-spacing: 0.5px; padding: 8px 10px 4px; }
     .pal-item { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 6px; cursor: pointer; font-size: 12.5px; color: var(--text-s); }
     .pal-item i, .pal-item svg { width: 14px; height: 14px; color: var(--text-m); flex-shrink: 0; }
@@ -563,7 +576,7 @@
       position: fixed; top: 48px; right: 0; bottom: 0; width: 360px; z-index: 70;
       background: var(--bg-card); border-left: 1px solid var(--card-border);
       display: flex; flex-direction: column;
-      transform: translateX(100%); transition: transform 0.2s ease;
+      transform: translateX(100%); transition: transform var(--dur) var(--ease);
     }
     body.flowy-open #flowy-panel { transform: translateX(0); }
     body.flowy-open .main { margin-right: 360px; }
@@ -610,6 +623,67 @@
     #fl-send:not(:disabled):hover { background: var(--blue-b); }
     #fl-send i, #fl-send svg { width: 15px; height: 15px; }
     .fl-micro { font-size: 9.5px; color: var(--text-m); text-align: center; padding: 0 14px 8px; flex-shrink: 0; }
+
+    /* FLOWY FAB */
+    #flowy-fab {
+      position: fixed; right: 24px; bottom: 24px; z-index: 90;
+      width: 48px; height: 48px; border-radius: 50%; border: none; cursor: pointer;
+      background: linear-gradient(135deg, #0057FF, #8b5cf6); color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 4px 16px rgba(0,87,255,0.35);
+      transition: transform var(--dur) var(--ease), opacity var(--dur) var(--ease);
+      animation: fab-glow 4s ease-in-out infinite;
+    }
+    #flowy-fab:hover { transform: scale(1.07); }
+    #flowy-fab i, #flowy-fab svg { width: 21px; height: 21px; }
+    body.flowy-open #flowy-fab { opacity: 0; pointer-events: none; transform: scale(0.6); }
+    @keyframes fab-glow { 0%, 100% { box-shadow: 0 4px 16px rgba(0,87,255,0.35); } 50% { box-shadow: 0 4px 26px rgba(139,92,246,0.5); } }
+    #toast { bottom: 84px; }
+
+    /* FLOWY NUDGE */
+    #flowy-nudge {
+      position: fixed; right: 24px; bottom: 84px; z-index: 89; width: 264px;
+      background: var(--bg-card); border-radius: 12px;
+      box-shadow: 0 0 2px rgba(0,0,0,0.15), 0 10px 30px rgba(0,0,0,0.22);
+      animation: nudge-in 0.4s var(--ease);
+    }
+    @keyframes nudge-in { from { opacity: 0; transform: translateY(10px) scale(0.97); } to { opacity: 1; transform: none; } }
+    .fn-body { padding: 14px 16px; cursor: pointer; }
+    .fn-title { font-size: 11px; font-weight: 700; background: linear-gradient(135deg, #0057FF, #8b5cf6); -webkit-background-clip: text; background-clip: text; color: transparent; margin-bottom: 4px; }
+    .fn-text { font-size: 12.5px; color: var(--text-s); line-height: 1.5; }
+    .fn-text strong { color: var(--text); }
+    .fn-cta { font-size: 11.5px; font-weight: 600; color: var(--blue); margin-top: 8px; }
+    .fn-x { position: absolute; top: 8px; right: 8px; width: 22px; height: 22px; background: transparent; border: none; border-radius: 4px; color: var(--text-m); cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .fn-x:hover { background: var(--hover); }
+    .fn-x i, .fn-x svg { width: 12px; height: 12px; }
+    @media (prefers-reduced-motion: reduce) { #flowy-fab { animation: none; } #flowy-nudge { animation: none; } }
+
+    /* TEAM */
+    .team-strip { display: flex; align-items: center; gap: 26px; padding: 18px 22px; flex-wrap: wrap; }
+    .ts-block { min-width: 120px; }
+    .ts-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-m); margin-bottom: 3px; }
+    .ts-val { font-size: 24px; font-weight: 700; font-variant-numeric: tabular-nums; }
+    .ts-of { font-size: 13px; color: var(--text-m); font-weight: 500; }
+    .ts-div { width: 1px; height: 40px; background: var(--border); }
+    .ts-actions { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+    .role-row { display: flex; align-items: center; gap: 11px; padding: 10px 16px; border-bottom: 1px solid var(--border); }
+    .role-row:last-child { border-bottom: none; }
+    .role-chip { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; padding: 3px 9px; border-radius: 3px; flex-shrink: 0; width: 64px; text-align: center; }
+    .rc-owner  { background: rgba(139,92,246,0.12); color: var(--purple); }
+    .rc-admin  { background: var(--blue-dim); color: var(--blue); }
+    .rc-member { background: var(--green-dim); color: var(--green); }
+    .rc-viewer { background: var(--hover); color: var(--text-m); }
+    .role-desc { font-size: 11.5px; color: var(--text-m); line-height: 1.45; }
+    .role-sel { background: var(--input-bg); border: 1px solid var(--input-border); border-radius: 4px; color: var(--text); font-size: 11px; font-family: inherit; padding: 4px 6px; cursor: pointer; outline: none; }
+    .team-act { display: inline-flex; align-items: center; gap: 5px; background: transparent; border: none; color: var(--text-m); font-size: 11px; font-family: inherit; cursor: pointer; padding: 4px 6px; border-radius: 4px; }
+    .team-act:hover { background: var(--hover); color: var(--text); }
+    .team-act.danger:hover { color: var(--red); }
+    .tl-item { display: flex; gap: 10px; padding: 9px 16px; border-bottom: 1px solid var(--border); font-size: 11.5px; color: var(--text-s); }
+    .tl-item:last-child { border-bottom: none; }
+    .tl-time { margin-left: auto; font-size: 10px; color: var(--text-m); white-space: nowrap; }
+    .inv-overlay { position: fixed; inset: 0; z-index: 400; background: rgba(10,13,20,0.5); backdrop-filter: blur(3px); display: none; align-items: center; justify-content: center; padding: 16px; }
+    .inv-overlay.open { display: flex; }
+    .inv-modal { width: 100%; max-width: 440px; background: var(--bg-card); border-radius: 12px; box-shadow: 0 0 2px rgba(0,0,0,0.2), 0 20px 50px rgba(0,0,0,0.3); overflow: hidden; animation: pmenu-in var(--dur) var(--ease); }
 
     /* NAV RAIL (collapsed) */
     @media (min-width: 901px) {
@@ -721,6 +795,8 @@
       .suite-search { margin: 0 8px; }
       .cal-cell { min-height: 56px; }
       #flowy-panel { width: 100%; }
+      #flowy-fab { right: 16px; bottom: 20px; }
+      #flowy-nudge { right: 16px; bottom: 78px; width: calc(100% - 32px); max-width: 300px; }
       body.flowy-open .main { margin-right: 0; }
       .suite-flowy-txt { display: none; }
       .suite-flowy-btn { padding: 6px 9px; }
@@ -730,6 +806,8 @@
       .page { padding: 16px 14px 80px; }
       .g2, .g3, .ov-bot, .leads-split, .feed-grid, .settings-grid-v2, .analytics-charts { grid-template-columns: 1fr; }
       .stat-hero { grid-column: span 1; }
+      .sg-7, .sg-6, .sg-5, .sg-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      body.flowy-open .spark { display: block; }
       .stat-hero .stat-val { font-size: 30px; }
     }
   </style>
@@ -806,6 +884,7 @@
   <div class="nav-item" data-page="activity" title="Activity"><i data-lucide="history"></i><span class="nav-txt">Activity</span></div>
   <div class="nav-item" data-page="calendar" title="Calendar"><i data-lucide="calendar"></i><span class="nav-txt">Calendar <span class="nav-new">New</span></span></div>
   <div class="nav-item" data-page="automations" title="Automations"><i data-lucide="workflow"></i><span class="nav-txt">Automations</span></div>
+  <div class="nav-item" data-page="team" title="Team"><i data-lucide="users"></i><span class="nav-txt">Team</span></div>
 
   <div class="nav-group-label">Insights</div>
   <div class="nav-item" data-page="analytics" title="Analytics"><i data-lucide="chart-column"></i><span class="nav-txt">Analytics</span></div>
@@ -861,7 +940,7 @@
       </div>
     </div>
 
-    <div class="stats-grid">
+    <div class="stats-grid sg-7">
       <div class="card stat-card"><div class="stat-top"><div class="stat-label"><i data-lucide="user-plus" class="kpi-glyph kg-blue"></i>New Leads Today</div></div><div class="stat-val-row"><div class="stat-val" id="val-new-leads">—</div><div class="spark" id="spark-new-leads"></div></div><div class="stat-delta-row" id="delta-new-leads"></div><div class="stat-hint">Leads created today in Zoho CRM</div></div>
       <div class="card stat-card"><div class="stat-top"><div class="stat-label"><i data-lucide="zap" class="kpi-glyph kg-green"></i>Avg Response</div><div id="await-response"></div></div><div class="stat-val" id="val-response-time">—</div><div class="stat-hint" id="hint-response" data-live="First-touch speed on new leads">Awaiting automation</div></div>
       <div class="card stat-card"><div class="stat-top"><div class="stat-label"><i data-lucide="sparkles" class="kpi-glyph kg-purple"></i>AI Replies</div><div id="await-ai-replies"></div></div><div class="stat-val" id="val-ai-replies">—</div><div class="stat-hint" id="hint-ai-replies" data-live="Instant responses sent by Flowaify AI">Awaiting automation</div></div>
@@ -924,7 +1003,7 @@
       <button class="btn-mini btn-mini-ghost" onclick="exportLeadsCsv()" style="display:inline-flex;align-items:center;gap:6px;"><i data-lucide="download" style="width:13px;height:13px;"></i>Export CSV</button>
     </div>
 
-    <div class="stats-grid">
+    <div class="stats-grid sg-5">
       <div class="card stat-card"><div class="stat-top"><div class="stat-label"><i data-lucide="users" class="kpi-glyph kg-blue"></i>Total Leads</div></div><div class="stat-val-row"><div class="stat-val" id="val-total-leads">—</div><div class="spark" id="spark-leads-total"></div></div><div class="stat-hint">All contacts in Zoho CRM</div></div>
       <div class="card stat-card"><div class="stat-top"><div class="stat-label"><i data-lucide="user-plus" class="kpi-glyph kg-blue"></i><span id="label-leads-new">New Leads (30d)</span></div></div><div class="stat-val" id="val-leads-new">—</div><div class="stat-delta-row" id="delta-leads-new"></div><div class="stat-hint">Created in the selected period</div></div>
       <div class="card stat-card"><div class="stat-top"><div class="stat-label"><i data-lucide="badge-check" class="kpi-glyph kg-green"></i>Qualified Leads</div></div><div class="stat-val" id="val-leads-qualified">—</div><div class="stat-hint">Leads Flowaify has categorized</div></div>
@@ -1019,10 +1098,65 @@
     </div>
   </div>
 
+  <!-- TEAM -->
+  <div class="page" id="page-team">
+
+    <div class="card mb20" id="team-setup-card" style="display:none;">
+      <div class="sec-head"><div class="sec-title">One-time setup needed</div><span class="state-pill awaiting"><span class="sp-dot"></span>Not enabled</span></div>
+      <div class="p20" style="font-size:12.5px;color:var(--text-s);line-height:1.7;">
+        Team storage isn't enabled on your Worker yet. In Cloudflare: <strong>Workers &amp; Pages → KV → Create namespace</strong> (name it <strong>flowaify-team</strong>), then <strong>your Worker → Settings → Bindings → Add → KV Namespace</strong> with variable name <strong>TEAM_KV</strong>, then paste the latest <strong>index.js</strong> and Deploy. Refresh this page after.
+      </div>
+    </div>
+
+    <div id="team-content" style="display:none;">
+      <div class="card mb20">
+        <div class="team-strip">
+          <div class="ts-block">
+            <div class="ts-label">Seats used</div>
+            <div class="ts-val"><span id="team-used">—</span> <span class="ts-of">of <span id="team-total">3</span></span></div>
+            <div class="setup-bar" style="margin-top:8px;"><div class="setup-fill" id="team-bar" style="width:0%"></div></div>
+          </div>
+          <div class="ts-div"></div>
+          <div class="ts-block"><div class="ts-label">Active</div><div class="ts-val" id="team-active">—</div></div>
+          <div class="ts-block"><div class="ts-label">Pending</div><div class="ts-val" id="team-pending">—</div></div>
+          <div class="ts-actions">
+            <button class="btn-mini btn-mini-ghost" onclick="buySeats()">Buy more seats</button>
+            <button class="cmd-primary" id="team-invite-btn" onclick="openInvite()"><i data-lucide="user-plus"></i>Invite member</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="feed-grid">
+        <div class="card">
+          <div class="sec-head"><div class="sec-title">Members</div><div class="sec-sub" id="team-count"></div></div>
+          <div class="table-wrap">
+            <table class="skel-table">
+              <thead><tr><th>Member</th><th>Role</th><th>Status</th><th>Added</th><th style="width:120px;"></th></tr></thead>
+              <tbody id="team-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:16px;">
+          <div class="card">
+            <div class="sec-head"><div class="sec-title">Roles &amp; Permissions</div></div>
+            <div class="role-row"><span class="role-chip rc-owner">Owner</span><span class="role-desc">Everything — billing, seats, team, settings</span></div>
+            <div class="role-row"><span class="role-chip rc-admin">Admin</span><span class="role-desc">Manage team &amp; settings, edit leads</span></div>
+            <div class="role-row"><span class="role-chip rc-member">Member</span><span class="role-desc">Work leads, use Flowy, view everything</span></div>
+            <div class="role-row"><span class="role-chip rc-viewer">Viewer</span><span class="role-desc">Read-only dashboards and reports</span></div>
+          </div>
+          <div class="card">
+            <div class="sec-head"><div class="sec-title">Team Activity</div></div>
+            <div id="team-log"><div class="empty-note" style="padding:20px 16px;text-align:center;font-size:11.5px;color:var(--text-m);">Invites, role changes, and removals show here.</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- AUTOMATIONS -->
   <div class="page" id="page-automations">
 
-    <div class="stats-grid mb20">
+    <div class="stats-grid sg-4 mb20">
       <div class="card stat-card"><div class="stat-top"><div class="stat-label"><i data-lucide="zap" class="kpi-glyph kg-blue"></i>Active Automations</div></div><div class="stat-val" id="val-auto-active">—</div></div>
       <div class="card stat-card"><div class="stat-top"><div class="stat-label"><i data-lucide="sparkles" class="kpi-glyph kg-purple"></i>AI Replies</div><div id="await-ai-auto"></div></div><div class="stat-val" id="val-ai-replies-auto">—</div></div>
       <div class="card stat-card"><div class="stat-top"><div class="stat-label"><i data-lucide="repeat-2" class="kpi-glyph kg-amber"></i>Sequences</div><div id="await-fu-auto"></div></div><div class="stat-val" id="val-follow-ups-auto">—</div></div>
@@ -1076,7 +1210,7 @@
   <!-- ANALYTICS -->
   <div class="page" id="page-analytics">
 
-    <div class="stats-grid">
+    <div class="stats-grid sg-6">
       <div class="card stat-card"><div class="stat-top"><div class="stat-label"><i data-lucide="users" class="kpi-glyph kg-blue"></i>Leads This Period</div></div><div class="stat-val-row"><div class="stat-val" id="val-an-total">—</div><div class="spark" id="spark-an-total"></div></div><div class="stat-delta-row" id="delta-an-total"></div></div>
       <div class="card stat-card"><div class="stat-top"><div class="stat-label"><i data-lucide="percent" class="kpi-glyph kg-green"></i>Conversion Rate</div></div><div class="stat-val" id="val-an-conv">—</div></div>
       <div class="card stat-card"><div class="stat-top"><div class="stat-label"><i data-lucide="zap" class="kpi-glyph kg-green"></i>Avg Response</div></div><div class="stat-val" id="val-an-response">—</div></div>
@@ -1132,14 +1266,14 @@
     <div class="pivot-pane one-col" id="pane-team">
     <div class="settings-grid-v2">
       <div class="card">
-        <div class="sec-head"><div class="sec-title">Users &amp; Permissions</div><button class="btn-mini btn-mini-ghost" onclick="comingSoon('Team invites')">Invite</button></div>
+        <div class="sec-head"><div class="sec-title">Users &amp; Permissions</div><button class="btn-mini btn-mini-primary" onclick="showPage('team')">Manage team</button></div>
         <div class="p20">
           <div style="display:flex;align-items:center;gap:11px;padding-bottom:14px;border-bottom:1px solid var(--border);margin-bottom:14px;">
             <div class="profile-card-avatar" style="background:linear-gradient(135deg,#0057FF,#8b5cf6);" id="settings-avatar">—</div>
             <div style="flex:1;"><div style="font-size:12.5px;font-weight:700;color:var(--text);" id="settings-name">User</div><div style="font-size:10.5px;color:var(--text-m);" id="settings-email">—</div></div>
-            <span class="badge b-low">Admin</span>
+            <span class="badge b-low">Owner</span>
           </div>
-          <div class="empty-state" style="padding:14px 8px;"><i data-lucide="users"></i><div class="empty-state-title">No additional teammates yet</div><div class="empty-state-sub">Invite teammates to give them access to leads, conversations, and automations.</div></div>
+          <div style="font-size:12px;color:var(--text-s);line-height:1.6;">Seats, member roles, invites, and the team activity log now live on the <span class="sec-link" onclick="showPage('team')">Team page</span> — including seat purchases and pending provisioning status.</div>
         </div>
       </div>
     </div>
@@ -1202,6 +1336,17 @@
 
 </main>
 
+<!-- FLOWY FAB + NUDGE -->
+<div id="flowy-nudge" style="display:none;">
+  <button class="fn-x" onclick="dismissNudge(event)"><i data-lucide="x"></i></button>
+  <div class="fn-body" onclick="nudgeOpen()">
+    <div class="fn-title">✨ Flowy</div>
+    <div class="fn-text" id="fn-text">Ask me anything about your leads.</div>
+    <div class="fn-cta">Ask Flowy →</div>
+  </div>
+</div>
+<button id="flowy-fab" onclick="toggleFlowy()" title="Ask Flowy (⌘J)"><i data-lucide="sparkles"></i></button>
+
 <!-- FLOWY AI PANEL -->
 <aside id="flowy-panel">
   <div class="fl-head">
@@ -1228,9 +1373,28 @@
 
 <div id="report-view"></div>
 
+<!-- INVITE MODAL -->
+<div class="inv-overlay" id="inv-overlay" onclick="if(event.target===this)closeInvite()">
+  <div class="inv-modal">
+    <div class="sec-head" style="border-bottom:1px solid var(--border);">
+      <div><div class="sec-title">Invite a team member</div><div class="sec-sub">They'll get a Flowaify login provisioned within one business day.</div></div>
+      <button class="fl-close" onclick="closeInvite()"><i data-lucide="x"></i></button>
+    </div>
+    <div class="p20">
+      <div class="field"><label>Full name</label><input type="text" id="inv-name" placeholder="Jane Smith" /></div>
+      <div class="field"><label>Work email</label><input type="email" id="inv-email" placeholder="jane@business.com" /></div>
+      <div class="field" style="margin-bottom:0;"><label>Role</label><select id="inv-role"><option value="member">Member — work leads, use Flowy</option><option value="admin">Admin — manage team &amp; settings</option><option value="viewer">Viewer — read-only</option></select></div>
+    </div>
+    <div style="display:flex;justify-content:flex-end;gap:8px;padding:0 20px 18px;">
+      <button class="btn-mini btn-mini-ghost" onclick="closeInvite()">Cancel</button>
+      <button class="cmd-primary" id="inv-send" onclick="inviteMember()"><i data-lucide="user-plus"></i>Send invite</button>
+    </div>
+  </div>
+</div>
+
 <div id="toast"><div class="toast-icon"><i data-lucide="check"></i></div><div id="toast-msg" style="font-size:12.5px;font-weight:600;color:var(--text-s);line-height:1.45;"></div></div>
 
-<script src="crm.js?v=11"></script>
+<script src="crm.js?v=12"></script>
 <script src="flowy.js?v=1"></script>
 <script>
 const AUTH0_DOMAIN    = 'auth.flowaify.app';
@@ -1257,6 +1421,8 @@ async function boot(user) {
   document.getElementById('app').style.display = 'block';
   if (user) {
     window.__userSub = user.sub || null;
+    window.__userName = user.name || '';
+    window.__userEmail = user.email || '';
     const init = (user.name || user.email || '?')[0].toUpperCase();
     document.getElementById('sb-avatar').textContent = init;
     const meAv = document.getElementById('me-avatar');
@@ -1312,6 +1478,7 @@ const PAGE_META = {
   activity:    { title:'Activity',    sub:'A live timeline of everything happening across your leads and pipeline.' },
   calendar:    { title:'Calendar',    sub:'Deal closings and lead flow across the month.' },
   automations: { title:'Automations', sub:'Pause or resume Flowaify automations for this account.' },
+  team:        { title:'Team',        sub:'Manage seats, members, and roles for your workspace.' },
   analytics:   { title:'Analytics',   sub:'Understand lead performance, response speed, source quality, and booked call conversion.' },
   settings:    { title:'Settings',    sub:'Manage workspace, users, automation rules, CRM settings, and notification preferences.' },
 };
@@ -1325,6 +1492,7 @@ function showPage(id) {
   document.getElementById('topbar-title').textContent = m.title || id;
   document.getElementById('topbar-sub').textContent   = m.sub   || '';
   window.scrollTo(0,0); closeProfileMenu(); closeMob();
+  if (id === 'team' && window.teamLoad) teamLoad();
   lucide.createIcons();
 }
 document.querySelectorAll('.nav-item[data-page]').forEach(el => el.addEventListener('click', () => showPage(el.dataset.page)));
@@ -1411,6 +1579,31 @@ function saveDashSettings() {
 
 function comingSoon(feature) { showToast(feature + ' is coming soon.'); }
 
+function nudgeOpen() {
+  dismissNudge();
+  if (!window.__flowyOpen) toggleFlowy();
+}
+function dismissNudge(e) {
+  if (e) e.stopPropagation();
+  const n = document.getElementById('flowy-nudge');
+  if (n) n.style.display = 'none';
+  try { localStorage.setItem('flw_nudge', new Date().toISOString().slice(0, 10)); } catch(err) {}
+}
+function maybeShowNudge(text) {
+  try {
+    const today = new Date().toISOString().slice(0, 10);
+    if (localStorage.getItem('flw_nudge') === today) return;
+  } catch(e) { return; }
+  if (window.__flowyOpen) return;
+  const n = document.getElementById('flowy-nudge');
+  if (!n) return;
+  if (text) document.getElementById('fn-text').innerHTML = text;
+  n.style.display = 'block';
+  lucide.createIcons();
+  clearTimeout(n._t);
+  n._t = setTimeout(function() { n.style.display = 'none'; }, 20000);
+}
+
 function toggleNavRail() {
   const on = document.body.classList.toggle('nav-rail');
   try { localStorage.setItem('flw_nav_rail', on ? '1' : '0'); } catch(e) {}
@@ -1446,11 +1639,13 @@ const PAL_PAGES = [
   { label: 'Activity',    icon: 'history',      run: () => showPage('activity') },
   { label: 'Calendar',    icon: 'calendar',     run: () => showPage('calendar') },
   { label: 'Automations', icon: 'workflow',     run: () => showPage('automations') },
+  { label: 'Team',        icon: 'users',        run: () => showPage('team') },
   { label: 'Analytics',   icon: 'chart-column', run: () => showPage('analytics') },
   { label: 'Settings',    icon: 'settings',     run: () => showPage('settings') },
 ];
 const PAL_ACTIONS = [
   { label: 'Ask Flowy',           icon: 'sparkles',    run: () => { if (!window.__flowyOpen) toggleFlowy(); } },
+  { label: 'Invite a teammate',   icon: 'user-plus',   run: () => { showPage('team'); setTimeout(() => { if (window.openInvite) openInvite(); }, 200); } },
   { label: 'Toggle dark mode',    icon: 'moon',        run: () => toggleTheme() },
   { label: 'Refresh data',        icon: 'refresh-cw',  run: () => refreshData() },
   { label: 'Export leads CSV',    icon: 'download',    run: () => exportLeadsCsv() },

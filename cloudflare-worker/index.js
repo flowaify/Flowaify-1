@@ -34,7 +34,7 @@ export default {
 
     const corsHeaders = corsOrigin ? {
       'Access-Control-Allow-Origin': corsOrigin,
-      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+      'Access-Control-Allow-Methods': 'GET, POST, PUT, OPTIONS',
       'Access-Control-Allow-Headers': 'Authorization, Content-Type',
       'Access-Control-Max-Age': '86400',
     } : {};
@@ -64,6 +64,10 @@ export default {
 
       if (url.pathname === '/ai' && request.method === 'POST') {
         return handleAI(request, env, corsHeaders);
+      }
+
+      if (url.pathname === '/team' && (request.method === 'GET' || request.method === 'PUT')) {
+        return handleTeam(request, env, corsHeaders);
       }
 
       return json({ error: 'Not found' }, 404, corsHeaders);
@@ -357,6 +361,86 @@ async function handleAI(request, env, corsHeaders) {
     console.error('Workers AI error:', err.message);
     return json({ error: 'AI request failed' }, 502, corsHeaders);
   }
+}
+
+// ─── /team (GET/PUT) — team roster stored in KV per client ────────────────────
+// Requires a KV namespace binding named "TEAM_KV" (Settings → Bindings → KV).
+
+const TEAM_ROLES    = new Set(['owner', 'admin', 'member', 'viewer']);
+const TEAM_STATUSES = new Set(['active', 'pending']);
+
+function sanitizeTeamDoc(doc) {
+  const out = { seatsIncluded: 3, members: [], log: [], updatedAt: Date.now() };
+  const n = parseInt(doc && doc.seatsIncluded, 10);
+  if (Number.isFinite(n) && n >= 1 && n <= 100) out.seatsIncluded = n;
+  const members = Array.isArray(doc && doc.members) ? doc.members.slice(0, 50) : [];
+  out.members = members.map(m => ({
+    id:      String(m.id || '').replace(/[^\w-]/g, '').slice(0, 40),
+    name:    String(m.name || '').slice(0, 80),
+    email:   String(m.email || '').slice(0, 120),
+    role:    TEAM_ROLES.has(String(m.role)) ? String(m.role) : 'member',
+    status:  TEAM_STATUSES.has(String(m.status)) ? String(m.status) : 'pending',
+    addedAt: Number.isFinite(Number(m.addedAt)) ? Number(m.addedAt) : Date.now(),
+  })).filter(m => m.email || m.name);
+  const log = Array.isArray(doc && doc.log) ? doc.log.slice(0, 20) : [];
+  out.log = log.map(l => ({
+    ts:   Number.isFinite(Number(l.ts)) ? Number(l.ts) : Date.now(),
+    text: String(l.text || '').slice(0, 200),
+  }));
+  return out;
+}
+
+async function handleTeam(request, env, corsHeaders) {
+  const authHeader = request.headers.get('Authorization') || '';
+  if (!authHeader.startsWith('Bearer ')) {
+    return json({ error: 'Missing token' }, 401, corsHeaders);
+  }
+  const token = authHeader.slice(7).trim();
+
+  let payload;
+  try {
+    payload = await verifyJWT(token, AUTH0_DOMAIN, AUTH0_CLIENT_ID, AUTH0_TENANT);
+  } catch (err) {
+    return json({ error: err.message }, 401, corsHeaders);
+  }
+
+  let clientId = payload['https://flowaify.app/clientId'];
+  if (!clientId && payload.sub) {
+    const subKey = 'CLIENT_' + payload.sub.replace(/[^A-Z0-9]/gi, '_').toUpperCase();
+    clientId = env[subKey];
+  }
+  if (!clientId) {
+    return json({ error: 'No clientId in token' }, 403, corsHeaders);
+  }
+
+  if (!env.TEAM_KV) {
+    return json({ error: 'TEAM_NOT_ENABLED' }, 501, corsHeaders);
+  }
+
+  const key = 'team:' + clientId.toUpperCase().replace(/[^A-Z0-9]/g, '_');
+
+  if (request.method === 'GET') {
+    const raw = await env.TEAM_KV.get(key);
+    if (!raw) {
+      return json({ seatsIncluded: 3, members: [], log: [], updatedAt: null }, 200, corsHeaders);
+    }
+    try {
+      return json(JSON.parse(raw), 200, corsHeaders);
+    } catch (e) {
+      return json({ seatsIncluded: 3, members: [], log: [], updatedAt: null }, 200, corsHeaders);
+    }
+  }
+
+  // PUT
+  let body;
+  try {
+    body = await request.json();
+  } catch (e) {
+    return json({ error: 'Invalid JSON body' }, 400, corsHeaders);
+  }
+  const doc = sanitizeTeamDoc(body);
+  await env.TEAM_KV.put(key, JSON.stringify(doc));
+  return json({ ok: true, doc }, 200, corsHeaders);
 }
 
 // ─── JWT Validation (Web Crypto API — no external deps) ──────────────────────

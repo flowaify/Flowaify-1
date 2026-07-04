@@ -12,7 +12,7 @@ var flowyBusy = false;
 function toggleFlowy() {
   window.__flowyOpen = !window.__flowyOpen;
   document.body.classList.toggle('flowy-open', window.__flowyOpen);
-  setTimeout(function() { window.dispatchEvent(new Event('resize')); }, 230);
+  setTimeout(function() { window.dispatchEvent(new Event('resize')); }, 300);
   if (window.__flowyOpen) {
     var inp = document.getElementById('fl-input');
     if (inp) setTimeout(function() { inp.focus(); }, 240);

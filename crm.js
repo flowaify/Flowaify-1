@@ -807,6 +807,12 @@ function rerender() {
   renderCalendar();
 
   if (typeof lucide !== 'undefined') lucide.createIcons();
+
+  if (!window.__nudged && typeof maybeShowNudge === 'function') {
+    window.__nudged = true;
+    const ins = buildInsights(data, ranged, days);
+    maybeShowNudge(ins.length ? ins[0].text + ' <strong>Ask me about it.</strong>' : null);
+  }
 }
 window.rerender = rerender;
 
@@ -1439,3 +1445,299 @@ function renderCharts(data, ranged, days) {
   if (pBooked) pBooked.style.display = hasBookedTime ? 'none' : '';
 
 }
+
+
+/* ── Team (Worker /team, KV-backed) ─────────────────────────────────────────── */
+window.__teamDoc = null;
+var teamLoading = false;
+
+async function teamFetch(method, body) {
+  var claims;
+  try { claims = await auth0Client.getIdTokenClaims(); } catch (e) { return { status: 0 }; }
+  if (!claims || !claims.__raw) return { status: 0 };
+  try {
+    var res = await fetch(WORKER + '/team', {
+      method: method,
+      headers: { Authorization: 'Bearer ' + claims.__raw, 'Content-Type': 'application/json' },
+      body: body ? JSON.stringify(body) : undefined,
+    });
+    var data = null;
+    try { data = await res.json(); } catch (e) {}
+    return { status: res.status, data: data };
+  } catch (e) {
+    return { status: 0 };
+  }
+}
+
+async function teamLoad(force) {
+  if (teamLoading) return;
+  if (window.__teamDoc && !force) { renderTeam(window.__teamDoc); return; }
+  teamLoading = true;
+  var r = await teamFetch('GET');
+  teamLoading = false;
+  var setup = document.getElementById('team-setup-card');
+  var content = document.getElementById('team-content');
+  if (r.status === 501 || r.status === 404) {
+    if (setup) setup.style.display = 'block';
+    if (content) content.style.display = 'none';
+    return;
+  }
+  if (r.status !== 200 || !r.data) {
+    if (typeof showToast === 'function') showToast("Couldn't load your team — try refreshing.");
+    return;
+  }
+  if (setup) setup.style.display = 'none';
+  if (content) content.style.display = 'block';
+
+  var doc = r.data;
+  doc.members = doc.members || [];
+  doc.log = doc.log || [];
+  if (!doc.seatsIncluded) doc.seatsIncluded = 3;
+
+  // Seed the signed-in account as Owner on first load
+  var hasOwner = doc.members.some(function(m) { return m.role === 'owner'; });
+  if (!hasOwner) {
+    doc.members.unshift({
+      id: 'owner',
+      name: window.__userName || 'Account owner',
+      email: window.__userEmail || '',
+      role: 'owner',
+      status: 'active',
+      addedAt: Date.now(),
+    });
+    teamLogPush(doc, 'Workspace created — owner seat activated');
+    await teamSave(doc, true);
+  }
+  window.__teamDoc = doc;
+  renderTeam(doc);
+}
+window.teamLoad = teamLoad;
+
+async function teamSave(doc, quiet) {
+  var r = await teamFetch('PUT', doc);
+  if (r.status === 200 && r.data && r.data.doc) {
+    window.__teamDoc = r.data.doc;
+    return true;
+  }
+  if (!quiet && typeof showToast === 'function') showToast("Couldn't save — your change was not stored.");
+  return false;
+}
+
+function teamLogPush(doc, text) {
+  doc.log = doc.log || [];
+  doc.log.unshift({ ts: Date.now(), text: String(text).slice(0, 200) });
+  doc.log = doc.log.slice(0, 20);
+}
+
+function roleChipHtml(role) {
+  var cls = { owner: 'rc-owner', admin: 'rc-admin', member: 'rc-member', viewer: 'rc-viewer' }[role] || 'rc-member';
+  return '<span class="role-chip ' + cls + '">' + escDash(role) + '</span>';
+}
+
+function renderTeam(doc) {
+  var members = doc.members || [];
+  var used = members.length;
+  var total = doc.seatsIncluded || 3;
+  var active = members.filter(function(m) { return m.status === 'active'; }).length;
+  var pending = used - active;
+
+  setText('team-used', used);
+  setText('team-total', total);
+  setText('team-active', active);
+  setText('team-pending', pending);
+  var bar = document.getElementById('team-bar');
+  if (bar) bar.style.width = Math.min(100, Math.round((used / total) * 100)) + '%';
+  var countEl = document.getElementById('team-count');
+  if (countEl) countEl.textContent = used + ' member' + (used === 1 ? '' : 's');
+
+  var inviteBtn = document.getElementById('team-invite-btn');
+  if (inviteBtn) {
+    inviteBtn.disabled = used >= total;
+    inviteBtn.style.opacity = used >= total ? '0.5' : '1';
+    inviteBtn.title = used >= total ? 'All seats are in use — buy more seats to invite' : 'Invite a team member';
+  }
+
+  var tbody = document.getElementById('team-tbody');
+  if (tbody) {
+    tbody.innerHTML = members.map(function(m) {
+      var isOwner = m.role === 'owner';
+      var safeId = String(m.id).replace(/[^\w-]/g, '');
+      var roleCell = isOwner
+        ? roleChipHtml('owner')
+        : '<select class="role-sel" onchange="setRole(\'' + safeId + '\', this.value)">' +
+            ['admin', 'member', 'viewer'].map(function(r) {
+              return '<option value="' + r + '"' + (m.role === r ? ' selected' : '') + '>' + r.charAt(0).toUpperCase() + r.slice(1) + '</option>';
+            }).join('') + '</select>';
+      var statusCell = m.status === 'active'
+        ? '<span class="state-pill live"><span class="sp-dot"></span>Active</span>'
+        : '<span class="state-pill awaiting"><span class="sp-dot"></span>Pending</span>';
+      var actions = isOwner ? '' :
+        (m.status === 'pending'
+          ? '<button class="team-act" onclick="resendProvision(\'' + safeId + '\')" title="Resend provisioning email"><i data-lucide="mail"></i></button>' +
+            '<button class="team-act" onclick="markActive(\'' + safeId + '\')" title="Mark active"><i data-lucide="check"></i></button>'
+          : '') +
+        '<button class="team-act danger" onclick="removeMember(\'' + safeId + '\')" title="Remove"><i data-lucide="trash-2"></i></button>';
+      return '<tr>' +
+        '<td><div class="lead-cell">' + avatarHtml(m.name || m.email) +
+          '<div><div style="font-weight:600;font-size:12.5px;">' + escDash(m.name || '—') + '</div>' +
+          '<div style="font-size:10.5px;color:var(--text-m);">' + escDash(m.email) + '</div></div></div></td>' +
+        '<td>' + roleCell + '</td>' +
+        '<td>' + statusCell + '</td>' +
+        '<td style="font-size:11.5px;color:var(--text-m);">' + (m.addedAt ? new Date(m.addedAt).toLocaleDateString() : '—') + '</td>' +
+        '<td style="text-align:right;white-space:nowrap;">' + actions + '</td>' +
+        '</tr>';
+    }).join('');
+  }
+
+  var logEl = document.getElementById('team-log');
+  if (logEl) {
+    var log = doc.log || [];
+    logEl.innerHTML = log.length
+      ? log.slice(0, 10).map(function(l) {
+          return '<div class="tl-item"><span>' + escDash(l.text) + '</span><span class="tl-time">' + relTime(l.ts) + '</span></div>';
+        }).join('')
+      : '<div style="padding:20px 16px;text-align:center;font-size:11.5px;color:var(--text-m);">Invites, role changes, and removals show here.</div>';
+  }
+
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+function openInvite() {
+  var doc = window.__teamDoc;
+  if (doc && (doc.members || []).length >= (doc.seatsIncluded || 3)) {
+    if (typeof showToast === 'function') showToast('All seats are in use — buy more seats first.');
+    return;
+  }
+  var ov = document.getElementById('inv-overlay');
+  if (ov) {
+    document.getElementById('inv-name').value = '';
+    document.getElementById('inv-email').value = '';
+    document.getElementById('inv-role').value = 'member';
+    ov.classList.add('open');
+    lucide.createIcons();
+    setTimeout(function() { document.getElementById('inv-name').focus(); }, 80);
+  }
+}
+window.openInvite = openInvite;
+function closeInvite() {
+  var ov = document.getElementById('inv-overlay');
+  if (ov) ov.classList.remove('open');
+}
+window.closeInvite = closeInvite;
+
+function provisionMail(m) {
+  var biz = (typeof bizNameCrm === 'function') ? bizNameCrm() : '';
+  try {
+    var saved = JSON.parse(localStorage.getItem('flw_settings_' + (window.__userSub || 'anon')) || '{}');
+    biz = ((saved.biz || {})['s2-biz-name'] || '').trim();
+  } catch (e) {}
+  var subject = 'Provision new seat' + (biz ? ' — ' + biz : '');
+  var body = 'Please provision a Flowaify login for a new team member.\n\n' +
+    'Name: ' + m.name + '\nEmail: ' + m.email + '\nRole: ' + m.role +
+    (biz ? '\nBusiness: ' + biz : '') +
+    '\nRequested by: ' + (window.__userEmail || '') +
+    '\n\nSent from Flowaify Dashboard → Team';
+  window.location.href = 'mailto:contact@flowaify.app?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+}
+
+async function inviteMember() {
+  var doc = window.__teamDoc;
+  if (!doc) return;
+  var name = (document.getElementById('inv-name') || {}).value || '';
+  var email = ((document.getElementById('inv-email') || {}).value || '').trim();
+  var role = (document.getElementById('inv-role') || {}).value || 'member';
+  if (!name.trim() || email.indexOf('@') === -1) {
+    if (typeof showToast === 'function') showToast('Add a name and a valid email first.');
+    return;
+  }
+  if (doc.members.some(function(m) { return m.email.toLowerCase() === email.toLowerCase(); })) {
+    if (typeof showToast === 'function') showToast('That email is already on the team.');
+    return;
+  }
+  var member = {
+    id: 'm' + Date.now(),
+    name: name.trim().slice(0, 80),
+    email: email.slice(0, 120),
+    role: role,
+    status: 'pending',
+    addedAt: Date.now(),
+  };
+  var prev = JSON.parse(JSON.stringify(doc));
+  doc.members.push(member);
+  teamLogPush(doc, (window.__userName || 'Owner') + ' invited ' + member.name + ' as ' + role);
+  renderTeam(doc);
+  closeInvite();
+  var ok = await teamSave(doc);
+  if (!ok) { window.__teamDoc = prev; renderTeam(prev); return; }
+  provisionMail(member);
+  if (typeof showToast === 'function') showToast('Invite recorded — Flowaify is provisioning the login.');
+}
+window.inviteMember = inviteMember;
+
+async function setRole(id, role) {
+  var doc = window.__teamDoc;
+  if (!doc) return;
+  var m = doc.members.find(function(x) { return String(x.id) === String(id); });
+  if (!m || m.role === 'owner') return;
+  var prev = m.role;
+  m.role = role;
+  teamLogPush(doc, m.name + ' changed to ' + role);
+  renderTeam(doc);
+  var ok = await teamSave(doc);
+  if (!ok) { m.role = prev; renderTeam(doc); }
+  else if (typeof showToast === 'function') showToast(escDash(m.name) + ' is now ' + role + '.');
+}
+window.setRole = setRole;
+
+async function markActive(id) {
+  var doc = window.__teamDoc;
+  if (!doc) return;
+  var m = doc.members.find(function(x) { return String(x.id) === String(id); });
+  if (!m) return;
+  m.status = 'active';
+  teamLogPush(doc, m.name + '\u2019s seat activated');
+  renderTeam(doc);
+  await teamSave(doc);
+}
+window.markActive = markActive;
+
+async function removeMember(id) {
+  var doc = window.__teamDoc;
+  if (!doc) return;
+  var m = doc.members.find(function(x) { return String(x.id) === String(id); });
+  if (!m || m.role === 'owner') return;
+  if (!confirm('Remove ' + m.name + ' from the team? Their login will be deactivated.')) return;
+  var prev = JSON.parse(JSON.stringify(doc));
+  doc.members = doc.members.filter(function(x) { return String(x.id) !== String(id); });
+  teamLogPush(doc, m.name + ' removed from the team');
+  renderTeam(doc);
+  var ok = await teamSave(doc);
+  if (!ok) { window.__teamDoc = prev; renderTeam(prev); }
+  else if (typeof showToast === 'function') showToast(escDash(m.name) + ' removed — we\u2019ll deactivate their login.');
+}
+window.removeMember = removeMember;
+
+function resendProvision(id) {
+  var doc = window.__teamDoc;
+  if (!doc) return;
+  var m = doc.members.find(function(x) { return String(x.id) === String(id); });
+  if (m) provisionMail(m);
+}
+window.resendProvision = resendProvision;
+
+function buySeats() {
+  var biz = '';
+  try {
+    var saved = JSON.parse(localStorage.getItem('flw_settings_' + (window.__userSub || 'anon')) || '{}');
+    biz = ((saved.biz || {})['s2-biz-name'] || '').trim();
+  } catch (e) {}
+  var doc = window.__teamDoc || {};
+  var subject = 'Seat purchase request' + (biz ? ' — ' + biz : '');
+  var body = 'We\u2019d like to add more seats to our Flowaify plan.\n\n' +
+    'Current seats: ' + ((doc.members || []).length) + ' of ' + (doc.seatsIncluded || 3) +
+    (biz ? '\nBusiness: ' + biz : '') +
+    '\nRequested by: ' + (window.__userEmail || '') +
+    '\n\nSent from Flowaify Dashboard \u2192 Team';
+  window.location.href = 'mailto:contact@flowaify.app?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+}
+window.buySeats = buySeats;
