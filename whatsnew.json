@@ -1,0 +1,38 @@
+[
+  {
+    "date": "Jul 3, 2026",
+    "tag": "AI",
+    "title": "Meet Flowy — your AI assistant, now in the dashboard",
+    "text": "Press ⌘J or hit the Flowy button. Ask about your leads, run commands, get a daily briefing, and draft follow-ups — all from a Copilot-style side panel."
+  },
+  {
+    "date": "Jul 3, 2026",
+    "tag": "Feature",
+    "title": "Update leads without leaving the dashboard",
+    "text": "Set a lead to Hot, Warm, Cold, or Booked and add notes right from the lead panel — changes write straight to your CRM."
+  },
+  {
+    "date": "Jul 3, 2026",
+    "tag": "Feature",
+    "title": "Calendar, funnel, and exports",
+    "text": "A new Calendar page maps your deal closings and lead flow, Analytics gained a conversion funnel, and you can export leads to CSV or print a client-ready report."
+  },
+  {
+    "date": "Jul 3, 2026",
+    "tag": "Design",
+    "title": "Dark mode + command palette",
+    "text": "Toggle dark mode from the header, and press ⌘K to jump to any page, lead, or action instantly."
+  },
+  {
+    "date": "Jul 2, 2026",
+    "tag": "Design",
+    "title": "A completely redesigned dashboard",
+    "text": "New Microsoft-inspired look: cleaner cards, live sparklines, a lead goal gauge, top-lead scoring, and smart insights generated from your data."
+  },
+  {
+    "date": "Jul 1, 2026",
+    "tag": "Feature",
+    "title": "Live CRM data",
+    "text": "Your dashboard now syncs directly with your CRM — leads, pipeline, sources, and activity update every time you open it."
+  }
+]
