@@ -62,6 +62,10 @@ export default {
         return handleUpdate(request, env, corsHeaders);
       }
 
+      if (url.pathname === '/ai' && request.method === 'POST') {
+        return handleAI(request, env, corsHeaders);
+      }
+
       return json({ error: 'Not found' }, 404, corsHeaders);
 
     } catch (err) {
@@ -286,6 +290,73 @@ async function handleUpdate(request, env, corsHeaders) {
     return json({ error: 'Nothing to update' }, 400, corsHeaders);
   }
   return json({ ok: true, updated: results }, 200, corsHeaders);
+}
+
+// ─── /ai (POST) — Flowy assistant via Workers AI ──────────────────────────────
+// Requires a Workers AI binding named "AI" (Settings → Bindings → Workers AI).
+
+async function handleAI(request, env, corsHeaders) {
+  const authHeader = request.headers.get('Authorization') || '';
+  if (!authHeader.startsWith('Bearer ')) {
+    return json({ error: 'Missing token' }, 401, corsHeaders);
+  }
+  const token = authHeader.slice(7).trim();
+
+  let payload;
+  try {
+    payload = await verifyJWT(token, AUTH0_DOMAIN, AUTH0_CLIENT_ID, AUTH0_TENANT);
+  } catch (err) {
+    return json({ error: err.message }, 401, corsHeaders);
+  }
+
+  let clientId = payload['https://flowaify.app/clientId'];
+  if (!clientId && payload.sub) {
+    const subKey = 'CLIENT_' + payload.sub.replace(/[^A-Z0-9]/gi, '_').toUpperCase();
+    clientId = env[subKey];
+  }
+  if (!clientId) {
+    return json({ error: 'No clientId in token' }, 403, corsHeaders);
+  }
+
+  if (!env.AI) {
+    return json({ error: 'AI_NOT_ENABLED' }, 501, corsHeaders);
+  }
+
+  let body;
+  try {
+    body = await request.json();
+  } catch (e) {
+    return json({ error: 'Invalid JSON body' }, 400, corsHeaders);
+  }
+  const question = String(body.question || '').slice(0, 500);
+  if (!question.trim()) {
+    return json({ error: 'Missing question' }, 400, corsHeaders);
+  }
+  const context = JSON.stringify(body.context || {}).slice(0, 6000);
+  const history = Array.isArray(body.history) ? body.history.slice(-6).filter(m =>
+    m && (m.role === 'user' || m.role === 'assistant') && typeof m.content === 'string'
+  ).map(m => ({ role: m.role, content: m.content.slice(0, 400) })) : [];
+
+  const messages = [
+    {
+      role: 'system',
+      content: "You are Flowy, Flowaify's friendly CRM assistant living inside a client dashboard. " +
+        "Answer ONLY from the CRM DATA provided below. Be concise (2-4 sentences), professional but warm. " +
+        "Use plain numbers, not markdown tables. If the data cannot answer the question, say so briefly " +
+        "and suggest what the user could check instead. Never invent leads, numbers, dates, or events.\n\n" +
+        "CRM DATA:\n" + context,
+    },
+    ...history,
+    { role: 'user', content: question },
+  ];
+
+  try {
+    const out = await env.AI.run('@cf/meta/llama-3.1-8b-instruct', { messages, max_tokens: 300 });
+    return json({ answer: (out && out.response) || 'Sorry — I could not generate an answer.' }, 200, corsHeaders);
+  } catch (err) {
+    console.error('Workers AI error:', err.message);
+    return json({ error: 'AI request failed' }, 502, corsHeaders);
+  }
 }
 
 // ─── JWT Validation (Web Crypto API — no external deps) ──────────────────────
