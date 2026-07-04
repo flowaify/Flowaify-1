@@ -146,7 +146,7 @@ function renderMiniFeed(data) {
       text: 'Deal <strong>' + pEsc(d.name) + '</strong>' + (d.stage ? ' · ' + pEsc(d.stage) : '') });
   });
   events.sort(function(a, b) { return b.ts - a.ts; });
-  var top = events.slice(0, 5);
+  var top = events.slice(0, 7);
   if (!top.length) {
     el.innerHTML = '<div class="empty-note">New leads and automation events will appear here.</div>';
     return;

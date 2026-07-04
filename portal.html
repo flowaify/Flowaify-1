@@ -134,7 +134,11 @@
     .sec-head { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid var(--border); gap: 10px; }
     .sec-title { font-size: 13px; font-weight: 650; }
     .sec-sub { font-size: 11px; color: var(--text-m); }
-    .g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; }
+    .g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: stretch; }
+    .g2 > .card, .g2 > div { min-width: 0; }
+    .act-card { display: flex; flex-direction: column; }
+    #pt-activity { flex: 1; display: flex; flex-direction: column; justify-content: flex-start; }
+    #pt-activity .empty-note { margin: auto; }
     .g4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
     .mb16 { margin-bottom: 16px; }
 
@@ -176,6 +180,8 @@
     .up-name { font-size: 12px; font-weight: 600; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .up-sub { font-size: 10.5px; color: var(--text-m); }
     .up-amt { margin-left: auto; font-size: 12px; font-weight: 700; color: var(--green); font-variant-numeric: tabular-nums; flex-shrink: 0; }
+    .card-tint-blue { background: linear-gradient(135deg, rgba(0,87,255,0.07), var(--bg-card) 58%); }
+    [data-theme="dark"] .card-tint-blue { background: linear-gradient(135deg, rgba(59,130,246,0.14), var(--bg-card) 58%); }
     .ptm-wrap { display: flex; align-items: center; gap: 14px; padding: 14px 16px; }
     .ptm-avatars { display: flex; }
     .ptm-avatars .lead-avatar { width: 30px; height: 30px; border-radius: 50%; color: #fff; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; border: 2px solid var(--bg-card); margin-left: -8px; }
@@ -341,12 +347,12 @@
           <div class="sec-head"><div class="sec-title">Upcoming Closings</div><a class="sec-link" href="app.html">Calendar</a></div>
           <div id="pt-upcoming"><div class="empty-note">Checking your pipeline…</div></div>
         </div>
-        <div class="card" id="pt-team-card" style="display:none;">
+        <div class="card card-tint-blue" id="pt-team-card" style="display:none;">
           <div class="sec-head"><div class="sec-title">Your Team</div><a class="sec-link" href="app.html">Manage team →</a></div>
           <div id="pt-team"></div>
         </div>
       </div>
-      <div class="card">
+      <div class="card act-card">
         <div class="sec-head"><div class="sec-title">Latest Activity</div><a class="sec-link" href="app.html">View all</a></div>
         <div id="pt-activity"><div class="empty-note">Loading activity…</div></div>
       </div>
