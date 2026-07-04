@@ -201,6 +201,33 @@
 
     footer { text-align: center; font-size: 10.5px; color: var(--text-m); padding: 26px 0 0; }
 
+    /* MODAL */
+    .modal-overlay { position: fixed; inset: 0; z-index: 400; background: rgba(10,13,20,0.5); backdrop-filter: blur(3px); display: none; align-items: center; justify-content: center; padding: 16px; }
+    .modal-overlay.open { display: flex; }
+    .modal { width: 100%; max-width: 460px; background: var(--bg-card); border-radius: 12px; box-shadow: 0 0 2px rgba(0,0,0,0.2), 0 20px 50px rgba(0,0,0,0.3); overflow: hidden; animation: menu-in 0.15s ease; }
+    .modal-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 18px 20px 14px; border-bottom: 1px solid var(--border); }
+    .modal-title { font-size: 15px; font-weight: 700; }
+    .modal-sub { font-size: 11.5px; color: var(--text-m); margin-top: 2px; }
+    .modal-x { width: 28px; height: 28px; background: transparent; border: none; border-radius: 4px; color: var(--text-m); cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .modal-x:hover { background: var(--hover); color: var(--text); }
+    .modal-x i, .modal-x svg { width: 15px; height: 15px; }
+    .modal-body { padding: 18px 20px; }
+    .field { margin-bottom: 14px; }
+    .field label { display: block; font-size: 11px; font-weight: 600; color: var(--text-m); margin-bottom: 5px; }
+    .field input, .field select, .field textarea { width: 100%; padding: 8px 11px; background: var(--input-bg); border: 1px solid var(--input-border); border-radius: 5px; color: var(--text); font-size: 12.5px; font-family: inherit; outline: none; resize: vertical; transition: border-color 0.12s; }
+    .field input:focus, .field select:focus, .field textarea:focus { border-color: var(--blue); }
+    .modal-foot { display: flex; justify-content: flex-end; gap: 8px; padding: 14px 20px 18px; border-top: 1px solid var(--border); }
+    .btn-primary { display: inline-flex; align-items: center; gap: 7px; padding: 8px 16px; background: var(--blue); border: none; border-radius: 5px; color: #fff; font-size: 12.5px; font-weight: 600; cursor: pointer; transition: background 0.12s; }
+    .btn-primary:hover { background: var(--blue-b); }
+    .btn-primary i, .btn-primary svg { width: 13px; height: 13px; }
+    .btn-ghost { display: inline-flex; align-items: center; gap: 7px; padding: 8px 14px; background: transparent; border: 1px solid var(--input-border); border-radius: 5px; color: var(--text-s); font-size: 12.5px; font-weight: 500; cursor: pointer; transition: background 0.12s; }
+    .btn-ghost:hover { background: var(--hover); color: var(--text); }
+    .btn-ghost i, .btn-ghost svg { width: 13px; height: 13px; }
+
+    /* TOAST */
+    #toast { position: fixed; bottom: 24px; right: 24px; z-index: 500; background: var(--bg-card); border-radius: 8px; padding: 12px 16px; box-shadow: 0 0 2px rgba(0,0,0,0.2), 0 8px 24px rgba(0,0,0,0.25); display: none; align-items: center; gap: 9px; max-width: 340px; font-size: 12.5px; color: var(--text-s); animation: menu-in 0.2s ease; }
+    #toast i, #toast svg { width: 14px; height: 14px; color: var(--green); flex-shrink: 0; }
+
     @media (max-width: 860px) {
       #login-view.show { flex-direction: column; }
       .lg-brand { padding: 36px 28px; flex: none; }
@@ -321,25 +348,25 @@
         <div class="sup-icon" style="background:var(--blue-dim);color:var(--blue);"><i data-lucide="pen-line"></i></div>
         <div class="sup-title">Request a change</div>
         <div class="sup-sub">Tweak an automation, message copy, or routing — we'll handle it.</div>
-        <button class="sup-btn" onclick="supportMail('Change request')">Request</button>
+        <button class="sup-btn" onclick="openRequest('change')">Request</button>
       </div>
       <div class="card sup-card">
         <div class="sup-icon" style="background:var(--amber-dim);color:#d97706;"><i data-lucide="triangle-alert"></i></div>
         <div class="sup-title">Report an issue</div>
         <div class="sup-sub">Something looks off? Tell us and we'll jump on it.</div>
-        <button class="sup-btn" onclick="supportMail('Issue report')">Report</button>
+        <button class="sup-btn" onclick="openRequest('issue')">Report</button>
       </div>
       <div class="card sup-card">
         <div class="sup-icon" style="background:var(--green-dim);color:var(--green);"><i data-lucide="phone"></i></div>
         <div class="sup-title">Book a call</div>
         <div class="sup-sub">Grab time with the Flowaify team for a walkthrough or strategy chat.</div>
-        <button class="sup-btn" onclick="supportMail('Call request')">Book</button>
+        <button class="sup-btn" onclick="openRequest('call')">Book</button>
       </div>
       <div class="card sup-card">
         <div class="sup-icon" style="background:rgba(139,92,246,0.10);color:var(--purple);"><i data-lucide="mail"></i></div>
         <div class="sup-title">Email us</div>
         <div class="sup-sub">Anything else — we usually reply within one business day.</div>
-        <button class="sup-btn" onclick="supportMail('Hello')">Email</button>
+        <button class="sup-btn" onclick="openRequest('hello')">Email</button>
       </div>
     </div>
 
@@ -352,6 +379,43 @@
     <footer>Flowaify Workspace · <span id="ft-year"></span></footer>
   </div>
 </div>
+
+<!-- REQUEST MODAL -->
+<div class="modal-overlay" id="req-overlay" onclick="if(event.target===this)closeRequest()">
+  <div class="modal">
+    <div class="modal-head">
+      <div>
+        <div class="modal-title" id="req-title">Request a change</div>
+        <div class="modal-sub" id="req-sub">Tell us what you need — we'll confirm within one business day.</div>
+      </div>
+      <button class="modal-x" onclick="closeRequest()"><i data-lucide="x"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="field" id="req-urgency-wrap" style="display:none;">
+        <label>How urgent is it?</label>
+        <select id="req-urgency">
+          <option>Normal — within a few days is fine</option>
+          <option>High — affecting my leads right now</option>
+          <option>Low — whenever you get to it</option>
+        </select>
+      </div>
+      <div class="field">
+        <label id="req-msg-label">What do you need?</label>
+        <textarea id="req-msg" rows="5" placeholder="Describe it in your own words…"></textarea>
+      </div>
+      <div class="field" style="margin-bottom:0;">
+        <label>Reply-to email</label>
+        <input type="email" id="req-email" placeholder="you@business.com" />
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-ghost" onclick="copyRequest()"><i data-lucide="copy"></i>Copy message</button>
+      <button class="btn-primary" id="req-send" onclick="sendRequest()"><i data-lucide="send"></i>Send via email</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"><i data-lucide="check"></i><span id="toast-msg"></span></div>
 
 <script src="portal.js?v=2"></script>
 <script>
@@ -433,15 +497,94 @@ function boot(user) {
   }).catch(function() {});
 }
 
-function supportMail(kind) {
-  let biz = '';
+/* ── Support requests ── */
+const SUPPORT_EMAIL = 'contact@flowaify.app';
+const BOOKING_URL   = ''; // paste your Calendly/booking link here to make "Book a call" open it directly
+
+const REQ_KINDS = {
+  change: { title: 'Request a change',  sub: "Tell us what you need — we'll confirm within one business day.", label: 'What would you like changed?', urgency: false },
+  issue:  { title: 'Report an issue',   sub: "Describe what looks off — we'll jump on it.",                    label: "What's happening?",            urgency: true },
+  call:   { title: 'Book a call',       sub: "Tell us what you'd like to cover and some times that work.",     label: 'What should we cover, and when are you free?', urgency: false },
+  hello:  { title: 'Email us',          sub: 'Anything at all — we usually reply within one business day.',    label: 'Your message',                 urgency: false },
+};
+let reqKind = 'change';
+
+function bizName() {
   try {
     const saved = JSON.parse(localStorage.getItem('flw_settings_' + (window.__userSub || 'anon')) || '{}');
-    biz = ((saved.biz || {})['s2-biz-name'] || '').trim();
-  } catch(e) {}
-  const subject = encodeURIComponent(kind + (biz ? ' — ' + biz : ''));
-  window.location.href = 'mailto:contact@flowaify.app?subject=' + subject;
+    return ((saved.biz || {})['s2-biz-name'] || '').trim();
+  } catch(e) { return ''; }
 }
+
+function openRequest(kind) {
+  if (kind === 'call' && BOOKING_URL) { window.open(BOOKING_URL, '_blank'); return; }
+  reqKind = kind;
+  const k = REQ_KINDS[kind] || REQ_KINDS.hello;
+  document.getElementById('req-title').textContent = k.title;
+  document.getElementById('req-sub').textContent = k.sub;
+  document.getElementById('req-msg-label').textContent = k.label;
+  document.getElementById('req-urgency-wrap').style.display = k.urgency ? 'block' : 'none';
+  document.getElementById('req-msg').value = '';
+  const em = document.getElementById('req-email');
+  if (em && !em.value) em.value = window.__userEmail || '';
+  document.getElementById('req-overlay').classList.add('open');
+  lucide.createIcons();
+  setTimeout(function() { document.getElementById('req-msg').focus(); }, 80);
+}
+function closeRequest() { document.getElementById('req-overlay').classList.remove('open'); }
+
+function buildRequest() {
+  const k = REQ_KINDS[reqKind] || REQ_KINDS.hello;
+  const biz = bizName();
+  const msg = document.getElementById('req-msg').value.trim();
+  const email = document.getElementById('req-email').value.trim();
+  const urgency = reqKind === 'issue' ? document.getElementById('req-urgency').value : null;
+  const subject = k.title + (biz ? ' — ' + biz : '');
+  const lines = [];
+  if (biz) lines.push('Business: ' + biz);
+  if (email) lines.push('Reply-to: ' + email);
+  if (urgency) lines.push('Urgency: ' + urgency);
+  lines.push('Sent from: Flowaify Workspace');
+  lines.push('');
+  lines.push(msg);
+  return { subject: subject, body: lines.join('\n'), msg: msg };
+}
+
+function sendRequest() {
+  const r = buildRequest();
+  if (!r.msg) { portalToast('Add a quick message first.'); return; }
+  const href = 'mailto:' + SUPPORT_EMAIL +
+    '?subject=' + encodeURIComponent(r.subject) +
+    '&body=' + encodeURIComponent(r.body).slice(0, 1800);
+  window.location.href = href;
+  closeRequest();
+  portalToast('Opening your email app — just hit send.');
+}
+
+function copyRequest() {
+  const r = buildRequest();
+  if (!r.msg) { portalToast('Add a quick message first.'); return; }
+  const text = 'To: ' + SUPPORT_EMAIL + '\nSubject: ' + r.subject + '\n\n' + r.body;
+  navigator.clipboard.writeText(text).then(function() {
+    closeRequest();
+    portalToast('Copied — paste it into any email or message.');
+  }).catch(function() {
+    portalToast("Couldn't copy — select and copy the text manually.");
+  });
+}
+
+function portalToast(msg) {
+  const t = document.getElementById('toast');
+  document.getElementById('toast-msg').textContent = msg;
+  t.style.display = 'flex';
+  lucide.createIcons();
+  clearTimeout(t._t);
+  t._t = setTimeout(function() { t.style.display = 'none'; }, 4000);
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeRequest();
+});
 
 function toggleProfileMenu() { document.getElementById('profile-menu').classList.toggle('open'); }
 document.addEventListener('click', function(e) {
