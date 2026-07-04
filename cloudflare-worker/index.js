@@ -34,7 +34,7 @@ export default {
 
     const corsHeaders = corsOrigin ? {
       'Access-Control-Allow-Origin': corsOrigin,
-      'Access-Control-Allow-Methods': 'GET, OPTIONS',
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
       'Access-Control-Allow-Headers': 'Authorization, Content-Type',
       'Access-Control-Max-Age': '86400',
     } : {};
@@ -56,6 +56,10 @@ export default {
 
       if (url.pathname === '/data') {
         return handleData(request, env, corsHeaders);
+      }
+
+      if (url.pathname === '/update' && request.method === 'POST') {
+        return handleUpdate(request, env, corsHeaders);
       }
 
       return json({ error: 'Not found' }, 404, corsHeaders);
@@ -171,6 +175,117 @@ async function handleData(request, env, corsHeaders) {
 
   // 7. Shape and return
   return json(shapeResponse(contacts, deals), 200, corsHeaders);
+}
+
+// ─── /update (POST) — write status changes and notes back to Zoho ────────────
+// Requires the Zoho refresh token to carry ZohoCRM.modules.ALL scope.
+
+async function handleUpdate(request, env, corsHeaders) {
+  // Auth: identical validation path to /data
+  const authHeader = request.headers.get('Authorization') || '';
+  if (!authHeader.startsWith('Bearer ')) {
+    return json({ error: 'Missing token' }, 401, corsHeaders);
+  }
+  const token = authHeader.slice(7).trim();
+
+  let payload;
+  try {
+    payload = await verifyJWT(token, AUTH0_DOMAIN, AUTH0_CLIENT_ID, AUTH0_TENANT);
+  } catch (err) {
+    return json({ error: err.message }, 401, corsHeaders);
+  }
+
+  let clientId = payload['https://flowaify.app/clientId'];
+  if (!clientId && payload.sub) {
+    const subKey = 'CLIENT_' + payload.sub.replace(/[^A-Z0-9]/gi, '_').toUpperCase();
+    clientId = env[subKey];
+  }
+  if (!clientId) {
+    return json({ error: 'No clientId in token' }, 403, corsHeaders);
+  }
+
+  const key = clientId.toUpperCase().replace(/[^A-Z0-9]/g, '_');
+  const refreshToken = env[`REFRESH_TOKEN_${key}`];
+  if (!refreshToken) {
+    return json({ error: `No Zoho credentials for client: ${clientId}` }, 500, corsHeaders);
+  }
+  const datacenter = env[`DATACENTER_${key}`] || 'https://www.zohoapis.com';
+
+  let zohoToken;
+  try {
+    zohoToken = await getZohoToken(clientId, refreshToken, datacenter, env);
+  } catch (err) {
+    return json({ error: 'Failed to authenticate with CRM' }, 500, corsHeaders);
+  }
+
+  // Parse and validate body
+  let body;
+  try {
+    body = await request.json();
+  } catch (e) {
+    return json({ error: 'Invalid JSON body' }, 400, corsHeaders);
+  }
+  const contactId = String(body.contactId || '').replace(/[^\w]/g, '');
+  if (!contactId) {
+    return json({ error: 'Missing contactId' }, 400, corsHeaders);
+  }
+
+  const ALLOWED_STATUSES = new Set(['HOT', 'WARM', 'COLD', 'BOOKED']);
+  const results = {};
+
+  // Status update → flow_state on the contact
+  if (body.status != null) {
+    const status = String(body.status).toUpperCase();
+    if (!ALLOWED_STATUSES.has(status)) {
+      return json({ error: 'Invalid status' }, 400, corsHeaders);
+    }
+    const resp = await fetch(`${datacenter}/crm/v2/Contacts`, {
+      method: 'PUT',
+      headers: {
+        Authorization: `Zoho-oauthtoken ${zohoToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ data: [{ id: contactId, flow_state: status }] }),
+    });
+    if (resp.status === 401) {
+      delete tokenCache[clientId];
+      return json({ error: 'ZOHO_UNAUTHORIZED' }, 401, corsHeaders);
+    }
+    if (!resp.ok) {
+      const detail = await resp.text();
+      console.error('Zoho status update failed:', resp.status, detail.slice(0, 200));
+      return json({ error: 'CRM rejected the status update' }, 502, corsHeaders);
+    }
+    results.status = status;
+  }
+
+  // Note → Notes subresource on the contact
+  if (body.note != null && String(body.note).trim() !== '') {
+    const note = String(body.note).slice(0, 2000);
+    const resp = await fetch(`${datacenter}/crm/v2/Contacts/${contactId}/Notes`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Zoho-oauthtoken ${zohoToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ data: [{ Note_Title: 'Dashboard note', Note_Content: note }] }),
+    });
+    if (resp.status === 401) {
+      delete tokenCache[clientId];
+      return json({ error: 'ZOHO_UNAUTHORIZED' }, 401, corsHeaders);
+    }
+    if (!resp.ok) {
+      const detail = await resp.text();
+      console.error('Zoho note create failed:', resp.status, detail.slice(0, 200));
+      return json({ error: 'CRM rejected the note' }, 502, corsHeaders);
+    }
+    results.note = true;
+  }
+
+  if (!('status' in results) && !('note' in results)) {
+    return json({ error: 'Nothing to update' }, 400, corsHeaders);
+  }
+  return json({ ok: true, updated: results }, 200, corsHeaders);
 }
 
 // ─── JWT Validation (Web Crypto API — no external deps) ──────────────────────

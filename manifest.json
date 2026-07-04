@@ -1,0 +1,13 @@
+{
+  "name": "Flowaify Dashboard",
+  "short_name": "Flowaify",
+  "description": "Live CRM dashboard — leads, pipeline, automations, and analytics.",
+  "start_url": "/app.html",
+  "display": "standalone",
+  "background_color": "#0b0e16",
+  "theme_color": "#16161a",
+  "icons": [
+    { "src": "logo-transparent.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "logo-transparent.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ]
+}

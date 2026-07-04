@@ -6,6 +6,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Flowaify — Dashboard</title>
   <link rel="icon" type="image/png" href="logo-transparent.png" />
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#16161a" />
+  <link rel="apple-touch-icon" href="logo-transparent.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -494,6 +497,67 @@
     #auto-activity { flex: 1; display: flex; flex-direction: column; justify-content: center; }
     #auto-activity .feed-item { width: 100%; }
 
+    /* ERROR BANNER + SYNC */
+    #err-banner { position: sticky; top: 94px; z-index: 39; margin: 12px 28px 0; display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: var(--red-dim); border: 1px solid rgba(220,38,38,0.25); border-radius: 8px; font-size: 12.5px; color: var(--text); }
+    #err-banner i, #err-banner svg { width: 15px; height: 15px; color: var(--red); flex-shrink: 0; }
+    #err-banner span { flex: 1; }
+    .sync-label { font-size: 11px; color: var(--text-m); margin-right: 8px; white-space: nowrap; }
+
+    /* INSIGHTS */
+    .insight-row { display: flex; align-items: flex-start; gap: 10px; padding: 10px 16px; border-bottom: 1px solid var(--border); }
+    .insight-row:last-child { border-bottom: none; }
+    .insight-icon { width: 24px; height: 24px; border-radius: 6px; background: var(--hover); display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+    .insight-icon i, .insight-icon svg { width: 13px; height: 13px; }
+    .insight-text { font-size: 12px; color: var(--text-s); line-height: 1.5; }
+    .insight-text strong { color: var(--text); font-weight: 600; }
+
+    /* FUNNEL */
+    .funnel-row { display: flex; align-items: center; gap: 12px; padding: 7px 0; }
+    .funnel-name { width: 80px; font-size: 12px; font-weight: 500; color: var(--text-s); flex-shrink: 0; }
+    .funnel-track { flex: 1; height: 18px; background: var(--track); border-radius: 4px; overflow: hidden; }
+    .funnel-fill { height: 100%; border-radius: 4px; transition: width .5s ease; }
+    .funnel-n { width: 40px; text-align: right; font-size: 12.5px; font-weight: 700; color: var(--text); font-variant-numeric: tabular-nums; flex-shrink: 0; }
+    .funnel-conv { width: 44px; text-align: right; font-size: 10.5px; color: var(--text-m); font-variant-numeric: tabular-nums; flex-shrink: 0; }
+
+    /* STATUS PICKER + NOTE (lead detail) */
+    .status-picker { display: flex; gap: 6px; flex-wrap: wrap; }
+    .status-chip { border: 1px solid var(--input-border); background: transparent; border-radius: 4px; font-family: inherit; font-size: 10.5px; font-weight: 700; letter-spacing: 0.3px; padding: 5px 10px; cursor: pointer; color: var(--text-m); transition: all 0.12s; }
+    .status-chip:hover { color: var(--text); border-color: var(--text-m); }
+    .status-chip.sc-hot.active    { background: var(--red-dim);    color: var(--red);    border-color: rgba(220,38,38,0.4); }
+    .status-chip.sc-warm.active   { background: var(--amber-dim);  color: #d97706;       border-color: rgba(217,119,6,0.4); }
+    .status-chip.sc-cold.active   { background: var(--blue-dim);   color: var(--blue);   border-color: rgba(0,87,255,0.35); }
+    .status-chip.sc-booked.active { background: var(--green-dim);  color: var(--green);  border-color: rgba(5,150,105,0.4); }
+    .lead-note { width: 100%; background: var(--input-bg); border: 1px solid var(--input-border); border-radius: 4px; color: var(--text); font-size: 12px; font-family: inherit; padding: 7px 10px; outline: none; resize: vertical; }
+    .lead-note:focus { border-color: var(--blue); }
+
+    /* PRINT REPORT */
+    #report-view { display: none; }
+    @media print {
+      body > *:not(#report-view) { display: none !important; }
+      #report-view { display: block !important; font-family: 'Segoe UI', Inter, sans-serif; color: #0f172a; padding: 20px; }
+      #report-view h1 { font-size: 22px; margin-bottom: 2px; }
+      #report-view .rp-sub { color: #64748b; font-size: 12px; margin-bottom: 20px; }
+      #report-view h2 { font-size: 14px; margin: 18px 0 8px; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; }
+      #report-view .rp-kpis { display: flex; gap: 30px; margin: 14px 0; }
+      #report-view .rp-kpis div { display: flex; flex-direction: column; }
+      #report-view .rp-kpis b { font-size: 20px; }
+      #report-view .rp-kpis span { font-size: 10px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; }
+      #report-view table { border-collapse: collapse; width: 100%; font-size: 12px; }
+      #report-view th, #report-view td { text-align: left; padding: 5px 8px; border-bottom: 1px solid #e2e8f0; }
+      #report-view ul { padding-left: 18px; font-size: 12px; line-height: 1.7; }
+      #report-view .rp-foot { margin-top: 24px; font-size: 10px; color: #94a3b8; }
+    }
+
+    /* COMMAND PALETTE */
+    .suite-search { position: relative; }
+    .palette { position: absolute; top: calc(100% + 6px); left: 0; right: 0; background: var(--bg-card); border-radius: 10px; box-shadow: 0 0 2px rgba(0,0,0,0.2), 0 12px 28px rgba(0,0,0,0.28); padding: 5px; display: none; z-index: 300; max-height: 380px; overflow-y: auto; }
+    .palette.open { display: block; animation: pmenu-in 0.12s ease; }
+    .pal-group { font-size: 10px; font-weight: 700; color: var(--text-m); text-transform: uppercase; letter-spacing: 0.5px; padding: 8px 10px 4px; }
+    .pal-item { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 6px; cursor: pointer; font-size: 12.5px; color: var(--text-s); }
+    .pal-item i, .pal-item svg { width: 14px; height: 14px; color: var(--text-m); flex-shrink: 0; }
+    .pal-item.sel, .pal-item:hover { background: var(--hover); color: var(--text); }
+    .pal-item .pal-sub { margin-left: auto; font-size: 10.5px; color: var(--text-m); }
+
     /* NAV RAIL (collapsed) */
     @media (min-width: 901px) {
       body.nav-rail { --sidebar-w: 52px; }
@@ -634,10 +698,12 @@
     <span class="suite-div"></span>
     <span class="suite-ctx">Dashboard</span>
   </div>
-  <div class="suite-search">
+  <div class="suite-search" id="suite-search-wrap">
     <i data-lucide="search"></i>
-    <input type="text" id="global-search" placeholder="Search leads…" onkeydown="if(event.key==='Enter')globalSearchGo()" />
+    <input type="text" id="global-search" placeholder="Search or jump to…" autocomplete="off"
+      oninput="paletteFilter()" onfocus="paletteOpen()" onkeydown="paletteKey(event)" />
     <span class="suite-search-kbd">⌘K</span>
+    <div class="palette" id="palette"></div>
   </div>
   <div class="suite-right">
   <button class="suite-icon-btn" id="theme-toggle" onclick="toggleTheme()" title="Toggle dark mode"><i data-lucide="moon"></i></button>
@@ -707,7 +773,10 @@
       <div class="topbar-sub" id="topbar-sub">Monitor lead flow, automation health, and CRM activity.</div>
     </div>
     <div class="topbar-right">
+      <span class="sync-label" id="sync-label"></span>
       <button class="cmd-primary" id="btn-refresh" onclick="refreshData()"><i data-lucide="refresh-cw"></i>Refresh</button>
+      <span class="cmd-div"></span>
+      <button class="cmd-btn" onclick="openReport()"><i data-lucide="file-text"></i>Report</button>
       <span class="cmd-div"></span>
       <div class="seg" id="range-seg">
         <button class="seg-btn" onclick="setRangeSeg(7,this)">7 days</button>
@@ -718,6 +787,12 @@
       <a class="cmd-btn" href="portal.html"><i data-lucide="layout-grid"></i>Workspace</a>
     </div>
   </header>
+
+  <div id="err-banner" style="display:none;">
+    <i data-lucide="wifi-off"></i>
+    <span>Couldn't reach your CRM data. Check your connection and try again.</span>
+    <button class="btn-mini btn-mini-primary" onclick="refreshData()">Retry</button>
+  </div>
 
   <!-- OVERVIEW -->
   <div class="page active" id="page-overview">
@@ -762,6 +837,10 @@
       </div>
       <div style="display:flex;flex-direction:column;gap:16px;">
         <div class="card">
+          <div class="sec-head"><div class="sec-title">Insights</div><span class="state-pill live"><span class="sp-dot"></span>Auto</span></div>
+          <div id="insights-list"></div>
+        </div>
+        <div class="card">
           <div class="sec-head"><div class="sec-title">Needs Attention</div><div class="sec-link" onclick="showPage('automations')">View all</div></div>
           <div id="attn-list"></div>
           <div class="empty-state" id="attn-empty" style="padding:22px 18px;"><i data-lucide="shield-alert"></i><div class="empty-state-title">All clear</div><div class="empty-state-sub">No leads need immediate attention.</div></div>
@@ -784,6 +863,7 @@
       </div>
       <select id="filter-status" onchange="applyLeadFilters()" style="padding:8px 12px;background:var(--input-bg);border:1px solid var(--input-border);border-radius:8px;font-size:12px;font-family:inherit;color:var(--text-s);"><option value="">All statuses</option></select>
       <select id="filter-source" onchange="applyLeadFilters()" style="padding:8px 12px;background:var(--input-bg);border:1px solid var(--input-border);border-radius:8px;font-size:12px;font-family:inherit;color:var(--text-s);"><option value="">All sources</option></select>
+      <button class="btn-mini btn-mini-ghost" onclick="exportLeadsCsv()" style="display:inline-flex;align-items:center;gap:6px;"><i data-lucide="download" style="width:13px;height:13px;"></i>Export CSV</button>
     </div>
 
     <div class="stats-grid">
@@ -947,6 +1027,11 @@
       <div class="card stat-card"><div class="stat-top"><div class="stat-label"><i data-lucide="pie-chart" class="kpi-glyph kg-purple"></i>Lead Sources</div></div><div class="stat-val" id="val-an-sources">—</div></div>
     </div>
 
+    <div class="card mb20">
+      <div class="sec-head"><div class="sec-title">Conversion Funnel</div><div class="sec-sub range-label">Last 30 days</div></div>
+      <div id="funnel" style="padding:14px 18px;"></div>
+    </div>
+
     <div class="analytics-charts mb20">
       <div class="card card-brand"><div class="sec-head"><div class="sec-title">Leads Over Time</div><div class="sec-sub range-label">Last 30 days</div></div>
         <div class="brand-stats">
@@ -1061,9 +1146,11 @@
 </div>
 
 
+<div id="report-view"></div>
+
 <div id="toast"><div class="toast-icon"><i data-lucide="check"></i></div><div id="toast-msg" style="font-size:12.5px;font-weight:600;color:var(--text-s);line-height:1.45;"></div></div>
 
-<script src="crm.js?v=10"></script>
+<script src="crm.js?v=11"></script>
 <script>
 const AUTH0_DOMAIN    = 'auth.flowaify.app';
 const AUTH0_CLIENT_ID = 'tx74Owqn3jVeSaVuxfFHsKloqbPqfAmN';
@@ -1123,6 +1210,7 @@ async function boot(user) {
   loadDashSettings();
   lucide.createIcons();
   initCharts();
+  try { if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js'); } catch(e) {}
 
   try {
     const claims = await auth0Client.getIdTokenClaims();
@@ -1270,19 +1358,104 @@ function setRangeSeg(days, btn) {
   setRange(days);
 }
 
-function globalSearchGo() {
-  const q = (document.getElementById('global-search') || {}).value || '';
-  showPage('leads');
-  const ls = document.getElementById('lead-search');
-  if (ls) { ls.value = q; }
-  if (window.applyLeadFilters) applyLeadFilters();
+/* ── Command palette ── */
+const PAL_PAGES = [
+  { label: 'Overview',    icon: 'home',         run: () => showPage('overview') },
+  { label: 'Leads',       icon: 'users-round',  run: () => showPage('leads') },
+  { label: 'Activity',    icon: 'history',      run: () => showPage('activity') },
+  { label: 'Calendar',    icon: 'calendar',     run: () => showPage('calendar') },
+  { label: 'Automations', icon: 'workflow',     run: () => showPage('automations') },
+  { label: 'Analytics',   icon: 'chart-column', run: () => showPage('analytics') },
+  { label: 'Settings',    icon: 'settings',     run: () => showPage('settings') },
+];
+const PAL_ACTIONS = [
+  { label: 'Toggle dark mode',    icon: 'moon',        run: () => toggleTheme() },
+  { label: 'Refresh data',        icon: 'refresh-cw',  run: () => refreshData() },
+  { label: 'Export leads CSV',    icon: 'download',    run: () => exportLeadsCsv() },
+  { label: 'Download report',     icon: 'file-text',   run: () => openReport() },
+  { label: 'Collapse navigation', icon: 'menu',        run: () => toggleNavRail() },
+  { label: 'Open Workspace',      icon: 'layout-grid', run: () => window.location.href = 'portal.html' },
+];
+let palSel = 0, palItems = [];
+
+function paletteOpen() { paletteFilter(); }
+function paletteClose() {
+  const p = document.getElementById('palette');
+  if (p) p.classList.remove('open');
+}
+
+function paletteFilter() {
+  const p = document.getElementById('palette');
+  const q = ((document.getElementById('global-search') || {}).value || '').trim().toLowerCase();
+  if (!p) return;
+  palItems = [];
+  let htmlOut = '';
+
+  const pages = PAL_PAGES.filter(x => !q || x.label.toLowerCase().includes(q));
+  if (pages.length) {
+    htmlOut += '<div class="pal-group">Pages</div>';
+    pages.forEach(x => { palItems.push(x); htmlOut += palRow(x, palItems.length - 1, 'Page'); });
+  }
+  const acts = PAL_ACTIONS.filter(x => !q || x.label.toLowerCase().includes(q));
+  if (acts.length) {
+    htmlOut += '<div class="pal-group">Actions</div>';
+    acts.forEach(x => { palItems.push(x); htmlOut += palRow(x, palItems.length - 1, 'Action'); });
+  }
+  if (q && window.__crmData) {
+    const leads = window.__crmData.contacts.filter(c =>
+      ((c.name || '') + ' ' + (c.email || '')).toLowerCase().includes(q)).slice(0, 6);
+    if (leads.length) {
+      htmlOut += '<div class="pal-group">Leads</div>';
+      leads.forEach(c => {
+        const id = c.id ? String(c.id).replace(/[^\w-]/g, '') : '';
+        const nm = String(c.name || '').replace(/[^\w\s.@-]/g, '');
+        const item = { label: c.name, icon: 'user', run: () => bellOpenLead(id, nm) };
+        palItems.push(item);
+        htmlOut += palRow(item, palItems.length - 1, 'Lead');
+      });
+    }
+  }
+  if (!palItems.length) htmlOut = '<div class="pal-group" style="padding:14px 10px;">No matches</div>';
+  palSel = 0;
+  p.innerHTML = htmlOut;
+  p.classList.add('open');
+  palPaint();
+  lucide.createIcons();
+}
+
+function palRow(x, i, sub) {
+  return '<div class="pal-item" data-i="' + i + '" onmousedown="event.preventDefault();palRun(' + i + ')">' +
+    '<i data-lucide="' + x.icon + '"></i>' + x.label + '<span class="pal-sub">' + sub + '</span></div>';
+}
+function palPaint() {
+  document.querySelectorAll('.pal-item').forEach(el =>
+    el.classList.toggle('sel', Number(el.getAttribute('data-i')) === palSel));
+}
+function palRun(i) {
+  const item = palItems[i];
+  paletteClose();
+  const s = document.getElementById('global-search');
+  if (s) { s.value = ''; s.blur(); }
+  if (item) item.run();
+}
+function paletteKey(e) {
+  const p = document.getElementById('palette');
+  if (!p || !p.classList.contains('open')) { if (e.key === 'Enter') paletteFilter(); return; }
+  if (e.key === 'ArrowDown') { e.preventDefault(); palSel = Math.min(palItems.length - 1, palSel + 1); palPaint(); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); palSel = Math.max(0, palSel - 1); palPaint(); }
+  else if (e.key === 'Enter') { e.preventDefault(); palRun(palSel); }
+  else if (e.key === 'Escape') { paletteClose(); e.target.blur(); }
 }
 document.addEventListener('keydown', e => {
   if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
     e.preventDefault();
     const s = document.getElementById('global-search');
-    if (s) s.focus();
+    if (s) { s.focus(); paletteOpen(); }
   }
+});
+document.addEventListener('click', e => {
+  const w = document.getElementById('suite-search-wrap');
+  if (w && !w.contains(e.target)) paletteClose();
 });
 
 function toggleBellMenu(e) {

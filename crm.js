@@ -18,29 +18,119 @@ async function loadDashboardData(token) {
     });
     if (!res.ok) {
       console.warn('Worker responded', res.status, await res.text());
+      showErrBanner(true);
       return;
     }
     window.__crmData = await res.json();
+    window.__lastSync = Date.now();
+    showErrBanner(false);
+    updateSyncLabel();
     rerender();
   } catch (err) {
     console.warn('CRM load failed:', err.message);
+    showErrBanner(true);
   }
 }
 
-async function refreshData() {
+function showErrBanner(show) {
+  const b = document.getElementById('err-banner');
+  if (b) b.style.display = show ? 'flex' : 'none';
+}
+
+function updateSyncLabel() {
+  const el = document.getElementById('sync-label');
+  if (!el) return;
+  if (!window.__lastSync) { el.textContent = ''; return; }
+  const m = Math.floor((Date.now() - window.__lastSync) / 60000);
+  el.textContent = m < 1 ? 'Synced just now' : 'Synced ' + m + 'm ago';
+}
+setInterval(updateSyncLabel, 30000);
+
+// Silent auto-refresh every 5 minutes while the tab is visible
+setInterval(function() {
+  if (!document.hidden && window.__crmData) refreshData(true);
+}, 300000);
+
+async function refreshData(quiet) {
   const btn = document.getElementById('btn-refresh');
   const icon = btn ? btn.querySelector('i, svg') : null;
   if (icon) icon.classList.add('spinning');
   try {
     const claims = await auth0Client.getIdTokenClaims();
     if (claims && claims.__raw) await loadDashboardData(claims.__raw);
-    if (typeof showToast === 'function') showToast('Dashboard refreshed with the latest CRM data.');
+    if (!quiet && typeof showToast === 'function') showToast('Dashboard refreshed with the latest CRM data.');
   } catch (e) {
     console.warn('Refresh failed:', e.message);
+    showErrBanner(true);
   }
   const icon2 = btn ? btn.querySelector('i, svg') : null;
   if (icon2) icon2.classList.remove('spinning');
 }
+
+/* ── Write-back: update a lead in Zoho via the Worker ───────────────────────── */
+async function updateLead(contactId, payload) {
+  let claims;
+  try { claims = await auth0Client.getIdTokenClaims(); } catch (e) { return false; }
+  if (!claims || !claims.__raw) return false;
+  try {
+    const res = await fetch(WORKER + '/update', {
+      method: 'POST',
+      headers: {
+        Authorization: 'Bearer ' + claims.__raw,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(Object.assign({ contactId: contactId }, payload)),
+    });
+    if (res.status === 404) {
+      if (typeof showToast === 'function') showToast('Lead updates need the new Worker — paste and deploy it in Cloudflare first.');
+      return false;
+    }
+    if (!res.ok) {
+      const err = await res.json().catch(function() { return {}; });
+      if (typeof showToast === 'function') showToast(err.error || 'Update failed — try again.');
+      return false;
+    }
+    return true;
+  } catch (e) {
+    if (typeof showToast === 'function') showToast('Update failed — check your connection.');
+    return false;
+  }
+}
+
+async function setLeadStatus(contactId, status) {
+  const data = window.__crmData;
+  if (!data) return;
+  const c = data.contacts.find(function(x) { return String(x.id) === String(contactId); });
+  if (!c) return;
+  const prev = c.status;
+  c.status = status;               // optimistic
+  rerender();
+  selectLead(contactId);
+  const ok = await updateLead(contactId, { status: status });
+  if (ok) {
+    if (typeof showToast === 'function') showToast(escDash(c.name) + ' marked ' + status + '.');
+  } else {
+    c.status = prev;               // revert
+    rerender();
+    selectLead(contactId);
+  }
+}
+window.setLeadStatus = setLeadStatus;
+
+async function saveLeadNote(contactId) {
+  const ta = document.getElementById('lead-note-input');
+  if (!ta || !ta.value.trim()) return;
+  const note = ta.value.trim();
+  const btn = document.getElementById('lead-note-save');
+  if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
+  const ok = await updateLead(contactId, { note: note });
+  if (btn) { btn.disabled = false; btn.textContent = 'Save note'; }
+  if (ok) {
+    ta.value = '';
+    if (typeof showToast === 'function') showToast('Note saved to Zoho.');
+  }
+}
+window.saveLeadNote = saveLeadNote;
 
 /* ── Utilities ──────────────────────────────────────────────────────────────── */
 const REDUCED_MOTION = typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -494,6 +584,192 @@ function bellOpenLead(id, name) {
 }
 window.bellOpenLead = bellOpenLead;
 
+/* ── Insights ───────────────────────────────────────────────────────────────── */
+function buildInsights(data, ranged, days) {
+  const out = [];
+  const contacts = data.contacts || [];
+  const deals = data.deals || [];
+
+  // Top source share
+  if (ranged.length >= 3) {
+    const counts = groupCount(ranged, function(c) { return c.source; });
+    const top = Object.keys(counts).sort(function(a, b) { return counts[b] - counts[a]; })[0];
+    const share = Math.round((counts[top] / ranged.length) * 100);
+    if (share >= 25 && top !== 'Unknown') {
+      out.push({ icon: 'pie-chart', color: 'var(--blue)', text: '<strong>' + escDash(top) + '</strong> drives ' + share + '% of your leads this period.' });
+    }
+  }
+
+  // Best weekday
+  if (ranged.length >= 4) {
+    const dow = [0,0,0,0,0,0,0];
+    const names = ['Sundays','Mondays','Tuesdays','Wednesdays','Thursdays','Fridays','Saturdays'];
+    ranged.forEach(function(c) { if (c.createdAt) dow[new Date(c.createdAt).getDay()]++; });
+    const max = Math.max.apply(null, dow);
+    if (max >= 2 && dow.filter(function(v) { return v === max; }).length === 1) {
+      out.push({ icon: 'calendar-days', color: 'var(--purple)', text: '<strong>' + names[dow.indexOf(max)] + '</strong> bring the most new leads.' });
+    }
+  }
+
+  // Deals closing within 7 days
+  const now = Date.now();
+  const week = deals.filter(function(d) {
+    if (!d.closingDate) return false;
+    const t = new Date(d.closingDate).getTime();
+    return t >= now - 86400000 && t <= now + 7 * 86400000;
+  });
+  if (week.length > 0) {
+    let total = 0; week.forEach(function(d) { total += d.amount || 0; });
+    out.push({ icon: 'dollar-sign', color: 'var(--green)', text: '<strong>' + week.length + ' deal' + (week.length === 1 ? '' : 's') + '</strong>' + (total > 0 ? ' worth ' + fmtMoney(total) : '') + ' close within 7 days.' });
+  }
+
+  // Lead flow trend
+  const prev = prevWindowCount(contacts, days);
+  if (prev > 0 && ranged.length !== prev) {
+    const pct = Math.round(((ranged.length - prev) / prev) * 100);
+    if (Math.abs(pct) >= 15) {
+      out.push({
+        icon: pct > 0 ? 'trending-up' : 'trending-down',
+        color: pct > 0 ? 'var(--green)' : 'var(--red)',
+        text: 'Lead flow is <strong>' + (pct > 0 ? 'up ' : 'down ') + Math.abs(pct) + '%</strong> vs the prior period.'
+      });
+    }
+  }
+
+  // Unresponsive
+  const twoDaysAgo = now - 48 * 3600000;
+  const unresp = contacts.filter(function(c) {
+    return c.createdAt && new Date(c.createdAt).getTime() < twoDaysAgo && !c.lastTouchAt;
+  }).length;
+  if (unresp > 0) {
+    out.push({ icon: 'alert-circle', color: '#d97706', text: '<strong>' + unresp + ' lead' + (unresp === 1 ? ' hasn\'t' : 's haven\'t') + '</strong> been touched in 48h+.' });
+  }
+
+  // Goal pace
+  const nowD = new Date();
+  const monthStart = new Date(nowD.getFullYear(), nowD.getMonth(), 1).getTime();
+  const monthCount = contacts.filter(function(c) { return c.createdAt && new Date(c.createdAt).getTime() >= monthStart; }).length;
+  const goal = goalTarget();
+  const daysIn = new Date(nowD.getFullYear(), nowD.getMonth() + 1, 0).getDate();
+  const elapsed = nowD.getDate() / daysIn;
+  if (goal > 0 && elapsed > 0.15) {
+    const pace = (monthCount / goal) / elapsed;
+    if (pace >= 1) out.push({ icon: 'target', color: 'var(--green)', text: 'You\'re <strong>on pace</strong> for your ' + goal + '-lead monthly goal.' });
+    else if (pace < 0.7) out.push({ icon: 'target', color: '#d97706', text: 'You\'re <strong>behind pace</strong> for your ' + goal + '-lead monthly goal.' });
+  }
+
+  return out.slice(0, 4);
+}
+
+function renderInsights(data, ranged, days) {
+  const el = document.getElementById('insights-list');
+  if (!el) return;
+  const items = buildInsights(data, ranged, days);
+  if (items.length === 0) {
+    el.innerHTML = '<div class="empty-state" style="padding:22px 16px;"><i data-lucide="lightbulb"></i>' +
+      '<div class="empty-state-title">No insights yet</div>' +
+      '<div class="empty-state-sub">Findings appear automatically as your lead data grows.</div></div>';
+    return;
+  }
+  el.innerHTML = items.map(function(it) {
+    return '<div class="insight-row">' +
+      '<div class="insight-icon" style="color:' + it.color + ';"><i data-lucide="' + it.icon + '"></i></div>' +
+      '<div class="insight-text">' + it.text + '</div>' +
+      '</div>';
+  }).join('');
+}
+
+/* ── Pipeline funnel ────────────────────────────────────────────────────────── */
+function renderFunnel(data, ranged) {
+  const el = document.getElementById('funnel');
+  if (!el) return;
+  const overview = data.overview || {};
+  const total = ranged.length;
+  if (total === 0) {
+    el.innerHTML = '<div class="empty-state" style="padding:28px 20px;"><i data-lucide="filter"></i>' +
+      '<div class="empty-state-title">No leads in this period</div>' +
+      '<div class="empty-state-sub">The funnel fills in as leads flow through your pipeline.</div></div>';
+    return;
+  }
+  const qualified = ranged.filter(function(c) { return c.status && String(c.status).trim() !== ''; }).length;
+  const booked = Math.min(overview.bookedCalls || 0, total);
+  const won = (data.deals || []).filter(function(d) { return String(d.stage || '').toUpperCase().indexOf('WON') !== -1; }).length;
+  const stages = [
+    { name: 'Leads',     n: total,     color: 'var(--blue)' },
+    { name: 'Qualified', n: qualified, color: '#8b5cf6' },
+    { name: 'Booked',    n: booked,    color: '#0d9488' },
+    { name: 'Won',       n: won,       color: 'var(--green)' },
+  ];
+  el.innerHTML = stages.map(function(s, i) {
+    const pct = Math.max(3, Math.round((s.n / total) * 100));
+    const conv = i > 0 && stages[i-1].n > 0 ? Math.round((s.n / stages[i-1].n) * 100) + '%' : '';
+    return '<div class="funnel-row">' +
+      '<div class="funnel-name">' + s.name + '</div>' +
+      '<div class="funnel-track"><div class="funnel-fill" style="width:' + pct + '%;background:' + s.color + ';"></div></div>' +
+      '<div class="funnel-n">' + s.n + '</div>' +
+      '<div class="funnel-conv">' + conv + '</div>' +
+      '</div>';
+  }).join('');
+}
+
+/* ── CSV export ─────────────────────────────────────────────────────────────── */
+function exportLeadsCsv() {
+  const rows = window.__leadsFiltered && window.__leadsFiltered.length
+    ? window.__leadsFiltered
+    : (window.__crmData ? window.__crmData.contacts : []);
+  if (!rows.length) { if (typeof showToast === 'function') showToast('No leads to export.'); return; }
+  const esc = function(v) { return '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"'; };
+  const head = ['Name','Email','Phone','Source','Status','Last Activity','Created'];
+  const lines = [head.map(esc).join(',')].concat(rows.map(function(c) {
+    return [c.name, c.email, c.phone, c.source, c.status,
+      c.lastTouchAt ? new Date(c.lastTouchAt).toLocaleDateString() : '',
+      c.createdAt ? new Date(c.createdAt).toLocaleDateString() : ''].map(esc).join(',');
+  }));
+  const blob = new Blob(['\ufeff' + lines.join('\n')], { type: 'text/csv;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'flowaify-leads-' + new Date().toISOString().slice(0, 10) + '.csv';
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(a.href);
+  if (typeof showToast === 'function') showToast('Exported ' + rows.length + ' leads to CSV.');
+}
+window.exportLeadsCsv = exportLeadsCsv;
+
+/* ── Printable report ───────────────────────────────────────────────────────── */
+function openReport() {
+  const data = window.__crmData;
+  const el = document.getElementById('report-view');
+  if (!el || !data) return;
+  const days = window.__rangeDays;
+  const ranged = filterByRange(data.contacts, days);
+  const overview = data.overview || {};
+  const src = groupCount(ranged, function(c) { return c.source; });
+  const srcRows = Object.keys(src).sort(function(a, b) { return src[b] - src[a]; })
+    .map(function(k) { return '<tr><td>' + escDash(k) + '</td><td>' + src[k] + '</td></tr>'; }).join('');
+  const stages = {};
+  (data.deals || []).forEach(function(d) { const s = d.stage || 'Unknown'; stages[s] = (stages[s] || 0) + (d.amount || 0); });
+  const stageRows = Object.keys(stages).sort(function(a, b) { return stages[b] - stages[a]; })
+    .map(function(k) { return '<tr><td>' + escDash(k) + '</td><td>' + fmtMoney(stages[k]) + '</td></tr>'; }).join('');
+  const insights = buildInsights(data, ranged, days)
+    .map(function(it) { return '<li>' + it.text + '</li>'; }).join('');
+
+  el.innerHTML =
+    '<h1>Flowaify — Performance Report</h1>' +
+    '<p class="rp-sub">Last ' + days + ' days · Generated ' + new Date().toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' }) + '</p>' +
+    '<div class="rp-kpis">' +
+      '<div><b>' + ranged.length + '</b><span>New Leads</span></div>' +
+      '<div><b>' + (overview.bookedCalls || 0) + '</b><span>Booked Calls</span></div>' +
+      '<div><b>' + fmtMoney(overview.pipelineValue) + '</b><span>Pipeline Value</span></div>' +
+      '<div><b>' + (data.contacts || []).length + '</b><span>Total Contacts</span></div>' +
+    '</div>' +
+    (insights ? '<h2>Insights</h2><ul>' + insights + '</ul>' : '') +
+    '<h2>Lead Sources</h2><table><tr><th>Source</th><th>Leads</th></tr>' + srcRows + '</table>' +
+    (stageRows ? '<h2>Pipeline by Stage</h2><table><tr><th>Stage</th><th>Value</th></tr>' + stageRows + '</table>' : '') +
+    '<p class="rp-foot">Prepared by Flowaify · flowaify.app</p>';
+  window.print();
+}
+window.openReport = openReport;
+
 /* ── Master rerender ────────────────────────────────────────────────────────── */
 function rerender() {
   const data = window.__crmData;
@@ -526,6 +802,8 @@ function rerender() {
   renderGoalGauge(data.contacts || []);
   renderStageList(data.deals || []);
   renderBell(data.needsAttention || []);
+  renderInsights(data, ranged, days);
+  renderFunnel(data, ranged);
   renderCalendar();
 
   if (typeof lucide !== 'undefined') lucide.createIcons();
@@ -827,6 +1105,18 @@ function selectLead(id) {
   rows.push('<div class="detail-row"><span class="dk">Created</span><span class="dv">' + (c.createdAt ? new Date(c.createdAt).toLocaleDateString() : '—') + '</span></div>');
   rows.push('<div class="detail-row"><span class="dk">Last Activity</span><span class="dv">' + (c.lastTouchAt ? relTime(new Date(c.lastTouchAt).getTime()) : '—') + '</span></div>');
   if (c.lastTouch) rows.push('<div class="detail-row"><span class="dk">Last Touch Type</span><span class="dv">' + escDash(c.lastTouch) + '</span></div>');
+  rows.push('</div>');
+
+  const safeId = String(c.id).replace(/[^\w-]/g, '');
+  rows.push('<div style="padding:12px 18px 14px;border-top:1px solid var(--border);">');
+  rows.push('<div style="font-size:11px;font-weight:700;color:var(--text-m);text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px;">Set Status</div>');
+  rows.push('<div class="status-picker">' + ['HOT','WARM','COLD','BOOKED'].map(function(s) {
+    const active = String(c.status || '').toUpperCase().indexOf(s) !== -1 ? ' active' : '';
+    return '<button class="status-chip sc-' + s.toLowerCase() + active + '" onclick="setLeadStatus(\'' + safeId + '\', \'' + s + '\')">' + s + '</button>';
+  }).join('') + '</div>');
+  rows.push('<div style="font-size:11px;font-weight:700;color:var(--text-m);text-transform:uppercase;letter-spacing:.4px;margin:14px 0 8px;">Add Note</div>');
+  rows.push('<textarea id="lead-note-input" class="lead-note" rows="2" placeholder="Type a note — saves to Zoho…"></textarea>');
+  rows.push('<button class="btn-mini btn-mini-primary" id="lead-note-save" style="margin-top:6px;" onclick="saveLeadNote(\'' + safeId + '\')">Save note</button>');
   rows.push('</div>');
 
   rows.push('<div style="padding:12px 18px 18px;border-top:1px solid var(--border);">');
