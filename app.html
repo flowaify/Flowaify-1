@@ -61,6 +61,7 @@
       --hover:      rgba(15,23,42,0.05);
       --suite-bg:   #16161a;
       --track:      rgba(15,23,42,0.09);
+      --dot:        rgba(15,23,42,0.07);
       --ease:       cubic-bezier(0.33, 0, 0.2, 1);
       --dur:        0.28s;
       --chart-tick: #64748b;
@@ -82,6 +83,7 @@
       --hover:      rgba(255,255,255,0.06);
       --suite-bg:   #090c14;
       --track:      rgba(255,255,255,0.10);
+      --dot:        rgba(255,255,255,0.06);
       --chart-tick: rgba(232,235,242,0.55);
       --chart-grid: rgba(255,255,255,0.07);
       --green-dim:  rgba(5,150,105,0.18);
@@ -583,6 +585,10 @@
     .suite-flowy-btn { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; background: linear-gradient(135deg, #0057FF, #8b5cf6); border: none; border-radius: 99px; color: #fff; font-size: 12px; font-weight: 600; font-family: inherit; cursor: pointer; transition: opacity 0.12s; margin-right: 4px; }
     .suite-flowy-btn:hover { opacity: 0.88; }
     .suite-flowy-btn i, .suite-flowy-btn svg { width: 13px; height: 13px; }
+    .logo-white { filter: brightness(0) invert(1); object-fit: contain; }
+    .suite-flowy-btn .logo-white { width: 14px; height: 14px; }
+    .fl-orb .logo-white { width: 14px; height: 14px; }
+    .fl-orb-sm .logo-white { width: 11px; height: 11px; }
     .fl-head { display: flex; align-items: center; gap: 9px; padding: 12px 14px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
     .fl-orb { width: 24px; height: 24px; border-radius: 50%; background: linear-gradient(135deg, #0057FF, #8b5cf6); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
     .fl-orb i, .fl-orb svg { width: 13px; height: 13px; color: #fff; }
@@ -591,7 +597,7 @@
     .fl-close { margin-left: auto; width: 28px; height: 28px; background: transparent; border: none; border-radius: 4px; color: var(--text-m); cursor: pointer; display: flex; align-items: center; justify-content: center; }
     .fl-close:hover { background: var(--hover); color: var(--text); }
     .fl-close i, .fl-close svg { width: 15px; height: 15px; }
-    .fl-msgs { flex: 1; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 12px; }
+    .fl-msgs { flex: 1; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 12px; background-image: radial-gradient(circle, var(--dot) 1px, transparent 1px); background-size: 16px 16px; }
     .fl-msg { display: flex; gap: 8px; animation: feedIn 0.25s both; }
     .fl-msg.fl-user { justify-content: flex-end; }
     .fl-msg.fl-user { background: var(--blue); color: #fff; border-radius: 12px 12px 3px 12px; padding: 9px 13px; font-size: 12.5px; line-height: 1.5; max-width: 85%; align-self: flex-end; display: block; }
@@ -627,17 +633,17 @@
     /* FLOWY FAB */
     #flowy-fab {
       position: fixed; right: 24px; bottom: 24px; z-index: 90;
-      width: 48px; height: 48px; border-radius: 50%; border: none; cursor: pointer;
-      background: linear-gradient(135deg, #0057FF, #8b5cf6); color: #fff;
+      width: 52px; height: 52px; border: none; cursor: pointer; padding: 0;
+      background: transparent;
       display: flex; align-items: center; justify-content: center;
-      box-shadow: 0 4px 16px rgba(0,87,255,0.35);
       transition: transform var(--dur) var(--ease), opacity var(--dur) var(--ease);
       animation: fab-glow 4s ease-in-out infinite;
     }
-    #flowy-fab:hover { transform: scale(1.07); }
-    #flowy-fab i, #flowy-fab svg { width: 21px; height: 21px; }
+    #flowy-fab img { width: 100%; height: 100%; object-fit: contain; }
+    [data-theme="dark"] #flowy-fab img { filter: brightness(0) invert(1); }
+    #flowy-fab:hover { transform: scale(1.08); }
     body.flowy-open #flowy-fab { opacity: 0; pointer-events: none; transform: scale(0.6); }
-    @keyframes fab-glow { 0%, 100% { box-shadow: 0 4px 16px rgba(0,87,255,0.35); } 50% { box-shadow: 0 4px 26px rgba(139,92,246,0.5); } }
+    @keyframes fab-glow { 0%, 100% { filter: drop-shadow(0 3px 10px rgba(0,87,255,0.35)); } 50% { filter: drop-shadow(0 3px 18px rgba(139,92,246,0.55)); } }
     #toast { bottom: 84px; }
 
     /* FLOWY NUDGE */
@@ -841,7 +847,7 @@
     <div class="palette" id="palette"></div>
   </div>
   <div class="suite-right">
-  <button class="suite-flowy-btn" onclick="toggleFlowy()" title="Ask Flowy (⌘J)"><i data-lucide="sparkles"></i><span class="suite-flowy-txt">Flowy</span></button>
+  <button class="suite-flowy-btn" onclick="toggleFlowy()" title="Ask Flowy (⌘J)"><img class="logo-white" src="logo-transparent.png" alt="" /><span class="suite-flowy-txt">Flowy</span></button>
   <button class="suite-icon-btn" id="theme-toggle" onclick="toggleTheme()" title="Toggle dark mode"><i data-lucide="moon"></i></button>
   <div class="bell-wrap">
     <button class="suite-icon-btn" onclick="toggleBellMenu(event)" title="Needs attention"><i data-lucide="bell"></i><span class="bell-badge" id="bell-badge" style="display:none;">0</span></button>
@@ -1128,7 +1134,13 @@
 
       <div class="feed-grid">
         <div class="card">
-          <div class="sec-head"><div class="sec-title">Members</div><div class="sec-sub" id="team-count"></div></div>
+          <div class="sec-head"><div class="sec-title">Members</div>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <input type="text" id="team-search" placeholder="Search members…" oninput="teamFilter()" style="padding:5px 10px;background:var(--input-bg);border:1px solid var(--input-border);border-radius:4px;font-size:11.5px;font-family:inherit;color:var(--text);outline:none;width:150px;" />
+              <button class="btn-mini btn-mini-ghost" onclick="exportTeamCsv()">Export</button>
+              <div class="sec-sub" id="team-count"></div>
+            </div>
+          </div>
           <div class="table-wrap">
             <table class="skel-table">
               <thead><tr><th>Member</th><th>Role</th><th>Status</th><th>Added</th><th style="width:120px;"></th></tr></thead>
@@ -1345,12 +1357,12 @@
     <div class="fn-cta">Ask Flowy →</div>
   </div>
 </div>
-<button id="flowy-fab" onclick="toggleFlowy()" title="Ask Flowy (⌘J)"><i data-lucide="sparkles"></i></button>
+<button id="flowy-fab" onclick="toggleFlowy()" title="Ask Flowy (⌘J)"><img src="logo-transparent.png" alt="Flowy" /></button>
 
 <!-- FLOWY AI PANEL -->
 <aside id="flowy-panel">
   <div class="fl-head">
-    <div class="fl-orb"><i data-lucide="sparkles"></i></div>
+    <div class="fl-orb"><img class="logo-white" src="logo-transparent.png" alt="" /></div>
     <div class="fl-title">Flowy</div>
     <span class="fl-ai-pill">AI</span>
     <button class="fl-close" onclick="toggleFlowy()" title="Close"><i data-lucide="x"></i></button>
@@ -1373,6 +1385,31 @@
 
 <div id="report-view"></div>
 
+<!-- MEMBER DRAWER -->
+<div class="inv-overlay" id="mem-overlay" onclick="if(event.target===this)closeMember()">
+  <div class="inv-modal">
+    <div class="sec-head" style="border-bottom:1px solid var(--border);">
+      <div style="display:flex;align-items:center;gap:11px;">
+        <span id="mem-avatar"></span>
+        <div><div class="sec-title" id="mem-title">Member</div><div class="sec-sub" id="mem-status-sub"></div></div>
+      </div>
+      <button class="fl-close" onclick="closeMember()"><i data-lucide="x"></i></button>
+    </div>
+    <div class="p20">
+      <div class="field"><label>Full name</label><input type="text" id="mem-name" /></div>
+      <div class="field"><label>Work email</label><input type="email" id="mem-email" /></div>
+      <div class="field"><label>Role</label><select id="mem-role"><option value="admin">Admin</option><option value="member">Member</option><option value="viewer">Viewer</option></select></div>
+      <div style="font-size:11px;color:var(--text-m);line-height:1.6;" id="mem-perms"></div>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;padding:0 20px 18px;">
+      <button class="btn-mini btn-mini-ghost" id="mem-resend" onclick="resendProvision(window.__memId)">Resend invite</button>
+      <button class="btn-mini btn-mini-ghost" id="mem-activate" onclick="markActive(window.__memId);closeMember()">Mark active</button>
+      <button class="team-act danger" style="margin-left:auto;" onclick="removeMember(window.__memId);closeMember()"><i data-lucide="trash-2"></i>Remove</button>
+      <button class="cmd-primary" onclick="saveMember()">Save</button>
+    </div>
+  </div>
+</div>
+
 <!-- INVITE MODAL -->
 <div class="inv-overlay" id="inv-overlay" onclick="if(event.target===this)closeInvite()">
   <div class="inv-modal">
@@ -1394,7 +1431,7 @@
 
 <div id="toast"><div class="toast-icon"><i data-lucide="check"></i></div><div id="toast-msg" style="font-size:12.5px;font-weight:600;color:var(--text-s);line-height:1.45;"></div></div>
 
-<script src="crm.js?v=12"></script>
+<script src="crm.js?v=13"></script>
 <script src="flowy.js?v=1"></script>
 <script>
 const AUTH0_DOMAIN    = 'auth.flowaify.app';
@@ -1692,7 +1729,16 @@ function paletteFilter() {
       });
     }
   }
-  if (!palItems.length) htmlOut = '<div class="pal-group" style="padding:14px 10px;">No matches</div>';
+  if (!palItems.length && q) {
+    const flowyItem = { label: 'Ask Flowy: “' + q + '”', icon: 'sparkles', run: () => {
+      if (!window.__flowyOpen) toggleFlowy();
+      setTimeout(() => { if (window.flowySend) flowySend(q); }, 320);
+    } };
+    palItems.push(flowyItem);
+    htmlOut = '<div class="pal-group">No matches — ask Flowy instead</div>' + palRow(flowyItem, 0, 'AI');
+  } else if (!palItems.length) {
+    htmlOut = '<div class="pal-group" style="padding:14px 10px;">Type to search pages, actions, and leads</div>';
+  }
   palSel = 0;
   p.innerHTML = htmlOut;
   p.classList.add('open');

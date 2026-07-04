@@ -83,6 +83,40 @@ async function portalBoot(token) {
 
   renderMiniFeed(data);
   renderUpcoming(data);
+  portalTeam(token);
+}
+
+/* ── Your team (KV roster via /team) ────────────────────────────────────────── */
+var PTM_HUES = [212, 262, 152, 22, 340, 190, 48, 288];
+function ptmAvatar(name) {
+  var n = String(name || '?');
+  var hash = 0;
+  for (var i = 0; i < n.length; i++) hash = (hash * 31 + n.charCodeAt(i)) >>> 0;
+  var hue = PTM_HUES[hash % PTM_HUES.length];
+  var initials = n.split(/\s+/).slice(0, 2).map(function(w) { return w.charAt(0); }).join('').toUpperCase() || '?';
+  return '<span class="lead-avatar" style="background:hsl(' + hue + ',62%,45%);">' + pEsc(initials) + '</span>';
+}
+
+async function portalTeam(token) {
+  var card = document.getElementById('pt-team-card');
+  var el = document.getElementById('pt-team');
+  if (!card || !el) return;
+  try {
+    var res = await fetch(PORTAL_WORKER + '/team', {
+      headers: { Authorization: 'Bearer ' + token },
+    });
+    if (!res.ok) return; // 501 (no KV) or error → keep card hidden
+    var doc = await res.json();
+    var members = doc.members || [];
+    if (!members.length) return;
+    var pending = members.filter(function(m) { return m.status === 'pending'; }).length;
+    el.innerHTML = '<div class="ptm-wrap">' +
+      '<div class="ptm-avatars">' + members.slice(0, 5).map(function(m) { return ptmAvatar(m.name || m.email); }).join('') + '</div>' +
+      '<div class="ptm-info"><strong>' + members.length + ' of ' + (doc.seatsIncluded || 3) + '</strong> seats used' +
+      (pending ? '<br>' + pending + ' invite' + (pending === 1 ? '' : 's') + ' pending provisioning' : '') +
+      '</div></div>';
+    card.style.display = 'block';
+  } catch (e) {}
 }
 
 /* ── Latest activity (mini feed) ────────────────────────────────────────────── */

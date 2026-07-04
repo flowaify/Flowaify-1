@@ -1577,7 +1577,7 @@ function renderTeam(doc) {
             '<button class="team-act" onclick="markActive(\'' + safeId + '\')" title="Mark active"><i data-lucide="check"></i></button>'
           : '') +
         '<button class="team-act danger" onclick="removeMember(\'' + safeId + '\')" title="Remove"><i data-lucide="trash-2"></i></button>';
-      return '<tr>' +
+      return '<tr data-mid="' + safeId + '" onclick="if(!event.target.closest(\'select,button\'))openMember(\'' + safeId + '\')" style="cursor:pointer;">' +
         '<td><div class="lead-cell">' + avatarHtml(m.name || m.email) +
           '<div><div style="font-weight:600;font-size:12.5px;">' + escDash(m.name || '—') + '</div>' +
           '<div style="font-size:10.5px;color:var(--text-m);">' + escDash(m.email) + '</div></div></div></td>' +
@@ -1741,3 +1741,109 @@ function buySeats() {
   window.location.href = 'mailto:contact@flowaify.app?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
 }
 window.buySeats = buySeats;
+
+
+/* ── Member drawer ──────────────────────────────────────────────────────────── */
+var ROLE_PERMS = {
+  owner:  'Owner — full control: billing, seats, team, settings, and all lead actions.',
+  admin:  'Admin — manage the team and settings, edit leads, use Flowy and reports.',
+  member: 'Member — work leads, update statuses, use Flowy; no team or settings control.',
+  viewer: 'Viewer — read-only access to dashboards, analytics, and reports.',
+};
+
+function openMember(id) {
+  var doc = window.__teamDoc;
+  if (!doc) return;
+  var m = doc.members.find(function(x) { return String(x.id) === String(id); });
+  if (!m) return;
+  window.__memId = m.id;
+  var ov = document.getElementById('mem-overlay');
+  if (!ov) return;
+  document.getElementById('mem-avatar').innerHTML = avatarHtml(m.name || m.email);
+  document.getElementById('mem-title').textContent = m.name || m.email || 'Member';
+  document.getElementById('mem-status-sub').textContent =
+    (m.status === 'active' ? 'Active' : 'Pending — being provisioned') +
+    ' · added ' + (m.addedAt ? new Date(m.addedAt).toLocaleDateString() : '—');
+  document.getElementById('mem-name').value = m.name || '';
+  document.getElementById('mem-email').value = m.email || '';
+  var roleSel = document.getElementById('mem-role');
+  var isOwner = m.role === 'owner';
+  roleSel.disabled = isOwner;
+  if (isOwner) {
+    roleSel.innerHTML = '<option value="owner" selected>Owner</option>';
+  } else {
+    roleSel.innerHTML = ['admin','member','viewer'].map(function(r) {
+      return '<option value="' + r + '"' + (m.role === r ? ' selected' : '') + '>' + r.charAt(0).toUpperCase() + r.slice(1) + '</option>';
+    }).join('');
+  }
+  document.getElementById('mem-perms').textContent = ROLE_PERMS[m.role] || '';
+  roleSel.onchange = function() { document.getElementById('mem-perms').textContent = ROLE_PERMS[roleSel.value] || ''; };
+  document.getElementById('mem-resend').style.display   = m.status === 'pending' ? '' : 'none';
+  document.getElementById('mem-activate').style.display = m.status === 'pending' ? '' : 'none';
+  var removeBtn = document.querySelector('#mem-overlay .team-act.danger');
+  if (removeBtn) removeBtn.style.display = isOwner ? 'none' : '';
+  ov.classList.add('open');
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+window.openMember = openMember;
+
+function closeMember() {
+  var ov = document.getElementById('mem-overlay');
+  if (ov) ov.classList.remove('open');
+}
+window.closeMember = closeMember;
+
+async function saveMember() {
+  var doc = window.__teamDoc;
+  if (!doc) return;
+  var m = doc.members.find(function(x) { return String(x.id) === String(window.__memId); });
+  if (!m) return;
+  var name = (document.getElementById('mem-name') || {}).value || '';
+  var email = ((document.getElementById('mem-email') || {}).value || '').trim();
+  var role = (document.getElementById('mem-role') || {}).value || m.role;
+  if (!name.trim() || email.indexOf('@') === -1) {
+    if (typeof showToast === 'function') showToast('Name and a valid email are required.');
+    return;
+  }
+  var prev = JSON.parse(JSON.stringify(doc));
+  var changed = [];
+  if (m.name !== name.trim()) changed.push('name');
+  if (m.email !== email) changed.push('email');
+  if (m.role !== role && m.role !== 'owner') { changed.push('role → ' + role); m.role = role; }
+  m.name = name.trim().slice(0, 80);
+  m.email = email.slice(0, 120);
+  if (changed.length) teamLogPush(doc, m.name + ' — ' + changed.join(', ') + ' updated');
+  renderTeam(doc);
+  closeMember();
+  var ok = await teamSave(doc);
+  if (!ok) { window.__teamDoc = prev; renderTeam(prev); return; }
+  if (changed.length && typeof showToast === 'function') showToast(escDash(m.name) + ' updated.');
+}
+window.saveMember = saveMember;
+
+/* ── Team search + export ───────────────────────────────────────────────────── */
+function teamFilter() {
+  var q = ((document.getElementById('team-search') || {}).value || '').trim().toLowerCase();
+  document.querySelectorAll('#team-tbody tr').forEach(function(tr) {
+    tr.style.display = !q || tr.textContent.toLowerCase().indexOf(q) !== -1 ? '' : 'none';
+  });
+}
+window.teamFilter = teamFilter;
+
+function exportTeamCsv() {
+  var doc = window.__teamDoc;
+  var rows = doc ? (doc.members || []) : [];
+  if (!rows.length) { if (typeof showToast === 'function') showToast('No team members to export.'); return; }
+  var esc = function(v) { return '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"'; };
+  var lines = [['Name','Email','Role','Status','Added'].map(esc).join(',')].concat(rows.map(function(m) {
+    return [m.name, m.email, m.role, m.status, m.addedAt ? new Date(m.addedAt).toLocaleDateString() : ''].map(esc).join(',');
+  }));
+  var blob = new Blob(['\ufeff' + lines.join('\n')], { type: 'text/csv;charset=utf-8' });
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'flowaify-team-' + new Date().toISOString().slice(0, 10) + '.csv';
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(a.href);
+  if (typeof showToast === 'function') showToast('Exported ' + rows.length + ' team members.');
+}
+window.exportTeamCsv = exportTeamCsv;

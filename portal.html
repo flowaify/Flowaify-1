@@ -176,6 +176,12 @@
     .up-name { font-size: 12px; font-weight: 600; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .up-sub { font-size: 10.5px; color: var(--text-m); }
     .up-amt { margin-left: auto; font-size: 12px; font-weight: 700; color: var(--green); font-variant-numeric: tabular-nums; flex-shrink: 0; }
+    .ptm-wrap { display: flex; align-items: center; gap: 14px; padding: 14px 16px; }
+    .ptm-avatars { display: flex; }
+    .ptm-avatars .lead-avatar { width: 30px; height: 30px; border-radius: 50%; color: #fff; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; border: 2px solid var(--bg-card); margin-left: -8px; }
+    .ptm-avatars .lead-avatar:first-child { margin-left: 0; }
+    .ptm-info { font-size: 12px; color: var(--text-s); line-height: 1.5; }
+    .ptm-info strong { color: var(--text); }
 
     /* SUPPORT CARDS */
     .sup-card { padding: 20px 18px; display: flex; flex-direction: column; gap: 8px; }
@@ -335,6 +341,10 @@
           <div class="sec-head"><div class="sec-title">Upcoming Closings</div><a class="sec-link" href="app.html">Calendar</a></div>
           <div id="pt-upcoming"><div class="empty-note">Checking your pipeline…</div></div>
         </div>
+        <div class="card" id="pt-team-card" style="display:none;">
+          <div class="sec-head"><div class="sec-title">Your Team</div><a class="sec-link" href="app.html">Manage team →</a></div>
+          <div id="pt-team"></div>
+        </div>
       </div>
       <div class="card">
         <div class="sec-head"><div class="sec-title">Latest Activity</div><a class="sec-link" href="app.html">View all</a></div>
@@ -417,7 +427,7 @@
 
 <div id="toast"><i data-lucide="check"></i><span id="toast-msg"></span></div>
 
-<script src="portal.js?v=2"></script>
+<script src="portal.js?v=3"></script>
 <script>
 const AUTH0_DOMAIN    = 'auth.flowaify.app';
 const AUTH0_CLIENT_ID = 'tx74Owqn3jVeSaVuxfFHsKloqbPqfAmN';
