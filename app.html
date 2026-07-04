@@ -3,7 +3,10 @@
 <!-- v2 -->
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Flowaify" />
   <title>Flowaify — Dashboard</title>
   <link rel="icon" type="image/png" href="logo-transparent.png" />
   <link rel="manifest" href="manifest.json" />
@@ -62,6 +65,8 @@
       --suite-bg:   #16161a;
       --track:      rgba(15,23,42,0.09);
       --dot:        rgba(15,23,42,0.07);
+      --hdr:        calc(48px + env(safe-area-inset-top, 0px));
+      --safe-b:     env(safe-area-inset-bottom, 0px);
       --ease:       cubic-bezier(0.33, 0, 0.2, 1);
       --dur:        0.28s;
       --chart-tick: #64748b;
@@ -103,6 +108,8 @@
     html { background: var(--bg); }
     html, body { height: 100%; font-family: 'Segoe UI', Inter, -apple-system, sans-serif; background: var(--bg); color: var(--text); font-size: 14px; line-height: 1.5; overflow-x: hidden; }
     a { text-decoration: none; color: inherit; }
+    * { -webkit-tap-highlight-color: transparent; }
+    .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
     button { font-family: inherit; }
     ::-webkit-scrollbar { width: 4px; height: 4px; }
     ::-webkit-scrollbar-track { background: transparent; }
@@ -110,9 +117,9 @@
 
     /* ───────── SUITE HEADER ───────── */
     .suite-bar {
-      position: fixed; top: 0; left: 0; right: 0; height: 48px; z-index: 80;
+      position: fixed; top: 0; left: 0; right: 0; height: var(--hdr); z-index: 80;
       background: var(--suite-bg); display: flex; align-items: center; justify-content: space-between;
-      padding: 0 16px; gap: 12px;
+      padding: env(safe-area-inset-top, 0px) 16px 0; gap: 12px;
     }
     .suite-left { display: flex; align-items: center; gap: 11px; min-width: 0; }
     .suite-logo { width: 22px; height: 22px; object-fit: contain; filter: brightness(0) invert(1); }
@@ -126,7 +133,7 @@
 
     /* ───────── SIDEBAR ───────── */
     .sidebar {
-      position: fixed; left: 0; top: 48px; bottom: 0; width: var(--sidebar-w);
+      position: fixed; left: 0; top: var(--hdr); bottom: 0; width: var(--sidebar-w);
       background: var(--sidebar-bg); z-index: 60;
       display: flex; flex-direction: column; padding: 14px 12px; gap: 1px;
       border-right: 1px solid var(--card-border);
@@ -196,9 +203,9 @@
     .profile-menu-item.danger:hover { background: var(--red-dim); color: var(--red); }
 
     /* ───────── MAIN / TOPBAR ───────── */
-    .main { margin-left: var(--sidebar-w); margin-top: 48px; min-height: calc(100vh - 48px); display: flex; flex-direction: column; transition: margin-left var(--dur) var(--ease), margin-right var(--dur) var(--ease); }
+    .main { margin-left: var(--sidebar-w); margin-top: var(--hdr); min-height: calc(100vh - var(--hdr)); display: flex; flex-direction: column; transition: margin-left var(--dur) var(--ease), margin-right var(--dur) var(--ease); }
     .topbar {
-      position: sticky; top: 48px; z-index: 40;
+      position: sticky; top: var(--hdr); z-index: 40;
       display: flex; align-items: center; justify-content: space-between;
       padding: 0 20px; height: 46px;
       background: var(--bg-card);
@@ -513,7 +520,7 @@
     #auto-activity .feed-item { width: 100%; }
 
     /* ERROR BANNER + SYNC */
-    #err-banner { position: sticky; top: 94px; z-index: 39; margin: 12px 28px 0; display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: var(--red-dim); border: 1px solid rgba(220,38,38,0.25); border-radius: 8px; font-size: 12.5px; color: var(--text); }
+    #err-banner { position: sticky; top: calc(var(--hdr) + 46px); z-index: 39; margin: 12px 28px 0; display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: var(--red-dim); border: 1px solid rgba(220,38,38,0.25); border-radius: 8px; font-size: 12.5px; color: var(--text); }
     #err-banner i, #err-banner svg { width: 15px; height: 15px; color: var(--red); flex-shrink: 0; }
     #err-banner span { flex: 1; }
     .sync-label { font-size: 11px; color: var(--text-m); margin-right: 8px; white-space: nowrap; }
@@ -575,7 +582,7 @@
 
     /* FLOWY PANEL (Copilot rail) */
     #flowy-panel {
-      position: fixed; top: 48px; right: 0; bottom: 0; width: 360px; z-index: 70;
+      position: fixed; top: var(--hdr); right: 0; bottom: 0; width: 360px; z-index: 70;
       background: var(--bg-card); border-left: 1px solid var(--card-border);
       display: flex; flex-direction: column;
       transform: translateX(100%); transition: transform var(--dur) var(--ease);
@@ -621,7 +628,7 @@
     .fl-chips { display: flex; gap: 6px; padding: 0 14px 8px; flex-wrap: wrap; flex-shrink: 0; }
     .fl-chip { background: transparent; border: 1px solid var(--input-border); border-radius: 99px; color: var(--text-s); font-size: 11px; font-weight: 500; font-family: inherit; padding: 5px 11px; cursor: pointer; transition: all 0.12s; }
     .fl-chip:hover { background: var(--hover); color: var(--text); border-color: var(--text-m); }
-    .fl-input-row { display: flex; align-items: flex-end; gap: 8px; padding: 8px 14px 6px; border-top: 1px solid var(--border); flex-shrink: 0; }
+    .fl-input-row { display: flex; align-items: flex-end; gap: 8px; padding: 8px 14px calc(6px + var(--safe-b)); border-top: 1px solid var(--border); flex-shrink: 0; }
     #fl-input { flex: 1; background: var(--input-bg); border: 1px solid var(--input-border); border-radius: 10px; color: var(--text); font-size: 12.5px; font-family: inherit; padding: 9px 12px; outline: none; resize: none; line-height: 1.4; max-height: 88px; }
     #fl-input:focus { border-color: var(--blue); }
     #fl-send { width: 34px; height: 34px; border-radius: 50%; background: var(--blue); border: none; color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: background 0.12s, opacity 0.12s; }
@@ -632,7 +639,7 @@
 
     /* FLOWY FAB */
     #flowy-fab {
-      position: fixed; right: 24px; bottom: 24px; z-index: 90;
+      position: fixed; right: 24px; bottom: calc(24px + var(--safe-b)); z-index: 90;
       width: 52px; height: 52px; border: none; cursor: pointer; padding: 0;
       background: transparent;
       display: flex; align-items: center; justify-content: center;
@@ -644,11 +651,11 @@
     #flowy-fab:hover { transform: scale(1.08); }
     body.flowy-open #flowy-fab { opacity: 0; pointer-events: none; transform: scale(0.6); }
     @keyframes fab-glow { 0%, 100% { filter: drop-shadow(0 3px 10px rgba(0,87,255,0.35)); } 50% { filter: drop-shadow(0 3px 18px rgba(139,92,246,0.55)); } }
-    #toast { bottom: 84px; }
+    #toast { bottom: calc(84px + var(--safe-b)); }
 
     /* FLOWY NUDGE */
     #flowy-nudge {
-      position: fixed; right: 24px; bottom: 84px; z-index: 89; width: 264px;
+      position: fixed; right: 24px; bottom: calc(84px + var(--safe-b)); z-index: 89; width: 264px;
       background: var(--bg-card); border-radius: 12px;
       box-shadow: 0 0 2px rgba(0,0,0,0.15), 0 10px 30px rgba(0,0,0,0.22);
       animation: nudge-in 0.4s var(--ease);
@@ -691,6 +698,9 @@
     .inv-overlay.open { display: flex; }
     .inv-modal { width: 100%; max-width: 440px; background: var(--bg-card); border-radius: 12px; box-shadow: 0 0 2px rgba(0,0,0,0.2), 0 20px 50px rgba(0,0,0,0.3); overflow: hidden; animation: pmenu-in var(--dur) var(--ease); }
 
+    /* MOBILE SEARCH TOGGLE */
+    .msearch-btn { display: none; }
+
     /* NAV RAIL (collapsed) */
     @media (min-width: 901px) {
       body.nav-rail { --sidebar-w: 52px; }
@@ -705,7 +715,7 @@
     /* MOBILE */
     .mob-ham { display: none; width: 32px; height: 32px; border-radius: 4px; background: transparent; border: none; color: rgba(255,255,255,0.85); cursor: pointer; align-items: center; justify-content: center; margin-right: 2px; }
     .mob-ham i { width: 16px; height: 16px; }
-    #mob-overlay { display: none; position: fixed; left: 0; right: 0; bottom: 0; top: 48px; z-index: 55; background: rgba(15,23,42,0.35); }
+    #mob-overlay { display: none; position: fixed; left: 0; right: 0; bottom: 0; top: var(--hdr); z-index: 55; background: rgba(15,23,42,0.35); }
     #mob-overlay.open { display: block; }
 
     /* GRID LAYOUTS */
@@ -798,9 +808,35 @@
       .mob-ham { display: flex; }
       .nav-collapse { display: none; }
       .suite-ctx, .suite-div, .suite-user, .suite-search-kbd { display: none; }
-      .suite-search { margin: 0 8px; }
+      .suite-search { display: none; }
+      .msearch-btn { display: flex; }
+      .suite-bar.msearch .suite-search {
+        display: flex; position: fixed; top: var(--hdr); left: 8px; right: 8px; z-index: 95;
+        margin: 6px 0 0; background: var(--bg-card); border: 1px solid var(--card-border);
+        box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+      }
+      .suite-bar.msearch .suite-search input { color: var(--text); font-size: 16px; }
+      .suite-bar.msearch .suite-search input::placeholder { color: var(--text-m); }
+      .suite-bar.msearch .suite-search i, .suite-bar.msearch .suite-search svg { color: var(--text-m); }
+      input, select, textarea { font-size: 16px !important; }
+      .topbar { flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; gap: 10px; }
+      .topbar::-webkit-scrollbar { display: none; }
+      .topbar-left { flex-shrink: 0; }
+      .topbar-right { flex-shrink: 0; }
+      .crumb, .crumb-sep { display: none; }
+      .skel-table { min-width: 580px; }
+      #page-team .skel-table { min-width: 620px; }
+      .team-strip { gap: 14px; }
+      .ts-actions { margin-left: 0; width: 100%; }
+      .brand-stats { flex-wrap: wrap; gap: 14px; }
+      .hero-btn { width: 100%; justify-content: center; }
+      .status-picker { gap: 5px; }
+      .sync-label { display: none; }
       .cal-cell { min-height: 56px; }
       #flowy-panel { width: 100%; }
+      @supports (height: 100dvh) {
+        #flowy-panel { bottom: auto; height: calc(100dvh - var(--hdr)); }
+      }
       #flowy-fab { right: 16px; bottom: 20px; }
       #flowy-nudge { right: 16px; bottom: 78px; width: calc(100% - 32px); max-width: 300px; }
       body.flowy-open .main { margin-right: 0; }
@@ -847,6 +883,7 @@
     <div class="palette" id="palette"></div>
   </div>
   <div class="suite-right">
+  <button class="suite-icon-btn msearch-btn" onclick="toggleMSearch(event)" title="Search"><i data-lucide="search"></i></button>
   <button class="suite-flowy-btn" onclick="toggleFlowy()" title="Ask Flowy (⌘J)"><img class="logo-white" src="logo-transparent.png" alt="" /><span class="suite-flowy-txt">Flowy</span></button>
   <button class="suite-icon-btn" id="theme-toggle" onclick="toggleTheme()" title="Toggle dark mode"><i data-lucide="moon"></i></button>
   <div class="bell-wrap">
@@ -1641,6 +1678,27 @@ function maybeShowNudge(text) {
   n._t = setTimeout(function() { n.style.display = 'none'; }, 20000);
 }
 
+function toggleMSearch(e) {
+  if (e) e.stopPropagation();
+  const bar = document.querySelector('.suite-bar');
+  const on = bar.classList.toggle('msearch');
+  if (on) {
+    const s = document.getElementById('global-search');
+    if (s) setTimeout(() => { s.focus(); paletteOpen(); }, 60);
+  } else {
+    paletteClose();
+  }
+}
+document.addEventListener('click', e => {
+  const bar = document.querySelector('.suite-bar');
+  if (bar && bar.classList.contains('msearch')) {
+    const wrap = document.getElementById('suite-search-wrap');
+    if (wrap && !wrap.contains(e.target) && !e.target.closest('.msearch-btn')) {
+      bar.classList.remove('msearch');
+    }
+  }
+});
+
 function toggleNavRail() {
   const on = document.body.classList.toggle('nav-rail');
   try { localStorage.setItem('flw_nav_rail', on ? '1' : '0'); } catch(e) {}
@@ -1757,6 +1815,8 @@ function palPaint() {
 function palRun(i) {
   const item = palItems[i];
   paletteClose();
+  const bar = document.querySelector('.suite-bar');
+  if (bar) bar.classList.remove('msearch');
   const s = document.getElementById('global-search');
   if (s) { s.value = ''; s.blur(); }
   if (item) item.run();

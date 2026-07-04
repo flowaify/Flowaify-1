@@ -2,7 +2,10 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Flowaify" />
   <title>Flowaify — Workspace</title>
   <link rel="icon" type="image/png" href="logo-transparent.png" />
   <meta name="theme-color" content="#16161a" />
@@ -38,6 +41,8 @@
       --hover:      rgba(15,23,42,0.05);
       --suite-bg:   #16161a;
       --track:      rgba(15,23,42,0.09);
+      --hdr:        calc(48px + env(safe-area-inset-top, 0px));
+      --safe-b:     env(safe-area-inset-bottom, 0px);
     }
     [data-theme="dark"] {
       --bg:         #0b0e16;
@@ -62,6 +67,7 @@
     html { background: var(--bg); }
     html, body { min-height: 100%; font-family: 'Segoe UI', Inter, -apple-system, sans-serif; background: var(--bg); color: var(--text); font-size: 14px; line-height: 1.5; }
     a { text-decoration: none; color: inherit; }
+    * { -webkit-tap-highlight-color: transparent; }
     button { font-family: inherit; }
     ::-webkit-scrollbar { width: 4px; height: 4px; }
     ::-webkit-scrollbar-thumb { background: var(--card-border); border-radius: 99px; }
@@ -77,7 +83,7 @@
     #login-view.show { display: flex; }
     .lg-brand {
       flex: 1.1; background: #0b0e16; color: #fff; display: flex; flex-direction: column;
-      justify-content: center; padding: 60px 64px; position: relative; overflow: hidden;
+      justify-content: center; padding: calc(60px + env(safe-area-inset-top, 0px)) 64px 60px; position: relative; overflow: hidden;
     }
     .lg-brand::after { content: ''; position: absolute; width: 480px; height: 480px; border-radius: 50%; background: radial-gradient(circle, rgba(0,87,255,0.25), transparent 65%); bottom: -160px; right: -120px; }
     .lg-orb { width: 44px; height: 44px; border-radius: 12px; background: linear-gradient(135deg, #0057FF, #8b5cf6); display: flex; align-items: center; justify-content: center; margin-bottom: 26px; }
@@ -99,7 +105,7 @@
     /* ── SUITE BAR ── */
     #hub { display: none; }
     #hub.show { display: block; }
-    .suite-bar { position: fixed; top: 0; left: 0; right: 0; height: 48px; z-index: 80; background: var(--suite-bg); display: flex; align-items: center; justify-content: space-between; padding: 0 16px; gap: 12px; }
+    .suite-bar { position: fixed; top: 0; left: 0; right: 0; height: var(--hdr); z-index: 80; background: var(--suite-bg); display: flex; align-items: center; justify-content: space-between; padding: env(safe-area-inset-top, 0px) 16px 0; gap: 12px; }
     .suite-left { display: flex; align-items: center; gap: 11px; }
     .suite-logo { width: 22px; height: 22px; object-fit: contain; filter: brightness(0) invert(1); }
     .suite-name { font-size: 14px; font-weight: 600; color: #fff; }
@@ -128,7 +134,7 @@
     .menu-item i, .menu-item svg { width: 14px; height: 14px; }
 
     /* ── HUB LAYOUT ── */
-    .hub-wrap { max-width: 1060px; margin: 0 auto; padding: 76px 24px 60px; }
+    .hub-wrap { max-width: 1060px; margin: 0 auto; padding: calc(var(--hdr) + 28px) 24px calc(60px + var(--safe-b)); }
     .card { background: var(--bg-card); border-radius: 10px; box-shadow: 0 0 2px rgba(0,0,0,0.10), 0 2px 6px rgba(0,0,0,0.08); overflow: hidden; }
     [data-theme="dark"] .card { box-shadow: 0 0 0 1px rgba(255,255,255,0.06), 0 2px 8px rgba(0,0,0,0.35); }
     .sec-head { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid var(--border); gap: 10px; }
@@ -237,10 +243,16 @@
     .btn-ghost i, .btn-ghost svg { width: 13px; height: 13px; }
 
     /* TOAST */
-    #toast { position: fixed; bottom: 24px; right: 24px; z-index: 500; background: var(--bg-card); border-radius: 8px; padding: 12px 16px; box-shadow: 0 0 2px rgba(0,0,0,0.2), 0 8px 24px rgba(0,0,0,0.25); display: none; align-items: center; gap: 9px; max-width: 340px; font-size: 12.5px; color: var(--text-s); animation: menu-in 0.2s ease; }
+    #toast { position: fixed; bottom: calc(24px + var(--safe-b)); right: 24px; z-index: 500; background: var(--bg-card); border-radius: 8px; padding: 12px 16px; box-shadow: 0 0 2px rgba(0,0,0,0.2), 0 8px 24px rgba(0,0,0,0.25); display: none; align-items: center; gap: 9px; max-width: 340px; font-size: 12.5px; color: var(--text-s); animation: menu-in 0.2s ease; }
     #toast i, #toast svg { width: 14px; height: 14px; color: var(--green); flex-shrink: 0; }
 
     @media (max-width: 860px) {
+      input, select, textarea { font-size: 16px !important; }
+      .modal { max-width: 100%; }
+      .modal-foot { flex-wrap: wrap; }
+      .modal-foot button { flex: 1; justify-content: center; }
+      .sup-btn { width: 100%; text-align: center; }
+      .ptm-info { min-width: 0; }
       #login-view.show { flex-direction: column; }
       .lg-brand { padding: 36px 28px; flex: none; }
       .lg-feat { padding: 5px 0; }
