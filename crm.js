@@ -872,6 +872,8 @@ function openLeadReport(id) {
       (c.email ? '<tr><td>Email</td><td>' + escDash(c.email) + '</td></tr>' : '') +
       (c.phone ? '<tr><td>Phone</td><td>' + escDash(c.phone) + '</td></tr>' : '') +
     '</table>' +
+    (c.score ? '<h2>Urgency Score</h2><p style="font-size:12px;line-height:1.7;">' + escDash(c.score) + '</p>' : '') +
+    (c.insight ? '<h2>Insight</h2><p style="font-size:12px;line-height:1.7;">' + escDash(c.insight) + '</p>' : '') +
     (c.summary ? '<h2>AI Summary</h2><p style="font-size:12px;line-height:1.7;">' + escDash(c.summary) + '</p>' : '') +
     '<h2>Timeline</h2><table><tr><th>Date</th><th>Event</th></tr>' +
       (events.length ? events.map(function(e) {
@@ -1252,7 +1254,12 @@ function selectLead(id) {
     rows.push('<span class="state-pill awaiting"><span class="sp-dot"></span>Awaiting automation data</span>');
   }
   rows.push('<div style="font-size:11px;font-weight:700;color:var(--text-m);text-transform:uppercase;letter-spacing:.4px;margin:14px 0 8px;">Automation Insights</div>');
-  rows.push('<div style="font-size:11.5px;color:var(--text-m);line-height:1.6;">Lead score and next follow-up will appear here once Flowaify automations are live for this lead.</div>');
+  if (c.score || c.insight) {
+    if (c.score) rows.push('<div class="detail-row"><span class="dk">Urgency Score</span><span class="dv">' + escDash(c.score) + '</span></div>');
+    if (c.insight) rows.push('<div style="font-size:12px;color:var(--text-s);line-height:1.6;margin-top:6px;">' + escDash(c.insight) + '</div>');
+  } else {
+    rows.push('<div style="font-size:11.5px;color:var(--text-m);line-height:1.6;">Lead score and insights will appear here once Flowaify automations are live for this lead.</div>');
+  }
   rows.push('</div>');
 
   body.innerHTML = rows.join('');

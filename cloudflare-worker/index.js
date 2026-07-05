@@ -716,7 +716,8 @@ async function getZohoToken(clientId, refreshToken, datacenter, env) {
 const CONTACT_FIELDS = [
   'Full_Name', 'Email', 'Phone',
   'Lead_Source',
-  'Flow_Urgency_Level',
+  'Flow_Urgency_Level', 'Flow_Source', 'Flow_Last_Touch_Type',
+  'Flow_Urgency_Score', 'Flow_Message_Summary', 'Flow_Claude_Summary',
   'flow_state', 'flow_source',
   'flow_last_touch_type', 'flow_last_touch_at',
   'flow_claude_summary',
@@ -765,11 +766,13 @@ function shapeContact(c) {
     name:        c.Full_Name || '—',
     email:       c.Email     || null,
     phone:       c.Phone     || null,
-    source:      c.flow_source   || c.Lead_Source || null,
+    source:      c.Flow_Source || c.flow_source || c.Lead_Source || null,
     status:      c.Flow_Urgency_Level || c.flow_state || null,
-    lastTouch:   c.flow_last_touch_type || null,
+    lastTouch:   c.Flow_Last_Touch_Type || c.flow_last_touch_type || null,
     lastTouchAt: c.flow_last_touch_at   || null,
-    summary:     c.flow_claude_summary  || null,
+    score:       c.Flow_Urgency_Score   || null,
+    insight:     c.Flow_Message_Summary || null,
+    summary:     c.Flow_Claude_Summary || c.flow_claude_summary || null,
     createdAt:   c.Created_Time         || null,
   };
 }

@@ -301,6 +301,8 @@ function flowyContext() {
     return {
       name: c.name, status: c.status || 'unscored', source: c.source || 'Unknown',
       daysOld: c.createdAt ? Math.floor((now - new Date(c.createdAt).getTime()) / 86400000) : null,
+      score: c.score || undefined,
+      insight: c.insight ? String(c.insight).slice(0, 100) : undefined,
       summary: c.summary ? String(c.summary).slice(0, 120) : undefined,
     };
   });
