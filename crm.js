@@ -770,6 +770,123 @@ function openReport() {
 }
 window.openReport = openReport;
 
+/* ── Custom reports (Flowy-driven) ──────────────────────────────────────────── */
+function openCustomReport(cfg) {
+  const data = window.__crmData;
+  const el = document.getElementById('report-view');
+  if (!el || !data) return;
+  const days = cfg.days || 30;
+  const sections = cfg.sections || ['kpis', 'sources', 'funnel', 'insights', 'topleads', 'stages'];
+  const ranged = filterByRange(data.contacts, days);
+  const overview = data.overview || {};
+  let out = '<h1>Flowaify — Custom Report</h1>' +
+    '<p class="rp-sub">' + escDash(cfg.rangeLabel || ('Last ' + days + ' days')) + ' · Generated ' +
+    new Date().toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' }) + '</p>';
+
+  if (sections.indexOf('kpis') !== -1) {
+    out += '<div class="rp-kpis">' +
+      '<div><b>' + ranged.length + '</b><span>New Leads</span></div>' +
+      '<div><b>' + (overview.bookedCalls || 0) + '</b><span>Booked Calls</span></div>' +
+      '<div><b>' + fmtMoney(overview.pipelineValue) + '</b><span>Pipeline Value</span></div>' +
+      '<div><b>' + (data.contacts || []).length + '</b><span>Total Contacts</span></div>' +
+      '</div>';
+  }
+  if (sections.indexOf('insights') !== -1) {
+    const ins = buildInsights(data, ranged, days).map(function(i) { return '<li>' + i.text + '</li>'; }).join('');
+    if (ins) out += '<h2>Insights</h2><ul>' + ins + '</ul>';
+  }
+  if (sections.indexOf('sources') !== -1) {
+    const src = groupCount(ranged, function(c) { return c.source; });
+    const rows = Object.keys(src).sort(function(a, b) { return src[b] - src[a]; })
+      .map(function(k) { return '<tr><td>' + escDash(k) + '</td><td>' + src[k] + '</td></tr>'; }).join('');
+    out += '<h2>Lead Sources</h2><table><tr><th>Source</th><th>Leads</th></tr>' + (rows || '<tr><td colspan="2">No leads in this period</td></tr>') + '</table>';
+  }
+  if (sections.indexOf('funnel') !== -1) {
+    const qual = ranged.filter(function(c) { return c.status && String(c.status).trim(); }).length;
+    const won = (data.deals || []).filter(function(d) { return String(d.stage || '').toUpperCase().indexOf('WON') !== -1; }).length;
+    out += '<h2>Conversion Funnel</h2><table><tr><th>Stage</th><th>Count</th></tr>' +
+      '<tr><td>Leads</td><td>' + ranged.length + '</td></tr>' +
+      '<tr><td>Qualified</td><td>' + qual + '</td></tr>' +
+      '<tr><td>Booked</td><td>' + Math.min(overview.bookedCalls || 0, ranged.length || (overview.bookedCalls || 0)) + '</td></tr>' +
+      '<tr><td>Won</td><td>' + won + '</td></tr></table>';
+  }
+  if (sections.indexOf('topleads') !== -1) {
+    const top = (data.contacts || []).slice().sort(function(a, b) {
+      const r = scoreRank(b.status) - scoreRank(a.status);
+      if (r !== 0) return r;
+      return (b.createdAt ? new Date(b.createdAt).getTime() : 0) - (a.createdAt ? new Date(a.createdAt).getTime() : 0);
+    }).slice(0, 10);
+    out += '<h2>Top Leads</h2><table><tr><th>Lead</th><th>Source</th><th>Status</th><th>Created</th></tr>' +
+      top.map(function(c) {
+        return '<tr><td>' + escDash(c.name) + '</td><td>' + escDash(c.source) + '</td><td>' +
+          escDash(c.status || 'Unscored') + '</td><td>' + (c.createdAt ? new Date(c.createdAt).toLocaleDateString() : '—') + '</td></tr>';
+      }).join('') + '</table>';
+  }
+  if (sections.indexOf('stages') !== -1) {
+    const stages = {};
+    (data.deals || []).forEach(function(d) { const s = d.stage || 'Unknown'; stages[s] = (stages[s] || 0) + (d.amount || 0); });
+    const rows2 = Object.keys(stages).sort(function(a, b) { return stages[b] - stages[a]; })
+      .map(function(k) { return '<tr><td>' + escDash(k) + '</td><td>' + fmtMoney(stages[k]) + '</td></tr>'; }).join('');
+    if (rows2) out += '<h2>Pipeline by Stage</h2><table><tr><th>Stage</th><th>Value</th></tr>' + rows2 + '</table>';
+  }
+  out += '<p class="rp-foot">Prepared by Flowy · Flowaify · flowaify.app</p>';
+  el.innerHTML = out;
+  window.print();
+}
+window.openCustomReport = openCustomReport;
+
+function openLeadReport(id) {
+  const data = window.__crmData;
+  const el = document.getElementById('report-view');
+  if (!el || !data) return;
+  const c = (data.contacts || []).find(function(x) { return String(x.id) === String(id); });
+  if (!c) return;
+
+  const events = [];
+  if (c.createdAt) events.push({ ts: new Date(c.createdAt).getTime(), text: 'Lead created' + (c.source ? ' via ' + c.source : '') });
+  if (c.lastTouchAt) events.push({ ts: new Date(c.lastTouchAt).getTime(), text: (c.lastTouch || 'Touch') + ' — most recent contact' });
+  events.sort(function(a, b) { return a.ts - b.ts; });
+
+  const relatedDeals = (data.deals || []).filter(function(d) {
+    const last = String(c.name || '').split(/\s+/).pop();
+    return last && last.length > 2 && String(d.name || '').toLowerCase().indexOf(last.toLowerCase()) !== -1;
+  });
+
+  let nextStep;
+  const st = String(c.status || '').toUpperCase();
+  if (st.indexOf('HOT') !== -1) nextStep = 'This lead is HOT — call today while interest is high.';
+  else if (st.indexOf('BOOK') !== -1) nextStep = 'Call is booked — confirm the appointment and prepare talking points.';
+  else if (st.indexOf('WARM') !== -1) nextStep = 'Warm lead — a personal follow-up this week keeps momentum.';
+  else if (!c.lastTouchAt) nextStep = 'No touches recorded yet — reach out with a first personal message.';
+  else nextStep = 'Keep the automated sequence running and monitor for engagement.';
+
+  el.innerHTML = '<h1>Lead Report — ' + escDash(c.name) + '</h1>' +
+    '<p class="rp-sub">Generated ' + new Date().toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' }) + ' · Prepared by Flowy</p>' +
+    '<div class="rp-kpis">' +
+      '<div><b>' + escDash(c.status || 'Unscored') + '</b><span>Status</span></div>' +
+      '<div><b>' + escDash(c.source || 'Unknown') + '</b><span>Source</span></div>' +
+      '<div><b>' + (c.createdAt ? new Date(c.createdAt).toLocaleDateString() : '—') + '</b><span>Created</span></div>' +
+      '<div><b>' + (c.lastTouchAt ? new Date(c.lastTouchAt).toLocaleDateString() : 'Never') + '</b><span>Last Touch</span></div>' +
+    '</div>' +
+    '<h2>Contact</h2><table>' +
+      (c.email ? '<tr><td>Email</td><td>' + escDash(c.email) + '</td></tr>' : '') +
+      (c.phone ? '<tr><td>Phone</td><td>' + escDash(c.phone) + '</td></tr>' : '') +
+    '</table>' +
+    (c.summary ? '<h2>AI Summary</h2><p style="font-size:12px;line-height:1.7;">' + escDash(c.summary) + '</p>' : '') +
+    '<h2>Timeline</h2><table><tr><th>Date</th><th>Event</th></tr>' +
+      (events.length ? events.map(function(e) {
+        return '<tr><td>' + new Date(e.ts).toLocaleDateString() + '</td><td>' + escDash(e.text) + '</td></tr>';
+      }).join('') : '<tr><td colspan="2">No recorded events yet</td></tr>') + '</table>' +
+    (relatedDeals.length ? '<h2>Related Deals</h2><table><tr><th>Deal</th><th>Stage</th><th>Value</th></tr>' +
+      relatedDeals.map(function(d) {
+        return '<tr><td>' + escDash(d.name) + '</td><td>' + escDash(d.stage) + '</td><td>' + fmtMoney(d.amount) + '</td></tr>';
+      }).join('') + '</table>' : '') +
+    '<h2>Recommended Next Step</h2><p style="font-size:12px;line-height:1.7;">' + escDash(nextStep) + '</p>' +
+    '<p class="rp-foot">Prepared by Flowy · Flowaify · flowaify.app</p>';
+  window.print();
+}
+window.openLeadReport = openLeadReport;
+
 /* ── Master rerender ────────────────────────────────────────────────────────── */
 function rerender() {
   const data = window.__crmData;

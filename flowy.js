@@ -9,6 +9,7 @@ var flowyBriefed = false;
 var flowyBusy = false;
 var flowyRestored = false;
 var flowyNews = null;       // cached whatsnew titles
+var flowyReport = { active: false, step: null, config: {} };
 
 function flChatKey() { return 'flw_chat_' + (window.__userSub || 'anon'); }
 
@@ -100,6 +101,11 @@ function flowySend(text) {
   flUser(q);
   flowyHistory.push({ role: 'user', content: q });
   flSaveTranscript();
+
+  if (flowyReport.active) {
+    flowyReportStep(q);
+    return;
+  }
 
   var local = flowyLocal(q);
   if (local) {
@@ -337,12 +343,33 @@ function flowyLocal(q) {
 
   // help
   if (/^(help|what can you do|what do you do)/.test(s)) {
-    return { html: 'I can do a lot:<br>• <strong>Answer data questions</strong> — "how many leads this week?", "what\'s my pipeline?", "who needs attention?"<br>• <strong>Run commands</strong> — "show hot leads", "go to analytics", "export csv", "dark mode"<br>• <strong>Update leads</strong> — "mark Sarah warm" writes straight to Zoho<br>• <strong>Draft follow-ups</strong> — "draft a follow-up text for Jacob"<br>• <strong>Brief you</strong> — "daily briefing"<br>Anything else, I\'ll think it through with AI.' };
+    return { html: 'I can do a lot:<br>• <strong>Answer data questions</strong> — "how many leads this week?", "what\'s my pipeline?", "who needs attention?"<br>• <strong>Run commands</strong> — "show hot leads", "go to analytics", "export csv", "dark mode"<br>• <strong>Update leads</strong> — "mark Sarah warm" writes straight to Zoho<br>• <strong>Draft follow-ups</strong> — "draft a follow-up text for Jacob"<br>• <strong>Build custom reports</strong> — "build me a report" (I\u2019ll ask what you want in it) or "report on Sarah"<br>• <strong>Brief you</strong> — "daily briefing"<br>Anything else, I\'ll think it through with AI.' };
   }
 
   // briefing
   if (/briefing|summary of (the )?day|catch me up|what.s (new|happening)/.test(s)) {
     return { html: flowyBriefingHtml(), plain: 'briefing' };
+  }
+
+  // custom report builder
+  m = q.match(/(?:report|summary)\s+(?:for|on|about)\s+(.+)$/i);
+  if (/report/i.test(s) && m && !/change|issue/.test(s)) {
+    var rl = flFindLead(m[1].replace(/lead\s*/i, ''));
+    if (rl) {
+      var rid = String(rl.id).replace(/[^\w-]/g, '');
+      return {
+        html: 'On it — building a full lead report for <strong>' + flEsc(rl.name) + '</strong>. The print dialog will open; save as PDF to share it.',
+        plain: 'lead report',
+        run: function() { openLeadReport(rid); },
+      };
+    }
+  }
+  if (/(?:build|create|make|generate|custom).{0,20}report|^report$|custom report/i.test(s)) {
+    flowyReport = { active: true, step: 'type', config: {} };
+    setTimeout(function() {
+      flBot('Let\u2019s build it. What kind of report do you want?' + flOpts(['Performance summary', 'Specific lead', 'Pipeline & deals']) + '<div style="margin-top:6px;font-size:10.5px;color:var(--text-m);">(say \u201ccancel\u201d anytime)</div>', { instant: true });
+    }, 300);
+    return { html: null, handled: true };
   }
 
   // memory: remember / forget / list / clear
@@ -598,3 +625,138 @@ window.flowyCopy = flowyCopy;
 /* Chip helper */
 function flowyChip(text) { flowySend(text); }
 window.flowyChip = flowyChip;
+
+/* ── Conversational report builder ──────────────────────────────────────────── */
+function flOpts(opts) {
+  return '<div class="fl-opts">' + opts.map(function(o) {
+    return '<button onclick="flowySend(\'' + o.replace(/[^\w\s&\u2013-]/g, '') + '\')">' + flEsc(o) + '</button>';
+  }).join('') + '</div>';
+}
+
+function flowyReportCancel(msg) {
+  flowyReport = { active: false, step: null, config: {} };
+  flBot(msg || 'No problem — report cancelled. Ask me anytime.', { instant: true });
+}
+
+function flowyParseDays(s) {
+  if (/7|week/.test(s)) return { days: 7, label: 'Last 7 days' };
+  if (/90|quarter/.test(s)) return { days: 90, label: 'Last 90 days' };
+  if (/30|month ago|last 30/.test(s)) return { days: 30, label: 'Last 30 days' };
+  if (/this month|current month/.test(s)) {
+    var now = new Date();
+    return { days: now.getDate(), label: 'This month' };
+  }
+  var m = s.match(/(?:from|since)\s+(.+)$/);
+  if (m) {
+    var t = Date.parse(m[1]);
+    if (!isNaN(t) && t < Date.now()) {
+      var d = Math.max(1, Math.ceil((Date.now() - t) / 86400000));
+      return { days: d, label: 'Since ' + new Date(t).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) };
+    }
+  }
+  return null;
+}
+
+var FLOWY_SECTIONS = [
+  { key: 'kpis',     words: /kpi|number|stat|metric/,        label: 'Key numbers' },
+  { key: 'sources',  words: /source/,                        label: 'Lead sources' },
+  { key: 'funnel',   words: /funnel|conversion/,             label: 'Conversion funnel' },
+  { key: 'insights', words: /insight|finding/,               label: 'Insights' },
+  { key: 'topleads', words: /top lead|lead list|leads/,      label: 'Top leads' },
+  { key: 'stages',   words: /stage|pipeline|deal/,           label: 'Pipeline by stage' },
+];
+
+function flowyReportStep(q) {
+  var s = q.toLowerCase().trim();
+  if (/^(cancel|never ?mind|stop|forget it|quit)/.test(s)) { flowyReportCancel(); return; }
+  var cfg = flowyReport.config;
+
+  flowyBusy = true;
+  flTyping(true);
+  setTimeout(function() {
+    flTyping(false);
+    flowyBusy = false;
+
+    if (flowyReport.step === 'type') {
+      if (/lead/.test(s) && !/leads/.test(s) || /specific/.test(s)) {
+        flowyReport.step = 'lead';
+        flBot('Which lead? Give me a name.', { instant: true });
+        return;
+      }
+      if (/pipeline|deal/.test(s)) {
+        cfg.type = 'performance';
+        cfg.sections = ['kpis', 'stages', 'funnel'];
+        flowyReport.step = 'range';
+        flBot('Pipeline it is. What period should it cover?' + flOpts(['Last 7 days', 'Last 30 days', 'Last 90 days', 'This month']), { instant: true });
+        return;
+      }
+      if (/performance|summary|everything|full/.test(s)) {
+        cfg.type = 'performance';
+        flowyReport.step = 'range';
+        flBot('What period should the report cover?' + flOpts(['Last 7 days', 'Last 30 days', 'Last 90 days', 'This month']), { instant: true });
+        return;
+      }
+      flBot('I can do a <strong>performance summary</strong>, a <strong>specific lead</strong> report, or a <strong>pipeline & deals</strong> report — which one?' + flOpts(['Performance summary', 'Specific lead', 'Pipeline & deals']), { instant: true });
+      return;
+    }
+
+    if (flowyReport.step === 'lead') {
+      var lead = flFindLead(q);
+      if (!lead) {
+        flBot('I couldn\u2019t find a lead matching \u201c' + flEsc(q) + '\u201d — try their full name, or say \u201ccancel\u201d.', { instant: true });
+        return;
+      }
+      flowyReport = { active: false, step: null, config: {} };
+      var rid = String(lead.id).replace(/[^\w-]/g, '');
+      flBot('Building the full report for <strong>' + flEsc(lead.name) + '</strong> — the print dialog will open. Save as PDF to share it.', { instant: true });
+      setTimeout(function() { openLeadReport(rid); }, 600);
+      return;
+    }
+
+    if (flowyReport.step === 'range') {
+      var r = flowyParseDays(s);
+      if (!r) {
+        flBot('Give me a period — like <em>last 30 days</em>, <em>this month</em>, or <em>since June 1</em>.' + flOpts(['Last 7 days', 'Last 30 days', 'Last 90 days', 'This month']), { instant: true });
+        return;
+      }
+      cfg.days = r.days;
+      cfg.rangeLabel = r.label;
+      if (cfg.sections) {          // pipeline preset — skip section picking
+        flowyReportFinish();
+        return;
+      }
+      flowyReport.step = 'sections';
+      flBot('Last one — what should go in? Say <strong>everything</strong>, or pick from: key numbers, sources, funnel, insights, top leads, pipeline stages.' + flOpts(['Everything', 'Key numbers & sources', 'Funnel & insights']), { instant: true });
+      return;
+    }
+
+    if (flowyReport.step === 'sections') {
+      var picked = [];
+      if (/everything|all|full/.test(s)) {
+        picked = FLOWY_SECTIONS.map(function(x) { return x.key; });
+      } else {
+        FLOWY_SECTIONS.forEach(function(sec) { if (sec.words.test(s)) picked.push(sec.key); });
+      }
+      if (!picked.length) {
+        flBot('Tell me at least one section — or just say <strong>everything</strong>.' + flOpts(['Everything']), { instant: true });
+        return;
+      }
+      cfg.sections = picked;
+      flowyReportFinish();
+      return;
+    }
+
+    flowyReportCancel();
+  }, 350);
+}
+
+function flowyReportFinish() {
+  var cfg = flowyReport.config;
+  flowyReport = { active: false, step: null, config: {} };
+  var names = (cfg.sections || []).map(function(k) {
+    var f = FLOWY_SECTIONS.find(function(x) { return x.key === k; });
+    return f ? f.label.toLowerCase() : k;
+  });
+  flBot('Done — building your <strong>' + flEsc(cfg.rangeLabel || '') + '</strong> report with ' + flEsc(names.join(', ')) + '. The print dialog will open; save as PDF to share it.', { instant: true });
+  setTimeout(function() { openCustomReport(cfg); }, 600);
+}
