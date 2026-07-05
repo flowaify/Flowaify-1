@@ -1,0 +1,34 @@
+[
+  {
+    "q": "how do seats work team members pricing",
+    "a": "Your plan includes **3 seats**. Each seat is a full login for a team member with its own role (Admin, Member, or Viewer). Manage them on the **Team page** in the dashboard — and if you need more, hit *Buy more seats* there and the Flowaify team will set you up."
+  },
+  {
+    "q": "how do I invite add a team member teammate",
+    "a": "Head to **Team** in the dashboard sidebar and hit *Invite member* — name, email, role, done. Flowaify provisions their login within one business day, and they'll show as Active once it's live."
+  },
+  {
+    "q": "how do I request a change to my automations",
+    "a": "Easiest path: the **Request a change** card on your Workspace page — it opens a pre-filled form straight to the Flowaify team. Small tweaks are usually live within a business day."
+  },
+  {
+    "q": "how do I export my leads to csv download",
+    "a": "On the **Leads page**, filter to what you want and hit **Export CSV** — it downloads exactly what's on screen. You can also just tell me *\"export csv\"* and I'll do it."
+  },
+  {
+    "q": "how do I get a report for my client meeting",
+    "a": "Say *\"build me a report\"* and I'll ask what you want in it — period, sections, or a specific lead — then generate a print-ready PDF. There's also a **Report** button in the top bar for the quick version."
+  },
+  {
+    "q": "what does flowaify do service automations",
+    "a": "Flowaify captures every lead from your CRM, responds **instantly** by SMS and email, scores leads Hot/Warm/Cold, runs follow-up sequences automatically, and books calls onto your calendar. This dashboard — and me — are your window into all of it."
+  },
+  {
+    "q": "how do I turn on dark mode theme",
+    "a": "Tap the **moon icon** in the top header — it flips the whole workspace to dark and remembers your choice. Or just tell me *\"dark mode\"*."
+  },
+  {
+    "q": "how does lead scoring work hot warm cold",
+    "a": "Flowaify's automations score each lead **Hot, Warm, or Cold** based on engagement — replies, speed, and behavior. Scores land in your CRM and show up everywhere in the dashboard. You can also override any score yourself from the lead panel, or tell me *\"mark Sarah warm\"*."
+  }
+]

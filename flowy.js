@@ -10,8 +10,20 @@ var flowyBusy = false;
 var flowyRestored = false;
 var flowyNews = null;       // cached whatsnew titles
 var flowyReport = { active: false, step: null, config: {} };
+var flowyDay = { active: false, queue: [], idx: 0, done: 0 };
+var flowyFaq = null;
+var flowyAbort = null;
+window.__watchItems = [];
+var watchShown = false;
 
 function flChatKey() { return 'flw_chat_' + (window.__userSub || 'anon'); }
+
+function flPortalOnly(what) {
+  return {
+    html: what + ' works best in the dashboard. <a href="app.html" style="color:var(--blue);font-weight:600;">Open Dashboard →</a>',
+    plain: 'redirect',
+  };
+}
 
 function flSaveTranscript() {
   try {
@@ -48,6 +60,7 @@ function toggleFlowy() {
     if (inp) setTimeout(function() { inp.focus(); }, 240);
     flRestoreTranscript();
     if (!flowyBriefed) { flowyBriefed = true; flowyBriefing(); }
+    setTimeout(flowyWatchAnnounce, flowyBriefed ? 1400 : 400);
   }
 }
 window.toggleFlowy = toggleFlowy;
@@ -106,6 +119,10 @@ function flowySend(text) {
     flowyReportStep(q);
     return;
   }
+  if (flowyDay.active) {
+    flowyDayStep(q);
+    return;
+  }
 
   var local = flowyLocal(q);
   if (local) {
@@ -152,10 +169,12 @@ async function flowyAskAI(q) {
     return;
   }
   try {
+    flowyAbort = new AbortController();
     var res = await fetch(FLOWY_WORKER + '/ai', {
       method: 'POST',
       headers: { Authorization: 'Bearer ' + claims.__raw, 'Content-Type': 'application/json' },
       body: JSON.stringify({ question: q, context: flowyContext(), history: flowyHistory.slice(-7, -1) }),
+      signal: flowyAbort.signal,
     });
     if (res.status === 501 || res.status === 404) {
       flTyping(false);
@@ -184,6 +203,8 @@ async function flowyAskAI(q) {
     }
 
     // Streamed answer: live-typing bubble
+    window.__flStreaming = true;
+    flStopUI(true);
     var live = flAdd('<div class="fl-orb-sm"><img class="logo-white" src="logo-transparent.png" alt="" /></div><div class="fl-bubble"><span class="fl-live"></span></div>', 'fl-bot');
     var liveSpan = live ? live.querySelector('.fl-live') : null;
     var reader = res.body.getReader();
@@ -208,6 +229,8 @@ async function flowyAskAI(q) {
         }
       }
     }
+    window.__flStreaming = false;
+    flStopUI(false);
     ans = ans.trim() || 'Sorry — I came back empty on that one.';
     if (liveSpan) {
       liveSpan.parentElement.innerHTML = flMd(ans) +
@@ -219,9 +242,25 @@ async function flowyAskAI(q) {
     flSaveTranscript();
   } catch (e) {
     flTyping(false);
-    flBot('I could not reach the AI engine — check your connection and try again.');
+    window.__flStreaming = false;
+    flStopUI(false);
+    if (e && e.name === 'AbortError') {
+      flBot('<em>Stopped.</em>', { instant: true });
+    } else {
+      flBot('I could not reach the AI engine — check your connection and try again.');
+    }
   }
+  flowyAbort = null;
   flowyBusy = false;
+}
+
+function flStopUI(streaming) {
+  var btn = document.getElementById('fl-send');
+  if (!btn) return;
+  btn.disabled = false;
+  btn.innerHTML = streaming ? '<i data-lucide="square"></i>' : '<i data-lucide="arrow-up"></i>';
+  btn.classList.toggle('stopping', !!streaming);
+  if (typeof lucide !== 'undefined') lucide.createIcons();
 }
 
 /* ── Memory API (teachable facts) ───────────────────────────────────────────── */
@@ -351,9 +390,62 @@ function flowyLocal(q) {
     return { html: flowyBriefingHtml(), plain: 'briefing' };
   }
 
+  var portal = !!window.__isPortal;
+
+  // start my day
+  if (/start my day|work (my|the) (queue|leads)|daily run|morning run/.test(s)) {
+    if (portal) return flPortalOnly('The daily lead queue');
+    setTimeout(flowyDayStart, 300);
+    return { html: null, handled: true };
+  }
+
+  // note on {name}: {text}   /  log a call with {name}: {text}
+  m = q.match(/^(?:note (?:on|for)|log (?:a )?(?:call|meeting|chat) with)\s+([^:]+):\s*(.+)$/i);
+  if (m) {
+    if (portal) return flPortalOnly('Saving notes');
+    var noteLead = flFindLead(m[1]);
+    if (!noteLead) return { html: 'I couldn\u2019t find a lead named \u201c' + flEsc(m[1].trim()) + '\u201d.' };
+    var noteText = m[2].trim();
+    var noteId = String(noteLead.id).replace(/[^\w-]/g, '');
+    flowyBusy = true;
+    flTyping(true);
+    updateLead(noteId, { note: noteText }).then(function(ok) {
+      flTyping(false);
+      flowyBusy = false;
+      flBot(ok
+        ? '✓ Note saved to <strong>' + flEsc(noteLead.name) + '</strong> in Zoho:<br><em>' + flEsc(noteText) + '</em>'
+        : 'That note didn\u2019t save — try again in a moment.', { instant: true });
+    });
+    return { html: null, handled: true };
+  }
+
+  // compare this month vs last month
+  if (/compare.*(month|period)|this month (vs|versus|to|against) last/.test(s)) {
+    var contacts2 = contacts;
+    var nowD = new Date();
+    var thisStart = new Date(nowD.getFullYear(), nowD.getMonth(), 1).getTime();
+    var lastStart = new Date(nowD.getFullYear(), nowD.getMonth() - 1, 1).getTime();
+    var thisN = 0, lastN = 0;
+    contacts2.forEach(function(c) {
+      if (!c.createdAt) return;
+      var t = new Date(c.createdAt).getTime();
+      if (t >= thisStart) thisN++;
+      else if (t >= lastStart && t < thisStart) lastN++;
+    });
+    var diff = lastN > 0 ? Math.round(((thisN - lastN) / lastN) * 100) : null;
+    var verdict = diff == null ? '' :
+      diff >= 0 ? ' — up <strong>' + diff + '%</strong>. Keep feeding the machine.' : ' — down <strong>' + Math.abs(diff) + '%</strong>. Worth a look at your top source.';
+    return { html: 'This month: <strong>' + thisN + '</strong> leads · Last month: <strong>' + lastN + '</strong>' + verdict, plain: 'compare ' + thisN + '/' + lastN };
+  }
+
+  // FAQ knowledge (flowyfaq.json)
+  var faqHit = flowyFaqMatch(s);
+  if (faqHit) return { html: faqHit, plain: 'faq' };
+
   // custom report builder
   m = q.match(/(?:report|summary)\s+(?:for|on|about)\s+(.+)$/i);
   if (/report/i.test(s) && m && !/change|issue/.test(s)) {
+    if (portal) return flPortalOnly('Report building');
     var rl = flFindLead(m[1].replace(/lead\s*/i, ''));
     if (rl) {
       var rid = String(rl.id).replace(/[^\w-]/g, '');
@@ -365,6 +457,7 @@ function flowyLocal(q) {
     }
   }
   if (/(?:build|create|make|generate|custom).{0,20}report|^report$|custom report/i.test(s)) {
+    if (portal) return flPortalOnly('Report building');
     flowyReport = { active: true, step: 'type', config: {} };
     setTimeout(function() {
       flBot('Let\u2019s build it. What kind of report do you want?' + flOpts(['Performance summary', 'Specific lead', 'Pipeline & deals']) + '<div style="margin-top:6px;font-size:10.5px;color:var(--text-m);">(say \u201ccancel\u201d anytime)</div>', { instant: true });
@@ -411,12 +504,15 @@ function flowyLocal(q) {
   // mark {name} {status}  — write-back
   m = s.match(/(?:mark|set|make)\s+(.+?)\s+(?:as\s+)?(hot|warm|cold|booked)\b/);
   if (m) {
+    if (portal) return flPortalOnly('Updating leads');
     var lead = flFindLead(m[1]);
     if (!lead) return { html: 'I couldn\'t find a lead matching "<strong>' + flEsc(m[1]) + '</strong>". Check the spelling or try their full name.' };
     var st = m[2].toUpperCase();
     var safeId = String(lead.id).replace(/[^\w-]/g, '');
+    var prevSt = lead.status || '';
     return {
-      html: '✓ Marking <strong>' + flEsc(lead.name) + '</strong> as <strong>' + st + '</strong> — writing to Zoho now.',
+      html: '✓ Marking <strong>' + flEsc(lead.name) + '</strong> as <strong>' + st + '</strong> — writing to Zoho now.' +
+        '<div class="fl-opts"><button onclick="flowyUndoStatus(\'' + safeId + '\', \'' + prevSt.replace(/[^\w\s-]/g, '') + '\')">Undo</button></div>',
       plain: 'marked ' + lead.name + ' ' + st,
       run: function() { setLeadStatus(safeId, st); },
     };
@@ -434,6 +530,7 @@ function flowyLocal(q) {
   // show/filter status leads
   m = s.match(/(?:show|filter|list|see)\s+(?:me\s+)?(hot|warm|cold|booked)\s+leads/);
   if (m) {
+    if (portal) return flPortalOnly('Filtering leads');
     var st2 = m[1].toUpperCase();
     var list = flStatusList(st2);
     return {
@@ -456,19 +553,29 @@ function flowyLocal(q) {
   // navigate
   m = s.match(/(?:go to|open|take me to|show)\s+(?:the\s+)?(overview|home|leads|activity|calendar|automations|analytics|settings)/);
   if (m) {
+    if (portal) {
+      return { html: '✓ Taking you to the dashboard.', plain: 'nav', run: function() { window.location.href = 'app.html'; } };
+    }
     var page = m[1] === 'home' ? 'overview' : m[1];
     return { html: '✓ Opening <strong>' + page.charAt(0).toUpperCase() + page.slice(1) + '</strong>.', plain: 'opened ' + page, run: function() { showPage(page); } };
   }
 
   // actions
-  if (/export.*(csv|leads)|download.*(csv|leads)/.test(s)) return { html: '✓ Exporting your leads to CSV.', plain: 'exported', run: function() { exportLeadsCsv(); } };
-  if (/report/.test(s) && /download|open|generate|print|create/.test(s)) return { html: '✓ Building your report — the print dialog will open.', plain: 'report', run: function() { openReport(); } };
+  if (/export.*(csv|leads)|download.*(csv|leads)/.test(s)) {
+    if (portal) return flPortalOnly('CSV export');
+    return { html: '✓ Exporting your leads to CSV.', plain: 'exported', run: function() { exportLeadsCsv(); } };
+  }
+  if (/report/.test(s) && /download|open|generate|print|create/.test(s)) {
+    if (portal) return flPortalOnly('Report building');
+    return { html: '✓ Building your report — the print dialog will open.', plain: 'report', run: function() { openReport(); } };
+  }
   if (/dark mode|light mode|toggle theme|switch theme/.test(s)) return { html: '✓ Switching the theme.', plain: 'theme', run: function() { toggleTheme(); } };
   if (/^refresh|sync (data|now)|pull latest/.test(s)) return { html: '✓ Refreshing your CRM data.', plain: 'refresh', run: function() { refreshData(true); } };
 
   // find/open lead
   m = s.match(/(?:find|open|look ?up|pull up)\s+(?:lead\s+)?(.+)$/);
   if (m && !/leads|page/.test(m[1])) {
+    if (portal) return flPortalOnly('Opening leads');
     var lead3 = flFindLead(m[1]);
     if (lead3) {
       var sid = String(lead3.id).replace(/[^\w-]/g, '');
@@ -622,6 +729,133 @@ function flowyCopy(id) {
 }
 window.flowyCopy = flowyCopy;
 
+/* ── Proactive watchdog ─────────────────────────────────────────────────────── */
+function flowyWatch(data) {
+  if (!data) return;
+  var items = [];
+  var att = (data.needsAttention || []).length;
+  if (att > 0) {
+    items.push({ text: '<strong>' + att + '</strong> lead' + (att === 1 ? '' : 's') + ' untouched for 48h+ — momentum dies fast.', chips: ['Start my day', 'Show them'] });
+  }
+  // Goal pace
+  try {
+    var g = (typeof goalTarget === 'function') ? goalTarget() : 50;
+    var now = new Date();
+    var ms = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
+    var mo = (data.contacts || []).filter(function(c) { return c.createdAt && new Date(c.createdAt).getTime() >= ms; }).length;
+    var daysIn = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+    var elapsed = now.getDate() / daysIn;
+    if (g > 0 && elapsed > 0.2 && (mo / g) / elapsed < 0.7) {
+      items.push({ text: 'You\u2019re at <strong>' + mo + ' of ' + g + '</strong> leads — behind pace for the month.', chips: ['How is my goal?'] });
+    }
+  } catch (e) {}
+  // Deals closing within 48h
+  var soon = (data.deals || []).filter(function(d) {
+    if (!d.closingDate) return false;
+    var t = new Date(d.closingDate).getTime();
+    return t >= Date.now() - 86400000 && t <= Date.now() + 2 * 86400000;
+  });
+  if (soon.length) {
+    var tot = 0; soon.forEach(function(d) { tot += d.amount || 0; });
+    items.push({ text: '<strong>' + soon.length + '</strong> deal' + (soon.length === 1 ? '' : 's') + (tot ? ' worth <strong>' + fmtMoney(tot) + '</strong>' : '') + ' close within 48 hours.', chips: ['What closes this week?'] });
+  }
+  window.__watchItems = items;
+  var badge = document.getElementById('fab-badge');
+  if (badge) {
+    badge.textContent = items.length;
+    badge.style.display = items.length ? 'flex' : 'none';
+  }
+}
+window.flowyWatch = flowyWatch;
+
+function flowyWatchAnnounce() {
+  var items = window.__watchItems || [];
+  if (!items.length || watchShown) return;
+  watchShown = true;
+  var htmlOut = '<div class="fl-brief-head">I caught ' + items.length + ' thing' + (items.length === 1 ? '' : 's') + ' worth your attention:</div>' +
+    items.map(function(it) { return '• ' + it.text; }).join('<br>');
+  var chips = [];
+  items.forEach(function(it) { (it.chips || []).forEach(function(c) { if (chips.indexOf(c) === -1) chips.push(c); }); });
+  if (chips.length) htmlOut += flOpts(chips.slice(0, 3));
+  flBot(htmlOut, { instant: true });
+}
+
+/* ── Start-my-day guided queue ──────────────────────────────────────────────── */
+function flowyDayStart() {
+  var d = window.__crmData;
+  if (!d) { flBot('Your data is still loading — try again in a second.', { instant: true }); return; }
+  var queue = (d.needsAttention && d.needsAttention.length ? d.needsAttention : d.contacts.filter(function(c) {
+    return c.createdAt && (Date.now() - new Date(c.createdAt).getTime()) > 2 * 86400000 && !c.lastTouchAt;
+  })).map(function(c) { return String(c.id); });
+  if (!queue.length) {
+    flBot('Your queue is clear — every lead has been touched. That\u2019s how it\u2019s done. ✓', { instant: true });
+    return;
+  }
+  flowyDay = { active: true, queue: queue, idx: 0, done: 0 };
+  flBot('Let\u2019s work the queue — <strong>' + queue.length + '</strong> lead' + (queue.length === 1 ? '' : 's') + ' need a touch. Here\u2019s the first:', { instant: true });
+  setTimeout(flowyDayShow, 400);
+}
+
+function flowyDayShow() {
+  var d = window.__crmData;
+  if (!flowyDay.active || !d) return;
+  if (flowyDay.idx >= flowyDay.queue.length) { flowyDayFinish(); return; }
+  var c = d.contacts.find(function(x) { return String(x.id) === flowyDay.queue[flowyDay.idx]; });
+  if (!c) { flowyDay.idx++; flowyDayShow(); return; }
+  var age = c.createdAt ? relTime(new Date(c.createdAt).getTime()) : '—';
+  flBot('<strong>' + flEsc(c.name) + '</strong> · ' + flEsc(c.source || 'Unknown source') + ' · came in ' + age +
+    (c.status ? ' · ' + flEsc(c.status) : ' · unscored') +
+    '<br><span style="font-size:11px;color:var(--text-m);">(' + (flowyDay.idx + 1) + ' of ' + flowyDay.queue.length + ')</span>' +
+    flOpts(['Draft follow-up', 'Mark warm', 'Mark cold', 'Skip', 'Stop']), { instant: true });
+}
+
+function flowyDayStep(q) {
+  var s = q.toLowerCase().trim();
+  var d = window.__crmData;
+  var c = d ? d.contacts.find(function(x) { return String(x.id) === flowyDay.queue[flowyDay.idx]; }) : null;
+  if (/^(stop|cancel|quit|done|exit)/.test(s)) {
+    var n = flowyDay.done;
+    flowyDay = { active: false, queue: [], idx: 0, done: 0 };
+    flBot('Stopping there — you handled <strong>' + n + '</strong> lead' + (n === 1 ? '' : 's') + ' this run. Say <em>\u201cstart my day\u201d</em> to pick it back up.', { instant: true });
+    return;
+  }
+  if (!c) { flowyDay.idx++; flowyDayShow(); return; }
+  var sid = String(c.id).replace(/[^\w-]/g, '');
+
+  if (/draft/.test(s)) {
+    flowyDraft(c, 'text').then(function() {
+      flowyDay.done++;
+      flowyDay.idx++;
+      setTimeout(flowyDayShow, 700);
+    });
+    return;
+  }
+  var mm = s.match(/mark\s*(hot|warm|cold|booked)|^(hot|warm|cold|booked)$/);
+  if (mm) {
+    var st = (mm[1] || mm[2]).toUpperCase();
+    flBot('✓ <strong>' + flEsc(c.name) + '</strong> → ' + st + '. Next:', { instant: true });
+    setLeadStatus(sid, st);
+    flowyDay.done++;
+    flowyDay.idx++;
+    setTimeout(flowyDayShow, 900);
+    return;
+  }
+  if (/skip|next|pass/.test(s)) {
+    flowyDay.idx++;
+    flowyDayShow();
+    return;
+  }
+  flBot('Tap a chip or say <em>draft</em>, <em>mark warm/cold</em>, <em>skip</em>, or <em>stop</em>.' + flOpts(['Draft follow-up', 'Mark warm', 'Skip', 'Stop']), { instant: true });
+}
+
+function flowyDayFinish() {
+  var n = flowyDay.done;
+  var total = flowyDay.queue.length;
+  flowyDay = { active: false, queue: [], idx: 0, done: 0 };
+  watchShown = true;
+  flBot('🎉 Queue clear — <strong>' + n + ' of ' + total + '</strong> leads handled. That\u2019s a strong start to the day. I\u2019ll keep watch from here.', { instant: true });
+}
+
 /* Chip helper */
 function flowyChip(text) { flowySend(text); }
 window.flowyChip = flowyChip;
@@ -760,3 +994,91 @@ function flowyReportFinish() {
   flBot('Done — building your <strong>' + flEsc(cfg.rangeLabel || '') + '</strong> report with ' + flEsc(names.join(', ')) + '. The print dialog will open; save as PDF to share it.', { instant: true });
   setTimeout(function() { openCustomReport(cfg); }, 600);
 }
+
+
+/* ── Undo status change ─────────────────────────────────────────────────────── */
+function flowyUndoStatus(id, prev) {
+  if (!prev || !prev.trim()) {
+    // No previous status — nothing to revert in Zoho's allowed set; just tell the user
+    flBot('That lead had no score before — I can\u2019t un-set it from here, but you can pick a new one anytime.', { instant: true });
+    return;
+  }
+  var st = prev.toUpperCase();
+  if (['HOT', 'WARM', 'COLD', 'BOOKED'].indexOf(st) === -1) {
+    flBot('The previous status (\u201c' + flEsc(prev) + '\u201d) isn\u2019t one I can write back — leaving it as is.', { instant: true });
+    return;
+  }
+  flBot('↩ Reverting to <strong>' + st + '</strong>.', { instant: true });
+  setLeadStatus(id, st);
+}
+window.flowyUndoStatus = flowyUndoStatus;
+
+/* ── FAQ knowledge (flowyfaq.json) ──────────────────────────────────────────── */
+function flowyFaqLoad() {
+  if (flowyFaq !== null) return;
+  flowyFaq = [];
+  fetch('flowyfaq.json', { cache: 'no-cache' }).then(function(r) { return r.json(); })
+    .then(function(items) { if (Array.isArray(items)) flowyFaq = items; })
+    .catch(function() {});
+}
+flowyFaqLoad();
+
+function flowyFaqMatch(s) {
+  if (!flowyFaq || !flowyFaq.length) return null;
+  var best = null, bestScore = 0;
+  flowyFaq.forEach(function(f) {
+    var words = String(f.q || '').toLowerCase().split(/[^a-z0-9]+/).filter(function(w) { return w.length > 3; });
+    if (!words.length) return;
+    var hits = words.filter(function(w) { return s.indexOf(w) !== -1; }).length;
+    var score = hits / words.length;
+    if (hits >= 2 && score > bestScore) { best = f; bestScore = score; }
+  });
+  return best && bestScore >= 0.5 ? flMd(best.a) : null;
+}
+
+/* ── Voice input (Web Speech API) ───────────────────────────────────────────── */
+var flRec = null;
+function flVoiceSupported() {
+  return !!(window.SpeechRecognition || window.webkitSpeechRecognition);
+}
+function flVoice() {
+  var btn = document.getElementById('fl-mic');
+  var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) return;
+  if (flRec) { flRec.stop(); return; }
+  flRec = new SR();
+  flRec.lang = 'en-US';
+  flRec.interimResults = true;
+  var inp = document.getElementById('fl-input');
+  if (btn) btn.classList.add('rec');
+  flRec.onresult = function(e) {
+    var text = '';
+    for (var i = 0; i < e.results.length; i++) text += e.results[i][0].transcript;
+    if (inp) { inp.value = text; flInputSize(); }
+  };
+  flRec.onend = function() {
+    flRec = null;
+    if (btn) btn.classList.remove('rec');
+    if (inp && inp.value.trim()) inp.focus();
+  };
+  flRec.onerror = function() {
+    flRec = null;
+    if (btn) btn.classList.remove('rec');
+  };
+  try { flRec.start(); } catch (e) { flRec = null; if (btn) btn.classList.remove('rec'); }
+}
+window.flVoice = flVoice;
+document.addEventListener('DOMContentLoaded', function() {
+  var btn = document.getElementById('fl-mic');
+  if (btn && !flVoiceSupported()) btn.style.display = 'none';
+});
+
+/* ── Send-or-stop control ───────────────────────────────────────────────────── */
+function flSendOrStop() {
+  if (window.__flStreaming && flowyAbort) {
+    flowyAbort.abort();
+    return;
+  }
+  flowySend();
+}
+window.flSendOrStop = flSendOrStop;

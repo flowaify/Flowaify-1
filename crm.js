@@ -925,6 +925,8 @@ function rerender() {
 
   if (typeof lucide !== 'undefined') lucide.createIcons();
 
+  if (typeof flowyWatch === 'function') flowyWatch(data);
+
   if (!window.__nudged && typeof maybeShowNudge === 'function') {
     window.__nudged = true;
     const ins = buildInsights(data, ranged, days);

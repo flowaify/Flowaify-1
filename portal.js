@@ -81,6 +81,8 @@ async function portalBoot(token) {
   pDot('svc-crm', 'ok');
   pSet('svc-crm-state', 'Operational');
 
+  window.__crmData = data;
+  if (typeof flowyWatch === 'function') flowyWatch(data);
   renderMiniFeed(data);
   renderUpcoming(data);
   portalTeam(token);
