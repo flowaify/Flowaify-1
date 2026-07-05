@@ -144,9 +144,7 @@
     .sec-sub { font-size: 11px; color: var(--text-m); }
     .g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: stretch; }
     .g2 > .card, .g2 > div { min-width: 0; }
-    .act-card { display: flex; flex-direction: column; }
-    #pt-activity { flex: 1; display: flex; flex-direction: column; justify-content: flex-start; }
-    #pt-activity .empty-note { margin: auto; }
+    .g2 { align-items: start; }
     .g4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
     .mb16 { margin-bottom: 16px; }
 
@@ -206,15 +204,6 @@
     .sup-btn { align-self: flex-start; margin-top: 4px; padding: 6px 13px; background: transparent; border: 1px solid var(--input-border); border-radius: 4px; color: var(--text-s); font-size: 11.5px; font-weight: 500; cursor: pointer; transition: background 0.12s; }
     .sup-btn:hover { background: var(--hover); color: var(--text); }
 
-    /* WHAT'S NEW */
-    .wn-item { display: flex; gap: 14px; padding: 13px 16px; border-bottom: 1px solid var(--border); animation: rise 0.3s both; }
-    .wn-item:last-child { border-bottom: none; }
-    @keyframes rise { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: none; } }
-    .wn-date { font-size: 10.5px; color: var(--text-m); white-space: nowrap; width: 74px; flex-shrink: 0; padding-top: 2px; font-variant-numeric: tabular-nums; }
-    .wn-tag { display: inline-flex; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; padding: 2px 7px; border-radius: 3px; background: var(--blue-dim); color: var(--blue); margin-bottom: 3px; }
-    .wn-title { font-size: 12.5px; font-weight: 650; }
-    .wn-text { font-size: 11.5px; color: var(--text-m); margin-top: 1px; line-height: 1.5; }
-
     .empty-note { padding: 24px 16px; text-align: center; font-size: 11.5px; color: var(--text-m); }
     .skel { display: inline-block; width: 54px; height: 22px; border-radius: 5px; background: var(--hover); animation: pulse 1.8s ease-in-out infinite; }
     @keyframes pulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 0.9; } }
@@ -222,9 +211,8 @@
     footer { text-align: center; font-size: 10.5px; color: var(--text-m); padding: 26px 0 0; }
 
     /* ── FLOWY (portal rail) ── */
-    #flowy-panel { position: fixed; top: var(--hdr); right: 0; bottom: 0; width: 360px; z-index: 70; background: var(--bg-card); border-left: 1px solid var(--card-border); display: flex; flex-direction: column; transform: translateX(100%); transition: transform 0.28s cubic-bezier(0.33,0,0.2,1); }
-    body.flowy-open #flowy-panel { transform: translateX(0); }
-    body.flowy-open #hub .hub-wrap { max-width: none; margin-right: 376px; margin-left: 16px; transition: margin 0.28s cubic-bezier(0.33,0,0.2,1); }
+    .flowy-card { display: flex; flex-direction: column; background: linear-gradient(135deg, rgba(0,87,255,0.05), var(--bg-card) 45%); }
+    .flowy-card .fl-msgs { height: 300px; }
     .logo-white { filter: brightness(0) invert(1); object-fit: contain; }
     .fl-head { display: flex; align-items: center; gap: 9px; padding: 12px 14px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
     .fl-orb { width: 24px; height: 24px; border-radius: 50%; background: linear-gradient(135deg, #0057FF, #8b5cf6); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
@@ -271,12 +259,14 @@
     #fl-send.stopping { background: var(--red); opacity: 1 !important; }
     #fl-send i, #fl-send svg { width: 15px; height: 15px; }
     .fl-micro { font-size: 9.5px; color: var(--text-m); text-align: center; padding: 0 14px 8px; flex-shrink: 0; }
-    #flowy-fab { position: fixed; right: 24px; bottom: calc(24px + var(--safe-b)); z-index: 90; width: 52px; height: 52px; border: none; cursor: pointer; padding: 0; background: transparent; display: flex; align-items: center; justify-content: center; filter: drop-shadow(0 3px 10px rgba(0,87,255,0.35)); transition: transform 0.2s, opacity 0.2s; }
-    #flowy-fab img { width: 100%; height: 100%; object-fit: contain; }
-    [data-theme="dark"] #flowy-fab img { filter: brightness(0) invert(1); }
-    #flowy-fab:hover { transform: scale(1.08); }
-    body.flowy-open #flowy-fab { opacity: 0; pointer-events: none; }
-    #fab-badge { position: absolute; top: -3px; right: -3px; min-width: 18px; height: 18px; border-radius: 99px; background: #dc2626; color: #fff; font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center; padding: 0 4px; border: 2px solid var(--bg); }
+    .rec-item { display: flex; align-items: flex-start; gap: 11px; padding: 11px 16px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.12s; }
+    .rec-item:hover { background: var(--hover); }
+    .rec-item:last-child { border-bottom: none; }
+    .rec-icon { width: 26px; height: 26px; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+    .rec-icon i, .rec-icon svg { width: 13px; height: 13px; }
+    .rec-text { font-size: 12px; color: var(--text-s); line-height: 1.5; }
+    .rec-text strong { color: var(--text); }
+    .rec-cta { font-size: 10.5px; color: var(--blue); font-weight: 600; margin-top: 2px; }
 
     /* MODAL */
     .modal-overlay { position: fixed; inset: 0; z-index: 400; background: rgba(10,13,20,0.5); backdrop-filter: blur(3px); display: none; align-items: center; justify-content: center; padding: 16px; }
@@ -313,8 +303,7 @@
       .modal-foot button { flex: 1; justify-content: center; }
       .sup-btn { width: 100%; text-align: center; }
       .ptm-info { min-width: 0; }
-      #flowy-panel { width: 100%; }
-      body.flowy-open #hub .hub-wrap { margin-right: 16px; }
+      .flowy-card .fl-msgs { height: 240px; }
       #login-view.show { flex-direction: column; }
       .lg-brand { padding: calc(20px + env(safe-area-inset-top, 0px)) 22px 18px; flex: none; }
       .lg-orb { width: 34px; height: 34px; border-radius: 9px; margin-bottom: 12px; }
@@ -416,6 +405,28 @@
       </div>
     </div>
 
+    <!-- FLOWY -->
+    <div class="card flowy-card mb16" id="flowy-card">
+      <div class="fl-head">
+        <div class="fl-orb"><img class="logo-white" src="logo-transparent.png" alt="" /></div>
+        <div class="fl-title">Flowy</div>
+        <span class="fl-ai-pill">AI</span>
+        <div class="sec-sub" style="margin-left:auto;">Your AI account manager — ask about leads, pipeline, or Flowaify</div>
+      </div>
+      <div class="fl-msgs" id="fl-msgs"></div>
+      <div class="fl-chips">
+        <button class="fl-chip" onclick="flowyChip('Daily briefing')">Daily briefing</button>
+        <button class="fl-chip" onclick="flowyChip('How is my goal?')">How's my goal?</button>
+        <button class="fl-chip" onclick="flowyChip('What closes this week?')">Closes this week?</button>
+        <button class="fl-chip" onclick="flowyChip('What does Flowaify do for me?')">What does Flowaify do?</button>
+      </div>
+      <div class="fl-input-row">
+        <textarea id="fl-input" rows="1" placeholder="Ask Flowy anything…" onkeydown="flKey(event)" oninput="flInputSize()"></textarea>
+        <button id="fl-mic" onclick="flVoice()" title="Speak to Flowy"><i data-lucide="mic"></i></button>
+        <button id="fl-send" onclick="flSendOrStop()" disabled><i data-lucide="arrow-up"></i></button>
+      </div>
+    </div>
+
     <!-- YOUR SERVICE -->
     <div class="g2 mb16">
       <div style="display:flex;flex-direction:column;gap:16px;">
@@ -427,8 +438,8 @@
           <div class="svc-row"><span class="svc-dot" id="svc-ai"></span>Flowy AI<span class="svc-state" id="svc-ai-state">—</span></div>
         </div>
         <div class="card">
-          <div class="sec-head"><div class="sec-title">Upcoming Closings</div><a class="sec-link" href="app.html">Calendar</a></div>
-          <div id="pt-upcoming"><div class="empty-note">Checking your pipeline…</div></div>
+          <div class="sec-head"><div class="sec-title">Recommended for You</div><span class="fl-ai-pill">AI</span></div>
+          <div id="pt-rec"><div class="empty-note">Sizing up your data…</div></div>
         </div>
         <div class="card card-tint-blue" id="pt-team-card" style="display:none;">
           <div class="sec-head"><div class="sec-title">Your Team</div><a class="sec-link" href="app.html">Manage team →</a></div>
@@ -469,36 +480,9 @@
       </div>
     </div>
 
-    <!-- WHAT'S NEW -->
-    <div class="card">
-      <div class="sec-head"><div class="sec-title">What's New in Flowaify</div><div class="sec-sub">Product updates</div></div>
-      <div id="wn-list"><div class="empty-note">Loading updates…</div></div>
-    </div>
-
     <footer>Flowaify Workspace · <span id="ft-year"></span></footer>
   </div>
 
-  <aside id="flowy-panel">
-    <div class="fl-head">
-      <div class="fl-orb"><img class="logo-white" src="logo-transparent.png" alt="" /></div>
-      <div class="fl-title">Flowy</div>
-      <span class="fl-ai-pill">AI</span>
-      <button class="fl-close" onclick="toggleFlowy()" title="Close"><i data-lucide="x"></i></button>
-    </div>
-    <div class="fl-msgs" id="fl-msgs"></div>
-    <div class="fl-chips">
-      <button class="fl-chip" onclick="flowyChip('Daily briefing')">Daily briefing</button>
-      <button class="fl-chip" onclick="flowyChip('How is my goal?')">How's my goal?</button>
-      <button class="fl-chip" onclick="flowyChip('What closes this week?')">Closes this week?</button>
-    </div>
-    <div class="fl-input-row">
-      <textarea id="fl-input" rows="1" placeholder="Ask Flowy about your leads…" onkeydown="flKey(event)" oninput="flInputSize()"></textarea>
-      <button id="fl-mic" onclick="flVoice()" title="Speak to Flowy"><i data-lucide="mic"></i></button>
-      <button id="fl-send" onclick="flSendOrStop()" disabled><i data-lucide="arrow-up"></i></button>
-    </div>
-    <div class="fl-micro">Flowy uses your live CRM data · answers may be imperfect</div>
-  </aside>
-  <button id="flowy-fab" onclick="toggleFlowy()" title="Ask Flowy"><img src="logo-transparent.png" alt="Flowy" /><span id="fab-badge" style="display:none;">0</span></button>
 </div>
 
 <!-- REQUEST MODAL -->
@@ -566,8 +550,8 @@ function relTime(ts) {
 }
 function showToast(msg) { if (typeof portalToast === 'function') portalToast(msg); }
 </script>
-<script src="portal.js?v=4"></script>
-<script src="flowy.js?v=6"></script>
+<script src="portal.js?v=5"></script>
+<script src="flowy.js?v=7"></script>
 <script>
 const AUTH0_DOMAIN    = 'auth.flowaify.app';
 const AUTH0_CLIENT_ID = 'tx74Owqn3jVeSaVuxfFHsKloqbPqfAmN';
@@ -639,7 +623,6 @@ function boot(user) {
   document.getElementById('hub').classList.add('show');
   syncThemeIcon();
   lucide.createIcons();
-  loadWhatsNew();
   portalHealth();
 
   auth0Client.getIdTokenClaims().then(function(claims) {
@@ -757,25 +740,6 @@ function toggleTheme() {
   syncThemeIcon();
 }
 
-async function loadWhatsNew() {
-  const el = document.getElementById('wn-list');
-  const esc = function(s) { return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); };
-  try {
-    const res = await fetch('whatsnew.json', { cache: 'no-cache' });
-    if (!res.ok) throw new Error('no feed');
-    const items = await res.json();
-    if (!Array.isArray(items) || !items.length) throw new Error('empty');
-    el.innerHTML = items.slice(0, 8).map(function(it, i) {
-      return '<div class="wn-item" style="animation-delay:' + (i * 50) + 'ms">' +
-        '<div class="wn-date">' + esc(it.date) + '</div>' +
-        '<div><span class="wn-tag">' + esc(it.tag || 'Update') + '</span>' +
-        '<div class="wn-title">' + esc(it.title) + '</div>' +
-        '<div class="wn-text">' + esc(it.text) + '</div></div></div>';
-    }).join('');
-  } catch(e) {
-    el.innerHTML = '<div class="empty-note">Updates will appear here.</div>';
-  }
-}
 
 initAuth();
 </script>

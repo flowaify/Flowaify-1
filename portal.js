@@ -60,8 +60,8 @@ async function portalBoot(token) {
     pSet('svc-crm-state', 'Degraded');
     var actEl = document.getElementById('pt-activity');
     if (actEl) actEl.innerHTML = '<div class="empty-note">Couldn’t load activity right now.</div>';
-    var upEl = document.getElementById('pt-upcoming');
-    if (upEl) upEl.innerHTML = '<div class="empty-note">Couldn’t load your pipeline right now.</div>';
+    var upEl = document.getElementById('pt-rec');
+    if (upEl) upEl.innerHTML = '<div class="empty-note">Couldn’t size things up right now.</div>';
     return;
   }
 
@@ -83,8 +83,9 @@ async function portalBoot(token) {
 
   window.__crmData = data;
   if (typeof flowyWatch === 'function') flowyWatch(data);
+  if (typeof flowyPortalInit === 'function') flowyPortalInit();
   renderMiniFeed(data);
-  renderUpcoming(data);
+  renderRecommended(data);
   portalTeam(token);
 }
 
@@ -148,7 +149,7 @@ function renderMiniFeed(data) {
       text: 'Deal <strong>' + pEsc(d.name) + '</strong>' + (d.stage ? ' · ' + pEsc(d.stage) : '') });
   });
   events.sort(function(a, b) { return b.ts - a.ts; });
-  var top = events.slice(0, 7);
+  var top = events.slice(0, 4);
   if (!top.length) {
     el.innerHTML = '<div class="empty-note">New leads and automation events will appear here.</div>';
     return;
@@ -163,25 +164,70 @@ function renderMiniFeed(data) {
   if (typeof lucide !== 'undefined') lucide.createIcons();
 }
 
-/* ── Upcoming closings ──────────────────────────────────────────────────────── */
-function renderUpcoming(data) {
-  var el = document.getElementById('pt-upcoming');
+/* ── Recommended for you (rule-based, taps into Flowy) ─────────────────────── */
+function renderRecommended(data) {
+  var el = document.getElementById('pt-rec');
   if (!el) return;
-  var today = new Date(); today.setHours(0, 0, 0, 0);
-  var up = (data.deals || [])
-    .filter(function(d) { return d.closingDate && new Date(d.closingDate).getTime() >= today.getTime(); })
-    .sort(function(a, b) { return new Date(a.closingDate) - new Date(b.closingDate); })
-    .slice(0, 3);
-  if (!up.length) {
-    el.innerHTML = '<div class="empty-note">No closings scheduled — deals with closing dates show here.</div>';
-    return;
+  var recs = [];
+  var att = (data.needsAttention || []).length;
+  var contacts = data.contacts || [], deals = data.deals || [];
+  var now = Date.now();
+
+  if (att > 0) {
+    recs.push({ icon: 'alert-circle', bg: 'rgba(217,119,6,.12)', color: '#d97706',
+      text: '<strong>' + att + ' lead' + (att === 1 ? '' : 's') + '</strong> waiting on a first touch — momentum fades fast.',
+      cta: 'Ask Flowy who needs attention', q: 'Who needs attention?' });
   }
-  el.innerHTML = up.map(function(d) {
-    return '<div class="up-item">' +
-      '<div style="min-width:0;"><div class="up-name">' + pEsc(d.name) + '</div>' +
-      '<div class="up-sub">' + new Date(d.closingDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) +
-      (d.stage ? ' · ' + pEsc(d.stage) : '') + '</div></div>' +
-      (d.amount != null ? '<div class="up-amt">' + pMoney(d.amount) + '</div>' : '') +
+  var soon = deals.filter(function(d) {
+    if (!d.closingDate) return false;
+    var t = new Date(d.closingDate).getTime();
+    return t >= now - 86400000 && t <= now + 7 * 86400000;
+  });
+  if (soon.length) {
+    var tot = 0; soon.forEach(function(d) { tot += d.amount || 0; });
+    recs.push({ icon: 'dollar-sign', bg: 'rgba(5,150,105,.12)', color: '#059669',
+      text: '<strong>' + soon.length + ' deal' + (soon.length === 1 ? '' : 's') + '</strong>' + (tot ? ' worth <strong>$' + Number(tot).toLocaleString() + '</strong>' : '') + ' close this week — worth a prep pass.',
+      cta: 'See what closes this week', q: 'What closes this week?' });
+  }
+  try {
+    var g = goalTarget();
+    var ms = new Date(); ms.setDate(1); ms.setHours(0, 0, 0, 0);
+    var mo = contacts.filter(function(c) { return c.createdAt && new Date(c.createdAt).getTime() >= ms.getTime(); }).length;
+    var nowD = new Date();
+    var elapsed = nowD.getDate() / new Date(nowD.getFullYear(), nowD.getMonth() + 1, 0).getDate();
+    if (g > 0 && elapsed > 0.2 && (mo / g) / elapsed < 0.7) {
+      recs.push({ icon: 'target', bg: 'rgba(0,87,255,.12)', color: '#0057FF',
+        text: 'You\u2019re at <strong>' + mo + ' of ' + g + '</strong> leads — behind pace for the month.',
+        cta: 'Check my goal', q: 'How is my goal?' });
+    }
+  } catch (e) {}
+  var hot = contacts.filter(function(c) { return String(c.status || '').toUpperCase().indexOf('HOT') !== -1; });
+  if (hot.length) {
+    recs.push({ icon: 'flame', bg: 'rgba(220,38,38,.12)', color: '#dc2626',
+      text: '<strong>' + hot.length + ' HOT lead' + (hot.length === 1 ? '' : 's') + '</strong> on the board — strike while it\u2019s warm.',
+      cta: 'Show my hot leads', q: 'How many hot leads do I have?' });
+  }
+  // Evergreen fillers
+  recs.push({ icon: 'sparkles', bg: 'rgba(139,92,246,.12)', color: '#8b5cf6',
+    text: 'Start the day with a 20-second rundown of where everything stands.',
+    cta: 'Get my daily briefing', q: 'Daily briefing' });
+  recs.push({ icon: 'file-text', bg: 'rgba(0,87,255,.12)', color: '#0057FF',
+    text: 'Need something for a meeting? Flowy builds custom reports on request.',
+    cta: 'What can you do?', q: 'What can you do?' });
+
+  el.innerHTML = recs.slice(0, 4).map(function(r) {
+    return '<div class="rec-item" onclick="recAsk(\'' + r.q.replace(/[^\w\s?]/g, '') + '\')">' +
+      '<div class="rec-icon" style="background:' + r.bg + ';color:' + r.color + ';"><i data-lucide="' + r.icon + '"></i></div>' +
+      '<div><div class="rec-text">' + r.text + '</div>' +
+      '<div class="rec-cta">' + pEsc(r.cta) + ' →</div></div>' +
       '</div>';
   }).join('');
+  if (typeof lucide !== 'undefined') lucide.createIcons();
 }
+
+function recAsk(q) {
+  var card = document.getElementById('flowy-card');
+  if (card) card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  setTimeout(function() { if (typeof flowySend === 'function') flowySend(q); }, 350);
+}
+window.recAsk = recAsk;

@@ -39,6 +39,14 @@ function flRestoreTranscript() {
 
 /* ── Panel open/close ───────────────────────────────────────────────────────── */
 function toggleFlowy() {
+  if (window.__isPortal) {
+    var card = document.getElementById('flowy-card');
+    if (card) card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    var pinp = document.getElementById('fl-input');
+    if (pinp) setTimeout(function() { pinp.focus(); }, 320);
+    flowyPortalInit();
+    return;
+  }
   window.__flowyOpen = !window.__flowyOpen;
   document.body.classList.toggle('flowy-open', window.__flowyOpen);
   setTimeout(function() { window.dispatchEvent(new Event('resize')); }, 300);
@@ -51,6 +59,17 @@ function toggleFlowy() {
   }
 }
 window.toggleFlowy = toggleFlowy;
+
+/* Portal embedded box: greet once data is ready */
+function flowyPortalInit() {
+  if (!window.__isPortal || !window.__crmData) return;
+  if (!flowyBriefed) {
+    flowyBriefed = true;
+    flowyBriefing();
+    setTimeout(flowyWatchAnnounce, 1600);
+  }
+}
+window.flowyPortalInit = flowyPortalInit;
 
 /* ── Rendering ──────────────────────────────────────────────────────────────── */
 function flEsc(s) {
