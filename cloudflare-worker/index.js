@@ -257,7 +257,7 @@ async function handleUpdate(request, env, corsHeaders) {
         Authorization: `Zoho-oauthtoken ${zohoToken}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ data: [{ id: contactId, flow_state: status }] }),
+      body: JSON.stringify({ data: [{ id: contactId, Flow_Urgency_Level: status }] }),
     });
     if (resp.status === 401) {
       delete tokenCache[clientId];
@@ -716,6 +716,7 @@ async function getZohoToken(clientId, refreshToken, datacenter, env) {
 const CONTACT_FIELDS = [
   'Full_Name', 'Email', 'Phone',
   'Lead_Source',
+  'Flow_Urgency_Level',
   'flow_state', 'flow_source',
   'flow_last_touch_type', 'flow_last_touch_at',
   'flow_claude_summary',
@@ -765,7 +766,7 @@ function shapeContact(c) {
     email:       c.Email     || null,
     phone:       c.Phone     || null,
     source:      c.flow_source   || c.Lead_Source || null,
-    status:      c.flow_state    || null,
+    status:      c.Flow_Urgency_Level || c.flow_state || null,
     lastTouch:   c.flow_last_touch_type || null,
     lastTouchAt: c.flow_last_touch_at   || null,
     summary:     c.flow_claude_summary  || null,
