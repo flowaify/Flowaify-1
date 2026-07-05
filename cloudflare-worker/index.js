@@ -263,10 +263,12 @@ async function handleUpdate(request, env, corsHeaders) {
       delete tokenCache[clientId];
       return json({ error: 'ZOHO_UNAUTHORIZED' }, 401, corsHeaders);
     }
-    if (!resp.ok) {
-      const detail = await resp.text();
-      console.error('Zoho status update failed:', resp.status, detail.slice(0, 200));
-      return json({ error: 'CRM rejected the status update' }, 502, corsHeaders);
+    const out = await resp.json().catch(() => null);
+    const rec = out && out.data && out.data[0];
+    if (!resp.ok || !rec || rec.code !== 'SUCCESS') {
+      const why = rec ? (rec.code + (rec.details ? ' ' + JSON.stringify(rec.details).slice(0, 160) : '')) : ('HTTP ' + resp.status);
+      console.error('Zoho status update rejected:', why);
+      return json({ error: 'Zoho rejected the status: ' + why }, 502, corsHeaders);
     }
     results.status = status;
   }
@@ -286,10 +288,12 @@ async function handleUpdate(request, env, corsHeaders) {
       delete tokenCache[clientId];
       return json({ error: 'ZOHO_UNAUTHORIZED' }, 401, corsHeaders);
     }
-    if (!resp.ok) {
-      const detail = await resp.text();
-      console.error('Zoho note create failed:', resp.status, detail.slice(0, 200));
-      return json({ error: 'CRM rejected the note' }, 502, corsHeaders);
+    const outN = await resp.json().catch(() => null);
+    const recN = outN && outN.data && outN.data[0];
+    if (!resp.ok || !recN || recN.code !== 'SUCCESS') {
+      const whyN = recN ? (recN.code + (recN.details ? ' ' + JSON.stringify(recN.details).slice(0, 160) : '')) : ('HTTP ' + resp.status);
+      console.error('Zoho note rejected:', whyN);
+      return json({ error: 'Zoho rejected the note: ' + whyN }, 502, corsHeaders);
     }
     results.note = true;
   }
