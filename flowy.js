@@ -7,6 +7,35 @@ window.__flowyOpen = false;
 var flowyHistory = [];      // { role, content } for the LLM
 var flowyBriefed = false;
 var flowyBusy = false;
+var flowyRestored = false;
+var flowyNews = null;       // cached whatsnew titles
+
+function flChatKey() { return 'flw_chat_' + (window.__userSub || 'anon'); }
+
+function flSaveTranscript() {
+  try {
+    localStorage.setItem(flChatKey(), JSON.stringify(flowyHistory.slice(-20)));
+  } catch (e) {}
+}
+
+function flRestoreTranscript() {
+  if (flowyRestored) return;
+  flowyRestored = true;
+  var saved = [];
+  try { saved = JSON.parse(localStorage.getItem(flChatKey()) || '[]'); } catch (e) {}
+  if (!Array.isArray(saved) || !saved.length) return;
+  var m = document.getElementById('fl-msgs');
+  if (!m) return;
+  var div = document.createElement('div');
+  div.className = 'fl-earlier';
+  div.textContent = 'Earlier';
+  m.appendChild(div);
+  saved.slice(-12).forEach(function(t) {
+    if (t.role === 'user') flUser(t.content);
+    else flBot(flMd(t.content));
+  });
+  flowyHistory = saved.slice(-20);
+}
 
 /* ── Panel open/close ───────────────────────────────────────────────────────── */
 function toggleFlowy() {
@@ -16,6 +45,7 @@ function toggleFlowy() {
   if (window.__flowyOpen) {
     var inp = document.getElementById('fl-input');
     if (inp) setTimeout(function() { inp.focus(); }, 240);
+    flRestoreTranscript();
     if (!flowyBriefed) { flowyBriefed = true; flowyBriefing(); }
   }
 }
@@ -69,15 +99,18 @@ function flowySend(text) {
   if (inp) { inp.value = ''; flInputSize(); }
   flUser(q);
   flowyHistory.push({ role: 'user', content: q });
+  flSaveTranscript();
 
   var local = flowyLocal(q);
   if (local) {
+    if (local.handled) return; // async intent (memory) renders its own reply
     flowyBusy = true;
     flTyping(true);
     setTimeout(function() {
       flTyping(false);
       flBot(local.html, { instant: true });
       flowyHistory.push({ role: 'assistant', content: local.plain || 'done' });
+      flSaveTranscript();
       if (local.run) { try { local.run(); } catch (e) {} }
       flowyBusy = false;
     }, 350);
@@ -118,8 +151,8 @@ async function flowyAskAI(q) {
       headers: { Authorization: 'Bearer ' + claims.__raw, 'Content-Type': 'application/json' },
       body: JSON.stringify({ question: q, context: flowyContext(), history: flowyHistory.slice(-7, -1) }),
     });
-    flTyping(false);
     if (res.status === 501 || res.status === 404) {
+      flTyping(false);
       flBot("I can answer data questions and run commands instantly, but open-ended questions need my AI engine. " +
         "**One-time setup:** in Cloudflare, open the Worker → Settings → Bindings → add a <strong>Workers AI</strong> binding named <strong>AI</strong>, then redeploy. Free tier included.");
       flowyBusy = false;
@@ -130,15 +163,94 @@ async function flowyAskAI(q) {
       flowyBusy = false;
       return;
     }
-    var out = await res.json();
-    var ans = String(out.answer || '').trim() || 'Sorry — I came back empty on that one.';
-    flBot(flMd(ans), { ai: true });
+
+    flTyping(false);
+    var ctype = res.headers.get('Content-Type') || '';
+    if (ctype.indexOf('text/event-stream') === -1) {
+      // Older Worker still deployed — plain JSON path
+      var out = await res.json();
+      var ans0 = String(out.answer || '').trim() || 'Sorry — I came back empty on that one.';
+      flBot(flMd(ans0), { ai: true });
+      flowyHistory.push({ role: 'assistant', content: ans0 });
+      flSaveTranscript();
+      flowyBusy = false;
+      return;
+    }
+
+    // Streamed answer: live-typing bubble
+    var live = flAdd('<div class="fl-orb-sm"><img class="logo-white" src="logo-transparent.png" alt="" /></div><div class="fl-bubble"><span class="fl-live"></span></div>', 'fl-bot');
+    var liveSpan = live ? live.querySelector('.fl-live') : null;
+    var reader = res.body.getReader();
+    var dec = new TextDecoder();
+    var buf = '', ans = '';
+    while (true) {
+      var chunk = await reader.read();
+      if (chunk.done) break;
+      buf += dec.decode(chunk.value, { stream: true });
+      var lines = buf.split('\n');
+      buf = lines.pop();
+      for (var i = 0; i < lines.length; i++) {
+        var t = lines[i].trim();
+        if (t.indexOf('data: ') === 0 && t !== 'data: [DONE]') {
+          try {
+            var obj = JSON.parse(t.slice(6));
+            if (obj.response) {
+              ans += obj.response;
+              if (liveSpan) { liveSpan.innerHTML = flMd(ans); flScroll(); }
+            }
+          } catch (e) {}
+        }
+      }
+    }
+    ans = ans.trim() || 'Sorry — I came back empty on that one.';
+    if (liveSpan) {
+      liveSpan.parentElement.innerHTML = flMd(ans) +
+        '<div class="fl-foot"><i data-lucide="sparkles"></i>AI answer · based on your live CRM data</div>';
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+      flScroll();
+    }
     flowyHistory.push({ role: 'assistant', content: ans });
+    flSaveTranscript();
   } catch (e) {
     flTyping(false);
     flBot('I could not reach the AI engine — check your connection and try again.');
   }
   flowyBusy = false;
+}
+
+/* ── Memory API (teachable facts) ───────────────────────────────────────────── */
+async function flowyMemory(op) {
+  var claims;
+  try { claims = await auth0Client.getIdTokenClaims(); } catch (e) { return null; }
+  if (!claims || !claims.__raw) return null;
+  try {
+    var res = await fetch(FLOWY_WORKER + '/memory', {
+      method: 'POST',
+      headers: { Authorization: 'Bearer ' + claims.__raw, 'Content-Type': 'application/json' },
+      body: JSON.stringify(op),
+    });
+    if (res.status === 501 || res.status === 404) return { notEnabled: true };
+    if (!res.ok) return null;
+    return await res.json();
+  } catch (e) {
+    return null;
+  }
+}
+
+function flowyMemReply(promise, render) {
+  flowyBusy = true;
+  flTyping(true);
+  promise.then(function(out) {
+    flTyping(false);
+    if (out && out.notEnabled) {
+      flBot('My memory needs the same one-time KV setup as your Team page — create the <strong>flowaify-team</strong> namespace, bind it as <strong>TEAM_KV</strong> on the Worker, and redeploy.');
+    } else if (!out) {
+      flBot("I couldn't reach my memory just now — try again in a moment.");
+    } else {
+      flBot(render(out), { instant: true });
+    }
+    flowyBusy = false;
+  });
 }
 
 /* Compact CRM context for the LLM — a summary, never the raw dump */
@@ -164,7 +276,24 @@ function flowyContext() {
     ? buildInsights(d, filterByRange(contacts, window.__rangeDays || 30), window.__rangeDays || 30)
         .map(function(i) { return i.text.replace(/<[^>]+>/g, ''); })
     : [];
+  var biz = '', industry = '';
+  try {
+    var saved = JSON.parse(localStorage.getItem('flw_settings_' + (window.__userSub || 'anon')) || '{}');
+    biz = ((saved.biz || {})['s2-biz-name'] || '').trim();
+    industry = ((saved.biz || {})['s2-industry'] || '').trim();
+  } catch (e) {}
+  if (flowyNews === null) {
+    flowyNews = [];
+    fetch('whatsnew.json', { cache: 'no-cache' }).then(function(r) { return r.json(); })
+      .then(function(items) {
+        if (Array.isArray(items)) flowyNews = items.slice(0, 3).map(function(it) { return it.title; });
+      }).catch(function() {});
+  }
   return {
+    business: biz || undefined,
+    industry: industry && industry !== 'Select…' ? industry : undefined,
+    flowaifyService: 'Flowaify captures this client\u2019s CRM leads, replies instantly by SMS/email, scores and follows up automatically, and books calls.',
+    latestFeatures: flowyNews && flowyNews.length ? flowyNews : undefined,
     today: new Date().toISOString().slice(0, 10),
     totals: {
       contacts: contacts.length,
@@ -214,6 +343,42 @@ function flowyLocal(q) {
   // briefing
   if (/briefing|summary of (the )?day|catch me up|what.s (new|happening)/.test(s)) {
     return { html: flowyBriefingHtml(), plain: 'briefing' };
+  }
+
+  // memory: remember / forget / list / clear
+  m = q.match(/^remember\s+(?:that\s+)?(.+)$/i);
+  if (m) {
+    var fact = m[1].trim();
+    flowyMemReply(flowyMemory({ add: fact }), function(out) {
+      return "Got it — I'll remember that. ✓<br><em>" + flEsc(fact) + '</em>';
+    });
+    return { html: null, handled: true };
+  }
+  m = q.match(/^forget\s+(?:about\s+)?(.+)$/i);
+  if (m) {
+    var needle = m[1].trim();
+    flowyMemReply(flowyMemory({ remove: needle }), function(out) {
+      return out.changed
+        ? 'Forgotten. ✓' + (out.removed && out.removed.length ? '<br><em>' + out.removed.map(flEsc).join('<br>') + '</em>' : '')
+        : "I didn't have anything matching “" + flEsc(needle) + '”.';
+    });
+    return { html: null, handled: true };
+  }
+  if (/^(what do you remember|show (your )?memory|list memories)/i.test(s)) {
+    flowyMemReply(flowyMemory({ list: true }), function(out) {
+      return out.facts && out.facts.length
+        ? 'Here\u2019s what I\u2019m holding onto:<br>' + out.facts.map(function(f) { return '• ' + flEsc(f); }).join('<br>')
+        : "Nothing saved yet — tell me <em>\u201cremember \u2026\u201d</em> and I\u2019ll keep it in mind.";
+    });
+    return { html: null, handled: true };
+  }
+  if (/^(clear|wipe|reset) (your )?memory/i.test(s)) {
+    flowyMemReply(flowyMemory({ reset: true }), function(out) {
+      try { localStorage.removeItem(flChatKey()); } catch (e) {}
+      flowyHistory = [];
+      return 'Memory cleared — facts and chat history are gone. Fresh start. ✓';
+    });
+    return { html: null, handled: true };
   }
 
   // mark {name} {status}  — write-back
@@ -362,13 +527,18 @@ function flowyBriefingHtml() {
   var g = (typeof goalTarget === 'function') ? goalTarget() : 50;
   var att = (d.needsAttention || []).length;
   var parts = [];
-  parts.push('<strong>' + (ov.newLeadsToday || 0) + '</strong> new lead' + (ov.newLeadsToday === 1 ? '' : 's') + ' today, <strong>' + mo + '</strong> this month (' + Math.round((mo / g) * 100) + '% of your ' + g + '-lead goal).');
-  parts.push('Pipeline: <strong>' + fmtMoney(ov.pipelineValue) + '</strong> across ' + (d.deals || []).length + ' open deals.');
+  // Win first
+  parts.push('The headline: <strong>' + fmtMoney(ov.pipelineValue) + '</strong> in play across ' + (d.deals || []).length + ' open deals, and <strong>' + mo + '</strong> lead' + (mo === 1 ? '' : 's') + ' in the door this month — ' + Math.round((mo / g) * 100) + '% of your ' + g + '-lead goal.');
   if (typeof buildInsights === 'function') {
     var ins = buildInsights(d, filterByRange(contacts, 30), 30).slice(0, 2);
     ins.forEach(function(i) { parts.push(i.text); });
   }
-  if (att > 0) parts.push('<strong>' + att + '</strong> lead' + (att === 1 ? '' : 's') + ' need attention — say <em>"show them"</em>.');
+  // Risk + next step last
+  if (att > 0) {
+    parts.push('One thing I\u2019d handle today: <strong>' + att + '</strong> lead' + (att === 1 ? '' : 's') + ' sitting untouched for 48h+. Say <em>\u201cshow them\u201d</em> and I\u2019ll pull the list.');
+  } else {
+    parts.push('Nothing is slipping — every lead has been touched. Ask me anything, or say <em>\u201cwhat closes this week?\u201d</em>');
+  }
   return parts.join('<br><br>');
 }
 function flowyBriefing() {
