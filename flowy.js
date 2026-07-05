@@ -26,28 +26,15 @@ function flPortalOnly(what) {
 }
 
 function flSaveTranscript() {
-  try {
-    localStorage.setItem(flChatKey(), JSON.stringify(flowyHistory.slice(-20)));
-  } catch (e) {}
+  // Chat is session-only by design — a page refresh starts clean.
+  // Also purge any transcript saved by earlier versions.
+  try { localStorage.removeItem(flChatKey()); } catch (e) {}
 }
 
 function flRestoreTranscript() {
   if (flowyRestored) return;
   flowyRestored = true;
-  var saved = [];
-  try { saved = JSON.parse(localStorage.getItem(flChatKey()) || '[]'); } catch (e) {}
-  if (!Array.isArray(saved) || !saved.length) return;
-  var m = document.getElementById('fl-msgs');
-  if (!m) return;
-  var div = document.createElement('div');
-  div.className = 'fl-earlier';
-  div.textContent = 'Earlier';
-  m.appendChild(div);
-  saved.slice(-12).forEach(function(t) {
-    if (t.role === 'user') flUser(t.content);
-    else flBot(flMd(t.content));
-  });
-  flowyHistory = saved.slice(-20);
+  try { localStorage.removeItem(flChatKey()); } catch (e) {}
 }
 
 /* ── Panel open/close ───────────────────────────────────────────────────────── */
