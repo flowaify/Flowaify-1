@@ -80,6 +80,7 @@
 
     /* ── LOGIN (split screen) ── */
     #login-view { display: none; min-height: 100vh; }
+    @supports (min-height: 100dvh) { #login-view { min-height: 100dvh; } }
     #login-view.show { display: flex; }
     .lg-brand {
       flex: 1.1; background: #0b0e16; color: #fff; display: flex; flex-direction: column;
@@ -256,8 +257,17 @@
       .sup-btn { width: 100%; text-align: center; }
       .ptm-info { min-width: 0; }
       #login-view.show { flex-direction: column; }
-      .lg-brand { padding: 36px 28px; flex: none; }
-      .lg-feat { padding: 5px 0; }
+      .lg-brand { padding: calc(20px + env(safe-area-inset-top, 0px)) 22px 18px; flex: none; }
+      .lg-orb { width: 34px; height: 34px; border-radius: 9px; margin-bottom: 12px; }
+      .lg-orb i, .lg-orb svg { width: 17px; height: 17px; }
+      .lg-name { font-size: 20px; margin-bottom: 4px; }
+      .lg-tag { font-size: 12.5px; margin-bottom: 12px; }
+      .lg-feat { padding: 3px 0; font-size: 12px; }
+      .lg-feat i, .lg-feat svg { width: 13px; height: 13px; }
+      .lg-side { flex: none; align-items: flex-start; padding: 20px 18px calc(24px + var(--safe-b)); }
+      .lg-card { max-width: 100%; padding: 24px 22px; }
+      .lg-hi { font-size: 18px; }
+      .lg-sub { margin-bottom: 18px; }
       .hero { flex-direction: column; align-items: flex-start; }
       .hero-stats { gap: 20px; flex-wrap: wrap; }
       .g2, .g4 { grid-template-columns: 1fr; }
