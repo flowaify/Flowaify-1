@@ -709,6 +709,10 @@
     .team-act.danger:hover { color: var(--red); }
     .tl-item { display: flex; gap: 10px; padding: 9px 16px; border-bottom: 1px solid var(--border); font-size: 11.5px; color: var(--text-s); }
     .tl-item:last-child { border-bottom: none; }
+    #top-leads-list { max-height: 262px; overflow-y: auto; }
+    #ov-activity { max-height: 224px; overflow-y: auto; }
+    #insights-list { max-height: 220px; overflow-y: auto; }
+    #attn-list { max-height: 220px; overflow-y: auto; }
     .tl-time { margin-left: auto; font-size: 10px; color: var(--text-m); white-space: nowrap; }
     .inv-overlay { position: fixed; inset: 0; z-index: 400; background: rgba(10,13,20,0.5); backdrop-filter: blur(3px); display: none; align-items: center; justify-content: center; padding: 16px; }
     .inv-overlay.open { display: flex; }
@@ -1488,8 +1492,8 @@
 
 <div id="toast"><div class="toast-icon"><i data-lucide="check"></i></div><div id="toast-msg" style="font-size:12.5px;font-weight:600;color:var(--text-s);line-height:1.45;"></div></div>
 
-<script src="crm.js?v=16"></script>
-<script src="flowy.js?v=6"></script>
+<script src="crm.js?v=17"></script>
+<script src="flowy.js?v=7"></script>
 <script>
 const AUTH0_DOMAIN    = 'auth.flowaify.app';
 const AUTH0_CLIENT_ID = 'tx74Owqn3jVeSaVuxfFHsKloqbPqfAmN';

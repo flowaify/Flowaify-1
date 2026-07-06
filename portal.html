@@ -214,7 +214,9 @@
 
     /* ── FLOWY (portal rail) ── */
     .flowy-card { display: flex; flex-direction: column; background: linear-gradient(135deg, rgba(0,87,255,0.05), var(--bg-card) 45%); }
-    .flowy-card .fl-msgs { height: 300px; }
+    .flowy-card .fl-msgs { height: 300px; flex: none; overflow-y: auto; }
+    .act-card #pt-activity { max-height: 220px; overflow-y: auto; }
+    #pt-rec { max-height: 260px; overflow-y: auto; }
     .logo-white { filter: brightness(0) invert(1); object-fit: contain; }
     .fl-head { display: flex; align-items: center; gap: 9px; padding: 12px 14px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
     .fl-orb { width: 24px; height: 24px; border-radius: 50%; background: linear-gradient(135deg, #0057FF, #8b5cf6); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
