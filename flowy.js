@@ -100,13 +100,13 @@ function flBot(html, opts) {
   var foot = opts.ai
     ? '<div class="fl-foot"><i data-lucide="sparkles"></i>AI answer · based on your live CRM data</div>'
     : (opts.instant ? '<div class="fl-foot"><i data-lucide="zap"></i>Instant · from your live data</div>' : '');
-  flAdd('<div class="fl-orb-sm"><i data-lucide="sparkles"></i></div><div class="fl-bubble">' + html + foot + '</div>', 'fl-bot');
+  flAdd('<div class="fl-orb-sm"><img class="logo-white" src="logo-transparent.png" alt="" /></div><div class="fl-bubble">' + html + foot + '</div>', 'fl-bot');
 }
 function flTyping(show) {
   var ex = document.getElementById('fl-typing');
   if (ex) ex.remove();
   if (show) {
-    flAdd('<div class="fl-orb-sm"><i data-lucide="sparkles"></i></div><div class="fl-bubble fl-dots"><span></span><span></span><span></span></div>', 'fl-bot')
+    flAdd('<div class="fl-orb-sm"><img class="logo-white" src="logo-transparent.png" alt="" /></div><div class="fl-bubble fl-dots"><span></span><span></span><span></span></div>', 'fl-bot')
       .id = 'fl-typing';
   }
 }

@@ -41,6 +41,7 @@
       --hover:      rgba(15,23,42,0.05);
       --suite-bg:   #16161a;
       --track:      rgba(15,23,42,0.09);
+      --bubble:     #dfe1e5;
       --hdr:        calc(48px + env(safe-area-inset-top, 0px));
       --safe-b:     env(safe-area-inset-bottom, 0px);
     }
@@ -61,6 +62,7 @@
       --hover:      rgba(255,255,255,0.06);
       --suite-bg:   #090c14;
       --track:      rgba(255,255,255,0.10);
+      --bubble:     #1d2432;
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -228,7 +230,7 @@
     .fl-msg.fl-bot { align-items: flex-start; max-width: 94%; }
     .fl-orb-sm { width: 20px; height: 20px; border-radius: 50%; background: linear-gradient(135deg, #0057FF, #8b5cf6); display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 3px; }
     .fl-orb-sm .logo-white { width: 11px; height: 11px; }
-    .fl-bubble { background: var(--hover); border-radius: 3px 12px 12px 12px; padding: 10px 13px; font-size: 12.5px; line-height: 1.55; color: var(--text-s); min-width: 0; }
+    .fl-bubble { background: var(--bubble); border-radius: 3px 12px 12px 12px; padding: 10px 13px; font-size: 12.5px; line-height: 1.55; color: var(--text-s); min-width: 0; }
     .fl-bubble strong { color: var(--text); font-weight: 600; }
     .fl-brief-head { font-weight: 600; color: var(--text); margin-bottom: 8px; }
     .fl-foot { display: flex; align-items: center; gap: 5px; margin-top: 8px; font-size: 9.5px; color: var(--text-m); }
@@ -437,6 +439,12 @@
           <div class="svc-row"><span class="svc-dot" id="svc-dash"></span>Dashboard<span class="svc-state" id="svc-dash-state">—</span></div>
           <div class="svc-row"><span class="svc-dot" id="svc-ai"></span>Flowy AI<span class="svc-state" id="svc-ai-state">—</span></div>
         </div>
+        <div class="card act-card">
+          <div class="sec-head"><div class="sec-title">Latest Activity</div><a class="sec-link" href="app.html">View all</a></div>
+          <div id="pt-activity"><div class="empty-note">Loading activity…</div></div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:16px;">
         <div class="card">
           <div class="sec-head"><div class="sec-title">Recommended for You</div><span class="fl-ai-pill">AI</span></div>
           <div id="pt-rec"><div class="empty-note">Sizing up your data…</div></div>
@@ -445,10 +453,6 @@
           <div class="sec-head"><div class="sec-title">Your Team</div><a class="sec-link" href="app.html">Manage team →</a></div>
           <div id="pt-team"></div>
         </div>
-      </div>
-      <div class="card act-card">
-        <div class="sec-head"><div class="sec-title">Latest Activity</div><a class="sec-link" href="app.html">View all</a></div>
-        <div id="pt-activity"><div class="empty-note">Loading activity…</div></div>
       </div>
     </div>
 
@@ -551,7 +555,7 @@ function relTime(ts) {
 function showToast(msg) { if (typeof portalToast === 'function') portalToast(msg); }
 </script>
 <script src="portal.js?v=5"></script>
-<script src="flowy.js?v=7"></script>
+<script src="flowy.js?v=8"></script>
 <script>
 const AUTH0_DOMAIN    = 'auth.flowaify.app';
 const AUTH0_CLIENT_ID = 'tx74Owqn3jVeSaVuxfFHsKloqbPqfAmN';
