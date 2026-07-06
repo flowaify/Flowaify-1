@@ -15,11 +15,16 @@ async function teamsInit() {
   if (_teamsPollingId) { clearInterval(_teamsPollingId); _teamsPollingId = null; }
   _teamsLastMsgTs = 0;
   _teamsCurrentChannel = null;
-  // Ensure we're on the chat tab
   teamsTab('chat', true);
   await teamLoad();
   var hub = document.getElementById('teams-hub');
-  if (!hub || hub.style.display === 'none') return;
+  if (!hub) return;
+  // teamLoad sets inline style to 'flex' on success; check computed display as fallback
+  var hubVisible = hub.style.display !== 'none' && hub.style.display !== '';
+  if (!hubVisible) {
+    var computed = window.getComputedStyle(hub).display;
+    if (computed === 'none') return;
+  }
   await teamsLoadChannels();
   _teamsPollingId = setInterval(teamsPoll, 8000);
 }
