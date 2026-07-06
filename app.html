@@ -897,6 +897,91 @@
     .teams-lead-pick-item:hover { background: var(--hover); }
     .teams-lead-pick-name { font-size: 13px; font-weight: 600; color: var(--text); }
     .teams-lead-pick-meta { font-size: 11.5px; color: var(--text-m); }
+    /* Invoices page */
+    #page-invoices { overflow: hidden; }
+    #page-invoices .stats-grid { flex-shrink: 0; }
+    .inv-split { flex: 1; min-height: 0; display: grid; grid-template-columns: 1fr 320px; gap: 16px; align-items: stretch; }
+    .inv-list-card { display: flex; flex-direction: column; min-height: 0; }
+    .inv-list-card .table-wrap { flex: 1; overflow-y: auto; }
+    .inv-detail-card { display: flex; flex-direction: column; overflow-y: auto; }
+    .inv-det-head { display: flex; align-items: flex-start; gap: 10px; padding: 14px 16px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+    .inv-det-head > div:first-child { flex: 1; min-width: 0; }
+    .inv-det-acts { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+    .inv-det-acts .btn-mini { display: flex; align-items: center; gap: 5px; }
+    .inv-det-acts .btn-mini i, .inv-det-acts .btn-mini svg { width: 11px; height: 11px; }
+    .inv-del-btn { color: var(--red) !important; border-color: var(--red) !important; }
+    .inv-del-btn:hover { background: var(--red-dim) !important; }
+    .inv-det-body { flex: 1; overflow-y: auto; padding: 0 0 12px; }
+    .inv-det-section { padding: 12px 16px; border-bottom: 1px solid var(--border); }
+    .inv-det-label { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-m); margin-bottom: 5px; }
+    .inv-det-row { display: flex; justify-content: space-between; align-items: center; padding: 4px 0; font-size: 12.5px; color: var(--text-s); }
+    .inv-det-totals { padding: 10px 16px; border-top: 1px solid var(--border); }
+    .inv-det-total-row { display: flex; justify-content: space-between; padding: 3px 0; font-size: 12.5px; color: var(--text-s); }
+    .inv-grand-total { font-size: 14px; font-weight: 700; color: var(--text); padding-top: 6px; border-top: 1px solid var(--border); margin-top: 4px; }
+    /* Drawer */
+    #inv-drawer { position: fixed; top: var(--hdr); right: 0; bottom: 0; width: 420px; z-index: 200; background: var(--bg-card); border-left: 1px solid var(--card-border); display: flex; flex-direction: column; transform: translateX(100%); transition: transform var(--dur) var(--ease); box-shadow: -4px 0 24px rgba(0,0,0,0.1); }
+    #inv-drawer.open { transform: translateX(0); }
+    #inv-drawer-overlay { position: fixed; inset: 0; z-index: 199; display: none; background: rgba(10,13,20,0.2); }
+    #inv-drawer-overlay.open { display: block; }
+    .inv-dr-head { display: flex; align-items: center; padding: 13px 16px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+    #inv-dr-title { font-size: 14px; font-weight: 700; color: var(--text); flex: 1; }
+    .inv-dr-close { width: 28px; height: 28px; background: transparent; border: none; border-radius: 4px; color: var(--text-m); cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .inv-dr-close:hover { background: var(--hover); color: var(--text); }
+    .inv-dr-close i, .inv-dr-close svg { width: 15px; height: 15px; }
+    .inv-dr-body { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 16px; }
+    .inv-dr-section { display: flex; flex-direction: column; gap: 10px; }
+    .inv-dr-section-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: var(--text-m); }
+    .inv-dr-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .inv-dr-field { display: flex; flex-direction: column; gap: 4px; }
+    .inv-dr-field label { font-size: 11px; font-weight: 600; color: var(--text-s); }
+    .inv-dr-field input, .inv-dr-field textarea { padding: 7px 10px; background: var(--input-bg); border: 1px solid var(--input-border); border-radius: 4px; font-size: 12.5px; font-family: inherit; color: var(--text); outline: none; }
+    .inv-dr-field input:focus, .inv-dr-field textarea:focus { border-color: var(--blue); }
+    .inv-dr-field textarea { resize: vertical; min-height: 60px; }
+    .inv-biz-block { padding: 9px 12px; background: var(--hover); border-radius: 4px; font-size: 11.5px; color: var(--text-m); line-height: 1.5; }
+    .inv-biz-block strong { color: var(--text-s); font-weight: 600; }
+    /* Line items */
+    .inv-line { display: grid; grid-template-columns: 1fr 52px 84px 72px 24px; gap: 6px; align-items: center; margin-bottom: 6px; }
+    .inv-line input { padding: 6px 8px; background: var(--input-bg); border: 1px solid var(--input-border); border-radius: 4px; font-size: 12px; font-family: inherit; color: var(--text); outline: none; width: 100%; box-sizing: border-box; }
+    .inv-line input:focus { border-color: var(--blue); }
+    .inv-line-desc { min-width: 0; }
+    .inv-line-total { font-size: 12px; font-weight: 600; color: var(--text); text-align: right; font-variant-numeric: tabular-nums; }
+    .inv-line-del { width: 22px; height: 22px; background: transparent; border: none; border-radius: 3px; color: var(--text-m); cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .inv-line-del:hover:not(:disabled) { background: var(--hover); color: var(--red); }
+    .inv-line-del:disabled { opacity: 0.3; cursor: default; }
+    .inv-line-del i, .inv-line-del svg { width: 12px; height: 12px; }
+    .inv-add-line { background: transparent; border: 1px dashed var(--input-border); border-radius: 4px; color: var(--text-m); font-size: 12px; font-family: inherit; padding: 6px 0; cursor: pointer; width: 100%; display: flex; align-items: center; justify-content: center; gap: 6px; }
+    .inv-add-line:hover { border-color: var(--blue); color: var(--blue); }
+    .inv-add-line i, .inv-add-line svg { width: 12px; height: 12px; }
+    .inv-totals-block { border-top: 1px solid var(--border); padding-top: 10px; display: flex; flex-direction: column; gap: 4px; }
+    .inv-total-row { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-s); }
+    .inv-grand { font-size: 14px; font-weight: 700; color: var(--text); padding-top: 6px; border-top: 1px solid var(--border); margin-top: 4px; }
+    .inv-dr-foot { display: flex; gap: 8px; padding: 12px 16px; border-top: 1px solid var(--border); flex-shrink: 0; }
+    .inv-dr-foot button { flex: 1; }
+    /* Print view */
+    #inv-print-view { position: fixed; inset: 0; z-index: 650; background: #f5f6f7; display: flex; flex-direction: column; transform: translateY(100%); transition: transform 0.22s var(--ease); }
+    #inv-print-view.open { transform: translateY(0); }
+    .ipv-bar { display: flex; align-items: center; gap: 10px; padding: 10px 16px; background: #fff; border-bottom: 1px solid #e5e7eb; flex-shrink: 0; }
+    #inv-print-view > div:last-child { flex: 1; overflow-y: auto; padding: 48px; }
+    .ipv-page { max-width: 780px; margin: 0 auto; background: #fff; padding: 48px; box-shadow: 0 2px 24px rgba(0,0,0,0.08); border-radius: 4px; }
+    .ipv-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 32px; padding-bottom: 24px; border-bottom: 2px solid #0050e6; }
+    .ipv-parties { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 8px; }
+    .ipv-date-row { display: flex; justify-content: space-between; gap: 20px; font-size: 12px; margin-bottom: 4px; }
+    .ipv-totals { display: flex; flex-direction: column; align-items: flex-end; margin-top: 16px; min-width: 260px; margin-left: auto; }
+    .ipv-total-row { display: flex; justify-content: space-between; gap: 40px; width: 100%; font-size: 13px; color: #6b7280; padding: 3px 0; }
+    .ipv-grand { font-size: 16px; font-weight: 800; color: #111827; padding-top: 8px; border-top: 2px solid #0050e6; margin-top: 6px; }
+    .ipv-notes { margin-top: 24px; padding-top: 20px; border-top: 1px solid #e5e7eb; }
+    .ipv-footer { margin-top: 40px; padding-top: 12px; border-top: 1px solid #e5e7eb; font-size: 11px; color: #9ca3af; }
+    @media (max-width: 900px) {
+      .inv-split { grid-template-columns: 1fr; }
+      .inv-detail-card { display: none; }
+      #inv-drawer { width: 100%; }
+      .ipv-page { padding: 24px 16px; }
+    }
+    @media print {
+      body > *:not(#inv-print-view) { display: none !important; }
+      #inv-print-view { position: static; transform: none !important; box-shadow: none; background: #fff; }
+      .ipv-bar { display: none !important; }
+    }
     /* Leads page */
     #page-leads > .card.mb20 { flex-shrink: 0; }
     #page-leads .stats-grid { flex-shrink: 0; }
@@ -1224,6 +1309,7 @@
   <div class="nav-item" data-page="calendar" title="Calendar"><i data-lucide="calendar"></i><span class="nav-txt">Calendar <span class="nav-new">New</span></span></div>
   <div class="nav-item" data-page="automations" title="Automations"><i data-lucide="workflow"></i><span class="nav-txt">Automations</span></div>
   <div class="nav-item" data-page="team" title="Team"><i data-lucide="users"></i><span class="nav-txt">Team</span></div>
+  <div class="nav-item" data-page="invoices" title="Invoices"><i data-lucide="file-text"></i><span class="nav-txt">Invoices</span></div>
 
   <div class="nav-group-label">Insights</div>
   <div class="nav-item" data-page="analytics" title="Analytics"><i data-lucide="chart-column"></i><span class="nav-txt">Analytics</span></div>
@@ -1716,6 +1802,145 @@
     <div class="card"><div class="sec-head"><div class="sec-title">Pipeline Value by Stage</div><div style="display:flex;align-items:center;gap:8px;"><button class="exq-btn" onclick="flowyExplain('my pipeline by stage')" title="Ask Flowy to explain"><i data-lucide="sparkles"></i></button><div class="sec-sub">All time</div></div></div><div id="stage-list" style="padding:14px 16px;min-height:140px;"><div class="empty-state" style="padding:36px 20px;"><i data-lucide="bar-chart-2"></i><div class="empty-state-title">No deals yet</div><div class="empty-state-sub">Pipeline value by stage will appear once deals exist in your CRM.</div></div></div></div>
   </div>
 
+  <!-- INVOICES -->
+  <div class="page" id="page-invoices">
+
+    <div class="stats-grid sg-3 mb20">
+      <div class="card stat-card"><div class="stat-top"><div class="stat-label"><i data-lucide="dollar-sign" class="kpi-glyph kg-green"></i>Total Invoiced</div></div><div class="stat-val" id="inv-kpi-total">—</div></div>
+      <div class="card stat-card"><div class="stat-top"><div class="stat-label"><i data-lucide="clock" class="kpi-glyph kg-amber"></i>Outstanding</div></div><div class="stat-val" id="inv-kpi-outstanding">—</div></div>
+      <div class="card stat-card"><div class="stat-top"><div class="stat-label"><i data-lucide="file" class="kpi-glyph kg-blue"></i>Drafts</div></div><div class="stat-val" id="inv-kpi-drafts">—</div></div>
+    </div>
+
+    <div class="inv-split">
+
+      <!-- List -->
+      <div class="card inv-list-card">
+        <div class="sec-head">
+          <div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0;">
+            <input id="inv-search" type="text" placeholder="Search invoices…" oninput="invFilterList()" style="padding:5px 10px;background:var(--input-bg);border:1px solid var(--input-border);border-radius:4px;font-size:11.5px;font-family:inherit;color:var(--text);outline:none;width:160px;" />
+            <select id="inv-filter" onchange="invFilterList()" style="padding:5px 8px;background:var(--input-bg);border:1px solid var(--input-border);border-radius:4px;font-size:11.5px;font-family:inherit;color:var(--text);outline:none;cursor:pointer;">
+              <option value="all">All</option>
+              <option value="draft">Drafts</option>
+              <option value="sent">Sent</option>
+              <option value="paid">Paid</option>
+              <option value="overdue">Overdue</option>
+            </select>
+          </div>
+          <button class="cmd-primary" onclick="openNewInvoice()"><i data-lucide="plus"></i>New Invoice</button>
+        </div>
+        <div class="table-wrap">
+          <table class="skel-table">
+            <thead><tr><th>#</th><th>Client</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead>
+            <tbody id="inv-tbody"><tr><td colspan="5" style="text-align:center;padding:32px 16px;color:var(--text-m);font-size:12.5px;">Loading…</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Detail -->
+      <div class="card inv-detail-card" id="inv-detail-panel">
+        <div class="empty-state" style="padding:60px 20px;">
+          <i data-lucide="file-text"></i>
+          <div class="empty-state-title">Select an invoice</div>
+          <div class="empty-state-sub">Click any invoice to preview details here.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Invoice drawer (fixed) -->
+  <div id="inv-drawer-overlay" onclick="closeInvoiceDrawer()"></div>
+  <div id="inv-drawer">
+    <div class="inv-dr-head">
+      <span id="inv-dr-title">New Invoice</span>
+      <button class="inv-dr-close" onclick="closeInvoiceDrawer()"><i data-lucide="x"></i></button>
+    </div>
+    <div class="inv-dr-body">
+
+      <!-- Your business -->
+      <div class="inv-dr-section">
+        <div class="inv-dr-section-label">Your Business</div>
+        <div class="inv-biz-block"><strong id="inv-biz-name">—</strong><br><span id="inv-biz-email"></span></div>
+      </div>
+
+      <!-- Bill To -->
+      <div class="inv-dr-section">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+          <div class="inv-dr-section-label" style="margin-bottom:0;">Bill To</div>
+          <button class="btn-mini btn-mini-ghost" style="font-size:11px;padding:4px 10px;" onclick="invPickLead()"><i data-lucide="search"></i>Pick lead</button>
+        </div>
+        <div class="inv-dr-row">
+          <div class="inv-dr-field"><label>Name</label><input id="inv-dr-bill-name" type="text" placeholder="Client name" /></div>
+          <div class="inv-dr-field"><label>Email</label><input id="inv-dr-bill-email" type="email" placeholder="email@example.com" /></div>
+        </div>
+        <div class="inv-dr-field"><label>Company (optional)</label><input id="inv-dr-bill-company" type="text" placeholder="Company name" /></div>
+      </div>
+
+      <!-- Invoice info -->
+      <div class="inv-dr-section">
+        <div class="inv-dr-section-label">Invoice Details</div>
+        <div class="inv-dr-row">
+          <div class="inv-dr-field"><label>Invoice #</label><input id="inv-dr-num" type="text" placeholder="INV-001" /></div>
+          <div class="inv-dr-field"><label>Issue Date</label><input id="inv-dr-issue" type="date" /></div>
+        </div>
+        <div class="inv-dr-field"><label>Due Date</label><input id="inv-dr-due" type="date" /></div>
+      </div>
+
+      <!-- Line items -->
+      <div class="inv-dr-section">
+        <div style="display:grid;grid-template-columns:1fr 52px 84px 72px 24px;gap:6px;padding-bottom:6px;border-bottom:1px solid var(--border);margin-bottom:8px;">
+          <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-m);">Description</span>
+          <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-m);text-align:center;">Qty</span>
+          <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-m);text-align:right;">Price</span>
+          <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-m);text-align:right;">Total</span>
+          <span></span>
+        </div>
+        <div id="inv-lines-wrap"></div>
+        <button class="inv-add-line" onclick="invoiceAddLine()"><i data-lucide="plus"></i>Add line</button>
+        <div class="inv-totals-block">
+          <div class="inv-total-row"><span>Subtotal</span><span id="inv-dr-subtotal">$0.00</span></div>
+          <div class="inv-dr-row" style="gap:10px;margin-top:6px;">
+            <div class="inv-dr-field"><label>Tax %</label><input id="inv-dr-tax" type="number" min="0" max="100" step="0.1" placeholder="0" oninput="invoiceCalcTotals()" /></div>
+            <div class="inv-dr-field"><label>Discount $</label><input id="inv-dr-discount" type="number" min="0" step="0.01" placeholder="0.00" oninput="invoiceCalcTotals()" /></div>
+          </div>
+          <div class="inv-total-row"><span>Tax</span><span id="inv-dr-tax-amt">—</span></div>
+          <div class="inv-total-row"><span>Discount</span><span id="inv-dr-disc-amt">—</span></div>
+          <div class="inv-total-row inv-grand"><span>Total</span><span id="inv-dr-total">$0.00</span></div>
+        </div>
+      </div>
+
+      <!-- Notes -->
+      <div class="inv-dr-section">
+        <div class="inv-dr-field"><label>Notes (optional)</label><textarea id="inv-dr-notes" placeholder="Payment terms, bank details, or anything else…"></textarea></div>
+      </div>
+
+    </div>
+    <div class="inv-dr-foot">
+      <button class="btn-mini btn-mini-ghost" onclick="invPrintCurrent()"><i data-lucide="printer"></i>Print PDF</button>
+      <button class="btn-mini btn-mini-primary" id="inv-save-btn" onclick="invoiceSave('draft')">Save Draft</button>
+      <button class="btn-mini btn-mini-primary" onclick="invoiceSave('sent')" style="background:var(--green);">Mark Sent</button>
+    </div>
+  </div>
+
+  <!-- Invoice print view -->
+  <div id="inv-print-view">
+    <div class="ipv-bar"></div>
+    <div></div>
+  </div>
+
+  <!-- Invoice lead picker -->
+  <div class="teams-lead-picker" id="inv-lead-picker">
+    <div class="teams-lead-picker-box">
+      <div class="teams-lead-picker-head">
+        <input id="inv-lead-search" class="teams-lead-picker-search" placeholder="Search leads…" oninput="invFilterLeads(this.value)" />
+        <button class="teams-lead-picker-close" onclick="invCloseLeadPicker()"><i data-lucide="x"></i></button>
+      </div>
+      <div id="inv-lead-pick-list" class="teams-lead-picker-list">
+        <div style="padding:20px 16px;text-align:center;font-size:12.5px;color:var(--text-m);">No leads loaded yet</div>
+      </div>
+    </div>
+  </div>
+
   <!-- INTEGRATIONS -->
   <!-- SETTINGS -->
   <div class="page" id="page-settings">
@@ -1953,6 +2178,7 @@
 
 <script src="crm.js?v=21"></script>
 <script src="teams.js?v=2"></script>
+<script src="invoice.js?v=1"></script>
 <script src="flowy.js?v=10"></script>
 <script>
 const AUTH0_DOMAIN    = 'auth.flowaify.app';
@@ -2038,6 +2264,7 @@ const PAGE_META = {
   calendar:    { title:'Calendar',    sub:'Deal closings and lead flow across the month.' },
   automations: { title:'Automations', sub:'Pause or resume Flowaify automations for this account.' },
   team:        { title:'Team',        sub:'Manage seats, members, and roles for your workspace.' },
+  invoices:    { title:'Invoices',    sub:'Create, send, and track invoices for your clients.' },
   analytics:   { title:'Analytics',   sub:'Understand lead performance, response speed, source quality, and booked call conversion.' },
   settings:    { title:'Settings',    sub:'Manage workspace, users, automation rules, CRM settings, and notification preferences.' },
 };
@@ -2052,6 +2279,7 @@ function showPage(id) {
   document.getElementById('topbar-sub').textContent   = m.sub   || '';
   window.scrollTo(0,0); closeProfileMenu(); closeMob();
   if (id === 'team') { if (window.teamsInit) teamsInit(); else if (window.teamLoad) teamLoad(); }
+  if (id === 'invoices') { if (window.invoicesInit) invoicesInit(); }
   lucide.createIcons();
 }
 document.querySelectorAll('.nav-item[data-page]').forEach(el => el.addEventListener('click', () => showPage(el.dataset.page)));
@@ -2227,6 +2455,7 @@ const PAL_PAGES = [
   { label: 'Calendar',    icon: 'calendar',     run: () => showPage('calendar') },
   { label: 'Automations', icon: 'workflow',     run: () => showPage('automations') },
   { label: 'Team',        icon: 'users',        run: () => showPage('team') },
+  { label: 'Invoices',    icon: 'file-text',    run: () => showPage('invoices') },
   { label: 'Analytics',   icon: 'chart-column', run: () => showPage('analytics') },
   { label: 'Settings',    icon: 'settings',     run: () => showPage('settings') },
 ];

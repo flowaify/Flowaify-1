@@ -94,6 +94,18 @@ export default {
         return handleTeamActivity(request, env, corsHeaders);
       }
 
+      if (url.pathname === '/invoice/list' && request.method === 'GET') {
+        return handleInvoiceList(request, env, corsHeaders);
+      }
+
+      if (url.pathname === '/invoice/save' && request.method === 'POST') {
+        return handleInvoiceSave(request, env, corsHeaders);
+      }
+
+      if (url.pathname.startsWith('/invoice/') && request.method === 'DELETE') {
+        return handleInvoiceDelete(request, env, corsHeaders);
+      }
+
       return json({ error: 'Not found' }, 404, corsHeaders);
 
     } catch (err) {
@@ -1064,6 +1076,89 @@ function shapeResponse(rawContacts, rawDeals) {
     .slice(0, 10);
 
   return { overview, contacts, deals, needsAttention };
+}
+
+// ─── Invoice handlers ─────────────────────────────────────────────────────────
+
+async function resolveInvoiceAuth(request, env, corsHeaders) {
+  const authHeader = request.headers.get('Authorization') || '';
+  if (!authHeader.startsWith('Bearer ')) return { err: json({ error: 'Missing token' }, 401, corsHeaders) };
+  const token = authHeader.slice(7).trim();
+  let payload;
+  try { payload = await verifyJWT(token, AUTH0_DOMAIN, AUTH0_CLIENT_ID, AUTH0_TENANT); }
+  catch (e) { return { err: json({ error: e.message }, 401, corsHeaders) }; }
+  let clientId = payload['https://flowaify.app/clientId'];
+  if (!clientId && payload.sub) {
+    const subKey = 'CLIENT_' + payload.sub.replace(/[^A-Z0-9]/gi, '_').toUpperCase();
+    clientId = env[subKey];
+  }
+  if (!clientId) return { err: json({ error: 'No clientId in token' }, 403, corsHeaders) };
+  const kvKey = 'invoices:' + clientId.toUpperCase().replace(/[^A-Z0-9]/g, '_');
+  return { clientId, kvKey };
+}
+
+async function handleInvoiceList(request, env, corsHeaders) {
+  const auth = await resolveInvoiceAuth(request, env, corsHeaders);
+  if (auth.err) return auth.err;
+  if (!env.TEAM_KV) return json({ invoices: [] }, 200, corsHeaders);
+  const raw = await env.TEAM_KV.get(auth.kvKey);
+  const invoices = raw ? JSON.parse(raw) : [];
+  return json({ invoices }, 200, corsHeaders);
+}
+
+async function handleInvoiceSave(request, env, corsHeaders) {
+  const auth = await resolveInvoiceAuth(request, env, corsHeaders);
+  if (auth.err) return auth.err;
+  if (!env.TEAM_KV) return json({ error: 'KV not enabled' }, 501, corsHeaders);
+  let inv;
+  try { inv = await request.json(); } catch (e) { return json({ error: 'Bad JSON' }, 400, corsHeaders); }
+  if (!inv || !inv.id) return json({ error: 'Missing invoice id' }, 400, corsHeaders);
+  // Sanitise
+  const safe = {
+    id:        String(inv.id).replace(/[^\w-]/g, '').slice(0, 60),
+    number:    String(inv.number || '').slice(0, 40),
+    billTo:    {
+      name:    String((inv.billTo || {}).name || '').slice(0, 100),
+      email:   String((inv.billTo || {}).email || '').slice(0, 120),
+      company: String((inv.billTo || {}).company || '').slice(0, 100),
+    },
+    lines:     (Array.isArray(inv.lines) ? inv.lines : []).slice(0, 50).map(l => ({
+      description: String(l.description || '').slice(0, 200),
+      qty:         Number.isFinite(+l.qty) ? +l.qty : 1,
+      unitPrice:   Number.isFinite(+l.unitPrice) ? +l.unitPrice : 0,
+      total:       Number.isFinite(+l.total) ? +l.total : 0,
+    })),
+    subtotal:  Number.isFinite(+inv.subtotal) ? +inv.subtotal : 0,
+    taxRate:   Number.isFinite(+inv.taxRate) ? +inv.taxRate : 0,
+    discount:  Number.isFinite(+inv.discount) ? +inv.discount : 0,
+    total:     Number.isFinite(+inv.total) ? +inv.total : 0,
+    status:    ['draft','sent','paid','overdue'].includes(inv.status) ? inv.status : 'draft',
+    issueDate: String(inv.issueDate || '').slice(0, 10),
+    dueDate:   String(inv.dueDate || '').slice(0, 10),
+    notes:     String(inv.notes || '').slice(0, 1000),
+    createdAt: Number.isFinite(+inv.createdAt) ? +inv.createdAt : Date.now(),
+    updatedAt: Date.now(),
+  };
+  const raw = await env.TEAM_KV.get(auth.kvKey);
+  let list = raw ? JSON.parse(raw) : [];
+  const idx = list.findIndex(x => x.id === safe.id);
+  if (idx !== -1) list[idx] = safe; else list.unshift(safe);
+  list = list.slice(0, 500);
+  await env.TEAM_KV.put(auth.kvKey, JSON.stringify(list));
+  return json({ invoice: safe }, 200, corsHeaders);
+}
+
+async function handleInvoiceDelete(request, env, corsHeaders) {
+  const auth = await resolveInvoiceAuth(request, env, corsHeaders);
+  if (auth.err) return auth.err;
+  if (!env.TEAM_KV) return json({ ok: true }, 200, corsHeaders);
+  const id = request.url.split('/invoice/')[1] || '';
+  const safeId = id.replace(/[^\w-]/g, '');
+  const raw = await env.TEAM_KV.get(auth.kvKey);
+  let list = raw ? JSON.parse(raw) : [];
+  list = list.filter(x => x.id !== safeId);
+  await env.TEAM_KV.put(auth.kvKey, JSON.stringify(list));
+  return json({ ok: true }, 200, corsHeaders);
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
