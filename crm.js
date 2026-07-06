@@ -838,14 +838,13 @@ function generateReportEditor() {
   var reportTitle = typeLabels[__reType] || 'Performance Report';
   var html = '';
 
-  // Cover
+  // Cover — clean, no platform branding
   html += '<div class="rp-cover">';
-  html += '<div class="rp-cover-logo"><svg viewBox="0 0 24 24" fill="none" stroke="#0050e6" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width:32px;height:32px;"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>Flowaify</div>';
   html += '<div class="rp-cover-body">';
   if (reportFor) html += '<div class="rp-cover-client">' + escDash(reportFor) + '</div>';
   html += '<h1>' + reportTitle + '</h1>';
-  html += '<div class="rp-cover-range">Last ' + days + ' days &nbsp;·&nbsp; ' + dateStr + '</div>';
-  if (signedBy) html += '<div class="rp-cover-sig">Prepared by ' + escDash(signedBy) + ' via Flowaify</div>';
+  html += '<div class="rp-cover-range">Last ' + days + ' days &nbsp;&nbsp;·&nbsp;&nbsp; ' + dateStr + '</div>';
+  if (signedBy) html += '<div class="rp-cover-sig">Prepared by: ' + escDash(signedBy) + '</div>';
   html += '</div></div>';
 
   // Key Metrics
@@ -921,21 +920,37 @@ function generateReportEditor() {
     }
   }
 
-  html += '<div class="rp-footer">Flowaify &nbsp;·&nbsp; Confidential &nbsp;·&nbsp; ' + dateStr + (signedBy ? ' &nbsp;·&nbsp; ' + escDash(signedBy) : '') + '</div>';
+  html += '<div class="rp-footer"><span>Confidential &nbsp;·&nbsp; ' + dateStr + (signedBy ? ' &nbsp;·&nbsp; ' + escDash(signedBy) : '') + '</span><span class="rp-footer-brand">Flowaify</span></div>';
 
-  var content = document.getElementById('report-preview-content');
+  var content = document.getElementById('report-page-content');
   if (content) content.innerHTML = html;
   closeReportEditor();
-  var overlay = document.getElementById('report-preview-overlay');
-  if (overlay) overlay.classList.add('open');
+  if (typeof showPage === 'function') showPage('reports');
+  var pb = document.getElementById('rpt-print-btn');
+  if (pb) pb.style.display = '';
+  var sub = document.getElementById('rpt-page-sub');
+  if (sub) sub.textContent = reportTitle + ' · Last ' + days + ' days · ' + dateStr;
 }
 
 function closeReportPreview() {
-  var overlay = document.getElementById('report-preview-overlay');
-  if (overlay) overlay.classList.remove('open');
+  var content = document.getElementById('report-page-content');
+  if (content) {
+    content.innerHTML = '<div class="empty-state" style="padding:80px 20px;"><i data-lucide="bar-chart-2"></i><div class="empty-state-title">No report generated yet</div><div class="empty-state-sub">Configure and generate a report to view your performance data here.</div><button class="cmd-primary" style="margin-top:14px;" onclick="openReportEditor()"><i data-lucide="plus"></i>New Report</button></div>';
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+  }
+  var pb = document.getElementById('rpt-print-btn');
+  if (pb) pb.style.display = 'none';
+  var sub = document.getElementById('rpt-page-sub');
+  if (sub) sub.textContent = 'No report generated yet — click New Report to get started';
 }
 
-function printReportEditor() { window.print(); }
+function printReportEditor() {
+  document.body.classList.add('printing-report');
+  window.print();
+  window.addEventListener('afterprint', function() {
+    document.body.classList.remove('printing-report');
+  }, { once: true });
+}
 
 window.openReportEditor  = openReportEditor;
 window.closeReportEditor = closeReportEditor;

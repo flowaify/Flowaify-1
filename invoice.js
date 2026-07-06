@@ -439,13 +439,13 @@ function invRenderPrint(inv) {
   view.innerHTML =
     '<div class="ipv-bar">' +
       '<span style="font-size:13px;font-weight:600;color:#111827;flex:1;">Invoice ' + invEsc(inv.number || '') + '</span>' +
-      '<button class="rpo-print" onclick="window.print()"><i data-lucide="printer"></i>Print / Save PDF</button>' +
+      '<button class="rpo-print" onclick="invDoPrint()"><i data-lucide="printer"></i>Print / Save PDF</button>' +
       '<button class="rpo-close" onclick="closeInvPrint()">Close</button>' +
     '</div>' +
     '<div class="ipv-page">' +
       '<div class="ipv-header">' +
         '<div>' +
-          '<div style="font-size:13px;font-weight:700;color:#0050e6;letter-spacing:0.3px;">' + invEsc(bizName) + '</div>' +
+          '<div style="font-size:13px;font-weight:700;color:#111827;letter-spacing:0.3px;">' + invEsc(bizName) + '</div>' +
           (bizEmail ? '<div style="font-size:12px;color:#6b7280;margin-top:2px;">' + invEsc(bizEmail) + '</div>' : '') +
         '</div>' +
         '<div style="text-align:right;">' +
@@ -481,7 +481,7 @@ function invRenderPrint(inv) {
         '<div class="ipv-total-row ipv-grand"><span>Total Due</span><span>' + invFmt(inv.total || 0) + '</span></div>' +
       '</div>' +
       (inv.notes ? '<div class="ipv-notes"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:#9ca3af;margin-bottom:6px;">Notes</div><div style="font-size:12px;color:#6b7280;line-height:1.6;">' + invEsc(inv.notes) + '</div></div>' : '') +
-      '<div class="ipv-footer">Generated via Flowaify · Payment due ' + (inv.dueDate || '—') + '</div>' +
+      '<div class="ipv-footer"><span>Payment due ' + (inv.dueDate || '—') + '</span><span class="ipv-footer-brand">Flowaify</span></div>' +
     '</div>';
 
   view.classList.add('open');
@@ -493,6 +493,15 @@ function closeInvPrint() {
   if (view) view.classList.remove('open');
 }
 window.closeInvPrint = closeInvPrint;
+
+function invDoPrint() {
+  document.body.classList.add('printing-invoice');
+  window.print();
+  window.addEventListener('afterprint', function() {
+    document.body.classList.remove('printing-invoice');
+  }, { once: true });
+}
+window.invDoPrint = invDoPrint;
 
 // ── Lead picker in drawer ─────────────────────────────────────────────────────
 

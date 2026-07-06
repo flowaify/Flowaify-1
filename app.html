@@ -545,16 +545,51 @@
     .lead-note { width: 100%; background: var(--input-bg); border: 1px solid var(--input-border); border-radius: 4px; color: var(--text); font-size: 12px; font-family: inherit; padding: 7px 10px; outline: none; resize: vertical; }
     .lead-note:focus { border-color: var(--blue); }
 
-    /* PRINT REPORT */
+    /* Reports page */
+    #page-reports { overflow: hidden; }
+    .rpt-page-head { display: flex; align-items: center; justify-content: space-between; padding-bottom: 12px; flex-shrink: 0; }
+    .rpt-page-head-left { display: flex; flex-direction: column; gap: 2px; }
+    .rpt-page-head-title { font-size: 13px; font-weight: 650; color: var(--text); }
+    .rpt-page-head-sub { font-size: 11px; color: var(--text-m); }
+    .rpt-content-wrap { flex: 1; min-height: 0; overflow-y: auto; background: var(--bg-card); border: 1px solid var(--card-border); border-radius: 4px; }
+    #report-page-content { padding: 40px 48px; font-family: 'Segoe UI', Inter, -apple-system, sans-serif; }
     #report-view { display: none; }
+
+    /* Report document styles */
+    .rp-cover { padding: 56px 0 40px; border-bottom: 2px solid #111827; margin-bottom: 40px; }
+    .rp-cover-client { font-size: 11px; font-weight: 700; color: #6b7280; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 14px; }
+    .rp-cover-body h1 { font-size: 32px; font-weight: 800; color: #111827; margin: 0 0 12px; line-height: 1.2; }
+    .rp-cover-range { font-size: 13px; color: #6b7280; margin-bottom: 6px; }
+    .rp-cover-sig { font-size: 12px; color: #9ca3af; margin-top: 28px; }
+    .rp-section { margin-bottom: 36px; }
+    .rp-section-head { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #6b7280; border-bottom: 1px solid #e5e7eb; padding-bottom: 8px; margin-bottom: 16px; }
+    .rp-kpi-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; }
+    .rp-kpi-card { padding: 16px; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 4px; }
+    .rp-kpi-val { font-size: 22px; font-weight: 800; color: #111827; font-variant-numeric: tabular-nums; }
+    .rp-kpi-label { font-size: 10px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; font-weight: 600; }
+    .rp-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+    .rp-table th { text-align: left; padding: 8px 12px; background: #f9fafb; border-bottom: 2px solid #e5e7eb; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #6b7280; }
+    .rp-table td { padding: 9px 12px; border-bottom: 1px solid #f3f4f6; color: #374151; }
+    .rp-table tr:last-child td { border-bottom: none; }
+    .rp-list { padding-left: 20px; color: #374151; font-size: 13px; line-height: 1.9; }
+    .rp-footer { margin-top: 56px; padding-top: 14px; border-top: 1px solid #e5e7eb; font-size: 10px; color: #d1d5db; display: flex; align-items: center; justify-content: space-between; }
+    .rp-footer-brand { font-size: 9px; color: #e5e7eb; letter-spacing: 0.5px; }
+
+    /* Print — reports */
     @media print {
-      body > *:not(#report-preview-overlay):not(#report-view) { display: none !important; }
-      #report-preview-overlay { position: static !important; transform: none !important; background: #fff; }
-      .rpo-bar { display: none !important; }
-      #report-preview-content { padding: 32px !important; overflow: visible !important; }
-      .rp-kpi-grid { grid-template-columns: repeat(4,1fr) !important; }
-      /* legacy openReport() support */
-      #report-view { display: block !important; font-family: 'Segoe UI', Inter, sans-serif; color: #0f172a; padding: 20px; }
+      body.printing-report > *:not(.main) { display: none !important; }
+      body.printing-report .main > *:not(#page-reports) { display: none !important; }
+      body.printing-report #page-reports { display: flex !important; padding: 0 !important; }
+      body.printing-report .rpt-page-head { display: none !important; }
+      body.printing-report .rpt-content-wrap { overflow: visible !important; border: none !important; }
+      body.printing-report #report-page-content { padding: 32px !important; }
+      body.printing-report .rp-kpi-grid { grid-template-columns: repeat(4,1fr) !important; }
+    }
+    /* Print — invoices */
+    @media print {
+      body.printing-invoice > *:not(#inv-print-view) { display: none !important; }
+      body.printing-invoice #inv-print-view { position: static !important; transform: none !important; box-shadow: none !important; background: #fff !important; }
+      body.printing-invoice .ipv-bar { display: none !important; }
     }
 
     /* COMMAND PALETTE */
@@ -970,17 +1005,13 @@
     .ipv-total-row { display: flex; justify-content: space-between; gap: 40px; width: 100%; font-size: 13px; color: #6b7280; padding: 3px 0; }
     .ipv-grand { font-size: 16px; font-weight: 800; color: #111827; padding-top: 8px; border-top: 2px solid #0050e6; margin-top: 6px; }
     .ipv-notes { margin-top: 24px; padding-top: 20px; border-top: 1px solid #e5e7eb; }
-    .ipv-footer { margin-top: 40px; padding-top: 12px; border-top: 1px solid #e5e7eb; font-size: 11px; color: #9ca3af; }
+    .ipv-footer { margin-top: 40px; padding-top: 12px; border-top: 1px solid #e5e7eb; font-size: 11px; color: #9ca3af; display: flex; align-items: center; justify-content: space-between; }
+    .ipv-footer-brand { font-size: 9px; color: #e5e7eb; letter-spacing: 0.5px; }
     @media (max-width: 900px) {
       .inv-split { grid-template-columns: 1fr; }
       .inv-detail-card { display: none; }
       #inv-drawer { width: 100%; }
       .ipv-page { padding: 24px 16px; }
-    }
-    @media print {
-      body > *:not(#inv-print-view) { display: none !important; }
-      #inv-print-view { position: static; transform: none !important; box-shadow: none; background: #fff; }
-      .ipv-bar { display: none !important; }
     }
     /* Inbox page */
     #page-inbox { overflow: hidden; padding: 0; }
@@ -1385,14 +1416,21 @@
 
   <div class="nav-item active" data-page="overview" title="Overview"><i data-lucide="home"></i><span class="nav-txt">Overview</span></div>
 
-  <div class="nav-group-label">Manage</div>
+  <div class="nav-group-label">Pipeline</div>
   <div class="nav-item" data-page="leads" title="Leads"><i data-lucide="users-round"></i><span class="nav-txt">Leads</span></div>
   <div class="nav-item" data-page="activity" title="Activity"><i data-lucide="history"></i><span class="nav-txt">Activity</span></div>
-  <div class="nav-item" data-page="calendar" title="Calendar"><i data-lucide="calendar"></i><span class="nav-txt">Calendar <span class="nav-new">New</span></span></div>
+  <div class="nav-item" data-page="calendar" title="Calendar"><i data-lucide="calendar"></i><span class="nav-txt">Calendar</span></div>
+
+  <div class="nav-group-label">Automate</div>
   <div class="nav-item" data-page="automations" title="Automations"><i data-lucide="workflow"></i><span class="nav-txt">Automations</span></div>
+
+  <div class="nav-group-label">Workspace</div>
   <div class="nav-item" data-page="team" title="Team"><i data-lucide="users"></i><span class="nav-txt">Team</span></div>
-  <div class="nav-item" data-page="invoices" title="Invoices"><i data-lucide="file-text"></i><span class="nav-txt">Invoices</span></div>
   <div class="nav-item" data-page="inbox" title="Inbox"><i data-lucide="inbox"></i><span class="nav-txt">Inbox <span id="inbox-nav-badge" style="display:none;background:var(--red);color:#fff;font-size:9px;font-weight:700;border-radius:8px;padding:1px 5px;margin-left:4px;vertical-align:middle;"></span></span></div>
+
+  <div class="nav-group-label">Finance</div>
+  <div class="nav-item" data-page="invoices" title="Invoices"><i data-lucide="file-text"></i><span class="nav-txt">Invoices</span></div>
+  <div class="nav-item" data-page="reports" title="Reports"><i data-lucide="bar-chart-2"></i><span class="nav-txt">Reports</span></div>
 
   <div class="nav-group-label">Insights</div>
   <div class="nav-item" data-page="analytics" title="Analytics"><i data-lucide="chart-column"></i><span class="nav-txt">Analytics</span></div>
@@ -1420,8 +1458,6 @@
     <div class="topbar-right">
       <span class="sync-label" id="sync-label"></span>
       <button class="cmd-primary" id="btn-refresh" onclick="refreshData()"><i data-lucide="refresh-cw"></i>Refresh</button>
-      <span class="cmd-div"></span>
-      <button class="cmd-btn" onclick="openReportEditor()"><i data-lucide="file-text"></i>Report</button>
       <span class="cmd-div"></span>
       <div class="seg" id="range-seg">
         <button class="seg-btn" onclick="setRangeSeg(7,this)">7 days</button>
@@ -2024,6 +2060,30 @@
     </div>
   </div>
 
+  <!-- REPORTS PAGE -->
+  <div class="page" id="page-reports">
+    <div class="rpt-page-head">
+      <div class="rpt-page-head-left">
+        <div class="rpt-page-head-title" id="rpt-page-title">Reports</div>
+        <div class="rpt-page-head-sub" id="rpt-page-sub">No report generated yet — click New Report to get started</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <button class="cmd-btn" id="rpt-print-btn" onclick="printReportEditor()" style="display:none;"><i data-lucide="printer"></i>Print / PDF</button>
+        <button class="cmd-primary" onclick="openReportEditor()"><i data-lucide="plus"></i>New Report</button>
+      </div>
+    </div>
+    <div class="rpt-content-wrap">
+      <div id="report-page-content">
+        <div class="empty-state" style="padding:80px 20px;">
+          <i data-lucide="bar-chart-2"></i>
+          <div class="empty-state-title">No report generated yet</div>
+          <div class="empty-state-sub">Configure and generate a report to view your performance data here.</div>
+          <button class="cmd-primary" style="margin-top:14px;" onclick="openReportEditor()"><i data-lucide="plus"></i>New Report</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- INBOX PAGE -->
   <div class="page" id="page-inbox">
 
@@ -2345,9 +2405,9 @@
 
 <div id="toast"><div class="toast-icon"><i data-lucide="check"></i></div><div id="toast-msg" style="font-size:12.5px;font-weight:600;color:var(--text-s);line-height:1.45;"></div></div>
 
-<script src="crm.js?v=21"></script>
+<script src="crm.js?v=22"></script>
 <script src="teams.js?v=2"></script>
-<script src="invoice.js?v=1"></script>
+<script src="invoice.js?v=2"></script>
 <script src="inbox.js?v=2"></script>
 <script src="flowy.js?v=10"></script>
 <script>
@@ -2435,6 +2495,7 @@ const PAGE_META = {
   automations: { title:'Automations', sub:'Pause or resume Flowaify automations for this account.' },
   team:        { title:'Team',        sub:'Manage seats, members, and roles for your workspace.' },
   invoices:    { title:'Invoices',    sub:'Create, send, and track invoices for your clients.' },
+  reports:     { title:'Reports',     sub:'Generate and export performance reports for any date range.' },
   inbox:       { title:'Inbox',       sub:'Manage email conversations with your leads and clients.' },
   analytics:   { title:'Analytics',   sub:'Understand lead performance, response speed, source quality, and booked call conversion.' },
   settings:    { title:'Settings',    sub:'Manage workspace, users, automation rules, CRM settings, and notification preferences.' },
@@ -2452,6 +2513,7 @@ function showPage(id) {
   if (id === 'team') { if (window.teamsInit) teamsInit(); else if (window.teamLoad) teamLoad(); }
   if (id === 'invoices') { if (window.invoicesInit) invoicesInit(); }
   if (id === 'inbox')    { if (window.inboxInit)    inboxInit(); }
+  if (id === 'reports')  { /* content stays between nav visits */ }
   lucide.createIcons();
 }
 document.querySelectorAll('.nav-item[data-page]').forEach(el => el.addEventListener('click', () => showPage(el.dataset.page)));
@@ -2628,6 +2690,7 @@ const PAL_PAGES = [
   { label: 'Automations', icon: 'workflow',     run: () => showPage('automations') },
   { label: 'Team',        icon: 'users',        run: () => showPage('team') },
   { label: 'Invoices',    icon: 'file-text',    run: () => showPage('invoices') },
+  { label: 'Reports',     icon: 'bar-chart-2',  run: () => showPage('reports') },
   { label: 'Inbox',       icon: 'inbox',        run: () => showPage('inbox') },
   { label: 'Analytics',   icon: 'chart-column', run: () => showPage('analytics') },
   { label: 'Settings',    icon: 'settings',     run: () => showPage('settings') },
@@ -2638,7 +2701,7 @@ const PAL_ACTIONS = [
   { label: 'Toggle dark mode',    icon: 'moon',        run: () => toggleTheme() },
   { label: 'Refresh data',        icon: 'refresh-cw',  run: () => refreshData() },
   { label: 'Export leads CSV',    icon: 'download',    run: () => exportLeadsCsv() },
-  { label: 'Generate report',      icon: 'file-text',   run: () => openReportEditor() },
+  { label: 'New Report',            icon: 'bar-chart-2', run: () => { showPage('reports'); setTimeout(() => openReportEditor(), 80); } },
   { label: 'Collapse navigation', icon: 'menu',        run: () => toggleNavRail() },
   { label: 'Open Workspace',      icon: 'layout-grid', run: () => window.location.href = 'portal.html' },
 ];
