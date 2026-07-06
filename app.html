@@ -547,42 +547,46 @@
 
     /* Reports page */
     #page-reports { overflow: hidden; }
-    .rpt-page-head { display: flex; align-items: center; justify-content: space-between; padding-bottom: 12px; flex-shrink: 0; }
-    .rpt-page-head-left { display: flex; flex-direction: column; gap: 2px; }
-    .rpt-page-head-title { font-size: 13px; font-weight: 650; color: var(--text); }
-    .rpt-page-head-sub { font-size: 11px; color: var(--text-m); }
-    .rpt-content-wrap { flex: 1; min-height: 0; overflow-y: auto; background: var(--bg-card); border: 1px solid var(--card-border); border-radius: 4px; }
-    #report-page-content { padding: 40px 48px; font-family: 'Segoe UI', Inter, -apple-system, sans-serif; }
+    #page-reports .stats-grid { flex-shrink: 0; }
+    .rpt-split { flex: 1; min-height: 0; display: grid; grid-template-columns: 1fr 400px; gap: 16px; align-items: stretch; }
+    .rpt-list-card { display: flex; flex-direction: column; min-height: 0; }
+    .rpt-list-card .table-wrap { flex: 1; overflow-y: auto; }
+    .rpt-detail-card { display: flex; flex-direction: column; overflow: hidden; }
+    .rpt-det-head { display: flex; align-items: flex-start; gap: 10px; padding: 14px 16px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+    .rpt-det-info { flex: 1; min-width: 0; }
+    .rpt-det-title { font-size: 14px; font-weight: 700; color: var(--text); }
+    .rpt-det-meta { font-size: 11.5px; color: var(--text-m); margin-top: 3px; }
+    .rpt-det-acts { display: flex; align-items: center; gap: 6px; }
+    .rpt-det-acts .btn-mini i, .rpt-det-acts .btn-mini svg { width: 11px; height: 11px; }
+    .rpt-det-body { flex: 1; overflow-y: auto; }
+    .rpt-det-preview { padding: 24px; font-family: 'Segoe UI', Inter, -apple-system, sans-serif; font-size: 12px; }
     #report-view { display: none; }
 
     /* Report document styles */
-    .rp-cover { padding: 56px 0 40px; border-bottom: 2px solid #111827; margin-bottom: 40px; }
-    .rp-cover-client { font-size: 11px; font-weight: 700; color: #6b7280; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 14px; }
-    .rp-cover-body h1 { font-size: 32px; font-weight: 800; color: #111827; margin: 0 0 12px; line-height: 1.2; }
-    .rp-cover-range { font-size: 13px; color: #6b7280; margin-bottom: 6px; }
-    .rp-cover-sig { font-size: 12px; color: #9ca3af; margin-top: 28px; }
-    .rp-section { margin-bottom: 36px; }
-    .rp-section-head { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #6b7280; border-bottom: 1px solid #e5e7eb; padding-bottom: 8px; margin-bottom: 16px; }
-    .rp-kpi-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; }
-    .rp-kpi-card { padding: 16px; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 4px; }
-    .rp-kpi-val { font-size: 22px; font-weight: 800; color: #111827; font-variant-numeric: tabular-nums; }
-    .rp-kpi-label { font-size: 10px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; font-weight: 600; }
+    .rp-cover { padding: 40px 0 32px; border-bottom: 2px solid #1a1a1a; margin-bottom: 36px; }
+    .rp-cover-client { font-size: 9px; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 12px; }
+    .rp-cover-body h1 { font-size: 28px; font-weight: 800; color: #111827; margin: 0 0 10px; line-height: 1.2; }
+    .rp-cover-range { font-size: 12.5px; color: #6b7280; margin-bottom: 5px; }
+    .rp-cover-sig { font-size: 11.5px; color: #9ca3af; margin-top: 24px; }
+    .rp-section { margin-bottom: 32px; }
+    .rp-section-head { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: #6b7280; border-bottom: 1px solid #e5e7eb; padding-bottom: 8px; margin-bottom: 14px; }
+    .rp-kpi-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; }
+    .rp-kpi-card { padding: 14px; background: #fff; border: 1px solid #e5e7eb; border-radius: 3px; }
+    .rp-kpi-val { font-size: 20px; font-weight: 800; color: #111827; font-variant-numeric: tabular-nums; }
+    .rp-kpi-label { font-size: 9.5px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; font-weight: 600; }
     .rp-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
-    .rp-table th { text-align: left; padding: 8px 12px; background: #f9fafb; border-bottom: 2px solid #e5e7eb; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #6b7280; }
-    .rp-table td { padding: 9px 12px; border-bottom: 1px solid #f3f4f6; color: #374151; }
+    .rp-table th { text-align: left; padding: 8px 12px; background: #1a1a1a; font-size: 9.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #fff; border: none; }
+    .rp-table td { padding: 9px 12px; border-bottom: 1px solid #f0f0f0; color: #374151; }
     .rp-table tr:last-child td { border-bottom: none; }
-    .rp-list { padding-left: 20px; color: #374151; font-size: 13px; line-height: 1.9; }
-    .rp-footer { margin-top: 56px; padding-top: 14px; border-top: 1px solid #e5e7eb; font-size: 10px; color: #d1d5db; display: flex; align-items: center; justify-content: space-between; }
+    .rp-list { padding-left: 20px; color: #374151; font-size: 12.5px; line-height: 1.9; }
+    .rp-footer { margin-top: 48px; padding-top: 12px; border-top: 1px solid #e5e7eb; font-size: 10px; color: #d1d5db; display: flex; align-items: center; justify-content: space-between; }
     .rp-footer-brand { font-size: 9px; color: #e5e7eb; letter-spacing: 0.5px; }
 
     /* Print — reports */
     @media print {
-      body.printing-report > *:not(.main) { display: none !important; }
-      body.printing-report .main > *:not(#page-reports) { display: none !important; }
-      body.printing-report #page-reports { display: flex !important; padding: 0 !important; }
-      body.printing-report .rpt-page-head { display: none !important; }
-      body.printing-report .rpt-content-wrap { overflow: visible !important; border: none !important; }
-      body.printing-report #report-page-content { padding: 32px !important; }
+      body.printing-report > *:not(#rpt-print-view) { display: none !important; }
+      body.printing-report #rpt-print-view { position: static !important; transform: none !important; box-shadow: none !important; background: #fff !important; }
+      body.printing-report #rpt-print-view .ipv-bar { display: none !important; }
       body.printing-report .rp-kpi-grid { grid-template-columns: repeat(4,1fr) !important; }
     }
     /* Print — invoices */
@@ -998,20 +1002,28 @@
     .ipv-bar { display: flex; align-items: center; gap: 10px; padding: 10px 16px; background: #fff; border-bottom: 1px solid #e5e7eb; flex-shrink: 0; }
     #inv-print-view > div:last-child { flex: 1; overflow-y: auto; padding: 48px; }
     .ipv-page { max-width: 780px; margin: 0 auto; background: #fff; padding: 48px; box-shadow: 0 2px 24px rgba(0,0,0,0.08); border-radius: 4px; }
-    .ipv-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 32px; padding-bottom: 24px; border-bottom: 2px solid #0050e6; }
+    .ipv-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 32px; padding-bottom: 24px; border-bottom: 2px solid #1a1a1a; }
     .ipv-parties { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 8px; }
     .ipv-date-row { display: flex; justify-content: space-between; gap: 20px; font-size: 12px; margin-bottom: 4px; }
     .ipv-totals { display: flex; flex-direction: column; align-items: flex-end; margin-top: 16px; min-width: 260px; margin-left: auto; }
     .ipv-total-row { display: flex; justify-content: space-between; gap: 40px; width: 100%; font-size: 13px; color: #6b7280; padding: 3px 0; }
-    .ipv-grand { font-size: 16px; font-weight: 800; color: #111827; padding-top: 8px; border-top: 2px solid #0050e6; margin-top: 6px; }
+    .ipv-grand { font-size: 16px; font-weight: 800; color: #111827; padding-top: 8px; border-top: 2px solid #1a1a1a; margin-top: 6px; }
     .ipv-notes { margin-top: 24px; padding-top: 20px; border-top: 1px solid #e5e7eb; }
     .ipv-footer { margin-top: 40px; padding-top: 12px; border-top: 1px solid #e5e7eb; font-size: 11px; color: #9ca3af; display: flex; align-items: center; justify-content: space-between; }
     .ipv-footer-brand { font-size: 9px; color: #e5e7eb; letter-spacing: 0.5px; }
+    /* Report print view */
+    #rpt-print-view { position: fixed; inset: 0; z-index: 650; background: #f5f6f7; display: flex; flex-direction: column; transform: translateY(100%); transition: transform 0.22s var(--ease); }
+    #rpt-print-view.open { transform: translateY(0); }
+    #rpt-pv-scroll { flex: 1; overflow-y: auto; padding: 48px; }
+    #rpt-pv-content { max-width: 780px; margin: 0 auto; background: #fff; padding: 48px; box-shadow: 0 2px 24px rgba(0,0,0,0.08); border-radius: 4px; font-family: 'Segoe UI', Inter, -apple-system, sans-serif; }
     @media (max-width: 900px) {
       .inv-split { grid-template-columns: 1fr; }
       .inv-detail-card { display: none; }
       #inv-drawer { width: 100%; }
       .ipv-page { padding: 24px 16px; }
+      .rpt-split { grid-template-columns: 1fr; }
+      .rpt-detail-card { display: none; }
+      #rpt-print-view #rpt-pv-content { padding: 24px 16px; }
     }
     /* Inbox page */
     #page-inbox { overflow: hidden; padding: 0; }
@@ -1153,30 +1165,29 @@
     #report-preview-overlay.open { transform: translateY(0); }
     .rpo-bar { display: flex; align-items: center; gap: 10px; padding: 10px 16px; background: #fff; border-bottom: 1px solid #e5e7eb; flex-shrink: 0; }
     .rpo-bar-title { font-size: 13px; font-weight: 600; color: #111827; flex: 1; }
-    .rpo-print { padding: 7px 16px; background: #0050e6; color: #fff; border: none; border-radius: 4px; font-size: 12.5px; font-weight: 600; font-family: inherit; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+    .rpo-print { padding: 7px 16px; background: #1a1a1a; color: #fff; border: none; border-radius: 4px; font-size: 12.5px; font-weight: 600; font-family: inherit; cursor: pointer; display: flex; align-items: center; gap: 6px; }
     .rpo-print i, .rpo-print svg { width: 13px; height: 13px; }
     .rpo-close { padding: 7px 14px; background: transparent; border: 1px solid #e5e7eb; border-radius: 4px; font-size: 12.5px; font-family: inherit; cursor: pointer; color: #374151; }
     .rpo-close:hover { background: #f3f4f6; }
     #report-preview-content { flex: 1; overflow-y: auto; padding: 48px; font-family: 'Segoe UI', Inter, -apple-system, sans-serif; }
-    .rp-cover { min-height: 600px; display: flex; flex-direction: column; padding: 60px 0 40px; border-bottom: 2px solid #0050e6; margin-bottom: 48px; }
-    .rp-cover-logo { display: flex; align-items: center; gap: 10px; font-size: 16px; font-weight: 800; color: #0050e6; margin-bottom: auto; }
-    .rp-cover-body { padding-top: 60px; }
-    .rp-cover-client { font-size: 14px; font-weight: 600; color: #6b7280; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 12px; }
-    .rp-cover-body h1 { font-size: 36px; font-weight: 800; color: #111827; margin: 0 0 14px; line-height: 1.15; }
-    .rp-cover-range { font-size: 14px; color: #6b7280; margin-bottom: 6px; }
-    .rp-cover-sig { font-size: 13px; color: #9ca3af; margin-top: 32px; }
-    .rp-section { margin-bottom: 40px; }
-    .rp-section-head { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: #0050e6; border-bottom: 1px solid #e5e7eb; padding-bottom: 8px; margin-bottom: 16px; }
-    .rp-kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
-    .rp-kpi-card { padding: 16px; background: #fff; border: 1px solid #e5e7eb; border-radius: 4px; }
-    .rp-kpi-val { font-size: 24px; font-weight: 800; color: #111827; font-variant-numeric: tabular-nums; }
-    .rp-kpi-label { font-size: 11px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; font-weight: 600; }
-    .rp-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-    .rp-table th { text-align: left; padding: 8px 12px; background: #f9fafb; border-bottom: 2px solid #e5e7eb; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; color: #6b7280; }
-    .rp-table td { padding: 9px 12px; border-bottom: 1px solid #f3f4f6; color: #374151; }
+    .rp-cover { display: flex; flex-direction: column; padding: 40px 0 32px; border-bottom: 2px solid #1a1a1a; margin-bottom: 36px; }
+    .rp-cover-body h1 { font-size: 26px; font-weight: 800; color: #111827; margin: 0 0 10px; line-height: 1.2; }
+    .rp-cover-client { font-size: 9px; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 12px; }
+    .rp-cover-range { font-size: 12.5px; color: #6b7280; margin-bottom: 5px; }
+    .rp-cover-sig { font-size: 11.5px; color: #9ca3af; margin-top: 24px; }
+    .rp-section { margin-bottom: 32px; }
+    .rp-section-head { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: #6b7280; border-bottom: 1px solid #e5e7eb; padding-bottom: 8px; margin-bottom: 14px; }
+    .rp-kpi-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; }
+    .rp-kpi-card { padding: 14px; background: #fff; border: 1px solid #e5e7eb; border-radius: 3px; }
+    .rp-kpi-val { font-size: 20px; font-weight: 800; color: #111827; font-variant-numeric: tabular-nums; }
+    .rp-kpi-label { font-size: 9.5px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; font-weight: 600; }
+    .rp-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+    .rp-table th { text-align: left; padding: 8px 12px; background: #1a1a1a; font-size: 9.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #fff; border: none; }
+    .rp-table td { padding: 9px 12px; border-bottom: 1px solid #f0f0f0; color: #374151; }
     .rp-table tr:last-child td { border-bottom: none; }
-    .rp-list { padding-left: 20px; color: #374151; font-size: 13px; line-height: 1.8; }
-    .rp-footer { margin-top: 60px; padding-top: 16px; border-top: 1px solid #e5e7eb; font-size: 11px; color: #9ca3af; }
+    .rp-list { padding-left: 20px; color: #374151; font-size: 12.5px; line-height: 1.9; }
+    .rp-footer { margin-top: 48px; padding-top: 12px; border-top: 1px solid #e5e7eb; font-size: 10px; color: #d1d5db; display: flex; align-items: center; justify-content: space-between; }
+    .rp-footer-brand { font-size: 9px; color: #e5e7eb; letter-spacing: 0.5px; }
 
     /* MOBILE SEARCH TOGGLE */
     .msearch-btn { display: none; }
@@ -2047,6 +2058,18 @@
     <div></div>
   </div>
 
+  <!-- Report print view -->
+  <div id="rpt-print-view">
+    <div class="ipv-bar">
+      <span style="font-size:13px;font-weight:600;color:#111827;flex:1;">Report</span>
+      <button class="rpo-print" onclick="reportsPrintNow()"><i data-lucide="printer"></i>Print / Save PDF</button>
+      <button class="rpo-close" onclick="reportsClosePrint()">Close</button>
+    </div>
+    <div id="rpt-pv-scroll">
+      <div id="rpt-pv-content"></div>
+    </div>
+  </div>
+
   <!-- Invoice lead picker -->
   <div class="teams-lead-picker" id="inv-lead-picker">
     <div class="teams-lead-picker-box">
@@ -2062,25 +2085,40 @@
 
   <!-- REPORTS PAGE -->
   <div class="page" id="page-reports">
-    <div class="rpt-page-head">
-      <div class="rpt-page-head-left">
-        <div class="rpt-page-head-title" id="rpt-page-title">Reports</div>
-        <div class="rpt-page-head-sub" id="rpt-page-sub">No report generated yet — click New Report to get started</div>
-      </div>
-      <div style="display:flex;align-items:center;gap:8px;">
-        <button class="cmd-btn" id="rpt-print-btn" onclick="printReportEditor()" style="display:none;"><i data-lucide="printer"></i>Print / PDF</button>
-        <button class="cmd-primary" onclick="openReportEditor()"><i data-lucide="plus"></i>New Report</button>
-      </div>
+
+    <div class="stats-grid sg-3 mb20">
+      <div class="card stat-card"><div class="stat-top"><div class="stat-label"><i data-lucide="file-bar-chart" class="kpi-glyph kg-blue"></i>Total Reports</div></div><div class="stat-val" id="rpt-kpi-total">0</div></div>
+      <div class="card stat-card"><div class="stat-top"><div class="stat-label"><i data-lucide="calendar" class="kpi-glyph kg-green"></i>Last Generated</div></div><div class="stat-val" id="rpt-kpi-last">—</div></div>
+      <div class="card stat-card"><div class="stat-top"><div class="stat-label"><i data-lucide="bar-chart-2" class="kpi-glyph kg-amber"></i>Top Type</div></div><div class="stat-val" id="rpt-kpi-type">—</div></div>
     </div>
-    <div class="rpt-content-wrap">
-      <div id="report-page-content">
-        <div class="empty-state" style="padding:80px 20px;">
-          <i data-lucide="bar-chart-2"></i>
-          <div class="empty-state-title">No report generated yet</div>
-          <div class="empty-state-sub">Configure and generate a report to view your performance data here.</div>
-          <button class="cmd-primary" style="margin-top:14px;" onclick="openReportEditor()"><i data-lucide="plus"></i>New Report</button>
+
+    <div class="rpt-split">
+
+      <!-- List -->
+      <div class="card rpt-list-card">
+        <div class="sec-head">
+          <div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0;">
+            <input id="rpt-search" type="text" placeholder="Search reports…" oninput="rptFilterList()" style="padding:5px 10px;background:var(--input-bg);border:1px solid var(--input-border);border-radius:4px;font-size:11.5px;font-family:inherit;color:var(--text);outline:none;width:160px;" />
+          </div>
+          <button class="cmd-primary" onclick="openReportEditor()"><i data-lucide="plus"></i>New Report</button>
+        </div>
+        <div class="table-wrap">
+          <table class="skel-table">
+            <thead><tr><th>Report</th><th>Type</th><th>Range</th><th>Date</th></tr></thead>
+            <tbody id="rpt-tbody"><tr><td colspan="4" style="text-align:center;padding:32px 16px;color:var(--text-m);font-size:12.5px;">No reports yet</td></tr></tbody>
+          </table>
         </div>
       </div>
+
+      <!-- Detail -->
+      <div class="card rpt-detail-card" id="rpt-detail-panel">
+        <div class="empty-state" style="padding:60px 20px;">
+          <i data-lucide="bar-chart-2"></i>
+          <div class="empty-state-title">Select a report</div>
+          <div class="empty-state-sub">Choose a report from the list to preview it here.</div>
+        </div>
+      </div>
+
     </div>
   </div>
 
@@ -2405,11 +2443,12 @@
 
 <div id="toast"><div class="toast-icon"><i data-lucide="check"></i></div><div id="toast-msg" style="font-size:12.5px;font-weight:600;color:var(--text-s);line-height:1.45;"></div></div>
 
-<script src="crm.js?v=22"></script>
-<script src="teams.js?v=2"></script>
-<script src="invoice.js?v=2"></script>
+<script src="crm.js?v=23"></script>
+<script src="teams.js?v=3"></script>
+<script src="invoice.js?v=3"></script>
 <script src="inbox.js?v=2"></script>
 <script src="flowy.js?v=10"></script>
+<script src="reports.js?v=1"></script>
 <script>
 const AUTH0_DOMAIN    = 'auth.flowaify.app';
 const AUTH0_CLIENT_ID = 'tx74Owqn3jVeSaVuxfFHsKloqbPqfAmN';
@@ -2510,10 +2549,10 @@ function showPage(id) {
   document.getElementById('topbar-title').textContent = m.title || id;
   document.getElementById('topbar-sub').textContent   = m.sub   || '';
   window.scrollTo(0,0); closeProfileMenu(); closeMob();
-  if (id === 'team') { if (window.teamsInit) teamsInit(); else if (window.teamLoad) teamLoad(); }
+  if (id === 'team')     { if (window.teamsInit)    teamsInit();    else if (window.teamLoad) teamLoad(); }
   if (id === 'invoices') { if (window.invoicesInit) invoicesInit(); }
   if (id === 'inbox')    { if (window.inboxInit)    inboxInit(); }
-  if (id === 'reports')  { /* content stays between nav visits */ }
+  if (id === 'reports')  { if (window.reportsInit)  reportsInit(); }
   lucide.createIcons();
 }
 document.querySelectorAll('.nav-item[data-page]').forEach(el => el.addEventListener('click', () => showPage(el.dataset.page)));

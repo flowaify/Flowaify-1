@@ -922,14 +922,24 @@ function generateReportEditor() {
 
   html += '<div class="rp-footer"><span>Confidential &nbsp;·&nbsp; ' + dateStr + (signedBy ? ' &nbsp;·&nbsp; ' + escDash(signedBy) : '') + '</span><span class="rp-footer-brand">Flowaify</span></div>';
 
-  var content = document.getElementById('report-page-content');
-  if (content) content.innerHTML = html;
+  var rpt = {
+    id: 'rpt_' + Date.now(),
+    title: reportTitle,
+    type: __reType || 'full',
+    days: days,
+    dateStr: dateStr,
+    reportFor: reportFor,
+    signedBy: signedBy,
+    createdAt: Date.now(),
+    html: html
+  };
+
   closeReportEditor();
   if (typeof showPage === 'function') showPage('reports');
-  var pb = document.getElementById('rpt-print-btn');
-  if (pb) pb.style.display = '';
-  var sub = document.getElementById('rpt-page-sub');
-  if (sub) sub.textContent = reportTitle + ' · Last ' + days + ' days · ' + dateStr;
+  if (typeof reportsSave === 'function') {
+    reportsSave(rpt);
+  }
+  if (typeof showToast === 'function') showToast('Report saved.');
 }
 
 function closeReportPreview() {

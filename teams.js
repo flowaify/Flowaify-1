@@ -230,6 +230,18 @@ function twMsgBody(msg) {
         '</div>' +
       '</div>';
   }
+  if (msg.type === 'invoice' && msg.payload) {
+    var inv = msg.payload;
+    return '<div class="teams-msg-text">' + twEsc(msg.content || '') + '</div>' +
+      '<div class="teams-share-card">' +
+        '<div class="teams-share-card-title">Invoice</div>' +
+        '<div class="teams-share-card-name">' + twEsc(inv.number || '—') + ' &nbsp;·&nbsp; ' + twEsc(inv.clientName || '—') + '</div>' +
+        '<div class="teams-share-card-meta">' +
+          (inv.status ? twStatusBadge(inv.status) : '') +
+          '<span style="font-size:11.5px;color:var(--text-m);">' + (inv.total ? '$' + Number(inv.total).toFixed(2) : '') + '</span>' +
+        '</div>' +
+      '</div>';
+  }
   if (msg.type === 'report' && msg.payload) {
     var rep = msg.payload;
     return '<div class="teams-msg-text">' + twEsc(msg.content || '') + '</div>' +
@@ -237,7 +249,7 @@ function twMsgBody(msg) {
         '<div class="teams-share-card-title">Report</div>' +
         '<div class="teams-share-card-name">' + twEsc(rep.title || 'Report') + '</div>' +
         '<div class="teams-share-card-meta">' +
-          '<span style="font-size:11.5px;color:var(--text-m);">' + twEsc(rep.date || '') + '</span>' +
+          '<span style="font-size:11.5px;color:var(--text-m);">' + twEsc(rep.date || '') + (rep.reportFor ? ' · ' + twEsc(rep.reportFor) : '') + '</span>' +
         '</div>' +
       '</div>';
   }
@@ -517,6 +529,70 @@ function teamsShareLeadInChat(contactId, channelId) {
   teamsShareLead(contactId);
 }
 window.teamsShareLeadInChat = teamsShareLeadInChat;
+
+// ── Share invoice ─────────────────────────────────────────────────────────────
+
+async function teamsShareInvoice(inv) {
+  if (!_teamsCurrentChannel) {
+    if (typeof showPage === 'function') showPage('team');
+    if (typeof showToast === 'function') showToast('Select a channel on the Team page first.');
+    return;
+  }
+  var payload = {
+    id: inv.id,
+    number: inv.number,
+    clientName: (inv.billTo || {}).name || '—',
+    total: inv.total || 0,
+    status: inv.status || 'draft',
+    dueDate: inv.dueDate || ''
+  };
+  var r = await twFetch('POST', '/team/messages/send', {
+    channelId: _teamsCurrentChannel.id,
+    content: 'Shared invoice ' + (inv.number || '') + ' for ' + payload.clientName,
+    type: 'invoice',
+    payload: payload
+  });
+  if (r && r.status === 200 && r.data && r.data.message) {
+    teamsRenderMessages([r.data.message], true);
+    teamsScrollBottom();
+    _teamsLastMsgTs = r.data.message.ts || _teamsLastMsgTs;
+    teamsUpdateChannelPreview(_teamsCurrentChannel.id, 'Shared invoice ' + (inv.number || ''));
+    if (typeof showToast === 'function') showToast('Invoice shared in #' + _teamsCurrentChannel.name);
+  }
+}
+window.teamsShareInvoice = teamsShareInvoice;
+
+// ── Share report ──────────────────────────────────────────────────────────────
+
+async function teamsShareReport(rpt) {
+  if (!_teamsCurrentChannel) {
+    if (typeof showPage === 'function') showPage('team');
+    if (typeof showToast === 'function') showToast('Select a channel on the Team page first.');
+    return;
+  }
+  var payload = {
+    id: rpt.id,
+    title: rpt.title || 'Report',
+    type: rpt.type || 'full',
+    days: rpt.days || 30,
+    date: rpt.dateStr || new Date(rpt.createdAt).toLocaleDateString(),
+    reportFor: rpt.reportFor || ''
+  };
+  var r = await twFetch('POST', '/team/messages/send', {
+    channelId: _teamsCurrentChannel.id,
+    content: 'Shared report: ' + payload.title + (payload.reportFor ? ' for ' + payload.reportFor : ''),
+    type: 'report',
+    payload: payload
+  });
+  if (r && r.status === 200 && r.data && r.data.message) {
+    teamsRenderMessages([r.data.message], true);
+    teamsScrollBottom();
+    _teamsLastMsgTs = r.data.message.ts || _teamsLastMsgTs;
+    teamsUpdateChannelPreview(_teamsCurrentChannel.id, 'Shared report: ' + payload.title);
+    if (typeof showToast === 'function') showToast('Report shared in #' + _teamsCurrentChannel.name);
+  }
+}
+window.teamsShareReport = teamsShareReport;
 
 // ── Channel preview update ────────────────────────────────────────────────────
 

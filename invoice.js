@@ -126,6 +126,7 @@ function selectInvoice(id) {
       '</div>' +
       '<div class="inv-det-acts">' +
         '<button class="btn-mini btn-mini-ghost" onclick="openEditInvoice(\'' + id + '\')"><i data-lucide="pencil"></i>Edit</button>' +
+        '<button class="btn-mini btn-mini-ghost" onclick="invShareTeam(\'' + id + '\')"><i data-lucide="message-square"></i>Team</button>' +
         '<button class="btn-mini btn-mini-ghost" onclick="invPrintById(\'' + id + '\')"><i data-lucide="printer"></i>Print</button>' +
         (inv.status === 'draft' || inv.status === 'sent' ?
           '<button class="btn-mini btn-mini-primary" onclick="invMarkSent(\'' + id + '\')">' + (inv.status === 'draft' ? 'Mark Sent' : 'Mark Paid') + '</button>' : '') +
@@ -417,72 +418,115 @@ function invRenderPrint(inv) {
     var saved = JSON.parse(localStorage.getItem('flw_settings_' + (window.__userSub || 'anon')) || '{}');
     biz = saved.biz || {};
   } catch (e) {}
-  var bizName  = biz['s2-biz-name'] || 'Your Business';
-  var bizEmail = biz['s2-email'] || '';
-  var bt = inv.billTo || {};
-  var lines = inv.lines || [];
-
-  var linesHtml = lines.map(function(l) {
-    return '<tr>' +
-      '<td style="padding:9px 12px;border-bottom:1px solid #f3f4f6;color:#374151;">' + invEsc(l.description || '—') + '</td>' +
-      '<td style="padding:9px 12px;border-bottom:1px solid #f3f4f6;text-align:right;color:#6b7280;">' + (l.qty || 1) + '</td>' +
-      '<td style="padding:9px 12px;border-bottom:1px solid #f3f4f6;text-align:right;color:#6b7280;">' + invFmt(l.unitPrice || 0) + '</td>' +
-      '<td style="padding:9px 12px;border-bottom:1px solid #f3f4f6;text-align:right;font-weight:600;color:#111827;">' + invFmt(l.total || 0) + '</td>' +
-    '</tr>';
-  }).join('');
-
+  var bizName  = biz['s2-biz-name']  || '';
+  var bizEmail = biz['s2-biz-email'] || biz['s2-email'] || '';
+  var bizPhone = biz['s2-biz-phone'] || '';
+  var bt       = inv.billTo || {};
+  var lines    = inv.lines  || [];
   var tax      = (inv.subtotal || 0) * ((inv.taxRate || 0) / 100);
   var discount = inv.discount || 0;
 
+  var linesHtml = lines.length ? lines.map(function(l) {
+    return '<tr>' +
+      '<td style="padding:11px 14px;border-bottom:1px solid #f0f0f0;font-size:13px;color:#1a1a1a;">' + invEsc(l.description || '') + '</td>' +
+      '<td style="padding:11px 14px;border-bottom:1px solid #f0f0f0;text-align:right;font-size:13px;color:#6b7280;width:60px;">' + (l.qty || 1) + '</td>' +
+      '<td style="padding:11px 14px;border-bottom:1px solid #f0f0f0;text-align:right;font-size:13px;color:#6b7280;width:100px;">' + invFmt(l.unitPrice || 0) + '</td>' +
+      '<td style="padding:11px 14px;border-bottom:1px solid #f0f0f0;text-align:right;font-size:13px;font-weight:600;color:#1a1a1a;width:100px;">' + invFmt(l.total || 0) + '</td>' +
+    '</tr>';
+  }).join('') : '<tr><td colspan="4" style="padding:18px 14px;color:#9ca3af;font-size:12px;text-align:center;">No line items</td></tr>';
+
   var view = document.getElementById('inv-print-view');
   if (!view) return;
+
   view.innerHTML =
     '<div class="ipv-bar">' +
       '<span style="font-size:13px;font-weight:600;color:#111827;flex:1;">Invoice ' + invEsc(inv.number || '') + '</span>' +
       '<button class="rpo-print" onclick="invDoPrint()"><i data-lucide="printer"></i>Print / Save PDF</button>' +
       '<button class="rpo-close" onclick="closeInvPrint()">Close</button>' +
     '</div>' +
+    '<div style="flex:1;overflow-y:auto;padding:48px;background:#f5f6f7;">' +
     '<div class="ipv-page">' +
-      '<div class="ipv-header">' +
+
+      // ── Top: business left, invoice number box right ──
+      '<div style="display:flex;justify-content:space-between;align-items:flex-start;padding-bottom:24px;border-bottom:2px solid #1a1a1a;margin-bottom:28px;">' +
         '<div>' +
-          '<div style="font-size:13px;font-weight:700;color:#111827;letter-spacing:0.3px;">' + invEsc(bizName) + '</div>' +
+          '<div style="font-size:10px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:#9ca3af;margin-bottom:10px;">INVOICE</div>' +
+          '<div style="font-size:26px;font-weight:800;color:#111827;letter-spacing:-0.5px;line-height:1.1;margin-bottom:10px;">' + invEsc(bizName || 'Your Business') + '</div>' +
           (bizEmail ? '<div style="font-size:12px;color:#6b7280;margin-top:2px;">' + invEsc(bizEmail) + '</div>' : '') +
+          (bizPhone ? '<div style="font-size:12px;color:#6b7280;margin-top:2px;">' + invEsc(bizPhone) + '</div>' : '') +
         '</div>' +
         '<div style="text-align:right;">' +
-          '<div style="font-size:28px;font-weight:800;color:#111827;letter-spacing:-0.5px;">INVOICE</div>' +
-          '<div style="font-size:13px;color:#6b7280;margin-top:4px;">' + invEsc(inv.number || '') + '</div>' +
+          '<div style="display:inline-block;background:#1a1a1a;color:#fff;padding:14px 18px;border-radius:3px;min-width:130px;text-align:right;">' +
+            '<div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#9ca3af;margin-bottom:6px;">NO.</div>' +
+            '<div style="font-size:17px;font-weight:800;letter-spacing:0.5px;">' + invEsc(inv.number || '—') + '</div>' +
+            (inv.issueDate ? '<div style="font-size:10.5px;color:#9ca3af;margin-top:6px;">' + invEsc(inv.issueDate) + '</div>' : '') +
+          '</div>' +
+          (inv.dueDate ? '<div style="font-size:12px;color:#374151;margin-top:10px;text-align:right;">Due: <strong style="color:#111827;">' + invEsc(inv.dueDate) + '</strong></div>' : '') +
         '</div>' +
       '</div>' +
-      '<div class="ipv-parties">' +
-        '<div>' +
-          '<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:#9ca3af;margin-bottom:6px;">Bill To</div>' +
-          '<div style="font-size:13px;font-weight:700;color:#111827;">' + invEsc(bt.name || '—') + '</div>' +
-          (bt.company ? '<div style="font-size:12px;color:#6b7280;">' + invEsc(bt.company) + '</div>' : '') +
-          (bt.email ? '<div style="font-size:12px;color:#6b7280;">' + invEsc(bt.email) + '</div>' : '') +
-        '</div>' +
-        '<div style="text-align:right;">' +
-          '<div class="ipv-date-row"><span style="color:#9ca3af;">Issue Date</span><span>' + (inv.issueDate || '—') + '</span></div>' +
-          '<div class="ipv-date-row"><span style="color:#9ca3af;">Due Date</span><span style="font-weight:600;">' + (inv.dueDate || '—') + '</span></div>' +
-        '</div>' +
+
+      // ── Bill To ──
+      '<div style="margin-bottom:24px;">' +
+        '<div style="font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#9ca3af;margin-bottom:8px;">BILL TO</div>' +
+        '<div style="font-size:14px;font-weight:700;color:#111827;margin-bottom:3px;">' + invEsc(bt.name || '—') + '</div>' +
+        (bt.company ? '<div style="font-size:12.5px;color:#374151;">' + invEsc(bt.company) + '</div>' : '') +
+        (bt.email ? '<div style="font-size:12px;color:#6b7280;margin-top:2px;">' + invEsc(bt.email) + '</div>' : '') +
       '</div>' +
-      '<table style="width:100%;border-collapse:collapse;margin-top:24px;">' +
-        '<thead><tr>' +
-          '<th style="text-align:left;padding:8px 12px;background:#f9fafb;border-bottom:2px solid #e5e7eb;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.4px;color:#6b7280;">Description</th>' +
-          '<th style="text-align:right;padding:8px 12px;background:#f9fafb;border-bottom:2px solid #e5e7eb;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.4px;color:#6b7280;">Qty</th>' +
-          '<th style="text-align:right;padding:8px 12px;background:#f9fafb;border-bottom:2px solid #e5e7eb;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.4px;color:#6b7280;">Unit Price</th>' +
-          '<th style="text-align:right;padding:8px 12px;background:#f9fafb;border-bottom:2px solid #e5e7eb;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.4px;color:#6b7280;">Total</th>' +
+
+      // ── Payment terms ──
+      '<div style="background:#f9fafb;border-top:1px solid #e5e7eb;border-bottom:1px solid #e5e7eb;padding:9px 14px;text-align:center;font-size:12px;color:#374151;margin-bottom:0;">' +
+        '<em>' +
+          (inv.dueDate ? 'Payment due ' + invEsc(inv.dueDate) : 'Payment due upon receipt') +
+        '</em>' +
+      '</div>' +
+
+      // ── Line items table ──
+      '<table style="width:100%;border-collapse:collapse;">' +
+        '<thead><tr style="background:#1a1a1a;">' +
+          '<th style="text-align:left;padding:10px 14px;font-size:9.5px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#fff;border:none;">DESCRIPTION</th>' +
+          '<th style="text-align:right;padding:10px 14px;font-size:9.5px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#fff;border:none;width:60px;">QTY</th>' +
+          '<th style="text-align:right;padding:10px 14px;font-size:9.5px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#fff;border:none;width:100px;">PRICE</th>' +
+          '<th style="text-align:right;padding:10px 14px;font-size:9.5px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#fff;border:none;width:100px;">TOTAL</th>' +
         '</tr></thead>' +
         '<tbody>' + linesHtml + '</tbody>' +
       '</table>' +
-      '<div class="ipv-totals">' +
-        '<div class="ipv-total-row"><span>Subtotal</span><span>' + invFmt(inv.subtotal || 0) + '</span></div>' +
-        (inv.taxRate ? '<div class="ipv-total-row"><span>Tax (' + inv.taxRate + '%)</span><span>' + invFmt(tax) + '</span></div>' : '') +
-        (discount ? '<div class="ipv-total-row"><span>Discount</span><span>−' + invFmt(discount) + '</span></div>' : '') +
-        '<div class="ipv-total-row ipv-grand"><span>Total Due</span><span>' + invFmt(inv.total || 0) + '</span></div>' +
+
+      // ── Totals ──
+      '<div style="display:flex;justify-content:flex-end;margin-top:20px;">' +
+        '<div style="min-width:270px;">' +
+          '<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid #f0f0f0;font-size:12.5px;color:#374151;">' +
+            '<span>SUB TOTAL</span><span>' + invFmt(inv.subtotal || 0) + '</span>' +
+          '</div>' +
+          (inv.taxRate ? '<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid #f0f0f0;font-size:12.5px;color:#374151;">' +
+            '<span>TAX (' + inv.taxRate + '%)</span><span>' + invFmt(tax) + '</span></div>' : '') +
+          (discount ? '<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid #f0f0f0;font-size:12.5px;color:#374151;">' +
+            '<span>DISCOUNT</span><span>&minus;' + invFmt(discount) + '</span></div>' : '') +
+          '<div style="display:flex;justify-content:space-between;padding:7px 0;font-size:12.5px;color:#374151;">' +
+            '<span>TOTAL AMOUNT</span><span style="font-weight:600;">' + invFmt(inv.total || 0) + '</span>' +
+          '</div>' +
+        '</div>' +
       '</div>' +
-      (inv.notes ? '<div class="ipv-notes"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:#9ca3af;margin-bottom:6px;">Notes</div><div style="font-size:12px;color:#6b7280;line-height:1.6;">' + invEsc(inv.notes) + '</div></div>' : '') +
-      '<div class="ipv-footer"><span>Payment due ' + (inv.dueDate || '—') + '</span><span class="ipv-footer-brand">Flowaify</span></div>' +
-    '</div>';
+
+      // ── Balance Due ──
+      '<div style="display:flex;justify-content:space-between;align-items:center;background:#1a1a1a;color:#fff;padding:14px 18px;margin-top:14px;border-radius:2px;">' +
+        '<span style="font-size:11px;font-weight:800;letter-spacing:2px;text-transform:uppercase;">BALANCE DUE</span>' +
+        '<span style="font-size:22px;font-weight:800;">' + invFmt(inv.total || 0) + '</span>' +
+      '</div>' +
+
+      // ── Notes ──
+      (inv.notes ?
+        '<div style="margin-top:28px;padding-top:20px;border-top:1px solid #e5e7eb;">' +
+          '<div style="font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#9ca3af;margin-bottom:8px;">NOTES</div>' +
+          '<div style="font-size:12.5px;color:#374151;line-height:1.65;">' + invEsc(inv.notes) + '</div>' +
+        '</div>' : '') +
+
+      // ── Footer ──
+      '<div style="margin-top:44px;padding-top:12px;border-top:1px solid #e5e7eb;display:flex;justify-content:space-between;align-items:center;">' +
+        '<span style="font-size:11px;color:#9ca3af;">Thank you for your business.</span>' +
+        '<span style="font-size:9px;color:#d1d5db;letter-spacing:0.5px;">Flowaify</span>' +
+      '</div>' +
+
+    '</div></div>';
 
   view.classList.add('open');
   if (typeof lucide !== 'undefined') lucide.createIcons();
@@ -493,6 +537,17 @@ function closeInvPrint() {
   if (view) view.classList.remove('open');
 }
 window.closeInvPrint = closeInvPrint;
+
+function invShareTeam(id) {
+  var inv = _invList.find(function(x) { return x.id === id; });
+  if (!inv) return;
+  if (typeof teamsShareInvoice === 'function') {
+    teamsShareInvoice(inv);
+  } else {
+    if (typeof showToast === 'function') showToast('Open the Team page first to share to chat.');
+  }
+}
+window.invShareTeam = invShareTeam;
 
 function invDoPrint() {
   document.body.classList.add('printing-invoice');
