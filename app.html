@@ -547,19 +547,13 @@
     /* PRINT REPORT */
     #report-view { display: none; }
     @media print {
-      body > *:not(#report-view) { display: none !important; }
+      body > *:not(#report-preview-overlay):not(#report-view) { display: none !important; }
+      #report-preview-overlay { position: static !important; transform: none !important; background: #fff; }
+      .rpo-bar { display: none !important; }
+      #report-preview-content { padding: 32px !important; overflow: visible !important; }
+      .rp-kpi-grid { grid-template-columns: repeat(4,1fr) !important; }
+      /* legacy openReport() support */
       #report-view { display: block !important; font-family: 'Segoe UI', Inter, sans-serif; color: #0f172a; padding: 20px; }
-      #report-view h1 { font-size: 22px; margin-bottom: 2px; }
-      #report-view .rp-sub { color: #64748b; font-size: 12px; margin-bottom: 20px; }
-      #report-view h2 { font-size: 14px; margin: 18px 0 8px; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; }
-      #report-view .rp-kpis { display: flex; gap: 30px; margin: 14px 0; }
-      #report-view .rp-kpis div { display: flex; flex-direction: column; }
-      #report-view .rp-kpis b { font-size: 20px; }
-      #report-view .rp-kpis span { font-size: 10px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; }
-      #report-view table { border-collapse: collapse; width: 100%; font-size: 12px; }
-      #report-view th, #report-view td { text-align: left; padding: 5px 8px; border-bottom: 1px solid #e2e8f0; }
-      #report-view ul { padding-left: 18px; font-size: 12px; line-height: 1.7; }
-      #report-view .rp-foot { margin-top: 24px; font-size: 10px; color: #94a3b8; }
     }
 
     /* COMMAND PALETTE */
@@ -773,6 +767,77 @@
     .inv-overlay { position: fixed; inset: 0; z-index: 400; background: rgba(10,13,20,0.5); backdrop-filter: blur(3px); display: none; align-items: center; justify-content: center; padding: 16px; }
     .inv-overlay.open { display: flex; }
     .inv-modal { width: 100%; max-width: 440px; background: var(--bg-card); border-radius: 6px; border: 1px solid var(--card-border); box-shadow: 0 8px 32px rgba(0,0,0,0.18); overflow: hidden; animation: pmenu-in var(--dur) var(--ease); }
+
+    /* ── Report Editor Drawer ── */
+    #report-editor-drawer {
+      position: fixed; top: var(--hdr); right: 0; bottom: 0; width: 380px; z-index: 200;
+      background: var(--bg-card); border-left: 1px solid var(--card-border);
+      display: flex; flex-direction: column;
+      transform: translateX(100%); transition: transform var(--dur) var(--ease);
+    }
+    #report-editor-drawer.open { transform: translateX(0); }
+    .re-head { display: flex; align-items: center; padding: 13px 16px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+    .re-head-title { font-size: 14px; font-weight: 700; color: var(--text); }
+    .re-head-close { margin-left: auto; width: 28px; height: 28px; background: transparent; border: none; border-radius: 4px; color: var(--text-m); cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .re-head-close:hover { background: var(--hover); color: var(--text); }
+    .re-head-close i, .re-head-close svg { width: 15px; height: 15px; }
+    .re-body { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 18px; }
+    .re-section-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: var(--text-m); margin-bottom: 8px; }
+    .re-type-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .re-type-card { padding: 10px 12px; border: 1px solid var(--card-border); border-radius: 4px; font-size: 12.5px; font-weight: 500; color: var(--text-s); cursor: pointer; transition: border-color 0.12s, color 0.12s; line-height: 1.3; }
+    .re-type-card:hover { border-color: var(--blue-border); color: var(--text); }
+    .re-type-card.sel { border-color: var(--blue); color: var(--blue); background: var(--blue-dim); font-weight: 600; }
+    .re-range-row { display: flex; gap: 6px; flex-wrap: wrap; }
+    .re-range-btn { padding: 5px 12px; border: 1px solid var(--input-border); border-radius: 4px; background: transparent; color: var(--text-s); font-size: 12px; font-family: inherit; cursor: pointer; transition: border-color 0.12s; }
+    .re-range-btn:hover { border-color: var(--blue-border); color: var(--text); }
+    .re-range-btn.active { border-color: var(--blue); color: var(--blue); background: var(--blue-dim); font-weight: 600; }
+    .re-chk-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); }
+    .re-chk-row:last-child { border-bottom: none; }
+    .re-chk-row input[type=checkbox] { width: 14px; height: 14px; accent-color: var(--blue); cursor: pointer; flex-shrink: 0; }
+    .re-chk-info { flex: 1; min-width: 0; }
+    .re-chk-label { font-size: 12.5px; font-weight: 500; color: var(--text); }
+    .re-chk-sub { font-size: 11px; color: var(--text-m); margin-top: 1px; }
+    .re-field { display: flex; flex-direction: column; gap: 5px; }
+    .re-field label { font-size: 11.5px; font-weight: 600; color: var(--text-s); }
+    .re-field input { padding: 8px 10px; background: var(--input-bg); border: 1px solid var(--input-border); border-radius: 4px; font-size: 12.5px; font-family: inherit; color: var(--text); outline: none; }
+    .re-field input:focus { border-color: var(--blue); }
+    .re-hint { font-size: 11.5px; color: var(--text-m); padding: 8px 10px; background: var(--hover); border-radius: 4px; }
+    .re-generate { width: 100%; padding: 10px; background: var(--blue); color: #fff; border: none; border-radius: 4px; font-size: 13px; font-weight: 600; font-family: inherit; cursor: pointer; transition: background 0.12s; }
+    .re-generate:hover { background: var(--blue-b); }
+
+    /* ── Report Preview Overlay ── */
+    #report-preview-overlay {
+      position: fixed; inset: 0; z-index: 650; background: #f5f6f7;
+      display: flex; flex-direction: column; transform: translateY(100%);
+      transition: transform 0.22s var(--ease);
+    }
+    #report-preview-overlay.open { transform: translateY(0); }
+    .rpo-bar { display: flex; align-items: center; gap: 10px; padding: 10px 16px; background: #fff; border-bottom: 1px solid #e5e7eb; flex-shrink: 0; }
+    .rpo-bar-title { font-size: 13px; font-weight: 600; color: #111827; flex: 1; }
+    .rpo-print { padding: 7px 16px; background: #0050e6; color: #fff; border: none; border-radius: 4px; font-size: 12.5px; font-weight: 600; font-family: inherit; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+    .rpo-print i, .rpo-print svg { width: 13px; height: 13px; }
+    .rpo-close { padding: 7px 14px; background: transparent; border: 1px solid #e5e7eb; border-radius: 4px; font-size: 12.5px; font-family: inherit; cursor: pointer; color: #374151; }
+    .rpo-close:hover { background: #f3f4f6; }
+    #report-preview-content { flex: 1; overflow-y: auto; padding: 48px; font-family: 'Segoe UI', Inter, -apple-system, sans-serif; }
+    .rp-cover { min-height: 600px; display: flex; flex-direction: column; padding: 60px 0 40px; border-bottom: 2px solid #0050e6; margin-bottom: 48px; }
+    .rp-cover-logo { display: flex; align-items: center; gap: 10px; font-size: 16px; font-weight: 800; color: #0050e6; margin-bottom: auto; }
+    .rp-cover-body { padding-top: 60px; }
+    .rp-cover-client { font-size: 14px; font-weight: 600; color: #6b7280; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 12px; }
+    .rp-cover-body h1 { font-size: 36px; font-weight: 800; color: #111827; margin: 0 0 14px; line-height: 1.15; }
+    .rp-cover-range { font-size: 14px; color: #6b7280; margin-bottom: 6px; }
+    .rp-cover-sig { font-size: 13px; color: #9ca3af; margin-top: 32px; }
+    .rp-section { margin-bottom: 40px; }
+    .rp-section-head { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: #0050e6; border-bottom: 1px solid #e5e7eb; padding-bottom: 8px; margin-bottom: 16px; }
+    .rp-kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+    .rp-kpi-card { padding: 16px; background: #fff; border: 1px solid #e5e7eb; border-radius: 4px; }
+    .rp-kpi-val { font-size: 24px; font-weight: 800; color: #111827; font-variant-numeric: tabular-nums; }
+    .rp-kpi-label { font-size: 11px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; font-weight: 600; }
+    .rp-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .rp-table th { text-align: left; padding: 8px 12px; background: #f9fafb; border-bottom: 2px solid #e5e7eb; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; color: #6b7280; }
+    .rp-table td { padding: 9px 12px; border-bottom: 1px solid #f3f4f6; color: #374151; }
+    .rp-table tr:last-child td { border-bottom: none; }
+    .rp-list { padding-left: 20px; color: #374151; font-size: 13px; line-height: 1.8; }
+    .rp-footer { margin-top: 60px; padding-top: 16px; border-top: 1px solid #e5e7eb; font-size: 11px; color: #9ca3af; }
 
     /* MOBILE SEARCH TOGGLE */
     .msearch-btn { display: none; }
@@ -1035,7 +1100,7 @@
       <span class="sync-label" id="sync-label"></span>
       <button class="cmd-primary" id="btn-refresh" onclick="refreshData()"><i data-lucide="refresh-cw"></i>Refresh</button>
       <span class="cmd-div"></span>
-      <button class="cmd-btn" onclick="openReport()"><i data-lucide="file-text"></i>Report</button>
+      <button class="cmd-btn" onclick="openReportEditor()"><i data-lucide="file-text"></i>Report</button>
       <span class="cmd-div"></span>
       <div class="seg" id="range-seg">
         <button class="seg-btn" onclick="setRangeSeg(7,this)">7 days</button>
@@ -1502,6 +1567,62 @@
 
 <div id="report-view"></div>
 
+<!-- Report Editor Drawer -->
+<div id="report-editor-drawer">
+  <div class="re-head">
+    <div class="re-head-title">Report Editor</div>
+    <button class="re-head-close" onclick="closeReportEditor()"><i data-lucide="x"></i></button>
+  </div>
+  <div class="re-body">
+    <div>
+      <div class="re-section-label">Report Type</div>
+      <div class="re-type-grid">
+        <div class="re-type-card sel" data-type="full" onclick="reTypeSelect('full')">Full Report</div>
+        <div class="re-type-card" data-type="leads" onclick="reTypeSelect('leads')">Lead Summary</div>
+        <div class="re-type-card" data-type="pipeline" onclick="reTypeSelect('pipeline')">Pipeline</div>
+        <div class="re-type-card" data-type="automations" onclick="reTypeSelect('automations')">Automations</div>
+      </div>
+    </div>
+    <div>
+      <div class="re-section-label">Date Range</div>
+      <div class="re-range-row">
+        <button class="re-range-btn" onclick="reRangeSelect(7,this)">7 days</button>
+        <button class="re-range-btn active" onclick="reRangeSelect(30,this)">30 days</button>
+        <button class="re-range-btn" onclick="reRangeSelect(60,this)">60 days</button>
+        <button class="re-range-btn" onclick="reRangeSelect(90,this)">90 days</button>
+      </div>
+    </div>
+    <div>
+      <div class="re-section-label">Include Sections</div>
+      <div class="re-chk-row"><input type="checkbox" class="re-chk" data-sec="kpis" checked onchange="reSectionToggle('kpis',this.checked)"><div class="re-chk-info"><div class="re-chk-label">Key Metrics</div><div class="re-chk-sub">Leads, booked calls, pipeline, conversion rate</div></div></div>
+      <div class="re-chk-row"><input type="checkbox" class="re-chk" data-sec="insights" checked onchange="reSectionToggle('insights',this.checked)"><div class="re-chk-info"><div class="re-chk-label">Insights</div><div class="re-chk-sub">Auto-generated performance observations</div></div></div>
+      <div class="re-chk-row"><input type="checkbox" class="re-chk" data-sec="sources" checked onchange="reSectionToggle('sources',this.checked)"><div class="re-chk-info"><div class="re-chk-label">Lead Sources</div><div class="re-chk-sub">Breakdown by where leads came from</div></div></div>
+      <div class="re-chk-row"><input type="checkbox" class="re-chk" data-sec="funnel" checked onchange="reSectionToggle('funnel',this.checked)"><div class="re-chk-info"><div class="re-chk-label">Conversion Funnel</div><div class="re-chk-sub">Leads → Qualified → Booked → Won</div></div></div>
+      <div class="re-chk-row"><input type="checkbox" class="re-chk" data-sec="topleads" checked onchange="reSectionToggle('topleads',this.checked)"><div class="re-chk-info"><div class="re-chk-label">Top Leads</div><div class="re-chk-sub">Top 10 leads ranked by engagement score</div></div></div>
+      <div class="re-chk-row"><input type="checkbox" class="re-chk" data-sec="stages" checked onchange="reSectionToggle('stages',this.checked)"><div class="re-chk-info"><div class="re-chk-label">Pipeline by Stage</div><div class="re-chk-sub">Deal value grouped by pipeline stage</div></div></div>
+    </div>
+    <div>
+      <div class="re-section-label">Details</div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div class="re-field"><label>Report for</label><input type="text" id="re-report-for" placeholder="Business or client name" /></div>
+        <div class="re-field"><label>Signed by</label><input type="text" id="re-signed-by" placeholder="Your name" /></div>
+      </div>
+    </div>
+    <div id="re-hint" class="re-hint">6 sections selected · Last 30 days</div>
+    <button class="re-generate" onclick="generateReportEditor()">Generate Report</button>
+  </div>
+</div>
+
+<!-- Report Preview Overlay -->
+<div id="report-preview-overlay">
+  <div class="rpo-bar">
+    <span class="rpo-bar-title">Report Preview</span>
+    <button class="rpo-print" onclick="printReportEditor()"><i data-lucide="printer"></i>Print / Download PDF</button>
+    <button class="rpo-close" onclick="closeReportPreview()">Close</button>
+  </div>
+  <div id="report-preview-content"></div>
+</div>
+
 <!-- MEMBER DRAWER -->
 <div class="inv-overlay" id="mem-overlay" onclick="if(event.target===this)closeMember()">
   <div class="inv-modal">
@@ -1831,7 +1952,7 @@ const PAL_ACTIONS = [
   { label: 'Toggle dark mode',    icon: 'moon',        run: () => toggleTheme() },
   { label: 'Refresh data',        icon: 'refresh-cw',  run: () => refreshData() },
   { label: 'Export leads CSV',    icon: 'download',    run: () => exportLeadsCsv() },
-  { label: 'Download report',     icon: 'file-text',   run: () => openReport() },
+  { label: 'Generate report',      icon: 'file-text',   run: () => openReportEditor() },
   { label: 'Collapse navigation', icon: 'menu',        run: () => toggleNavRail() },
   { label: 'Open Workspace',      icon: 'layout-grid', run: () => window.location.href = 'portal.html' },
 ];

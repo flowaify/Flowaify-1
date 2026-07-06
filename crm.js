@@ -758,6 +758,195 @@ function exportLeadsCsv() {
 window.exportLeadsCsv = exportLeadsCsv;
 
 /* ── Printable report ───────────────────────────────────────────────────────── */
+/* ── Report Editor ───────────────────────────────────────────────────────────── */
+var __reDays     = 30;
+var __reSections = { kpis: true, sources: true, funnel: true, insights: true, topleads: true, stages: true };
+var __reType     = 'full';
+
+function openReportEditor() {
+  var drawer = document.getElementById('report-editor-drawer');
+  if (!drawer) return;
+  try {
+    var sub = window.__userSub || 'anon';
+    var s = JSON.parse(localStorage.getItem('flw_settings_' + sub) || '{}');
+    var rf = document.getElementById('re-report-for');
+    var rs = document.getElementById('re-signed-by');
+    if (rf && !rf.value) rf.value = s.businessName || '';
+    if (rs && !rs.value) rs.value = s.ownerName || s.name || '';
+  } catch(e) {}
+  __reDays = window.__rangeDays;
+  updateReportHint();
+  drawer.classList.add('open');
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+function closeReportEditor() {
+  var drawer = document.getElementById('report-editor-drawer');
+  if (drawer) drawer.classList.remove('open');
+}
+
+function reTypeSelect(type) {
+  __reType = type;
+  document.querySelectorAll('.re-type-card').forEach(function(c) {
+    c.classList.toggle('sel', c.dataset.type === type);
+  });
+  var defaults = {
+    full:        { kpis: true,  sources: true,  funnel: true,  insights: true,  topleads: true,  stages: true  },
+    leads:       { kpis: true,  sources: true,  funnel: false, insights: true,  topleads: true,  stages: false },
+    pipeline:    { kpis: false, sources: false, funnel: true,  insights: false, topleads: false, stages: true  },
+    automations: { kpis: true,  sources: false, funnel: false, insights: true,  topleads: false, stages: false },
+  };
+  __reSections = Object.assign({}, defaults[type] || defaults.full);
+  document.querySelectorAll('.re-chk').forEach(function(cb) {
+    cb.checked = !!__reSections[cb.dataset.sec];
+  });
+  updateReportHint();
+}
+
+function reRangeSelect(days, el) {
+  __reDays = days;
+  document.querySelectorAll('.re-range-btn').forEach(function(b) { b.classList.remove('active'); });
+  if (el) el.classList.add('active');
+  updateReportHint();
+}
+
+function reSectionToggle(sec, checked) {
+  __reSections[sec] = checked;
+  updateReportHint();
+}
+
+function updateReportHint() {
+  var hint = document.getElementById('re-hint');
+  if (!hint) return;
+  var count = Object.values(__reSections).filter(Boolean).length;
+  hint.textContent = count + ' section' + (count !== 1 ? 's' : '') + ' selected · Last ' + __reDays + ' days';
+}
+
+function generateReportEditor() {
+  var data = window.__crmData;
+  if (!data) { alert('Dashboard data is still loading. Please wait a moment.'); return; }
+  var rf = document.getElementById('re-report-for');
+  var rs = document.getElementById('re-signed-by');
+  var reportFor = rf ? rf.value.trim() : '';
+  var signedBy  = rs ? rs.value.trim() : '';
+  var days = __reDays;
+  var sections = __reSections;
+  var ranged = filterByRange(data.contacts, days);
+  var overview = data.overview || {};
+  var dateStr = new Date().toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
+  var typeLabels = { full: 'Full Performance Report', leads: 'Lead Summary', pipeline: 'Pipeline Report', automations: 'Automation Report' };
+  var reportTitle = typeLabels[__reType] || 'Performance Report';
+  var html = '';
+
+  // Cover
+  html += '<div class="rp-cover">';
+  html += '<div class="rp-cover-logo"><svg viewBox="0 0 24 24" fill="none" stroke="#0050e6" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width:32px;height:32px;"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>Flowaify</div>';
+  html += '<div class="rp-cover-body">';
+  if (reportFor) html += '<div class="rp-cover-client">' + escDash(reportFor) + '</div>';
+  html += '<h1>' + reportTitle + '</h1>';
+  html += '<div class="rp-cover-range">Last ' + days + ' days &nbsp;·&nbsp; ' + dateStr + '</div>';
+  if (signedBy) html += '<div class="rp-cover-sig">Prepared by ' + escDash(signedBy) + ' via Flowaify</div>';
+  html += '</div></div>';
+
+  // Key Metrics
+  if (sections.kpis) {
+    var conv = ranged.length ? Math.round((Math.min(overview.bookedCalls || 0, ranged.length) / ranged.length) * 100) : 0;
+    html += '<div class="rp-section"><div class="rp-section-head">Key Metrics</div>';
+    html += '<div class="rp-kpi-grid">';
+    html += '<div class="rp-kpi-card"><div class="rp-kpi-val">' + ranged.length + '</div><div class="rp-kpi-label">New Leads</div></div>';
+    html += '<div class="rp-kpi-card"><div class="rp-kpi-val">' + (overview.bookedCalls || 0) + '</div><div class="rp-kpi-label">Booked Calls</div></div>';
+    html += '<div class="rp-kpi-card"><div class="rp-kpi-val">' + fmtMoney(overview.pipelineValue) + '</div><div class="rp-kpi-label">Pipeline Value</div></div>';
+    html += '<div class="rp-kpi-card"><div class="rp-kpi-val">' + conv + '%</div><div class="rp-kpi-label">Conversion Rate</div></div>';
+    html += '</div></div>';
+  }
+
+  // Insights
+  if (sections.insights) {
+    var ins = buildInsights(data, ranged, days);
+    if (ins.length) {
+      html += '<div class="rp-section"><div class="rp-section-head">Insights</div>';
+      html += '<ul class="rp-list">' + ins.map(function(i) { return '<li>' + i.text + '</li>'; }).join('') + '</ul></div>';
+    }
+  }
+
+  // Lead Sources
+  if (sections.sources) {
+    var src = groupCount(ranged, function(c) { return c.source; });
+    var srcRows = Object.keys(src).sort(function(a, b) { return src[b] - src[a]; })
+      .map(function(k) { return '<tr><td>' + escDash(k) + '</td><td>' + src[k] + '</td></tr>'; }).join('');
+    if (srcRows) {
+      html += '<div class="rp-section"><div class="rp-section-head">Lead Sources</div>';
+      html += '<table class="rp-table"><tr><th>Source</th><th>Leads</th></tr>' + srcRows + '</table></div>';
+    }
+  }
+
+  // Funnel
+  if (sections.funnel) {
+    var qual = ranged.filter(function(c) { return c.status && String(c.status).trim(); }).length;
+    var won = (data.deals || []).filter(function(d) { return String(d.stage || '').toUpperCase().indexOf('WON') !== -1; }).length;
+    html += '<div class="rp-section"><div class="rp-section-head">Conversion Funnel</div>';
+    html += '<table class="rp-table"><tr><th>Stage</th><th>Count</th></tr>';
+    html += '<tr><td>Total Leads</td><td>' + ranged.length + '</td></tr>';
+    html += '<tr><td>Qualified</td><td>' + qual + '</td></tr>';
+    html += '<tr><td>Booked</td><td>' + (overview.bookedCalls || 0) + '</td></tr>';
+    html += '<tr><td>Won</td><td>' + won + '</td></tr></table></div>';
+  }
+
+  // Top Leads
+  if (sections.topleads) {
+    var top = (data.contacts || []).slice().sort(function(a, b) {
+      var r = scoreRank(b.status) - scoreRank(a.status);
+      if (r !== 0) return r;
+      return (b.createdAt ? new Date(b.createdAt).getTime() : 0) - (a.createdAt ? new Date(a.createdAt).getTime() : 0);
+    }).slice(0, 10);
+    if (top.length) {
+      html += '<div class="rp-section"><div class="rp-section-head">Top Leads</div>';
+      html += '<table class="rp-table"><tr><th>Lead</th><th>Source</th><th>Status</th><th>Created</th></tr>';
+      top.forEach(function(c) {
+        html += '<tr><td>' + escDash(c.name) + '</td><td>' + escDash(c.source) + '</td><td>' + escDash(c.status || '—') + '</td><td>' + (c.createdAt ? new Date(c.createdAt).toLocaleDateString() : '—') + '</td></tr>';
+      });
+      html += '</table></div>';
+    }
+  }
+
+  // Pipeline by Stage
+  if (sections.stages) {
+    var stgs = {};
+    (data.deals || []).forEach(function(d) { var s = d.stage || 'Unknown'; stgs[s] = (stgs[s] || 0) + (d.amount || 0); });
+    var stgRows = Object.keys(stgs).sort(function(a, b) { return stgs[b] - stgs[a]; })
+      .map(function(k) { return '<tr><td>' + escDash(k) + '</td><td>' + fmtMoney(stgs[k]) + '</td></tr>'; }).join('');
+    if (stgRows) {
+      html += '<div class="rp-section"><div class="rp-section-head">Pipeline by Stage</div>';
+      html += '<table class="rp-table"><tr><th>Stage</th><th>Value</th></tr>' + stgRows + '</table></div>';
+    }
+  }
+
+  html += '<div class="rp-footer">Flowaify &nbsp;·&nbsp; Confidential &nbsp;·&nbsp; ' + dateStr + (signedBy ? ' &nbsp;·&nbsp; ' + escDash(signedBy) : '') + '</div>';
+
+  var content = document.getElementById('report-preview-content');
+  if (content) content.innerHTML = html;
+  closeReportEditor();
+  var overlay = document.getElementById('report-preview-overlay');
+  if (overlay) overlay.classList.add('open');
+}
+
+function closeReportPreview() {
+  var overlay = document.getElementById('report-preview-overlay');
+  if (overlay) overlay.classList.remove('open');
+}
+
+function printReportEditor() { window.print(); }
+
+window.openReportEditor  = openReportEditor;
+window.closeReportEditor = closeReportEditor;
+window.reTypeSelect      = reTypeSelect;
+window.reRangeSelect     = reRangeSelect;
+window.reSectionToggle   = reSectionToggle;
+window.updateReportHint  = updateReportHint;
+window.generateReportEditor = generateReportEditor;
+window.closeReportPreview   = closeReportPreview;
+window.printReportEditor    = printReportEditor;
+
 function openReport() {
   const data = window.__crmData;
   const el = document.getElementById('report-view');
