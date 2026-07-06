@@ -8,6 +8,8 @@ window.__leadFilters    = { q: '', status: '', source: '' };
 window.__leadSort       = { key: 'createdAt', dir: -1 };
 window.__leadsShown     = 25;
 window.__leadsFiltered  = [];
+window.__lastKpiValues  = {};
+window.__kpiFirstRender = true;
 
 /* ── Data loading ───────────────────────────────────────────────────────────── */
 async function loadDashboardData(token) {
@@ -162,6 +164,26 @@ function setText(id, val) {
     else { el.textContent = target; el._raf = null; }
   }
   el._raf = requestAnimationFrame(frame);
+}
+
+function setKpi(id, val) {
+  const target = val != null ? String(val) : '—';
+  const m = target.match(/^([^0-9-]*)(-?[\d,]+(?:\.\d+)?)(.*)$/);
+  const num = m ? parseFloat(m[2].replace(/,/g, '')) : null;
+  const prev = window.__lastKpiValues[id];
+  window.__lastKpiValues[id] = num;
+  setText(id, val);
+  if (!window.__kpiFirstRender && num !== null && typeof prev === 'number' && num !== prev) {
+    const el = document.getElementById(id);
+    const card = el && el.closest('.stat-card');
+    if (card) {
+      card.classList.remove('kpi-pulsed');
+      requestAnimationFrame(function() {
+        card.classList.add('kpi-pulsed');
+        setTimeout(function() { card.classList.remove('kpi-pulsed'); }, 2400);
+      });
+    }
+  }
 }
 
 function sparkline(id, series, color) {
@@ -934,6 +956,8 @@ function rerender() {
     const ins = buildInsights(data, ranged, days);
     maybeShowNudge(ins.length ? ins[0].text + ' <strong>Ask me about it.</strong>' : null);
   }
+
+  window.__kpiFirstRender = false;
 }
 window.rerender = rerender;
 
@@ -953,12 +977,12 @@ function renderOverviewStats(data, ranged, days) {
   const overview = data.overview || {};
   const contacts = data.contacts || [];
 
-  setText('val-new-leads',     overview.newLeadsToday);
-  setText('val-response-time', overview.avgResponseTimeSecs != null ? overview.avgResponseTimeSecs + 's' : '—');
-  setText('val-ai-replies',    overview.aiRepliesSent);
-  setText('val-follow-ups',    overview.activeSequences);
-  setText('val-pipeline',      fmtMoney(overview.pipelineValue));
-  setText('val-booked-calls',  overview.bookedCalls);
+  setKpi('val-new-leads',     overview.newLeadsToday);
+  setKpi('val-response-time', overview.avgResponseTimeSecs != null ? overview.avgResponseTimeSecs + 's' : '—');
+  setKpi('val-ai-replies',    overview.aiRepliesSent);
+  setKpi('val-follow-ups',    overview.activeSequences);
+  setKpi('val-pipeline',      fmtMoney(overview.pipelineValue));
+  setKpi('val-booked-calls',  overview.bookedCalls);
 
   // New-leads delta: today vs yesterday
   const dayStart = new Date(); dayStart.setHours(0, 0, 0, 0);
