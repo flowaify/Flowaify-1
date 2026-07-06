@@ -106,6 +106,17 @@ export default {
         return handleInvoiceDelete(request, env, corsHeaders);
       }
 
+      if (url.pathname === '/inbox/status')        return handleInboxStatus(request, env, corsHeaders);
+      if (url.pathname === '/inbox/auth')           return handleInboxAuth(request, env, corsHeaders);
+      if (url.pathname === '/inbox/callback')       return handleInboxCallback(url, env);
+      if (url.pathname === '/inbox/folders')        return handleInboxFolders(request, env, corsHeaders);
+      if (url.pathname === '/inbox/threads')        return handleInboxThreads(request, env, corsHeaders);
+      if (url.pathname === '/inbox/send' && request.method === 'POST') return handleInboxSend(request, env, corsHeaders);
+      if (url.pathname === '/inbox/search')         return handleInboxSearch(request, env, corsHeaders);
+      if (url.pathname === '/inbox/unread-count')   return handleInboxUnreadCount(request, env, corsHeaders);
+      if (url.pathname === '/inbox/disconnect' && request.method === 'POST') return handleInboxDisconnect(request, env, corsHeaders);
+      if (url.pathname.startsWith('/inbox/thread/')) return handleInboxThread(request, env, corsHeaders, url.pathname.slice('/inbox/thread/'.length));
+
       return json({ error: 'Not found' }, 404, corsHeaders);
 
     } catch (err) {
@@ -1158,6 +1169,339 @@ async function handleInvoiceDelete(request, env, corsHeaders) {
   let list = raw ? JSON.parse(raw) : [];
   list = list.filter(x => x.id !== safeId);
   await env.TEAM_KV.put(auth.kvKey, JSON.stringify(list));
+  return json({ ok: true }, 200, corsHeaders);
+}
+
+// ─── /inbox/* ────────────────────────────────────────────────────────────────
+
+async function resolveInboxAuth(request, env, corsHeaders) {
+  const authHeader = request.headers.get('Authorization') || '';
+  if (!authHeader.startsWith('Bearer ')) return { err: json({ error: 'Missing token' }, 401, corsHeaders) };
+  const token = authHeader.slice(7).trim();
+  let payload;
+  try { payload = await verifyJWT(token, AUTH0_DOMAIN, AUTH0_CLIENT_ID, AUTH0_TENANT); }
+  catch (err) { return { err: json({ error: err.message }, 401, corsHeaders) }; }
+  let clientId = payload['https://flowaify.app/clientId'];
+  if (!clientId && payload.sub) {
+    const subKey = 'CLIENT_' + payload.sub.replace(/[^A-Z0-9]/gi, '_').toUpperCase();
+    clientId = env[subKey];
+  }
+  if (!clientId) return { err: json({ error: 'No clientId in token' }, 403, corsHeaders) };
+  return { sub: payload.sub || '', clientId };
+}
+
+async function getGmailAccessToken(sub, env) {
+  if (!env.TEAM_KV) return null;
+  try {
+    const cached = await env.TEAM_KV.get(`inbox:${sub}:gmail_access`);
+    if (cached) {
+      const { token, expiresAt } = JSON.parse(cached);
+      if (Date.now() < expiresAt - 60000) return token;
+    }
+    const refresh = await env.TEAM_KV.get(`inbox:${sub}:gmail_refresh`);
+    if (!refresh || !env.GOOGLE_CLIENT_ID || !env.GOOGLE_CLIENT_SECRET) return null;
+    const resp = await fetch('https://oauth2.googleapis.com/token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        client_id: env.GOOGLE_CLIENT_ID,
+        client_secret: env.GOOGLE_CLIENT_SECRET,
+        refresh_token: refresh,
+        grant_type: 'refresh_token',
+      }).toString(),
+    });
+    const data = await resp.json();
+    if (!data.access_token) return null;
+    const expiresAt = Date.now() + ((data.expires_in || 3600) * 1000);
+    await env.TEAM_KV.put(`inbox:${sub}:gmail_access`,
+      JSON.stringify({ token: data.access_token, expiresAt }), { expirationTtl: 3600 });
+    return data.access_token;
+  } catch(e) { return null; }
+}
+
+async function gmailFetch(method, path, accessToken, body) {
+  const opts = { method, headers: { Authorization: 'Bearer ' + accessToken } };
+  if (body) { opts.headers['Content-Type'] = 'application/json'; opts.body = JSON.stringify(body); }
+  return fetch('https://gmail.googleapis.com/gmail/v1/users/me' + path, opts);
+}
+
+function extractGmailBody(payload) {
+  if (!payload) return '';
+  const decode = (b64) => {
+    try {
+      const std = b64.replace(/-/g, '+').replace(/_/g, '/');
+      const bin = atob(std);
+      return new TextDecoder().decode(Uint8Array.from(bin, c => c.charCodeAt(0)));
+    } catch(e) { return ''; }
+  };
+  if (payload.body && payload.body.data) return decode(payload.body.data);
+  if (payload.parts) {
+    for (const p of payload.parts) {
+      if (p.mimeType === 'text/plain' && p.body && p.body.data) return decode(p.body.data);
+    }
+    for (const p of payload.parts) {
+      if (p.mimeType === 'multipart/alternative' || p.mimeType === 'multipart/mixed') {
+        const sub = extractGmailBody(p);
+        if (sub) return sub;
+      }
+    }
+    for (const p of payload.parts) {
+      if (p.mimeType === 'text/html' && p.body && p.body.data) return decode(p.body.data);
+    }
+  }
+  return '';
+}
+
+async function handleInboxStatus(request, env, corsHeaders) {
+  const auth = await resolveInboxAuth(request, env, corsHeaders);
+  if (auth.err) return auth.err;
+  if (!env.TEAM_KV) return json({ connected: false }, 200, corsHeaders);
+  const provider = await env.TEAM_KV.get(`inbox:${auth.sub}:provider`);
+  if (!provider) return json({ connected: false }, 200, corsHeaders);
+  const hasToken = provider === 'gmail'
+    ? !!(await env.TEAM_KV.get(`inbox:${auth.sub}:gmail_refresh`))
+    : false;
+  return json({ connected: hasToken, provider: hasToken ? provider : null }, 200, corsHeaders);
+}
+
+async function handleInboxAuth(request, env, corsHeaders) {
+  const auth = await resolveInboxAuth(request, env, corsHeaders);
+  if (auth.err) return auth.err;
+  if (!env.GOOGLE_CLIENT_ID) {
+    return json({ error: 'Gmail not configured — add GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET as Worker secrets.' }, 503, corsHeaders);
+  }
+  if (!env.TEAM_KV) return json({ error: 'KV not enabled' }, 503, corsHeaders);
+  const stateToken = crypto.randomUUID().replace(/-/g, '');
+  await env.TEAM_KV.put(`inbox:state:${stateToken}`, JSON.stringify({ sub: auth.sub }), { expirationTtl: 600 });
+  const redirectUri = 'https://flowaify-crm-proxy.black-glitter-c4cd.workers.dev/inbox/callback';
+  const oauthUrl = 'https://accounts.google.com/o/oauth2/v2/auth?' + new URLSearchParams({
+    client_id:     env.GOOGLE_CLIENT_ID,
+    redirect_uri:  redirectUri,
+    response_type: 'code',
+    scope:         'https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/gmail.send',
+    access_type:   'offline',
+    prompt:        'consent',
+    state:         stateToken,
+  }).toString();
+  return json({ url: oauthUrl }, 200, corsHeaders);
+}
+
+async function handleInboxCallback(url, env) {
+  const dashUrl = 'https://flowaify.app/app.html';
+  const code  = url.searchParams.get('code');
+  const state = url.searchParams.get('state');
+  if (!code || !state) return Response.redirect(dashUrl + '?inbox=error', 302);
+  if (!env.TEAM_KV)    return Response.redirect(dashUrl + '?inbox=error', 302);
+  const stateRaw = await env.TEAM_KV.get(`inbox:state:${state}`);
+  if (!stateRaw)  return Response.redirect(dashUrl + '?inbox=error&reason=state_expired', 302);
+  const { sub } = JSON.parse(stateRaw);
+  await env.TEAM_KV.delete(`inbox:state:${state}`);
+  if (!env.GOOGLE_CLIENT_ID || !env.GOOGLE_CLIENT_SECRET) return Response.redirect(dashUrl + '?inbox=error&reason=not_configured', 302);
+  try {
+    const redirectUri = 'https://flowaify-crm-proxy.black-glitter-c4cd.workers.dev/inbox/callback';
+    const resp = await fetch('https://oauth2.googleapis.com/token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        code,
+        client_id:     env.GOOGLE_CLIENT_ID,
+        client_secret: env.GOOGLE_CLIENT_SECRET,
+        redirect_uri:  redirectUri,
+        grant_type:    'authorization_code',
+      }).toString(),
+    });
+    const data = await resp.json();
+    if (!data.refresh_token) return Response.redirect(dashUrl + '?inbox=error&reason=no_refresh', 302);
+    await env.TEAM_KV.put(`inbox:${sub}:gmail_refresh`, data.refresh_token);
+    await env.TEAM_KV.put(`inbox:${sub}:provider`, 'gmail');
+    if (data.access_token) {
+      const expiresAt = Date.now() + ((data.expires_in || 3600) * 1000);
+      await env.TEAM_KV.put(`inbox:${sub}:gmail_access`,
+        JSON.stringify({ token: data.access_token, expiresAt }), { expirationTtl: 3600 });
+    }
+  } catch(e) { return Response.redirect(dashUrl + '?inbox=error', 302); }
+  return Response.redirect(dashUrl + '?inbox=connected', 302);
+}
+
+async function handleInboxFolders(request, env, corsHeaders) {
+  const auth = await resolveInboxAuth(request, env, corsHeaders);
+  if (auth.err) return auth.err;
+  if (!env.TEAM_KV) return json({ folders: [] }, 200, corsHeaders);
+  const provider = await env.TEAM_KV.get(`inbox:${auth.sub}:provider`);
+  if (!provider) return json({ error: 'Not connected' }, 403, corsHeaders);
+  if (provider !== 'gmail') return json({ folders: [] }, 200, corsHeaders);
+  const token = await getGmailAccessToken(auth.sub, env);
+  if (!token) return json({ error: 'Token expired — reconnect your email' }, 401, corsHeaders);
+  const resp = await gmailFetch('GET', '/labels', token);
+  const data = await resp.json();
+  const keep = new Set(['INBOX','SENT','DRAFT','STARRED','SPAM','TRASH']);
+  const folders = (data.labels || [])
+    .filter(l => keep.has(l.id) || l.type === 'user')
+    .map(l => ({ id: l.id, name: l.name }));
+  return json({ folders }, 200, corsHeaders);
+}
+
+async function handleInboxThreads(request, env, corsHeaders) {
+  const auth = await resolveInboxAuth(request, env, corsHeaders);
+  if (auth.err) return auth.err;
+  if (!env.TEAM_KV) return json({ threads: [] }, 200, corsHeaders);
+  const provider = await env.TEAM_KV.get(`inbox:${auth.sub}:provider`);
+  if (!provider) return json({ error: 'Not connected' }, 403, corsHeaders);
+  if (provider !== 'gmail') return json({ threads: [], nextPageToken: null }, 200, corsHeaders);
+  const token = await getGmailAccessToken(auth.sub, env);
+  if (!token) return json({ error: 'Token expired' }, 401, corsHeaders);
+  const url = new URL(request.url);
+  const folder    = url.searchParams.get('folder') || 'INBOX';
+  const pageToken = url.searchParams.get('pageToken') || '';
+  const params = new URLSearchParams({ labelIds: folder, maxResults: '25' });
+  if (pageToken) params.set('pageToken', pageToken);
+  const resp = await gmailFetch('GET', '/threads?' + params.toString(), token);
+  const data = await resp.json();
+  if (!data.threads) return json({ threads: [], nextPageToken: null }, 200, corsHeaders);
+  const threads = await Promise.all((data.threads || []).slice(0, 25).map(async t => {
+    try {
+      const tr = await gmailFetch('GET', `/threads/${t.id}?format=metadata&metadataHeaders=From&metadataHeaders=Subject&metadataHeaders=Date`, token);
+      const td = await tr.json();
+      const msgs  = td.messages || [];
+      const first = msgs[0] || {};
+      const last  = msgs.slice(-1)[0] || first;
+      const getH  = (hs, k) => ((hs || []).find(h => h.name === k) || {}).value || '';
+      const fHdrs = (first.payload || {}).headers || [];
+      const lHdrs = (last.payload  || {}).headers || [];
+      return {
+        id:           t.id,
+        subject:      getH(fHdrs, 'Subject') || '(no subject)',
+        from:         getH(fHdrs, 'From'),
+        date:         getH(lHdrs, 'Date'),
+        snippet:      (last.snippet || ''),
+        unread:       msgs.some(m => (m.labelIds || []).includes('UNREAD')),
+        messageCount: msgs.length,
+      };
+    } catch(e) { return { id: t.id, subject: '(error loading)', from: '', date: '', snippet: '', unread: false, messageCount: 1 }; }
+  }));
+  return json({ threads, nextPageToken: data.nextPageToken || null }, 200, corsHeaders);
+}
+
+async function handleInboxThread(request, env, corsHeaders, threadId) {
+  const auth = await resolveInboxAuth(request, env, corsHeaders);
+  if (auth.err) return auth.err;
+  if (!threadId) return json({ error: 'Missing thread id' }, 400, corsHeaders);
+  if (!env.TEAM_KV) return json({ messages: [] }, 200, corsHeaders);
+  const provider = await env.TEAM_KV.get(`inbox:${auth.sub}:provider`);
+  if (!provider) return json({ error: 'Not connected' }, 403, corsHeaders);
+  if (provider !== 'gmail') return json({ messages: [] }, 200, corsHeaders);
+  const token = await getGmailAccessToken(auth.sub, env);
+  if (!token) return json({ error: 'Token expired' }, 401, corsHeaders);
+  const resp = await gmailFetch('GET', `/threads/${threadId}?format=full`, token);
+  const data = await resp.json();
+  const messages = (data.messages || []).map(m => {
+    const getH = (k) => ((m.payload || {}).headers || []).find(h => h.name === k)?.value || '';
+    return {
+      id:      m.id,
+      from:    getH('From'),
+      to:      getH('To'),
+      subject: getH('Subject'),
+      date:    getH('Date'),
+      body:    extractGmailBody(m.payload),
+      unread:  (m.labelIds || []).includes('UNREAD'),
+    };
+  });
+  // Mark thread read
+  if (messages.some(m => m.unread)) {
+    gmailFetch('POST', `/threads/${threadId}/modify`, token, { removeLabelIds: ['UNREAD'] }).catch(() => {});
+  }
+  return json({ messages }, 200, corsHeaders);
+}
+
+async function handleInboxSend(request, env, corsHeaders) {
+  const auth = await resolveInboxAuth(request, env, corsHeaders);
+  if (auth.err) return auth.err;
+  if (!env.TEAM_KV) return json({ error: 'KV not enabled' }, 503, corsHeaders);
+  const provider = await env.TEAM_KV.get(`inbox:${auth.sub}:provider`);
+  if (!provider) return json({ error: 'Not connected' }, 403, corsHeaders);
+  let body;
+  try { body = await request.json(); } catch(e) { return json({ error: 'Bad JSON' }, 400, corsHeaders); }
+  const { to, subject, content, inReplyTo, threadId } = body;
+  if (!to || !subject || !content) return json({ error: 'Missing to/subject/content' }, 400, corsHeaders);
+  if (provider !== 'gmail') return json({ error: 'Provider not supported yet' }, 503, corsHeaders);
+  const token = await getGmailAccessToken(auth.sub, env);
+  if (!token) return json({ error: 'Token expired' }, 401, corsHeaders);
+  let headers = `To: ${to}\r\nSubject: ${subject}\r\nContent-Type: text/plain; charset=UTF-8\r\n`;
+  if (inReplyTo) headers += `In-Reply-To: ${inReplyTo}\r\nReferences: ${inReplyTo}\r\n`;
+  const rawEmail = headers + '\r\n' + content;
+  const bytes    = new TextEncoder().encode(rawEmail);
+  let binaryStr  = '';
+  bytes.forEach(b => { binaryStr += String.fromCharCode(b); });
+  const encoded  = btoa(binaryStr).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  const sendBody = { raw: encoded };
+  if (threadId) sendBody.threadId = threadId;
+  const resp = await gmailFetch('POST', '/messages/send', token, sendBody);
+  const result = await resp.json();
+  if (result.id) return json({ ok: true, messageId: result.id }, 200, corsHeaders);
+  return json({ error: 'Send failed', detail: result.error?.message || '' }, 500, corsHeaders);
+}
+
+async function handleInboxSearch(request, env, corsHeaders) {
+  const auth = await resolveInboxAuth(request, env, corsHeaders);
+  if (auth.err) return auth.err;
+  if (!env.TEAM_KV) return json({ threads: [] }, 200, corsHeaders);
+  const provider = await env.TEAM_KV.get(`inbox:${auth.sub}:provider`);
+  if (!provider) return json({ error: 'Not connected' }, 403, corsHeaders);
+  if (provider !== 'gmail') return json({ threads: [] }, 200, corsHeaders);
+  const token = await getGmailAccessToken(auth.sub, env);
+  if (!token) return json({ error: 'Token expired' }, 401, corsHeaders);
+  const q = new URL(request.url).searchParams.get('q') || '';
+  if (!q.trim()) return json({ threads: [] }, 200, corsHeaders);
+  const resp = await gmailFetch('GET', `/threads?${new URLSearchParams({ q, maxResults: '15' }).toString()}`, token);
+  const data = await resp.json();
+  if (!data.threads) return json({ threads: [] }, 200, corsHeaders);
+  const threads = await Promise.all((data.threads || []).slice(0, 15).map(async t => {
+    try {
+      const tr = await gmailFetch('GET', `/threads/${t.id}?format=metadata&metadataHeaders=From&metadataHeaders=Subject&metadataHeaders=Date`, token);
+      const td = await tr.json();
+      const msgs = td.messages || [];
+      const first = msgs[0] || {};
+      const last  = msgs.slice(-1)[0] || first;
+      const getH  = (hs, k) => ((hs || []).find(h => h.name === k) || {}).value || '';
+      return {
+        id:           t.id,
+        subject:      getH((first.payload || {}).headers || [], 'Subject') || '(no subject)',
+        from:         getH((first.payload || {}).headers || [], 'From'),
+        date:         getH((last.payload  || {}).headers || [], 'Date'),
+        snippet:      last.snippet || '',
+        unread:       msgs.some(m => (m.labelIds || []).includes('UNREAD')),
+        messageCount: msgs.length,
+      };
+    } catch(e) { return { id: t.id, subject: '(error)', from: '', date: '', snippet: '', unread: false, messageCount: 1 }; }
+  }));
+  return json({ threads }, 200, corsHeaders);
+}
+
+async function handleInboxUnreadCount(request, env, corsHeaders) {
+  const auth = await resolveInboxAuth(request, env, corsHeaders);
+  if (auth.err) return auth.err;
+  if (!env.TEAM_KV) return json({ count: 0 }, 200, corsHeaders);
+  const provider = await env.TEAM_KV.get(`inbox:${auth.sub}:provider`);
+  if (!provider) return json({ count: 0 }, 200, corsHeaders);
+  if (provider !== 'gmail') return json({ count: 0 }, 200, corsHeaders);
+  const token = await getGmailAccessToken(auth.sub, env);
+  if (!token) return json({ count: 0 }, 200, corsHeaders);
+  try {
+    const resp = await gmailFetch('GET', '/labels/INBOX', token);
+    const data = await resp.json();
+    return json({ count: data.messagesUnread || 0 }, 200, corsHeaders);
+  } catch(e) { return json({ count: 0 }, 200, corsHeaders); }
+}
+
+async function handleInboxDisconnect(request, env, corsHeaders) {
+  const auth = await resolveInboxAuth(request, env, corsHeaders);
+  if (auth.err) return auth.err;
+  if (!env.TEAM_KV) return json({ ok: true }, 200, corsHeaders);
+  await Promise.all([
+    env.TEAM_KV.delete(`inbox:${auth.sub}:provider`),
+    env.TEAM_KV.delete(`inbox:${auth.sub}:gmail_refresh`),
+    env.TEAM_KV.delete(`inbox:${auth.sub}:gmail_access`),
+  ]);
   return json({ ok: true }, 200, corsHeaders);
 }
 

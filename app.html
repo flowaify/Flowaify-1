@@ -982,6 +982,88 @@
       #inv-print-view { position: static; transform: none !important; box-shadow: none; background: #fff; }
       .ipv-bar { display: none !important; }
     }
+    /* Inbox page */
+    #page-inbox { overflow: hidden; padding: 0; }
+    .inbox-connect-view { flex: 1; display: flex; align-items: center; justify-content: center; padding: 40px 20px; }
+    .inbox-connect-card { background: var(--bg-card); border: 1px solid var(--card-border); border-radius: 6px; padding: 36px 44px; text-align: center; max-width: 380px; width: 100%; }
+    .inbox-connect-icon { width: 48px; height: 48px; background: var(--blue-dim); border-radius: 10px; display: flex; align-items: center; justify-content: center; margin: 0 auto 18px; }
+    .inbox-connect-icon i { width: 22px; height: 22px; color: var(--blue); }
+    .inbox-connect-title { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+    .inbox-connect-sub { font-size: 12.5px; color: var(--text-m); line-height: 1.65; margin-bottom: 22px; }
+    .inbox-connect-btns { display: flex; flex-direction: column; gap: 9px; }
+    .inbox-connect-gmail { display: flex; align-items: center; justify-content: center; gap: 9px; padding: 10px 20px; background: var(--blue); color: #fff; border: none; border-radius: 4px; font-size: 13px; font-weight: 600; font-family: inherit; cursor: pointer; transition: background 0.12s; }
+    .inbox-connect-gmail:hover { background: var(--blue-b); }
+    .inbox-connect-gmail:disabled { opacity: 0.6; cursor: wait; }
+    .inbox-connect-outlook { display: flex; align-items: center; justify-content: center; gap: 9px; padding: 10px 20px; background: transparent; color: var(--text-s); border: 1px solid var(--input-border); border-radius: 4px; font-size: 13px; font-weight: 500; font-family: inherit; cursor: pointer; transition: background 0.12s; }
+    .inbox-connect-outlook:hover { background: var(--hover); }
+    #inbox-main-view { flex: 1; min-height: 0; display: flex; flex-direction: column; padding: 14px 20px; }
+    .inbox-panes { flex: 1; min-height: 0; display: flex; background: var(--bg-card); border: 1px solid var(--card-border); border-radius: 4px; overflow: hidden; }
+    .inbox-folders { width: 184px; flex-shrink: 0; border-right: 1px solid var(--border); display: flex; flex-direction: column; overflow-y: auto; }
+    .inbox-folders-head { padding: 10px 12px 8px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .inbox-folders-head-title { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-m); }
+    .inbox-folder-item { display: flex; align-items: center; gap: 9px; padding: 8px 12px; font-size: 12.5px; color: var(--text-s); cursor: pointer; transition: background 0.12s; }
+    .inbox-folder-item:hover { background: var(--hover); }
+    .inbox-folder-item.active { background: var(--blue-dim); color: var(--blue); font-weight: 600; }
+    .inbox-folder-item i { width: 13px; height: 13px; flex-shrink: 0; }
+    .inbox-folder-sep { height: 1px; background: var(--border); margin: 5px 8px; }
+    .inbox-folder-disconnect { display: flex; align-items: center; gap: 8px; padding: 8px 12px; font-size: 11.5px; color: var(--text-m); cursor: pointer; margin-top: auto; border-top: 1px solid var(--border); transition: color 0.12s; }
+    .inbox-folder-disconnect:hover { color: var(--red); }
+    .inbox-folder-disconnect i { width: 12px; height: 12px; }
+    .inbox-threads { width: 300px; flex-shrink: 0; border-right: 1px solid var(--border); display: flex; flex-direction: column; }
+    .inbox-threads-head { padding: 9px 12px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+    .inbox-search-input { width: 100%; padding: 5px 10px; background: var(--input-bg); border: 1px solid var(--input-border); border-radius: 4px; font-size: 12px; font-family: inherit; color: var(--text); outline: none; box-sizing: border-box; }
+    #inbox-thread-list { flex: 1; overflow-y: auto; }
+    .inbox-thread-row { padding: 10px 14px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.12s; }
+    .inbox-thread-row:hover { background: var(--hover); }
+    .inbox-thread-row.selected { background: var(--blue-dim); }
+    .inbox-thread-row.unread .itr-from { font-weight: 700; color: var(--text); }
+    .inbox-thread-row.unread { background: rgba(0,80,230,0.03); }
+    .itr-top { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin-bottom: 2px; }
+    .itr-from { font-size: 12.5px; font-weight: 500; color: var(--text-s); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .itr-count { font-size: 10px; color: var(--text-m); font-weight: 400; }
+    .itr-date { font-size: 10.5px; color: var(--text-m); flex-shrink: 0; }
+    .itr-subject { font-size: 12px; color: var(--text); overflow: hidden; white-space: nowrap; text-overflow: ellipsis; margin-bottom: 2px; }
+    .itr-snippet { font-size: 11px; color: var(--text-m); overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+    .inbox-view { flex: 1; min-width: 0; display: flex; flex-direction: column; overflow: hidden; }
+    .inbox-thread-head { padding: 10px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+    .inbox-back-btn { display: none; }
+    .inbox-thread-subject { font-size: 13px; font-weight: 650; color: var(--text); flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .inbox-thread-acts { display: flex; gap: 2px; flex-shrink: 0; }
+    .inbox-messages-list { flex: 1; overflow-y: auto; padding: 12px 16px; display: flex; flex-direction: column; gap: 10px; }
+    .inbox-msg-card { border: 1px solid var(--border); border-radius: 4px; overflow: hidden; flex-shrink: 0; }
+    .inbox-msg-head { padding: 9px 14px; border-bottom: 1px solid var(--border); display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; background: var(--bg); }
+    .inbox-msg-from-wrap { display: flex; align-items: center; gap: 10px; min-width: 0; }
+    .inbox-msg-avatar { width: 28px; height: 28px; border-radius: 50%; background: var(--blue); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; }
+    .inbox-msg-from { font-size: 12.5px; font-weight: 600; color: var(--text); }
+    .inbox-msg-to { font-size: 11px; color: var(--text-m); }
+    .inbox-msg-date { font-size: 11px; color: var(--text-m); white-space: nowrap; flex-shrink: 0; }
+    .inbox-msg-body { padding: 12px 14px; }
+    .inbox-msg-pre { font-family: inherit; font-size: 12.5px; color: var(--text-s); line-height: 1.65; white-space: pre-wrap; word-break: break-word; margin: 0; }
+    .inbox-reply-bar { padding: 12px 16px; border-top: 1px solid var(--border); flex-direction: column; gap: 8px; background: var(--bg-card); flex-shrink: 0; }
+    .inbox-reply-head { display: flex; align-items: center; margin-bottom: 4px; }
+    .inbox-compose-textarea { width: 100%; padding: 8px 10px; background: var(--input-bg); border: 1px solid var(--input-border); border-radius: 4px; font-size: 12.5px; font-family: inherit; color: var(--text); resize: vertical; outline: none; min-height: 76px; box-sizing: border-box; }
+    .inbox-compose-foot { display: flex; align-items: center; gap: 8px; margin-top: 2px; }
+    #inbox-compose-overlay { position: fixed; bottom: 80px; right: 24px; z-index: 500; display: none; pointer-events: none; }
+    #inbox-compose-overlay.open { display: block; pointer-events: auto; }
+    .inbox-compose-box { background: var(--bg-card); border: 1px solid var(--card-border); border-radius: 6px 6px 0 0; box-shadow: 0 -4px 24px rgba(0,0,0,0.14); width: 420px; display: flex; flex-direction: column; }
+    .inbox-compose-head { padding: 10px 14px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .inbox-compose-title { font-size: 12.5px; font-weight: 650; color: var(--text); }
+    .inbox-compose-fields { padding: 0 14px; }
+    .inbox-compose-field { display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--border); padding: 7px 0; }
+    .inbox-compose-label { font-size: 11px; font-weight: 600; color: var(--text-m); width: 48px; flex-shrink: 0; }
+    .inbox-compose-input { flex: 1; background: transparent; border: none; outline: none; font-size: 12.5px; font-family: inherit; color: var(--text); }
+    .inbox-compose-body-wrap { padding: 8px 14px 12px; display: flex; flex-direction: column; gap: 8px; }
+    @media (max-width: 900px) {
+      #inbox-main-view { padding: 0; }
+      .inbox-panes { border-radius: 0; border-left: none; border-right: none; border-top: none; }
+      .inbox-folders { display: none; }
+      .inbox-threads { width: 100%; border-right: none; }
+      .inbox-view { position: fixed; top: var(--hdr); right: 0; bottom: 0; left: 0; background: var(--bg-card); z-index: 155; transform: translateX(100%); transition: transform var(--dur) var(--ease); }
+      .inbox-view.open { transform: translateX(0); }
+      .inbox-back-btn { display: inline-flex !important; }
+      #inbox-compose-overlay { right: 0; bottom: calc(var(--safe-b) + 56px); width: 100%; }
+      .inbox-compose-box { width: 100%; border-radius: 6px 6px 0 0; }
+    }
     /* Leads page */
     #page-leads > .card.mb20 { flex-shrink: 0; }
     #page-leads .stats-grid { flex-shrink: 0; }
@@ -1310,6 +1392,7 @@
   <div class="nav-item" data-page="automations" title="Automations"><i data-lucide="workflow"></i><span class="nav-txt">Automations</span></div>
   <div class="nav-item" data-page="team" title="Team"><i data-lucide="users"></i><span class="nav-txt">Team</span></div>
   <div class="nav-item" data-page="invoices" title="Invoices"><i data-lucide="file-text"></i><span class="nav-txt">Invoices</span></div>
+  <div class="nav-item" data-page="inbox" title="Inbox"><i data-lucide="inbox"></i><span class="nav-txt">Inbox <span id="inbox-nav-badge" style="display:none;background:var(--red);color:#fff;font-size:9px;font-weight:700;border-radius:8px;padding:1px 5px;margin-left:4px;vertical-align:middle;"></span></span></div>
 
   <div class="nav-group-label">Insights</div>
   <div class="nav-item" data-page="analytics" title="Analytics"><i data-lucide="chart-column"></i><span class="nav-txt">Analytics</span></div>
@@ -1941,6 +2024,92 @@
     </div>
   </div>
 
+  <!-- INBOX PAGE -->
+  <div class="page" id="page-inbox">
+
+    <!-- Connect view (shown when no email connected) -->
+    <div class="inbox-connect-view" id="inbox-connect-view">
+      <div class="inbox-connect-card">
+        <div class="inbox-connect-icon"><i data-lucide="mail"></i></div>
+        <div class="inbox-connect-title">Connect your email</div>
+        <div class="inbox-connect-sub">Link Gmail or Outlook to manage all your lead conversations from one place — no tab switching.</div>
+        <div class="inbox-connect-btns">
+          <button id="inbox-connect-gmail-btn" class="inbox-connect-gmail" onclick="inboxConnect('gmail')">
+            <i data-lucide="mail"></i>Connect Gmail
+          </button>
+          <button class="inbox-connect-outlook" onclick="inboxConnect('outlook')">
+            <i data-lucide="monitor"></i>Connect Outlook <span style="font-size:10px;color:var(--text-m);margin-left:4px;">Coming soon</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main view (shown when connected) -->
+    <div id="inbox-main-view" style="display:none;">
+      <div class="inbox-panes">
+
+        <!-- Folder list -->
+        <div class="inbox-folders">
+          <div class="inbox-folders-head">
+            <span class="inbox-folders-head-title">Folders</span>
+            <button class="cmd-btn" style="padding:3px 7px;" onclick="openCompose({})" title="Compose"><i data-lucide="pen-line"></i></button>
+          </div>
+          <div id="inbox-folder-list">
+            <div style="padding:14px;font-size:12px;color:var(--text-m);">Loading…</div>
+          </div>
+        </div>
+
+        <!-- Thread list -->
+        <div class="inbox-threads">
+          <div class="inbox-threads-head">
+            <input type="search" id="inbox-search" class="inbox-search-input" placeholder="Search emails…" oninput="inboxOnSearch(this.value)" />
+          </div>
+          <div id="inbox-thread-list">
+            <div style="padding:20px 14px;text-align:center;font-size:12px;color:var(--text-m);">Select a folder to view messages</div>
+          </div>
+        </div>
+
+        <!-- Thread / message view -->
+        <div class="inbox-view" id="inbox-view-pane">
+          <div class="empty-state" style="flex:1;padding:60px 16px;">
+            <i data-lucide="mail-open"></i>
+            <div class="empty-state-title">Select a conversation</div>
+            <div class="empty-state-sub">Choose a thread on the left to read it here.</div>
+            <button class="cmd-primary" style="margin-top:12px;" onclick="openCompose({})"><i data-lucide="pen-line"></i>Compose</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Compose overlay (floating bottom-right) -->
+  <div id="inbox-compose-overlay">
+    <div class="inbox-compose-box">
+      <div class="inbox-compose-head">
+        <span class="inbox-compose-title">New Message</span>
+        <button class="cmd-btn" style="padding:3px 7px;" onclick="inboxCloseCompose()"><i data-lucide="x"></i></button>
+      </div>
+      <div class="inbox-compose-fields">
+        <div class="inbox-compose-field">
+          <span class="inbox-compose-label">To</span>
+          <input type="email" id="inbox-compose-to" class="inbox-compose-input" placeholder="recipient@email.com" />
+        </div>
+        <div class="inbox-compose-field">
+          <span class="inbox-compose-label">Subject</span>
+          <input type="text" id="inbox-compose-subject" class="inbox-compose-input" placeholder="Subject line…" />
+        </div>
+      </div>
+      <div class="inbox-compose-body-wrap">
+        <textarea id="inbox-compose-body" class="inbox-compose-textarea" placeholder="Write your message…" rows="6"></textarea>
+        <div class="inbox-compose-foot">
+          <button id="inbox-compose-send-btn" class="cmd-primary" onclick="inboxSendCompose()"><i data-lucide="send"></i>Send</button>
+          <button class="cmd-btn" onclick="inboxCloseCompose()">Discard</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- INTEGRATIONS -->
   <!-- SETTINGS -->
   <div class="page" id="page-settings">
@@ -2179,6 +2348,7 @@
 <script src="crm.js?v=21"></script>
 <script src="teams.js?v=2"></script>
 <script src="invoice.js?v=1"></script>
+<script src="inbox.js?v=1"></script>
 <script src="flowy.js?v=10"></script>
 <script>
 const AUTH0_DOMAIN    = 'auth.flowaify.app';
@@ -2265,6 +2435,7 @@ const PAGE_META = {
   automations: { title:'Automations', sub:'Pause or resume Flowaify automations for this account.' },
   team:        { title:'Team',        sub:'Manage seats, members, and roles for your workspace.' },
   invoices:    { title:'Invoices',    sub:'Create, send, and track invoices for your clients.' },
+  inbox:       { title:'Inbox',       sub:'Manage email conversations with your leads and clients.' },
   analytics:   { title:'Analytics',   sub:'Understand lead performance, response speed, source quality, and booked call conversion.' },
   settings:    { title:'Settings',    sub:'Manage workspace, users, automation rules, CRM settings, and notification preferences.' },
 };
@@ -2280,6 +2451,7 @@ function showPage(id) {
   window.scrollTo(0,0); closeProfileMenu(); closeMob();
   if (id === 'team') { if (window.teamsInit) teamsInit(); else if (window.teamLoad) teamLoad(); }
   if (id === 'invoices') { if (window.invoicesInit) invoicesInit(); }
+  if (id === 'inbox')    { if (window.inboxInit)    inboxInit(); }
   lucide.createIcons();
 }
 document.querySelectorAll('.nav-item[data-page]').forEach(el => el.addEventListener('click', () => showPage(el.dataset.page)));
@@ -2456,6 +2628,7 @@ const PAL_PAGES = [
   { label: 'Automations', icon: 'workflow',     run: () => showPage('automations') },
   { label: 'Team',        icon: 'users',        run: () => showPage('team') },
   { label: 'Invoices',    icon: 'file-text',    run: () => showPage('invoices') },
+  { label: 'Inbox',       icon: 'inbox',        run: () => showPage('inbox') },
   { label: 'Analytics',   icon: 'chart-column', run: () => showPage('analytics') },
   { label: 'Settings',    icon: 'settings',     run: () => showPage('settings') },
 ];
