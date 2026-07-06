@@ -12,6 +12,7 @@ var flowyNews = null;       // cached whatsnew titles
 var flowyReport = { active: false, step: null, config: {} };
 var flowyDay = { active: false, queue: [], idx: 0, done: 0 };
 var flowyFaq = null;
+var flowyPending = {};
 var flowyAbort = null;
 window.__watchItems = [];
 var watchShown = false;
@@ -390,7 +391,7 @@ function flowyLocal(q) {
 
   // help
   if (/^(help|what can you do|what do you do)/.test(s)) {
-    return { html: 'I can do a lot:<br>• <strong>Answer data questions</strong> — "how many leads this week?", "what\'s my pipeline?", "who needs attention?"<br>• <strong>Run commands</strong> — "show hot leads", "go to analytics", "export csv", "dark mode"<br>• <strong>Update leads</strong> — "mark Sarah warm" writes straight to Zoho<br>• <strong>Draft follow-ups</strong> — "draft a follow-up text for Jacob"<br>• <strong>Build custom reports</strong> — "build me a report" (I\u2019ll ask what you want in it) or "report on Sarah"<br>• <strong>Brief you</strong> — "daily briefing"<br>Anything else, I\'ll think it through with AI.' };
+    return { html: 'I can do a lot:<br>• <strong>Answer data questions</strong> — "how many leads this week?", "what\'s my pipeline?", "who needs attention?"<br>• <strong>Run commands</strong> — "show hot leads", "go to analytics", "export csv", "dark mode"<br>• <strong>Update leads</strong> — "mark Sarah warm" writes straight to Zoho<br>• <strong>Draft follow-ups</strong> — "draft a follow-up text for Jacob"<br>• <strong>Take actions</strong> — "create an invoice for Sarah", "send an email to Mike", "share Jane in chat"<br>• <strong>Build reports</strong> — "build me a report" or "report on Sarah"<br>• <strong>Brief you</strong> — "daily briefing"<br>Anything else, I\'ll think it through with AI.' };
   }
 
   // briefing
@@ -558,8 +559,35 @@ function flowyLocal(q) {
     };
   }
 
+  // create invoice for {name}
+  m = s.match(/(?:create|write|make|generate)\s+(?:an?\s+)?invoice\s+(?:for\s+)?(.+)$/);
+  if (m) {
+    if (portal) return flPortalOnly('Creating invoices');
+    var iLead = flFindLead(m[1].trim());
+    if (!iLead) return { html: 'I couldn\'t find a lead named "<strong>' + flEsc(m[1].trim()) + '</strong>". Check the spelling or try their full name.' };
+    return { html: flowyInvoiceIntent(iLead), plain: 'invoice intent' };
+  }
+
+  // send/write/draft email to {name}  (skips existing "draft follow-up" which requires "draft|write|compose" + message type)
+  m = s.match(/(?:send|compose)\s+(?:an?\s+)?(?:email|message)\s+(?:to\s+)?(.+)$/);
+  if (m) {
+    if (portal) return flPortalOnly('Composing emails');
+    var eLead = flFindLead(m[1].trim());
+    if (!eLead) return { html: 'I couldn\'t find a lead named "<strong>' + flEsc(m[1].trim()) + '</strong>".' };
+    return { html: flowyEmailIntent(eLead), plain: 'email intent' };
+  }
+
+  // share {name} in chat
+  m = s.match(/share\s+(.+?)\s+in\s+(?:the\s+)?(?:team\s+)?chat/);
+  if (m) {
+    if (portal) return flPortalOnly('Sharing leads in chat');
+    var cLead = flFindLead(m[1].trim());
+    if (!cLead) return { html: 'I couldn\'t find a lead named "<strong>' + flEsc(m[1].trim()) + '</strong>".' };
+    return { html: flowyShareInChatIntent(cLead), plain: 'share in chat' };
+  }
+
   // navigate
-  m = s.match(/(?:go to|open|take me to|show)\s+(?:the\s+)?(overview|home|leads|activity|calendar|automations|analytics|settings)/);
+  m = s.match(/(?:go to|open|take me to|show)\s+(?:the\s+)?(overview|home|leads|activity|calendar|automations|team|analytics|settings|inbox)/);
   if (m) {
     if (portal) {
       return { html: '✓ Taking you to the dashboard.', plain: 'nav', run: function() { window.location.href = 'app.html'; } };
@@ -1020,6 +1048,77 @@ function flowyUndoStatus(id, prev) {
   setLeadStatus(id, st);
 }
 window.flowyUndoStatus = flowyUndoStatus;
+
+/* ── Approval card ──────────────────────────────────────────────────────────── */
+function flApproval(bodyHtml, action) {
+  var id = 'flap' + Date.now();
+  flowyPending[id] = action;
+  return '<div class="fl-appr">' +
+    '<div class="fl-appr-label">Here\'s what I\'ll do</div>' +
+    '<div class="fl-appr-body">' + bodyHtml + '</div>' +
+    '<div class="fl-appr-acts" id="' + id + '">' +
+    '<button class="fl-appr-ok" onclick="flowyConfirm(\'' + id + '\')">Confirm</button>' +
+    '<button class="fl-appr-no" onclick="flowyCancel(\'' + id + '\')">Cancel</button>' +
+    '</div></div>';
+}
+
+function flowyConfirm(id) {
+  var action = flowyPending[id];
+  if (!action) return;
+  delete flowyPending[id];
+  var acts = document.getElementById(id);
+  if (acts) acts.innerHTML = '<span class="fl-appr-done">✓ Done</span>';
+  try { action(); } catch (e) {}
+}
+window.flowyConfirm = flowyConfirm;
+
+function flowyCancel(id) {
+  delete flowyPending[id];
+  var acts = document.getElementById(id);
+  if (acts) acts.innerHTML = '<span class="fl-appr-gone">Cancelled</span>';
+  flBot('No problem. Let me know if you need anything else.', { instant: true });
+}
+window.flowyCancel = flowyCancel;
+
+/* ── Action intent renderers ────────────────────────────────────────────────── */
+function flowyInvoiceIntent(lead) {
+  return flApproval(
+    'Create an invoice draft for <strong>' + flEsc(lead.name) + '</strong>' +
+    (lead.email ? ' <span style="color:var(--text-m);">· ' + flEsc(lead.email) + '</span>' : ''),
+    function() {
+      if (typeof showPage === 'function') showPage('invoices');
+      setTimeout(function() {
+        if (typeof openNewInvoice === 'function') openNewInvoice(lead);
+      }, 200);
+    }
+  );
+}
+
+function flowyEmailIntent(lead) {
+  return flApproval(
+    'Open a compose window to <strong>' + flEsc(lead.name) + '</strong>' +
+    (lead.email ? ' at <strong>' + flEsc(lead.email) + '</strong>' : ''),
+    function() {
+      if (typeof showPage === 'function') showPage('inbox');
+      setTimeout(function() {
+        if (typeof openCompose === 'function') openCompose({ to: lead.email, name: lead.name });
+      }, 200);
+    }
+  );
+}
+
+function flowyShareInChatIntent(lead) {
+  return flApproval(
+    'Share <strong>' + flEsc(lead.name) + '</strong> as a lead card in the team chat',
+    function() {
+      var lid = String(lead.id).replace(/[^\w-]/g, '');
+      if (typeof showPage === 'function') showPage('team');
+      setTimeout(function() {
+        if (typeof teamsShareLead === 'function') teamsShareLead(lid);
+      }, 600);
+    }
+  );
+}
 
 /* ── FAQ knowledge (flowyfaq.json) ──────────────────────────────────────────── */
 function flowyFaqLoad() {

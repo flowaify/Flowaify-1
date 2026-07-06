@@ -635,6 +635,16 @@
     .fl-opts button { background: var(--bg-card); border: 1px solid var(--input-border); border-radius: 99px; color: var(--text-s); font-size: 11px; font-weight: 500; font-family: inherit; padding: 5px 12px; cursor: pointer; transition: all 0.12s; }
     .fl-opts button:hover { border-color: var(--blue); color: var(--blue); }
     .fl-earlier { align-self: center; font-size: 9.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: var(--text-m); background: var(--bg-card); border: 1px solid var(--border); border-radius: 99px; padding: 3px 10px; margin: 2px 0 4px; }
+    .fl-appr { border-left: 2px solid var(--blue); background: var(--bg); border-radius: 0 6px 6px 0; padding: 10px 12px; margin-top: 2px; }
+    .fl-appr-label { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-m); margin-bottom: 5px; }
+    .fl-appr-body { font-size: 12.5px; color: var(--text-s); line-height: 1.5; margin-bottom: 9px; }
+    .fl-appr-acts { display: flex; gap: 7px; align-items: center; }
+    .fl-appr-ok { padding: 5px 14px; background: var(--blue); color: #fff; border: none; border-radius: 4px; font-size: 12px; font-weight: 600; font-family: inherit; cursor: pointer; }
+    .fl-appr-ok:hover { opacity: 0.85; }
+    .fl-appr-no { padding: 5px 12px; background: transparent; border: 1px solid var(--input-border); color: var(--text-s); border-radius: 4px; font-size: 12px; font-family: inherit; cursor: pointer; }
+    .fl-appr-no:hover { background: var(--hover); }
+    .fl-appr-done { font-size: 12px; font-weight: 600; color: var(--green); }
+    .fl-appr-gone { font-size: 12px; color: var(--text-m); }
 
     /* FLOWY FAB */
     #flowy-fab {
@@ -1943,7 +1953,7 @@
 
 <script src="crm.js?v=21"></script>
 <script src="teams.js?v=2"></script>
-<script src="flowy.js?v=9"></script>
+<script src="flowy.js?v=10"></script>
 <script>
 const AUTH0_DOMAIN    = 'auth.flowaify.app';
 const AUTH0_CLIENT_ID = 'tx74Owqn3jVeSaVuxfFHsKloqbPqfAmN';
