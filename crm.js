@@ -1815,7 +1815,7 @@ async function teamLoad(force) {
   var r = await teamFetch('GET');
   teamLoading = false;
   var setup = document.getElementById('team-setup-card');
-  var content = document.getElementById('team-content');
+  var content = document.getElementById('teams-hub');
   if (r.status === 501 || r.status === 404) {
     if (setup) setup.style.display = 'block';
     if (content) content.style.display = 'none';
@@ -1826,7 +1826,7 @@ async function teamLoad(force) {
     return;
   }
   if (setup) setup.style.display = 'none';
-  if (content) content.style.display = 'block';
+  if (content) content.style.display = 'flex';
 
   var doc = r.data;
   doc.members = doc.members || [];

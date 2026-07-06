@@ -1,0 +1,7 @@
+name = "flowaify-crm-proxy"
+main = "index.js"
+compatibility_date = "2024-01-01"
+
+[[kv_namespaces]]
+binding = "TEAM_KV"
+id = "d3aae082c21d42a68da4817e3bd7be7c"

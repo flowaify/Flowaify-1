@@ -34,7 +34,7 @@ export default {
 
     const corsHeaders = corsOrigin ? {
       'Access-Control-Allow-Origin': corsOrigin,
-      'Access-Control-Allow-Methods': 'GET, POST, PUT, OPTIONS',
+      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
       'Access-Control-Allow-Headers': 'Authorization, Content-Type',
       'Access-Control-Max-Age': '86400',
     } : {};
@@ -72,6 +72,26 @@ export default {
 
       if (url.pathname === '/team' && (request.method === 'GET' || request.method === 'PUT')) {
         return handleTeam(request, env, corsHeaders);
+      }
+
+      if (url.pathname === '/team/channels') {
+        return handleTeamChannels(request, env, corsHeaders);
+      }
+
+      if (url.pathname === '/team/messages') {
+        return handleTeamMessages(request, env, corsHeaders);
+      }
+
+      if (url.pathname === '/team/messages/send' && request.method === 'POST') {
+        return handleTeamSend(request, env, corsHeaders);
+      }
+
+      if (url.pathname === '/team/react' && request.method === 'POST') {
+        return handleTeamReact(request, env, corsHeaders);
+      }
+
+      if (url.pathname === '/team/activity') {
+        return handleTeamActivity(request, env, corsHeaders);
       }
 
       return json({ error: 'Not found' }, 404, corsHeaders);
@@ -599,6 +619,206 @@ async function handleTeam(request, env, corsHeaders) {
   const doc = sanitizeTeamDoc(body);
   await env.TEAM_KV.put(key, JSON.stringify(doc));
   return json({ ok: true, doc }, 200, corsHeaders);
+}
+
+// ─── Teams Chat — shared auth/clientId resolver ───────────────────────────────
+
+async function resolveTeamsAuth(request, env, corsHeaders) {
+  const authHeader = request.headers.get('Authorization') || '';
+  if (!authHeader.startsWith('Bearer ')) return { err: json({ error: 'Missing token' }, 401, corsHeaders) };
+  const token = authHeader.slice(7).trim();
+  let payload;
+  try { payload = await verifyJWT(token, AUTH0_DOMAIN, AUTH0_CLIENT_ID, AUTH0_TENANT); }
+  catch (err) { return { err: json({ error: err.message }, 401, corsHeaders) }; }
+  let clientId = payload['https://flowaify.app/clientId'];
+  if (!clientId && payload.sub) {
+    const subKey = 'CLIENT_' + payload.sub.replace(/[^A-Z0-9]/gi, '_').toUpperCase();
+    clientId = env[subKey];
+  }
+  if (!clientId) return { err: json({ error: 'No clientId in token' }, 403, corsHeaders) };
+  if (!env.TEAM_KV) return { err: json({ error: 'TEAM_NOT_ENABLED' }, 501, corsHeaders) };
+  const pfx = 'team:' + clientId.toUpperCase().replace(/[^A-Z0-9]/g, '_');
+  return { clientId, sub: payload.sub || '', name: payload.name || payload.email || 'Member', pfx };
+}
+
+// ─── /team/channels (GET list, POST create) ───────────────────────────────────
+
+async function handleTeamChannels(request, env, corsHeaders) {
+  const auth = await resolveTeamsAuth(request, env, corsHeaders);
+  if (auth.err) return auth.err;
+  const { pfx, sub, name } = auth;
+
+  if (request.method === 'GET') {
+    const raw = await env.TEAM_KV.get(pfx + ':channels');
+    const channels = raw ? JSON.parse(raw) : [];
+    // Attach unread counts per channel per user
+    const result = await Promise.all(channels.map(async ch => {
+      const msgsRaw = await env.TEAM_KV.get(pfx + ':ch:' + ch.id + ':msgs');
+      const msgs = msgsRaw ? JSON.parse(msgsRaw) : [];
+      const readKey = pfx + ':ch:' + ch.id + ':read:' + sub;
+      const lastReadRaw = await env.TEAM_KV.get(readKey);
+      const lastRead = lastReadRaw ? parseInt(lastReadRaw, 10) : 0;
+      const unread = msgs.filter(m => m.ts > lastRead && m.authorSub !== sub).length;
+      const last = msgs[msgs.length - 1];
+      return { ...ch, unread, lastMessage: last ? (last.content || '').slice(0, 60) : '' };
+    }));
+    return json({ channels: result }, 200, corsHeaders);
+  }
+
+  // POST — create channel
+  let body;
+  try { body = await request.json(); } catch { return json({ error: 'Invalid JSON' }, 400, corsHeaders); }
+  const chName = String(body.name || '').replace(/[^\w\s\-]/g, '').trim().slice(0, 40);
+  if (!chName) return json({ error: 'Name required' }, 400, corsHeaders);
+
+  const raw = await env.TEAM_KV.get(pfx + ':channels');
+  const channels = raw ? JSON.parse(raw) : [];
+  if (channels.some(c => c.name.toLowerCase() === chName.toLowerCase())) {
+    return json({ error: 'Channel already exists' }, 409, corsHeaders);
+  }
+  const channel = { id: 'ch_' + Date.now().toString(36), name: chName, createdAt: Date.now(), createdBy: sub };
+  channels.push(channel);
+  await env.TEAM_KV.put(pfx + ':channels', JSON.stringify(channels));
+  await appendTeamActivity(env, pfx, sub, name, name + ' created #' + chName);
+  return json({ channel }, 200, corsHeaders);
+}
+
+// ─── /team/messages (GET) ─────────────────────────────────────────────────────
+
+async function handleTeamMessages(request, env, corsHeaders) {
+  if (request.method !== 'GET') return json({ error: 'Method not allowed' }, 405, corsHeaders);
+  const auth = await resolveTeamsAuth(request, env, corsHeaders);
+  if (auth.err) return auth.err;
+  const { pfx, sub } = auth;
+  const url = new URL(request.url);
+  const channelId = url.searchParams.get('channel') || '';
+  const after = parseInt(url.searchParams.get('after') || '0', 10);
+  if (!channelId) return json({ error: 'channel required' }, 400, corsHeaders);
+
+  const msgsRaw = await env.TEAM_KV.get(pfx + ':ch:' + channelId + ':msgs');
+  let msgs = msgsRaw ? JSON.parse(msgsRaw) : [];
+  if (after > 0) msgs = msgs.filter(m => m.ts > after);
+
+  // Mark as read up to now
+  await env.TEAM_KV.put(pfx + ':ch:' + channelId + ':read:' + sub, String(Date.now()), { expirationTtl: 7 * 24 * 3600 });
+
+  // Annotate which reactions the requesting user has made
+  msgs = msgs.map(m => ({
+    ...m,
+    myReactions: Object.keys(m.userReactions || {}).filter(k => (m.userReactions[k] || []).includes(sub))
+  }));
+
+  return json({ messages: msgs }, 200, corsHeaders);
+}
+
+// ─── /team/messages/send (POST) ───────────────────────────────────────────────
+
+async function handleTeamSend(request, env, corsHeaders) {
+  const auth = await resolveTeamsAuth(request, env, corsHeaders);
+  if (auth.err) return auth.err;
+  const { pfx, sub, name } = auth;
+
+  let body;
+  try { body = await request.json(); } catch { return json({ error: 'Invalid JSON' }, 400, corsHeaders); }
+  const channelId = String(body.channelId || '').replace(/[^\w_-]/g, '');
+  const content   = String(body.content  || '').slice(0, 4000).trim();
+  const type      = ['text', 'lead', 'report'].includes(body.type) ? body.type : 'text';
+  const payload   = (type !== 'text' && body.payload && typeof body.payload === 'object') ? body.payload : null;
+  if (!channelId || !content) return json({ error: 'channelId and content required' }, 400, corsHeaders);
+
+  const msgsKey = pfx + ':ch:' + channelId + ':msgs';
+  const msgsRaw = await env.TEAM_KV.get(msgsKey);
+  const msgs = msgsRaw ? JSON.parse(msgsRaw) : [];
+
+  const message = {
+    id:         'msg_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+    authorSub:  sub,
+    authorName: name,
+    content,
+    type,
+    payload,
+    ts:         Date.now(),
+    reactions:  {},
+    userReactions: {},
+  };
+  msgs.push(message);
+  // Cap at 500 messages per channel
+  if (msgs.length > 500) msgs.splice(0, msgs.length - 500);
+  await env.TEAM_KV.put(msgsKey, JSON.stringify(msgs));
+
+  // Update read marker for sender
+  await env.TEAM_KV.put(pfx + ':ch:' + channelId + ':read:' + sub, String(message.ts), { expirationTtl: 7 * 24 * 3600 });
+
+  return json({ message: { ...message, myReactions: [] } }, 200, corsHeaders);
+}
+
+// ─── /team/react (POST) ───────────────────────────────────────────────────────
+
+async function handleTeamReact(request, env, corsHeaders) {
+  const auth = await resolveTeamsAuth(request, env, corsHeaders);
+  if (auth.err) return auth.err;
+  const { pfx, sub } = auth;
+
+  let body;
+  try { body = await request.json(); } catch { return json({ error: 'Invalid JSON' }, 400, corsHeaders); }
+  const channelId = String(body.channelId || '').replace(/[^\w_-]/g, '');
+  const msgId     = String(body.msgId     || '');
+  const emoji     = String(body.emoji     || '').slice(0, 8);
+  if (!channelId || !msgId || !emoji) return json({ error: 'channelId, msgId, emoji required' }, 400, corsHeaders);
+
+  const msgsKey = pfx + ':ch:' + channelId + ':msgs';
+  const msgsRaw = await env.TEAM_KV.get(msgsKey);
+  if (!msgsRaw) return json({ error: 'Channel not found' }, 404, corsHeaders);
+  const msgs = JSON.parse(msgsRaw);
+  const msg = msgs.find(m => m.id === msgId);
+  if (!msg) return json({ error: 'Message not found' }, 404, corsHeaders);
+
+  msg.userReactions = msg.userReactions || {};
+  msg.reactions     = msg.reactions     || {};
+  const users = msg.userReactions[emoji] || [];
+  const idx   = users.indexOf(sub);
+  if (idx === -1) {
+    users.push(sub);
+    msg.reactions[emoji] = (msg.reactions[emoji] || 0) + 1;
+  } else {
+    users.splice(idx, 1);
+    msg.reactions[emoji] = Math.max(0, (msg.reactions[emoji] || 1) - 1);
+    if (msg.reactions[emoji] === 0) delete msg.reactions[emoji];
+  }
+  msg.userReactions[emoji] = users;
+  await env.TEAM_KV.put(msgsKey, JSON.stringify(msgs));
+  return json({ ok: true, reactions: msg.reactions }, 200, corsHeaders);
+}
+
+// ─── /team/activity (GET/POST) ────────────────────────────────────────────────
+
+async function handleTeamActivity(request, env, corsHeaders) {
+  const auth = await resolveTeamsAuth(request, env, corsHeaders);
+  if (auth.err) return auth.err;
+  const { pfx, sub, name } = auth;
+
+  if (request.method === 'GET') {
+    const raw = await env.TEAM_KV.get(pfx + ':activity');
+    const log = raw ? JSON.parse(raw) : [];
+    return json({ log }, 200, corsHeaders);
+  }
+
+  // POST — append entry
+  let body;
+  try { body = await request.json(); } catch { return json({ error: 'Invalid JSON' }, 400, corsHeaders); }
+  const text = String(body.text || '').slice(0, 200).trim();
+  if (!text) return json({ error: 'text required' }, 400, corsHeaders);
+  await appendTeamActivity(env, pfx, sub, name, text);
+  return json({ ok: true }, 200, corsHeaders);
+}
+
+async function appendTeamActivity(env, pfx, sub, name, text) {
+  const key = pfx + ':activity';
+  const raw = await env.TEAM_KV.get(key);
+  const log = raw ? JSON.parse(raw) : [];
+  log.push({ ts: Date.now(), sub, name, text });
+  if (log.length > 200) log.splice(0, log.length - 200);
+  await env.TEAM_KV.put(key, JSON.stringify(log));
 }
 
 // ─── JWT Validation (Web Crypto API — no external deps) ──────────────────────

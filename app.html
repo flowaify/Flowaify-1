@@ -747,15 +747,145 @@
     #page-automations .g2 > .card { display: flex; flex-direction: column; }
     #page-automations .g2 > .card > .p20 { flex: 1; overflow-y: auto; }
     #auto-activity { flex: 1; overflow-y: auto; }
-    /* Team page */
-    #page-team #team-content { flex: 1; min-height: 0; display: flex; flex-direction: column; }
-    #page-team #team-content > .card.mb20 { flex-shrink: 0; }
-    #page-team .feed-grid { flex: 1; min-height: 0; align-items: stretch; }
-    #page-team .feed-grid > .card { display: flex; flex-direction: column; }
-    #page-team .feed-grid .table-wrap { flex: 1; overflow-y: auto; }
-    #page-team .feed-grid > div { display: flex; flex-direction: column; gap: 12px; }
-    #page-team .feed-grid > div > .card { flex: 1; min-height: 0; display: flex; flex-direction: column; }
-    #team-log { flex: 1; overflow-y: auto; }
+    /* Teams Hub */
+    #page-team #team-setup-card { flex-shrink: 0; }
+    #teams-hub { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+    .teams-tabs { display: flex; align-items: center; border-bottom: 1px solid var(--border); background: var(--bg-card); flex-shrink: 0; padding: 0 4px; gap: 2px; }
+    .teams-tab { display: flex; align-items: center; gap: 7px; padding: 10px 14px; font-size: 13px; font-weight: 500; color: var(--text-s); background: transparent; border: none; border-bottom: 2px solid transparent; cursor: pointer; transition: color 0.12s; position: relative; margin-bottom: -1px; }
+    .teams-tab:hover { color: var(--text); }
+    .teams-tab.active { color: var(--blue); border-bottom-color: var(--blue); font-weight: 600; }
+    .teams-tab i, .teams-tab svg { width: 14px; height: 14px; }
+    .teams-tab-badge { position: absolute; top: 7px; right: 6px; min-width: 16px; height: 16px; background: var(--blue); color: #fff; font-size: 10px; font-weight: 700; border-radius: 8px; padding: 0 4px; display: flex; align-items: center; justify-content: center; line-height: 1; }
+    .teams-section { display: none; flex: 1; min-height: 0; flex-direction: column; }
+    .teams-section.active { display: flex; }
+    /* Chat layout */
+    .teams-chat-layout { display: grid; grid-template-columns: 200px 1fr; flex: 1; min-height: 0; overflow: hidden; }
+    .teams-info-panel-open .teams-chat-layout { grid-template-columns: 200px 1fr 220px; }
+    .teams-ch-sidebar { border-right: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; background: var(--bg); }
+    .teams-ch-head { display: flex; align-items: center; padding: 12px 12px 8px; flex-shrink: 0; }
+    .teams-ch-head-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: var(--text-m); flex: 1; }
+    .teams-ch-add-btn { width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; background: transparent; border: none; border-radius: 3px; color: var(--text-m); cursor: pointer; }
+    .teams-ch-add-btn:hover { background: var(--hover); color: var(--text); }
+    .teams-ch-add-btn i, .teams-ch-add-btn svg { width: 13px; height: 13px; }
+    #teams-ch-list { flex: 1; overflow-y: auto; padding: 0 6px 8px; }
+    .teams-ch-item { display: flex; align-items: flex-start; gap: 6px; padding: 7px 8px; border-radius: 4px; cursor: pointer; transition: background 0.1s; }
+    .teams-ch-item:hover { background: var(--hover); }
+    .teams-ch-item.active { background: var(--blue-dim); }
+    .teams-ch-icon { font-size: 13px; color: var(--text-m); flex-shrink: 0; margin-top: 1px; font-weight: 600; line-height: 1.2; }
+    .teams-ch-item.active .teams-ch-icon { color: var(--blue); }
+    .teams-ch-item-body { flex: 1; min-width: 0; }
+    .teams-ch-name-row { display: flex; align-items: center; justify-content: space-between; gap: 4px; }
+    .teams-ch-item-name { font-size: 13px; font-weight: 500; color: var(--text-s); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; }
+    .teams-ch-item.active .teams-ch-item-name { color: var(--blue); font-weight: 600; }
+    .teams-ch-unread { min-width: 16px; height: 16px; background: var(--blue); color: #fff; font-size: 10px; font-weight: 700; border-radius: 8px; padding: 0 4px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; line-height: 1; }
+    .teams-ch-preview { font-size: 11px; color: var(--text-m); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; line-height: 1.3; }
+    /* Message area */
+    .teams-main { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+    .teams-main-header { display: flex; align-items: center; padding: 10px 16px; border-bottom: 1px solid var(--border); background: var(--bg-card); flex-shrink: 0; gap: 10px; }
+    .teams-main-title { display: flex; align-items: center; gap: 4px; flex: 1; min-width: 0; }
+    .teams-hash { font-size: 16px; color: var(--text-m); font-weight: 600; line-height: 1; }
+    .teams-main-title span:last-child { font-size: 14px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .teams-main-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+    .teams-member-count { font-size: 11.5px; color: var(--text-m); }
+    .teams-hdr-btn { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; background: transparent; border: 1px solid transparent; border-radius: 4px; color: var(--text-m); cursor: pointer; }
+    .teams-hdr-btn:hover { background: var(--hover); border-color: var(--border); color: var(--text); }
+    .teams-hdr-btn i, .teams-hdr-btn svg { width: 14px; height: 14px; }
+    .teams-messages-wrap { flex: 1; min-height: 0; overflow-y: auto; }
+    #teams-messages { display: flex; flex-direction: column; padding: 8px 0 4px; }
+    /* Message rows */
+    .teams-msg-row { display: flex; gap: 10px; padding: 5px 16px; position: relative; }
+    .teams-msg-row:hover { background: var(--hover); }
+    .teams-msg-row:hover .teams-msg-react-btn { opacity: 1; }
+    .teams-msg-avatar { width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: #fff; }
+    .teams-msg-avatar-spacer { width: 32px; flex-shrink: 0; }
+    .teams-msg-body { flex: 1; min-width: 0; padding: 1px 0; }
+    .teams-msg-meta { display: flex; align-items: baseline; gap: 8px; margin-bottom: 2px; }
+    .teams-msg-author { font-size: 13px; font-weight: 600; color: var(--text); }
+    .teams-msg-time { font-size: 11px; color: var(--text-m); }
+    .teams-msg-text { font-size: 13.5px; line-height: 1.5; color: var(--text); word-break: break-word; }
+    .teams-msg-react-btn { position: absolute; right: 12px; top: 5px; opacity: 0; background: var(--bg-card); border: 1px solid var(--border); border-radius: 4px; padding: 2px 8px; font-size: 14px; cursor: pointer; color: var(--text-m); transition: opacity 0.1s; }
+    .teams-msg-react-btn:hover { color: var(--text); }
+    .teams-reactions { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+    .teams-reaction { display: flex; align-items: center; gap: 3px; padding: 2px 7px; border: 1px solid var(--border); border-radius: 12px; font-size: 13px; cursor: pointer; background: var(--bg); transition: background 0.1s, border-color 0.1s; }
+    .teams-reaction:hover, .teams-reaction.mine { background: var(--blue-dim); border-color: var(--blue-border); }
+    .teams-reaction-count { font-size: 11.5px; color: var(--text-m); font-weight: 600; }
+    .teams-day-sep { display: flex; align-items: center; gap: 12px; padding: 12px 16px; }
+    .teams-day-sep::before, .teams-day-sep::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+    .teams-day-sep span { font-size: 11px; color: var(--text-m); font-weight: 600; white-space: nowrap; }
+    /* Share cards */
+    .teams-share-card { border: 1px solid var(--border); border-radius: 4px; padding: 10px 14px; margin-top: 6px; background: var(--bg); max-width: 320px; }
+    .teams-share-card-title { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-m); margin-bottom: 4px; }
+    .teams-share-card-name { font-size: 13.5px; font-weight: 600; color: var(--text); margin-bottom: 5px; }
+    .teams-share-card-meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .teams-share-card-link { font-size: 12px; color: var(--blue); cursor: pointer; margin-left: auto; }
+    .teams-share-card-link:hover { text-decoration: underline; }
+    /* Compose */
+    .teams-compose { padding: 10px 14px; border-top: 1px solid var(--border); background: var(--bg-card); flex-shrink: 0; }
+    .teams-compose-inner { display: flex; align-items: flex-end; gap: 8px; background: var(--input-bg); border: 1px solid var(--input-border); border-radius: 6px; padding: 8px 10px; }
+    .teams-input-ta { flex: 1; background: transparent; border: none; outline: none; font-family: inherit; font-size: 13.5px; color: var(--text); resize: none; line-height: 1.45; max-height: 120px; overflow-y: auto; }
+    .teams-input-ta::placeholder { color: var(--text-m); }
+    .teams-compose-actions { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
+    .teams-compose-btn { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; background: transparent; border: none; border-radius: 4px; color: var(--text-m); cursor: pointer; }
+    .teams-compose-btn:hover { background: var(--hover); color: var(--text); }
+    .teams-compose-btn i, .teams-compose-btn svg { width: 14px; height: 14px; }
+    .teams-send-btn { width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; background: var(--blue); border: none; border-radius: 4px; color: #fff; cursor: pointer; flex-shrink: 0; }
+    .teams-send-btn:hover { opacity: 0.85; }
+    .teams-send-btn i, .teams-send-btn svg { width: 14px; height: 14px; }
+    /* Info panel */
+    .teams-info-panel { width: 220px; border-left: 1px solid var(--border); display: none; flex-direction: column; overflow: hidden; background: var(--bg-card); }
+    .teams-info-panel-open .teams-info-panel { display: flex; }
+    .teams-info-header { display: flex; align-items: center; padding: 12px 14px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+    .teams-info-title { font-size: 13px; font-weight: 600; color: var(--text); flex: 1; }
+    .teams-info-close { width: 24px; height: 24px; background: transparent; border: none; border-radius: 3px; color: var(--text-m); cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .teams-info-close:hover { background: var(--hover); color: var(--text); }
+    .teams-info-close i, .teams-info-close svg { width: 13px; height: 13px; }
+    #teams-info-members { flex: 1; overflow-y: auto; padding: 6px 0; }
+    .teams-info-member { display: flex; align-items: center; gap: 8px; padding: 7px 14px; }
+    .teams-info-member-name { font-size: 12.5px; font-weight: 500; color: var(--text); }
+    .teams-info-member-role { font-size: 11px; color: var(--text-m); }
+    .teams-presence { width: 8px; height: 8px; border-radius: 50%; background: var(--border); flex-shrink: 0; }
+    .teams-presence.online { background: var(--green); }
+    .teams-info-sep { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: var(--text-m); padding: 10px 14px 6px; border-top: 1px solid var(--border); flex-shrink: 0; }
+    #teams-info-pinned { padding: 0 14px 8px; }
+    .teams-empty-note { font-size: 11.5px; color: var(--text-m); }
+    /* Members section */
+    #teams-section-members { overflow-y: auto; }
+    #teams-section-members > .card { margin: 16px 16px 0; flex-shrink: 0; }
+    .teams-members-grid { margin: 16px; align-items: start; }
+    .teams-members-grid > .card { display: flex; flex-direction: column; min-height: 260px; }
+    .teams-members-grid .table-wrap { flex: 1; overflow-y: auto; max-height: 400px; }
+    .teams-members-grid > div { display: flex; flex-direction: column; gap: 16px; }
+    .teams-members-grid > div > .card { display: flex; flex-direction: column; }
+    #team-log { flex: 1; overflow-y: auto; max-height: 200px; }
+    /* Activity section */
+    .teams-activity-card { flex: 1; min-height: 0; display: flex; flex-direction: column; margin: 16px; }
+    .teams-activity-feed { flex: 1; overflow-y: auto; }
+    .teams-act-filter-sel { padding: 5px 8px; background: var(--input-bg); border: 1px solid var(--input-border); border-radius: 4px; font-size: 11.5px; font-family: inherit; color: var(--text); outline: none; cursor: pointer; }
+    /* Loading */
+    .teams-loading { display: flex; align-items: center; justify-content: center; padding: 40px 20px; color: var(--text-m); font-size: 13px; }
+    /* New channel modal */
+    .teams-ch-modal { position: fixed; inset: 0; z-index: 500; background: rgba(10,13,20,0.5); backdrop-filter: blur(3px); display: none; align-items: center; justify-content: center; padding: 16px; }
+    .teams-ch-modal.open { display: flex; }
+    .teams-ch-modal-box { width: 100%; max-width: 380px; background: var(--bg-card); border-radius: 6px; border: 1px solid var(--card-border); box-shadow: 0 8px 32px rgba(0,0,0,0.18); overflow: hidden; animation: pmenu-in var(--dur) var(--ease); }
+    .teams-ch-modal-head { display: flex; align-items: center; padding: 14px 16px; border-bottom: 1px solid var(--border); }
+    .teams-ch-modal-title { font-size: 14px; font-weight: 700; flex: 1; }
+    .teams-ch-modal-body { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+    .teams-ch-modal-footer { padding: 12px 16px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 8px; }
+    /* Lead picker */
+    .teams-lead-picker { position: fixed; inset: 0; z-index: 500; background: rgba(10,13,20,0.5); backdrop-filter: blur(3px); display: none; align-items: center; justify-content: center; padding: 16px; }
+    .teams-lead-picker.open { display: flex; }
+    .teams-lead-picker-box { width: 100%; max-width: 420px; background: var(--bg-card); border-radius: 6px; border: 1px solid var(--card-border); box-shadow: 0 8px 32px rgba(0,0,0,0.18); overflow: hidden; animation: pmenu-in var(--dur) var(--ease); display: flex; flex-direction: column; max-height: 440px; }
+    .teams-lead-picker-head { display: flex; align-items: center; padding: 12px 16px; border-bottom: 1px solid var(--border); gap: 10px; }
+    .teams-lead-picker-search { flex: 1; background: var(--input-bg); border: 1px solid var(--input-border); border-radius: 4px; padding: 6px 10px; font-size: 13px; font-family: inherit; color: var(--text); outline: none; }
+    .teams-lead-picker-close { width: 24px; height: 24px; background: transparent; border: none; border-radius: 3px; color: var(--text-m); cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .teams-lead-picker-close:hover { background: var(--hover); }
+    .teams-lead-picker-close i, .teams-lead-picker-close svg { width: 13px; height: 13px; }
+    .teams-lead-picker-list { flex: 1; overflow-y: auto; }
+    .teams-lead-pick-item { display: flex; align-items: center; gap: 10px; padding: 9px 16px; cursor: pointer; border-bottom: 1px solid var(--border); }
+    .teams-lead-pick-item:last-child { border-bottom: none; }
+    .teams-lead-pick-item:hover { background: var(--hover); }
+    .teams-lead-pick-name { font-size: 13px; font-weight: 600; color: var(--text); }
+    .teams-lead-pick-meta { font-size: 11.5px; color: var(--text-m); }
     /* Leads page */
     #page-leads > .card.mb20 { flex-shrink: 0; }
     #page-leads .stats-grid { flex-shrink: 0; }
@@ -973,6 +1103,17 @@
       #page-team .skel-table { min-width: 620px; }
       .team-strip { gap: 14px; }
       .ts-actions { margin-left: 0; width: 100%; }
+      /* Teams mobile */
+      .teams-tabs { position: sticky; bottom: 0; top: auto; border-top: 1px solid var(--border); border-bottom: none; order: 99; padding: 0; margin-top: auto; flex-shrink: 0; }
+      .teams-tab { flex: 1; justify-content: center; flex-direction: column; align-items: center; gap: 3px; padding: 8px 4px 10px; font-size: 10.5px; border-bottom: none; border-top: 2px solid transparent; margin-bottom: 0; margin-top: -1px; }
+      .teams-tab.active { border-top-color: var(--blue); border-bottom-color: transparent; }
+      .teams-tab span { font-size: 10.5px; }
+      .teams-chat-layout { grid-template-columns: 1fr !important; }
+      .teams-ch-sidebar { display: none !important; }
+      .teams-info-panel { display: none !important; }
+      #teams-section-members > .card { margin: 12px 12px 0; }
+      .teams-members-grid { margin: 12px; }
+      .teams-activity-card { margin: 12px; }
       .brand-stats { flex-wrap: wrap; gap: 14px; }
       .hero-btn { width: 100%; justify-content: center; }
       .status-picker { gap: 5px; }
@@ -1295,55 +1436,185 @@
       </div>
     </div>
 
-    <div id="team-content" style="display:none;">
-      <div class="card mb20">
-        <div class="team-strip">
-          <div class="ts-block">
-            <div class="ts-label">Seats used</div>
-            <div class="ts-val"><span id="team-used">—</span> <span class="ts-of">of <span id="team-total">3</span></span></div>
-            <div class="setup-bar" style="margin-top:8px;"><div class="setup-fill" id="team-bar" style="width:0%"></div></div>
+    <!-- Teams Hub -->
+    <div id="teams-hub" style="display:none;">
+
+      <!-- Tab bar -->
+      <div class="teams-tabs">
+        <button class="teams-tab active" data-tab="chat" onclick="teamsTab('chat')">
+          <i data-lucide="message-square"></i><span>Chat</span>
+        </button>
+        <button class="teams-tab" data-tab="members" onclick="teamsTab('members')">
+          <i data-lucide="users"></i><span>Members</span>
+        </button>
+        <button class="teams-tab" data-tab="activity" onclick="teamsTab('activity')">
+          <i data-lucide="history"></i><span>Activity</span>
+        </button>
+      </div>
+
+      <!-- Chat section -->
+      <div class="teams-section active" id="teams-section-chat">
+        <div class="teams-chat-layout">
+
+          <!-- Channel sidebar -->
+          <div class="teams-ch-sidebar">
+            <div class="teams-ch-head">
+              <span class="teams-ch-head-label">Channels</span>
+              <button class="teams-ch-add-btn" onclick="teamsNewChannel()" title="New channel"><i data-lucide="plus"></i></button>
+            </div>
+            <div id="teams-ch-list">
+              <div class="teams-loading" style="padding:16px 12px;font-size:12.5px;">Loading…</div>
+            </div>
           </div>
-          <div class="ts-div"></div>
-          <div class="ts-block"><div class="ts-label">Active</div><div class="ts-val" id="team-active">—</div></div>
-          <div class="ts-block"><div class="ts-label">Pending</div><div class="ts-val" id="team-pending">—</div></div>
-          <div class="ts-actions">
-            <button class="btn-mini btn-mini-ghost" onclick="buySeats()">Buy more seats</button>
-            <button class="cmd-primary" id="team-invite-btn" onclick="openInvite()"><i data-lucide="user-plus"></i>Invite member</button>
+
+          <!-- Message area -->
+          <div class="teams-main">
+            <div class="teams-main-header" id="teams-main-header">
+              <div class="teams-main-title">
+                <span class="teams-hash">#</span><span id="teams-active-name">General</span>
+              </div>
+              <div class="teams-main-actions">
+                <span class="teams-member-count" id="teams-ch-member-count"></span>
+                <button class="teams-hdr-btn" onclick="teamsToggleInfo()" title="Members &amp; info"><i data-lucide="panel-right"></i></button>
+              </div>
+            </div>
+            <div class="teams-messages-wrap" id="teams-messages-wrap">
+              <div id="teams-messages">
+                <div class="teams-loading">Loading messages…</div>
+              </div>
+            </div>
+            <div class="teams-compose">
+              <div class="teams-compose-inner">
+                <textarea id="teams-input" class="teams-input-ta" placeholder="Message #General…" rows="1" onkeydown="teamsKeyDown(event)" oninput="teamsAutoResize(this)"></textarea>
+                <div class="teams-compose-actions">
+                  <button class="teams-compose-btn" onclick="teamsPickLead()" title="Share lead"><i data-lucide="user-plus"></i></button>
+                  <button class="teams-send-btn" onclick="teamsSendMsg()" title="Send"><i data-lucide="send"></i></button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Info panel (togglable) -->
+          <div class="teams-info-panel" id="teams-info-panel">
+            <div class="teams-info-header">
+              <span class="teams-info-title">Members</span>
+              <button class="teams-info-close" onclick="teamsToggleInfo()"><i data-lucide="x"></i></button>
+            </div>
+            <div id="teams-info-members">
+              <div class="teams-empty-note" style="padding:12px 14px;">Loading…</div>
+            </div>
+            <div class="teams-info-sep">Pinned</div>
+            <div id="teams-info-pinned"><div class="teams-empty-note" style="padding:4px 0;">No pinned items</div></div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Members section -->
+      <div class="teams-section" id="teams-section-members">
+        <div class="card">
+          <div class="team-strip">
+            <div class="ts-block">
+              <div class="ts-label">Seats used</div>
+              <div class="ts-val"><span id="team-used">—</span> <span class="ts-of">of <span id="team-total">3</span></span></div>
+              <div class="setup-bar" style="margin-top:8px;"><div class="setup-fill" id="team-bar" style="width:0%"></div></div>
+            </div>
+            <div class="ts-div"></div>
+            <div class="ts-block"><div class="ts-label">Active</div><div class="ts-val" id="team-active">—</div></div>
+            <div class="ts-block"><div class="ts-label">Pending</div><div class="ts-val" id="team-pending">—</div></div>
+            <div class="ts-actions">
+              <button class="btn-mini btn-mini-ghost" onclick="buySeats()">Buy more seats</button>
+              <button class="cmd-primary" id="team-invite-btn" onclick="openInvite()"><i data-lucide="user-plus"></i>Invite member</button>
+            </div>
+          </div>
+        </div>
+        <div class="feed-grid teams-members-grid">
+          <div class="card">
+            <div class="sec-head"><div class="sec-title">Members</div>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <input type="text" id="team-search" placeholder="Search members…" oninput="teamFilter()" style="padding:5px 10px;background:var(--input-bg);border:1px solid var(--input-border);border-radius:4px;font-size:11.5px;font-family:inherit;color:var(--text);outline:none;width:150px;" />
+                <button class="btn-mini btn-mini-ghost" onclick="exportTeamCsv()">Export</button>
+                <div class="sec-sub" id="team-count"></div>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table class="skel-table">
+                <thead><tr><th>Member</th><th>Role</th><th>Status</th><th>Added</th><th style="width:120px;"></th></tr></thead>
+                <tbody id="team-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:16px;">
+            <div class="card">
+              <div class="sec-head"><div class="sec-title">Roles &amp; Permissions</div></div>
+              <div class="role-row"><span class="role-chip rc-owner">Owner</span><span class="role-desc">Everything — billing, seats, team, settings</span></div>
+              <div class="role-row"><span class="role-chip rc-admin">Admin</span><span class="role-desc">Manage team &amp; settings, edit leads</span></div>
+              <div class="role-row"><span class="role-chip rc-member">Member</span><span class="role-desc">Work leads, use Flowy, view everything</span></div>
+              <div class="role-row"><span class="role-chip rc-viewer">Viewer</span><span class="role-desc">Read-only dashboards and reports</span></div>
+            </div>
+            <div class="card">
+              <div class="sec-head"><div class="sec-title">Recent Activity</div></div>
+              <div id="team-log"><div style="padding:20px 16px;text-align:center;font-size:11.5px;color:var(--text-m);">Invites, role changes, and removals show here.</div></div>
+            </div>
           </div>
         </div>
       </div>
 
-      <div class="feed-grid">
-        <div class="card">
-          <div class="sec-head"><div class="sec-title">Members</div>
-            <div style="display:flex;align-items:center;gap:8px;">
-              <input type="text" id="team-search" placeholder="Search members…" oninput="teamFilter()" style="padding:5px 10px;background:var(--input-bg);border:1px solid var(--input-border);border-radius:4px;font-size:11.5px;font-family:inherit;color:var(--text);outline:none;width:150px;" />
-              <button class="btn-mini btn-mini-ghost" onclick="exportTeamCsv()">Export</button>
-              <div class="sec-sub" id="team-count"></div>
+      <!-- Activity section -->
+      <div class="teams-section" id="teams-section-activity">
+        <div class="card teams-activity-card">
+          <div class="sec-head">
+            <div class="sec-title">Team Activity</div>
+            <select id="teams-act-filter" class="teams-act-filter-sel" onchange="teamsApplyActFilter()">
+              <option value="all">All members</option>
+            </select>
+          </div>
+          <div id="teams-activity-feed" class="teams-activity-feed">
+            <div class="empty-state" style="padding:40px 20px;">
+              <i data-lucide="history"></i>
+              <div class="empty-state-title">No activity yet</div>
+              <div class="empty-state-sub">Team actions like invites, lead updates, and report generation show here.</div>
             </div>
-          </div>
-          <div class="table-wrap">
-            <table class="skel-table">
-              <thead><tr><th>Member</th><th>Role</th><th>Status</th><th>Added</th><th style="width:120px;"></th></tr></thead>
-              <tbody id="team-tbody"></tbody>
-            </table>
-          </div>
-        </div>
-        <div style="display:flex;flex-direction:column;gap:16px;">
-          <div class="card">
-            <div class="sec-head"><div class="sec-title">Roles &amp; Permissions</div></div>
-            <div class="role-row"><span class="role-chip rc-owner">Owner</span><span class="role-desc">Everything — billing, seats, team, settings</span></div>
-            <div class="role-row"><span class="role-chip rc-admin">Admin</span><span class="role-desc">Manage team &amp; settings, edit leads</span></div>
-            <div class="role-row"><span class="role-chip rc-member">Member</span><span class="role-desc">Work leads, use Flowy, view everything</span></div>
-            <div class="role-row"><span class="role-chip rc-viewer">Viewer</span><span class="role-desc">Read-only dashboards and reports</span></div>
-          </div>
-          <div class="card">
-            <div class="sec-head"><div class="sec-title">Team Activity</div></div>
-            <div id="team-log"><div class="empty-note" style="padding:20px 16px;text-align:center;font-size:11.5px;color:var(--text-m);">Invites, role changes, and removals show here.</div></div>
           </div>
         </div>
       </div>
+
+    </div><!-- /teams-hub -->
+
+    <!-- New channel modal -->
+    <div class="teams-ch-modal" id="teams-ch-modal">
+      <div class="teams-ch-modal-box">
+        <div class="teams-ch-modal-head">
+          <span class="teams-ch-modal-title">New Channel</span>
+          <button class="teams-info-close" onclick="teamsCloseChModal()"><i data-lucide="x"></i></button>
+        </div>
+        <div class="teams-ch-modal-body">
+          <label style="font-size:12px;font-weight:600;color:var(--text-m);display:block;margin-bottom:6px;">Channel name</label>
+          <input id="teams-ch-name-input" type="text" placeholder="e.g. Leads, Q3 Deals…" maxlength="40"
+            style="width:100%;padding:9px 12px;background:var(--input-bg);border:1px solid var(--input-border);border-radius:4px;font-size:13.5px;font-family:inherit;color:var(--text);outline:none;box-sizing:border-box;"
+            onkeydown="if(event.key==='Enter')teamsCreateChannel()" />
+          <div style="font-size:11.5px;color:var(--text-m);">Use letters, numbers, spaces, dashes, or underscores.</div>
+        </div>
+        <div class="teams-ch-modal-footer">
+          <button class="btn-mini btn-mini-ghost" onclick="teamsCloseChModal()">Cancel</button>
+          <button class="btn-mini btn-mini-primary" onclick="teamsCreateChannel()">Create channel</button>
+        </div>
+      </div>
     </div>
+
+    <!-- Lead picker -->
+    <div class="teams-lead-picker" id="teams-lead-picker">
+      <div class="teams-lead-picker-box">
+        <div class="teams-lead-picker-head">
+          <input id="teams-lead-search" class="teams-lead-picker-search" placeholder="Search leads…" oninput="teamsFilterLeadPicker(this.value)" />
+          <button class="teams-lead-picker-close" onclick="teamsCloseLeadPicker()"><i data-lucide="x"></i></button>
+        </div>
+        <div id="teams-lead-pick-list" class="teams-lead-picker-list">
+          <div style="padding:20px 16px;text-align:center;font-size:12.5px;color:var(--text-m);">No leads loaded yet</div>
+        </div>
+      </div>
+    </div>
+
   </div>
 
   <!-- AUTOMATIONS -->
@@ -1670,6 +1941,7 @@
 <div id="toast"><div class="toast-icon"><i data-lucide="check"></i></div><div id="toast-msg" style="font-size:12.5px;font-weight:600;color:var(--text-s);line-height:1.45;"></div></div>
 
 <script src="crm.js?v=20"></script>
+<script src="teams.js?v=1"></script>
 <script src="flowy.js?v=9"></script>
 <script>
 const AUTH0_DOMAIN    = 'auth.flowaify.app';
@@ -1685,6 +1957,7 @@ async function initAuth() {
         redirect_uri: window.location.origin + '/portal.html',
       }
     });
+    window.__auth0Client = auth0Client;
     const ok = await auth0Client.isAuthenticated();
     if (!ok) { window.location.href = 'portal.html'; return; }
     boot(await auth0Client.getUser());
@@ -1767,7 +2040,7 @@ function showPage(id) {
   document.getElementById('topbar-title').textContent = m.title || id;
   document.getElementById('topbar-sub').textContent   = m.sub   || '';
   window.scrollTo(0,0); closeProfileMenu(); closeMob();
-  if (id === 'team' && window.teamLoad) teamLoad();
+  if (id === 'team') { if (window.teamsInit) teamsInit(); else if (window.teamLoad) teamLoad(); }
   lucide.createIcons();
 }
 document.querySelectorAll('.nav-item[data-page]').forEach(el => el.addEventListener('click', () => showPage(el.dataset.page)));
