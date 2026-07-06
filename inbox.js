@@ -9,31 +9,15 @@ var _inboxSearchTimer   = null;
 
 // ─── init ─────────────────────────────────────────────────────────────────────
 
-async function inboxInit() {
+function inboxInit() {
   if (_inboxPollingId) { clearInterval(_inboxPollingId); _inboxPollingId = null; }
-
-  // Detect OAuth callback redirects
-  var params = new URLSearchParams(window.location.search);
-  if (params.get('inbox') === 'connected') {
-    history.replaceState(null, '', window.location.pathname);
-    setTimeout(function() { showToast('Email account connected.'); }, 300);
-  }
-  if (params.get('inbox') === 'error') {
-    history.replaceState(null, '', window.location.pathname);
-    setTimeout(function() { showToast('Email connection failed — please try again.'); }, 300);
-  }
-
-  try {
-    var r = await inboxFetch('GET', '/inbox/status');
-    _inboxConnected = r.connected;
-    _inboxProvider  = r.provider || null;
-  } catch(e) { _inboxConnected = false; }
-
-  if (!_inboxConnected) { inboxShowConnect(); return; }
   inboxShowMain();
-  await inboxLoadFolders();
-  await inboxLoadThreads(_inboxCurrentFolder);
-  _inboxPollingId = setInterval(inboxPoll, 10000);
+  inboxRenderStaticFolders();
+  var list = document.getElementById('inbox-thread-list');
+  if (list) list.innerHTML = inboxEmptyFolderState();
+  var vp = document.getElementById('inbox-view-pane');
+  if (vp) { vp.innerHTML = inboxEmptyThread(); vp.classList.remove('open'); }
+  lucide.createIcons();
 }
 window.inboxInit = inboxInit;
 
@@ -90,6 +74,37 @@ async function inboxLoadFolders() {
 
 var _inboxFolderData = [];
 
+var INBOX_STATIC_FOLDERS = [
+  { id: 'INBOX',   name: 'Inbox',   icon: 'inbox' },
+  { id: 'STARRED', name: 'Starred', icon: 'star' },
+  { id: 'DRAFT',   name: 'Drafts',  icon: 'file' },
+  { id: 'SENT',    name: 'Sent',    icon: 'send-horizontal' },
+  { id: 'SPAM',    name: 'Spam',    icon: 'shield-off' },
+  { id: 'TRASH',   name: 'Trash',   icon: 'trash-2' },
+];
+
+function inboxRenderStaticFolders() {
+  var html = '';
+  INBOX_STATIC_FOLDERS.forEach(function(f) {
+    var act = f.id === _inboxCurrentFolder ? ' active' : '';
+    html += '<div class="inbox-folder-item' + act + '" onclick="inboxSelectFolder(\'' + f.id + '\')">' +
+      '<i data-lucide="' + f.icon + '"></i><span>' + f.name + '</span></div>';
+  });
+  html += '<div class="inbox-folder-sep"></div>';
+  var la = _inboxCurrentFolder === 'LEAD_THREADS' ? ' active' : '';
+  html += '<div class="inbox-folder-item' + la + '" onclick="inboxSelectFolder(\'LEAD_THREADS\')">' +
+    '<i data-lucide="users-round"></i><span>Lead Threads</span></div>';
+  var el = document.getElementById('inbox-folder-list');
+  if (el) { el.innerHTML = html; lucide.createIcons(); }
+}
+
+function inboxEmptyFolderState() {
+  return '<div class="empty-state" style="padding:40px 16px;">' +
+    '<i data-lucide="mail"></i>' +
+    '<div class="empty-state-title">Select a folder</div>' +
+    '<div class="empty-state-sub">Choose a folder on the left to view messages.</div></div>';
+}
+
 function renderFolderList(folders) {
   if (folders.length) _inboxFolderData = folders;
   var use = _inboxFolderData;
@@ -121,10 +136,21 @@ function renderFolderList(folders) {
 async function inboxSelectFolder(folderId) {
   _inboxCurrentFolder = folderId;
   _inboxCurrentThread = null;
-  renderFolderList([]);
+  inboxRenderStaticFolders();
   var vp = document.getElementById('inbox-view-pane');
   if (vp) { vp.innerHTML = inboxEmptyThread(); vp.classList.remove('open'); lucide.createIcons(); }
-  await inboxLoadThreads(folderId);
+  if (_inboxConnected) {
+    await inboxLoadThreads(folderId);
+  } else {
+    var list = document.getElementById('inbox-thread-list');
+    if (list) {
+      list.innerHTML = '<div class="empty-state" style="padding:40px 16px;">' +
+        '<i data-lucide="mail"></i>' +
+        '<div class="empty-state-title">No messages</div>' +
+        '<div class="empty-state-sub">This folder is empty.</div></div>';
+      lucide.createIcons();
+    }
+  }
 }
 window.inboxSelectFolder = inboxSelectFolder;
 
