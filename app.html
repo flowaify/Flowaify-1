@@ -908,6 +908,7 @@
     #ov-kpi-grid .stat-card { cursor: grab; }
     #ov-kpi-grid .stat-card:active { cursor: grabbing; }
     #page-overview { overflow-y: auto; }
+    #page-overview > * { flex-shrink: 0; }
     /* KPI strip: separate cards with gaps (not the joined stats-grid look) */
     #ov-kpi-grid { display: flex; gap: 12px; background: transparent; border: none; border-radius: 0; overflow: visible; }
     #ov-kpi-grid .stat-card { flex: 1 1 0; min-width: 0; margin: 0; background: var(--bg-card); border: 1px solid var(--card-border); border-radius: 4px; }
@@ -1250,6 +1251,7 @@
     /* Leads page */
     /* LEADS PAGE — Lead Pipeline / Command Center */
     #page-leads { overflow-y: auto; }
+    #page-leads > * { flex-shrink: 0; }
     #page-leads .leads-split { align-items: start; }
     .lt-select { padding: 8px 10px; background: var(--input-bg); border: 1px solid var(--input-border); border-radius: 5px; font-size: 12px; font-family: inherit; color: var(--text-s); outline: none; cursor: pointer; }
     .lt-tabs { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
