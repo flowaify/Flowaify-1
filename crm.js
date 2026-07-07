@@ -571,26 +571,12 @@ window.renderCalendar = renderCalendar;
 
 /* ── Notification bell ──────────────────────────────────────────────────────── */
 function renderBell(needsAttention) {
+  // Delegate to notification drawer builder if available; it handles badge too
+  if (typeof buildNotifList === 'function') { buildNotifList(); return; }
+  // Fallback: update badge only
   const badge = document.getElementById('bell-badge');
-  const list = document.getElementById('bell-list');
   const n = (needsAttention || []).length;
-  if (badge) {
-    badge.textContent = n;
-    badge.style.display = n > 0 ? 'flex' : 'none';
-  }
-  if (!list) return;
-  if (n === 0) {
-    list.innerHTML = '<div class="bell-empty">All clear — no leads need attention.</div>';
-    return;
-  }
-  list.innerHTML = needsAttention.slice(0, 6).map(function(c) {
-    const safeName = String(c.name || '').replace(/[^\w\s.@-]/g, '');
-    return '<div class="bell-item" onclick="bellOpenLead(\'' + (c.id ? String(c.id).replace(/[^\w-]/g, '') : '') + '\', \'' + safeName + '\')">' +
-      avatarHtml(c.name) +
-      '<div><div class="bell-item-name">' + escDash(c.name) + '</div>' +
-      '<div class="bell-item-sub">' + escDash(c.status) + ' · No touch in 24h+</div></div>' +
-      '</div>';
-  }).join('');
+  if (badge) { badge.textContent = n; badge.style.display = n > 0 ? 'flex' : 'none'; }
 }
 
 function bellOpenLead(id, name) {
