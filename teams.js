@@ -684,6 +684,39 @@ function twEsc(s) {
   return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 }
 
+// ── Overview "Team Chat" widget ───────────────────────────────────────────────
+
+async function ovTeamWidgetRefresh() {
+  var el = document.getElementById('ov-team-list');
+  if (!el) return;
+  var card = document.getElementById('card-team');
+  if (card && card.style.display === 'none') return;
+  var r = await twFetch('GET', '/team/channels');
+  var channels = (r && r.status === 200 && r.data && r.data.channels) || [];
+  if (!channels.length) {
+    el.innerHTML = '<div class="empty-state" style="padding:26px 18px;"><i data-lucide="message-square"></i>' +
+      '<div class="empty-state-title">No channels yet</div>' +
+      '<div class="empty-state-sub">Open the Team page to start chatting.</div></div>';
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+    return;
+  }
+  el.innerHTML = channels.slice(0, 4).map(function(c) {
+    var unread = c.unreadCount || 0;
+    var preview = c.lastMessage
+      ? twEsc(String(c.lastMessage).slice(0, 48))
+      : 'No messages yet';
+    return '<div class="ovt-row" onclick="showPage(\'team\')">' +
+      '<div class="ovt-hash">#</div>' +
+      '<div class="ovt-body">' +
+        '<div class="ovt-name">' + twEsc(c.name) + '</div>' +
+        '<div class="ovt-preview">' + preview + '</div>' +
+      '</div>' +
+      (unread > 0 ? '<span class="ovt-unread">' + unread + '</span>' : '') +
+    '</div>';
+  }).join('');
+}
+window.ovTeamWidgetRefresh = ovTeamWidgetRefresh;
+
 function twInitials(name) {
   var parts = String(name || '?').trim().split(/\s+/);
   return ((parts[0][0] || '') + (parts[1] ? parts[1][0] : '')).toUpperCase();

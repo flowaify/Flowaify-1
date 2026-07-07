@@ -1174,6 +1174,7 @@ function rerender() {
   renderBell(data.needsAttention || []);
   renderInsights(data, ranged, days);
   renderFunnel(data, ranged);
+  renderMiniFunnel(data.contacts || []);
   renderCalendar();
 
   if (typeof lucide !== 'undefined') lucide.createIcons();
@@ -1316,6 +1317,37 @@ function renderTopLeads(contacts) {
       '<div class="pl-score">' + scorePct + '</div>' +
     '</div>';
   }).join('');
+}
+
+/* Mini conversion funnel — overview widget */
+function renderMiniFunnel(contacts) {
+  const el = document.getElementById('ov-funnel');
+  if (!el) return;
+  const total = contacts.length;
+  if (!total) {
+    el.innerHTML = '<div class="empty-state" style="padding:26px 18px;"><i data-lucide="filter"></i>' +
+      '<div class="empty-state-title">No leads yet</div>' +
+      '<div class="empty-state-sub">Funnel fills in as leads come in.</div></div>';
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+    return;
+  }
+  const engaged = contacts.filter(function(c) { return c.lastTouchAt || scoreRank(c.status) > 0; }).length;
+  const booked = contacts.filter(function(c) { return String(c.status || '').toUpperCase().indexOf('BOOK') !== -1; }).length;
+  const rows = [
+    ['All Leads', total,   '#3b82f6'],
+    ['Engaged',   engaged, '#0057FF'],
+    ['Booked',    booked,  '#059669']
+  ];
+  const conv = Math.round((booked / total) * 100);
+  el.innerHTML = rows.map(function(r) {
+    const pct = Math.max(4, Math.round((r[1] / total) * 100));
+    return '<div class="ovf-row">' +
+      '<div class="ovf-label">' + r[0] + '</div>' +
+      '<div class="ovf-track"><div class="ovf-fill" style="width:' + pct + '%;background:' + r[2] + ';"></div></div>' +
+      '<div class="ovf-count">' + r[1] + '</div>' +
+    '</div>';
+  }).join('') +
+  '<div class="ovf-foot">' + conv + '% lead-to-booked conversion</div>';
 }
 
 function renderNeedsAttention(needsAttention) {
