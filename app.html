@@ -619,6 +619,7 @@
       #ov-kpi-grid .stat-card { flex: 1 1 calc(50% - 6px); }
       body.ov-customize .main { margin-right: 0; }
       #ov-catalog { width: min(320px, 92vw); }
+      .leads-split > .card:last-child { position: static; max-height: none; overflow-y: visible; }
     }
     .card-ctx-item { padding: 8px 12px; font-size: 12px; cursor: pointer; color: var(--text); display: flex; align-items: center; gap: 8px; }
     .card-ctx-item:hover { background: var(--hover); }
@@ -1255,7 +1256,13 @@
     #page-leads .leads-split { align-items: start; }
     .lt-select { padding: 8px 10px; background: var(--input-bg); border: 1px solid var(--input-border); border-radius: 5px; font-size: 12px; font-family: inherit; color: var(--text-s); outline: none; cursor: pointer; }
     .lt-tabs { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
-    .lt-tab { font-size: 11.5px; font-weight: 600; padding: 6px 12px; border-radius: 5px; cursor: pointer; color: var(--text-s); border: 1px solid var(--border); background: var(--bg-card); white-space: nowrap; transition: background 0.12s, color 0.12s, border-color 0.12s; }
+    .lt-tab { font-size: 11.5px; font-weight: 600; padding: 6px 12px; border-radius: 5px; cursor: pointer; color: var(--text-s); border: 1px solid var(--border); background: var(--bg-card); white-space: nowrap; transition: background 0.12s, color 0.12s, border-color 0.12s; user-select: none; -webkit-user-select: none; }
+    .lt-clear { margin-left: auto; color: var(--red); border-color: transparent; background: transparent; }
+    .lt-clear:hover { background: var(--red-dim, rgba(220,38,38,.08)); }
+    .lt-bulk { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border: 1px solid rgba(59,130,246,.35); background: var(--blue-dim); border-radius: 5px; margin-bottom: 12px; flex-wrap: wrap; }
+    .lt-bulk-count { font-size: 12px; font-weight: 700; color: var(--blue); white-space: nowrap; }
+    .lt-bulk-label { font-size: 11px; color: var(--text-m); white-space: nowrap; }
+    .leads-split > .card:last-child { position: sticky; top: 0; max-height: calc(100dvh - var(--hdr) - 28px); overflow-y: auto; }
     .lt-tab:hover:not(.active) { background: var(--hover); }
     .lt-tab.active { background: var(--blue-dim); color: var(--blue); border-color: rgba(59,130,246,.35); }
     .lt-tab span { font-weight: 500; opacity: 0.8; }
@@ -1778,11 +1785,11 @@
   <div class="page" id="page-leads">
 
     <div class="stats-grid sg-5">
-      <div class="card stat-card"><div class="stat-top"><div class="stat-label"><i data-lucide="users" class="kpi-glyph kg-blue"></i>Total Leads</div></div><div class="stat-val-row"><div class="stat-val" id="val-total-leads">—</div><div class="spark" id="spark-leads-total"></div></div><div class="stat-hint">All contacts in your CRM</div></div>
-      <div class="card stat-card"><div class="stat-top"><div class="stat-label"><i data-lucide="user-plus" class="kpi-glyph kg-blue"></i><span id="label-leads-new">New Leads (30d)</span></div></div><div class="stat-val" id="val-leads-new">—</div><div class="stat-delta-row" id="delta-leads-new"></div><div class="stat-hint">Created in the selected period</div></div>
-      <div class="card stat-card"><div class="stat-top"><div class="stat-label"><i data-lucide="flame" class="kpi-glyph kg-red"></i>Hot Leads</div></div><div class="stat-val" id="val-leads-hot">—</div><div class="stat-hint">Highest follow-up priority</div></div>
-      <div class="card stat-card"><div class="stat-top"><div class="stat-label"><i data-lucide="calendar-check" class="kpi-glyph kg-teal"></i>Booked Calls</div></div><div class="stat-val" id="val-leads-booked">—</div><div class="stat-hint">Contacts marked as booked</div></div>
-      <div class="card stat-card"><div class="stat-top"><div class="stat-label"><i data-lucide="alert-triangle" class="kpi-glyph kg-amber"></i>Needs Follow-Up</div></div><div class="stat-val" id="val-leads-followup">—</div><div class="stat-hint">No contact in 48h+</div></div>
+      <div class="card stat-card" style="cursor:pointer;" onclick="leadsSetTab('all')" title="Show all leads"><div class="stat-top"><div class="stat-label"><i data-lucide="users" class="kpi-glyph kg-blue"></i>Total Leads</div></div><div class="stat-val-row"><div class="stat-val" id="val-total-leads">—</div><div class="spark" id="spark-leads-total"></div></div><div class="stat-hint">All contacts in your CRM</div></div>
+      <div class="card stat-card" style="cursor:pointer;" onclick="leadsSetTab('all')" title="Show all leads"><div class="stat-top"><div class="stat-label"><i data-lucide="user-plus" class="kpi-glyph kg-blue"></i><span id="label-leads-new">New Leads (30d)</span></div></div><div class="stat-val" id="val-leads-new">—</div><div class="stat-delta-row" id="delta-leads-new"></div><div class="stat-hint">Created in the selected period</div></div>
+      <div class="card stat-card" style="cursor:pointer;" onclick="leadsSetTab('hot')" title="Show hot leads"><div class="stat-top"><div class="stat-label"><i data-lucide="flame" class="kpi-glyph kg-red"></i>Hot Leads</div></div><div class="stat-val" id="val-leads-hot">—</div><div class="stat-hint">Highest follow-up priority</div></div>
+      <div class="card stat-card" style="cursor:pointer;" onclick="leadsSetTab('booked')" title="Show booked leads"><div class="stat-top"><div class="stat-label"><i data-lucide="calendar-check" class="kpi-glyph kg-teal"></i>Booked Calls</div></div><div class="stat-val" id="val-leads-booked">—</div><div class="stat-hint">Contacts marked as booked</div></div>
+      <div class="card stat-card" style="cursor:pointer;" onclick="leadsSetTab('followup')" title="Show leads needing follow-up"><div class="stat-top"><div class="stat-label"><i data-lucide="alert-triangle" class="kpi-glyph kg-amber"></i>Needs Follow-Up</div></div><div class="stat-val" id="val-leads-followup">—</div><div class="stat-hint">No contact in 48h+</div></div>
     </div>
 
     <div class="card mb20" style="display:flex;align-items:center;gap:9px;flex-wrap:wrap;padding:11px 14px;">
@@ -1811,6 +1818,20 @@
       <div class="lt-tab" data-tab="booked" onclick="leadsSetTab('booked')">Booked <span id="ltc-booked"></span></div>
       <div class="lt-tab" data-tab="followup" onclick="leadsSetTab('followup')">Needs Follow-Up <span id="ltc-followup"></span></div>
       <div class="lt-tab" data-tab="noactivity" onclick="leadsSetTab('noactivity')">No Activity <span id="ltc-noactivity"></span></div>
+      <div class="lt-tab lt-clear" id="lt-clear" style="display:none;" onclick="leadsClearFilters()">✕ Clear filters</div>
+    </div>
+
+    <div class="lt-bulk" id="lt-bulk" style="display:none;">
+      <span class="lt-bulk-count" id="lt-bulk-count">0 selected</span>
+      <button class="btn-mini btn-mini-ghost" onclick="leadsBulkExport()" style="display:inline-flex;align-items:center;gap:6px;"><i data-lucide="download" style="width:12px;height:12px;"></i>Export CSV</button>
+      <span class="lt-bulk-label">Set status:</span>
+      <div class="status-picker" style="margin:0;">
+        <button class="status-chip sc-hot" onclick="leadsBulkStatus('HOT')">HOT</button>
+        <button class="status-chip sc-warm" onclick="leadsBulkStatus('WARM')">WARM</button>
+        <button class="status-chip sc-cold" onclick="leadsBulkStatus('COLD')">COLD</button>
+        <button class="status-chip sc-booked" onclick="leadsBulkStatus('BOOKED')">BOOKED</button>
+      </div>
+      <button class="btn-mini btn-mini-ghost" onclick="leadsBulkClear()" style="margin-left:auto;">✕ Clear</button>
     </div>
 
     <div class="leads-split">
@@ -1825,7 +1846,7 @@
               <th class="th-sort" data-col="source" data-sort="source" onclick="sortLeads('source')">Source</th>
               <th class="th-sort" data-col="status" data-sort="status" onclick="sortLeads('status')">Status</th>
               <th class="th-sort" data-col="touch" data-sort="lastTouchAt" onclick="sortLeads('lastTouchAt')">Last Touch</th>
-              <th data-col="score">Score</th>
+              <th class="th-sort" data-col="score" data-sort="score" onclick="sortLeads('score')">Score</th>
               <th class="th-sort desc" data-col="created" data-sort="createdAt" onclick="sortLeads('createdAt')">Created</th>
               <th data-col="actions" style="width:74px;">Actions</th>
             </tr></thead>
@@ -2755,7 +2776,7 @@
 
 <div id="toast"><div class="toast-icon"><i data-lucide="check"></i></div><div id="toast-msg" style="font-size:12.5px;font-weight:600;color:var(--text-s);line-height:1.45;"></div></div>
 
-<script src="crm.js?v=26"></script>
+<script src="crm.js?v=27"></script>
 <script src="teams.js?v=4"></script>
 <script src="invoice.js?v=3"></script>
 <script src="inbox.js?v=2"></script>

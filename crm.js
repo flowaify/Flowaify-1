@@ -754,6 +754,11 @@ function exportLeadsCsv() {
   const rows = window.__leadsFiltered && window.__leadsFiltered.length
     ? window.__leadsFiltered
     : (window.__crmData ? window.__crmData.contacts : []);
+  leadsCsvDownload(rows);
+}
+window.exportLeadsCsv = exportLeadsCsv;
+
+function leadsCsvDownload(rows) {
   if (!rows.length) { if (typeof showToast === 'function') showToast('No leads to export.'); return; }
   const esc = function(v) { return '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"'; };
   const head = ['Name','Email','Phone','Source','Status','Last Activity','Created'];
@@ -770,7 +775,7 @@ function exportLeadsCsv() {
   URL.revokeObjectURL(a.href);
   if (typeof showToast === 'function') showToast('Exported ' + rows.length + ' leads to CSV.');
 }
-window.exportLeadsCsv = exportLeadsCsv;
+window.leadsCsvDownload = leadsCsvDownload;
 
 /* ── Printable report ───────────────────────────────────────────────────────── */
 /* ── Report Editor ───────────────────────────────────────────────────────────── */
@@ -1384,7 +1389,7 @@ function renderLeadsStats(data, ranged, days) {
   if (newLabel) newLabel.textContent = 'New Leads (' + days + 'd)';
 
   setText('val-leads-hot', contacts.filter(function(c) { return scoreRank(c.status) === 4; }).length);
-  setText('val-leads-booked', overview.bookedCalls);
+  setText('val-leads-booked', contacts.filter(function(c) { return scoreRank(c.status) === 3; }).length);
   setText('val-leads-followup', leadsNeedFollowUp(contacts).length);
 }
 
@@ -1500,13 +1505,15 @@ function applyLeadFilters() {
   const sort = window.__leadSort;
   const dateKeys = { createdAt: 1, lastTouchAt: 1 };
   filtered.sort(function(a, b) {
-    let va = a[sort.key], vb = b[sort.key];
-    if (dateKeys[sort.key]) {
-      va = va ? new Date(va).getTime() : null;
-      vb = vb ? new Date(vb).getTime() : null;
+    let va, vb;
+    if (sort.key === 'score') {
+      va = leadScore(a); vb = leadScore(b);
+    } else if (dateKeys[sort.key]) {
+      va = a[sort.key] ? new Date(a[sort.key]).getTime() : null;
+      vb = b[sort.key] ? new Date(b[sort.key]).getTime() : null;
     } else {
-      va = va ? String(va).toLowerCase() : null;
-      vb = vb ? String(vb).toLowerCase() : null;
+      va = a[sort.key] ? String(a[sort.key]).toLowerCase() : null;
+      vb = b[sort.key] ? String(b[sort.key]).toLowerCase() : null;
     }
     if (va == null && vb == null) return 0;
     if (va == null) return 1;
@@ -1516,8 +1523,25 @@ function applyLeadFilters() {
 
   window.__leadsFiltered = filtered;
   window.__leadsPage = 1;
+
+  /* clear-filters chip visibility */
+  const clearChip = document.getElementById('lt-clear');
+  if (clearChip) {
+    const active = !!(ql || status || source || isFinite(rangeD) || tab !== 'all');
+    clearChip.style.display = active ? '' : 'none';
+  }
+
   renderLeadsPageSlice();
 }
+
+function leadsClearFilters() {
+  const ls = document.getElementById('lead-search');   if (ls) ls.value = '';
+  const fs = document.getElementById('filter-status'); if (fs) fs.value = '';
+  const fo = document.getElementById('filter-source'); if (fo) fo.value = '';
+  const fr = document.getElementById('filter-range');  if (fr) fr.value = '';
+  leadsSetTab('all');
+}
+window.leadsClearFilters = leadsClearFilters;
 
 function renderLeadsPageSlice() {
   const all = window.__leadsFiltered || [];
@@ -1528,6 +1552,7 @@ function renderLeadsPageSlice() {
   const from = (page - 1) * per;
   renderLeadsTable(all.slice(from, from + per));
   leadsApplyCols();
+  leadsBulkSync();
 
   const countEl = document.getElementById('leads-page-count');
   if (countEl) countEl.textContent = all.length + ' lead' + (all.length === 1 ? '' : 's');
@@ -1576,13 +1601,70 @@ window.leadsSetTab = leadsSetTab;
 
 function leadsCheckAll(cb) {
   document.querySelectorAll('#full-leads-tbody .lt-check').forEach(function(c) { c.checked = cb.checked; });
+  leadsBulkSync();
 }
 window.leadsCheckAll = leadsCheckAll;
+
+/* ── Bulk actions ────────────────────────────────────────────────────────────── */
+function leadsSelectedIds() {
+  return Array.from(document.querySelectorAll('#full-leads-tbody .lt-check:checked'))
+    .map(function(c) { return c.getAttribute('data-id'); }).filter(Boolean);
+}
+
+function leadsBulkSync() {
+  const n = leadsSelectedIds().length;
+  const bar = document.getElementById('lt-bulk');
+  const cnt = document.getElementById('lt-bulk-count');
+  if (bar) bar.style.display = n > 0 ? 'flex' : 'none';
+  if (cnt) cnt.textContent = n + ' selected';
+  const head = document.querySelector('#page-leads thead .lt-check');
+  if (head) {
+    const total = document.querySelectorAll('#full-leads-tbody .lt-check').length;
+    head.checked = total > 0 && n === total;
+  }
+}
+window.leadsBulkSync = leadsBulkSync;
+
+function leadsBulkClear() {
+  document.querySelectorAll('#page-leads .lt-check').forEach(function(c) { c.checked = false; });
+  leadsBulkSync();
+}
+window.leadsBulkClear = leadsBulkClear;
+
+function leadsBulkExport() {
+  const ids = leadsSelectedIds();
+  const rows = ((window.__crmData || {}).contacts || []).filter(function(c) { return ids.indexOf(String(c.id)) !== -1; });
+  leadsCsvDownload(rows);
+}
+window.leadsBulkExport = leadsBulkExport;
+
+async function leadsBulkStatus(status) {
+  const ids = leadsSelectedIds();
+  if (!ids.length) return;
+  const contacts = (window.__crmData || {}).contacts || [];
+  const targets = contacts.filter(function(c) { return ids.indexOf(String(c.id)) !== -1; });
+  const prev = {};
+  targets.forEach(function(c) { prev[c.id] = c.status; c.status = status; }); /* optimistic */
+  rerender();
+  let fails = 0;
+  for (let i = 0; i < targets.length; i++) {
+    const ok = await updateLead(targets[i].id, { status: status });
+    if (!ok) { targets[i].status = prev[targets[i].id]; fails++; }
+  }
+  if (fails) rerender();
+  if (typeof showToast === 'function') {
+    showToast(fails
+      ? (targets.length - fails) + ' updated, ' + fails + ' failed.'
+      : targets.length + ' lead' + (targets.length === 1 ? '' : 's') + ' marked ' + status + '.');
+  }
+  leadsBulkClear();
+}
+window.leadsBulkStatus = leadsBulkStatus;
 
 function sortLeads(key) {
   const s = window.__leadSort;
   if (s.key === key) s.dir = -s.dir;
-  else { s.key = key; s.dir = key === 'createdAt' || key === 'lastTouchAt' ? -1 : 1; }
+  else { s.key = key; s.dir = (key === 'createdAt' || key === 'lastTouchAt' || key === 'score') ? -1 : 1; }
   document.querySelectorAll('.th-sort').forEach(function(th) {
     th.classList.remove('asc', 'desc');
     if (th.getAttribute('data-sort') === s.key) th.classList.add(s.dir === 1 ? 'asc' : 'desc');
@@ -1622,7 +1704,7 @@ function leadRowHtml(c) {
   const sel = c.id === window.__selectedLeadId ? ' class="row-selected"' : '';
   const safeId = String(c.id).replace(/[^\w-]/g, '');
   return '<tr' + sel + ' data-id="' + escDash(c.id) + '" onclick="selectLead(\'' + safeId + '\')">' +
-    '<td data-col="check" onclick="event.stopPropagation()"><input type="checkbox" class="lt-check" /></td>' +
+    '<td data-col="check" onclick="event.stopPropagation()"><input type="checkbox" class="lt-check" data-id="' + escDash(c.id) + '" onchange="leadsBulkSync()" /></td>' +
     '<td><div class="lead-cell">' + avatarHtml(c.name) + '<div style="font-weight:600;font-size:12.5px;">' + escDash(c.name) + '</div></div></td>' +
     '<td data-col="contact">' +
     (c.email ? '<div style="font-size:11.5px;">' + escDash(c.email) + '</div>' : '') +
