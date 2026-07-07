@@ -501,6 +501,50 @@
     .tl-name { font-size: 12.5px; font-weight: 600; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .tl-sub  { font-size: 10.5px; color: var(--text-m); }
 
+    /* PRIORITY LEADS — filter tabs */
+    .pl-tabs { display: flex; align-items: center; gap: 3px; }
+    .pl-tab { font-size: 10px; font-weight: 600; padding: 3px 7px; border-radius: 3px; cursor: pointer; color: var(--text-m); border: 1px solid transparent; white-space: nowrap; line-height: 1.5; }
+    .pl-tab.active { background: var(--blue-dim); color: var(--blue); border-color: rgba(59,130,246,.15); }
+    .pl-tab:hover:not(.active) { background: var(--hover); }
+    .pl-tab-cnt { font-weight: 500; opacity: 0.75; }
+    .pl-row { display: flex; align-items: center; gap: 10px; padding: 8px 14px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.1s; }
+    .pl-row:last-child { border-bottom: none; }
+    .pl-row:hover { background: var(--hover); }
+    .pl-body { flex: 1; min-width: 0; }
+    .pl-name { font-size: 12.5px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .pl-meta { font-size: 10.5px; color: var(--text-m); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .pl-score { font-size: 11px; font-weight: 700; color: var(--text-m); min-width: 24px; text-align: right; flex-shrink: 0; }
+
+    /* LEAD SOURCES — donut chart */
+    .src-donut-wrap { display: flex; align-items: center; gap: 14px; padding: 14px 16px 8px; }
+    .src-donut-pos { position: relative; width: 100px; height: 100px; flex-shrink: 0; }
+    .src-donut-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: none; }
+    .src-donut-num { font-size: 17px; font-weight: 700; color: var(--text); letter-spacing: -0.5px; line-height: 1; }
+    .src-donut-lbl { font-size: 8.5px; font-weight: 600; color: var(--text-m); text-transform: uppercase; letter-spacing: 0.4px; margin-top: 2px; }
+    .src-legend { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 7px; overflow: hidden; }
+    .src-leg-row { display: flex; align-items: center; gap: 7px; }
+    .src-leg-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+    .src-leg-name { font-size: 11.5px; color: var(--text); flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .src-leg-cnt { font-size: 11px; font-weight: 600; color: var(--text-m); flex-shrink: 0; }
+    .src-foot2 { font-size: 10px; color: var(--text-m); padding: 4px 16px 10px; border-top: 1px solid var(--border); }
+
+    /* CARD DRAG HANDLES + CUSTOMIZE MODE */
+    .card { position: relative; }
+    .card-handle { position: absolute; top: 9px; right: 9px; width: 22px; height: 22px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2.5px; cursor: pointer; opacity: 0; transition: opacity 0.15s; border-radius: 3px; z-index: 10; }
+    .card-handle:hover { background: var(--hover); opacity: 1 !important; }
+    .card-handle span { width: 11px; height: 1.5px; background: var(--text-m); border-radius: 1px; display: block; }
+    .card:hover > .card-handle { opacity: 0.45; }
+    body.ov-customize .ov-mid > .card { outline: 1px dashed rgba(59,130,246,.3); }
+    body.ov-customize .card-handle { opacity: 0.7 !important; cursor: grab; }
+    .ov-customize-bar { display: none; align-items: center; gap: 8px; padding: 0 0 10px; }
+    body.ov-customize .ov-customize-bar { display: flex; }
+    .ov-cust-label { font-size: 12px; font-weight: 600; color: var(--blue); flex: 1; }
+    .card-ctx-menu { position: absolute; top: 30px; right: 8px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 5px; box-shadow: 0 4px 16px rgba(0,0,0,.12); z-index: 300; min-width: 130px; overflow: hidden; display: none; }
+    .card-ctx-menu.open { display: block; }
+    .card-ctx-item { padding: 8px 12px; font-size: 12px; cursor: pointer; color: var(--text); display: flex; align-items: center; gap: 8px; }
+    .card-ctx-item:hover { background: var(--hover); }
+    .card-ctx-item.ctx-danger { color: var(--red); }
+
     /* LEADS SCROLL WINDOW (~10 rows) */
     .table-scroll { max-height: 452px; overflow-y: auto; }
     .table-scroll thead th { position: sticky; top: 0; background: var(--bg-card); z-index: 2; }
@@ -1466,7 +1510,7 @@
   <div class="nav-item" data-page="settings" title="Settings"><i data-lucide="settings"></i><span class="nav-txt">Settings</span></div>
 
   <div class="sidebar-bottom">
-    <div class="preview-badge" onclick="showToast('Live data from Zoho CRM. Refresh to sync the latest.')">
+    <div class="preview-badge" onclick="showToast('Live mode — data syncs automatically every 60 seconds.')">
       <div class="preview-badge-dot"></div>
       <div class="preview-badge-text">Live Mode</div>
     </div>
@@ -1503,43 +1547,68 @@
 
   <!-- OVERVIEW -->
   <div class="page active" id="page-overview">
-    <div class="greet-row">
-      <div>
-        <div class="greet-title" id="greet-title">Welcome back</div>
-        <div class="greet-sub" id="greet-date"></div>
-      </div>
-    </div>
-
     <div class="stats-grid sg-7" id="ov-kpi-grid">
-      <div class="card stat-card" data-wid="new-leads"><div class="stat-top"><div class="stat-label"><i data-lucide="user-plus" class="kpi-glyph kg-blue"></i>New Leads Today</div></div><div class="stat-val-row"><div class="stat-val" id="val-new-leads">—</div><div class="spark" id="spark-new-leads"></div></div><div class="stat-delta-row" id="delta-new-leads"></div><div class="stat-hint">Leads created today in Zoho CRM</div></div>
-      <div class="card stat-card" data-wid="response-time"><div class="stat-top"><div class="stat-label"><i data-lucide="zap" class="kpi-glyph kg-green"></i>Avg Response</div><div id="await-response"></div></div><div class="stat-val" id="val-response-time">—</div><div class="stat-hint" id="hint-response" data-live="First-touch speed on new leads">Awaiting automation</div></div>
-      <div class="card stat-card" data-wid="ai-replies"><div class="stat-top"><div class="stat-label"><i data-lucide="sparkles" class="kpi-glyph kg-purple"></i>AI Replies</div><div id="await-ai-replies"></div></div><div class="stat-val" id="val-ai-replies">—</div><div class="stat-hint" id="hint-ai-replies" data-live="Instant responses sent by Flowaify AI">Awaiting automation</div></div>
-      <div class="card stat-card" data-wid="follow-ups"><div class="stat-top"><div class="stat-label"><i data-lucide="repeat-2" class="kpi-glyph kg-amber"></i>Sequences</div><div id="await-follow-ups"></div></div><div class="stat-val" id="val-follow-ups">—</div><div class="stat-hint" id="hint-follow-ups" data-live="HOT + WARM leads in follow-up">Awaiting automation</div></div>
+      <div class="card stat-card" data-wid="new-leads"><div class="stat-top"><div class="stat-label"><i data-lucide="user-plus" class="kpi-glyph kg-blue"></i>New Leads Today</div></div><div class="stat-val-row"><div class="stat-val" id="val-new-leads">—</div><div class="spark" id="spark-new-leads"></div></div><div class="stat-delta-row" id="delta-new-leads"></div><div class="stat-hint">Leads captured today</div></div>
+      <div class="card stat-card" data-wid="response-time"><div class="stat-top"><div class="stat-label"><i data-lucide="zap" class="kpi-glyph kg-green"></i>Avg Response</div><div id="await-response"></div></div><div class="stat-val" id="val-response-time">—</div><div class="stat-hint" id="hint-response" data-live="First-touch speed on new leads">No data yet</div></div>
+      <div class="card stat-card" data-wid="ai-replies"><div class="stat-top"><div class="stat-label"><i data-lucide="sparkles" class="kpi-glyph kg-purple"></i>AI Replies</div><div id="await-ai-replies"></div></div><div class="stat-val" id="val-ai-replies">—</div><div class="stat-hint" id="hint-ai-replies" data-live="Instant responses sent by Flowaify AI">No data yet</div></div>
+      <div class="card stat-card" data-wid="follow-ups"><div class="stat-top"><div class="stat-label"><i data-lucide="repeat-2" class="kpi-glyph kg-amber"></i>Sequences</div><div id="await-follow-ups"></div></div><div class="stat-val" id="val-follow-ups">—</div><div class="stat-hint" id="hint-follow-ups" data-live="HOT + WARM leads in follow-up">No data yet</div></div>
       <div class="card stat-card stat-hero" data-wid="pipeline"><div class="stat-top"><div class="stat-label"><i data-lucide="dollar-sign" class="kpi-glyph kg-green"></i>Pipeline Value</div></div><div class="stat-val" id="val-pipeline">—</div><div id="delta-pipeline"></div><div class="stat-hint">Total value of all open deals</div></div>
       <div class="card stat-card" data-wid="booked-calls"><div class="stat-top"><div class="stat-label"><i data-lucide="calendar-check" class="kpi-glyph kg-teal"></i>Booked Calls</div></div><div class="stat-val" id="val-booked-calls">—</div><div class="stat-hint">Deals or contacts marked as booked</div></div>
     </div>
 
-    <div class="g3 mb20 ov-mid">
-      <div class="card">
+    <div class="ov-customize-bar">
+      <span class="ov-cust-label">Drag cards to reorder the middle row</span>
+      <button class="btn-mini btn-mini-primary" onclick="ovCustSave()">Save Layout</button>
+      <button class="btn-mini btn-mini-ghost" onclick="ovCustCancel()">Cancel</button>
+    </div>
+
+    <div class="g3 mb20 ov-mid" id="ov-mid-grid">
+      <div class="card" id="card-sources">
+        <div class="card-handle" onclick="cardCtxOpen(event,'card-sources')" title="Card options"><span></span><span></span><span></span></div>
+        <div class="card-ctx-menu" id="ctx-card-sources">
+          <div class="card-ctx-item ctx-danger" onclick="cardCtxHide('card-sources')"><i data-lucide="eye-off"></i>Hide card</div>
+          <div class="card-ctx-item" onclick="ovCustToggle()"><i data-lucide="move"></i>Customize layout</div>
+        </div>
         <div class="sec-head"><div class="sec-title">Lead Sources</div><button class="exq-btn" onclick="flowyExplain('my lead sources')" title="Ask Flowy to explain"><i data-lucide="sparkles"></i></button></div>
-        <div style="padding:16px 16px 12px;" id="src-list" class="src-list"><div class="empty-state" style="padding:60px 20px;"><i data-lucide="pie-chart"></i><div class="empty-state-title">No leads in this period</div><div class="empty-state-sub">Widen the date range, or check back when new leads come in.</div></div></div>
+        <div id="src-list"></div>
       </div>
-      <div class="card card-tint-blue">
+      <div class="card card-tint-blue" id="card-goal">
+        <div class="card-handle" onclick="cardCtxOpen(event,'card-goal')" title="Card options"><span></span><span></span><span></span></div>
+        <div class="card-ctx-menu" id="ctx-card-goal">
+          <div class="card-ctx-item ctx-danger" onclick="cardCtxHide('card-goal')"><i data-lucide="eye-off"></i>Hide card</div>
+          <div class="card-ctx-item" onclick="ovCustToggle()"><i data-lucide="move"></i>Customize layout</div>
+        </div>
         <div class="sec-head"><div class="sec-title">Monthly Lead Goal</div><div class="sec-sub" id="goal-month-label"></div></div>
         <div id="goal-gauge" style="padding:14px 16px;"></div>
       </div>
-      <div class="card card-tint-amber">
+      <div class="card card-tint-amber" id="card-resp">
+        <div class="card-handle" onclick="cardCtxOpen(event,'card-resp')" title="Card options"><span></span><span></span><span></span></div>
+        <div class="card-ctx-menu" id="ctx-card-resp">
+          <div class="card-ctx-item ctx-danger" onclick="cardCtxHide('card-resp')"><i data-lucide="eye-off"></i>Hide card</div>
+          <div class="card-ctx-item" onclick="ovCustToggle()"><i data-lucide="move"></i>Customize layout</div>
+        </div>
         <div class="sec-head"><div class="sec-title">Response Time</div><span class="state-pill awaiting" id="pill-resp-ov"><span class="sp-dot"></span>Awaiting data</span></div>
-        <div class="chart-wrap" style="padding:12px 16px;height:80px;"><canvas id="ch-resp"></canvas><div class="chart-empty"><i data-lucide="trending-up"></i><div class="chart-empty-title">Awaiting automation data</div><div class="chart-empty-text">Charts once automations respond to leads.</div></div></div>
+        <div class="chart-wrap" style="padding:12px 16px;height:80px;"><canvas id="ch-resp"></canvas><div class="chart-empty"><i data-lucide="trending-up"></i><div class="chart-empty-title">No data yet</div><div class="chart-empty-text">Fills in once automations start responding to leads.</div></div></div>
         <div class="benchmark-note">Target: under 90 seconds</div>
       </div>
     </div>
 
     <div class="ov-bot">
       <div class="card">
-        <div class="sec-head"><div class="sec-title">Top Leads</div><div style="display:flex;align-items:center;gap:10px;"><span class="score-legend"><i class="sl-dot" style="background:var(--red);"></i>Hot <i class="sl-dot" style="background:#d97706;"></i>Warm <i class="sl-dot" style="background:#64748b;"></i>Cold</span><div class="sec-link" onclick="showPage('leads')">View all leads</div></div></div>
+        <div class="sec-head">
+          <div class="sec-title">Priority Leads</div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div class="pl-tabs">
+              <div class="pl-tab active" data-filter="all" onclick="ovSetLeadFilter('all')">All <span class="pl-tab-cnt" id="pl-cnt-all"></span></div>
+              <div class="pl-tab" data-filter="hot" onclick="ovSetLeadFilter('hot')">Hot <span class="pl-tab-cnt" id="pl-cnt-hot"></span></div>
+              <div class="pl-tab" data-filter="warm" onclick="ovSetLeadFilter('warm')">Warm <span class="pl-tab-cnt" id="pl-cnt-warm"></span></div>
+              <div class="pl-tab" data-filter="cold" onclick="ovSetLeadFilter('cold')">Cold <span class="pl-tab-cnt" id="pl-cnt-cold"></span></div>
+            </div>
+            <div class="sec-link" onclick="showPage('leads')">View all</div>
+          </div>
+        </div>
         <div id="top-leads-list">
-          <div class="empty-state" style="padding:34px 20px;"><i data-lucide="users"></i><div class="empty-state-title">No leads yet</div><div class="empty-state-sub">Your top 5 scored leads will rank here once contacts exist in Zoho CRM.</div></div>
+          <div class="empty-state" style="padding:34px 20px;"><i data-lucide="users"></i><div class="empty-state-title">No leads yet</div><div class="empty-state-sub">Priority leads appear here as contacts come in.</div></div>
         </div>
       </div>
       <div style="display:flex;flex-direction:column;gap:16px;">
@@ -1548,7 +1617,7 @@
           <div id="insights-list"></div>
         </div>
         <div class="card">
-          <div class="sec-head"><div class="sec-title">Needs Attention</div><div class="sec-link" onclick="showPage('automations')">View all</div></div>
+          <div class="sec-head"><div class="sec-title">Needs Attention</div><div class="sec-link" onclick="showPage('leads')">View all</div></div>
           <div id="attn-list"></div>
           <div class="empty-state" id="attn-empty" style="padding:22px 18px;"><i data-lucide="shield-alert"></i><div class="empty-state-title">All clear</div><div class="empty-state-sub">No leads need immediate attention.</div></div>
         </div>
@@ -1574,7 +1643,7 @@
     </div>
 
     <div class="stats-grid sg-5">
-      <div class="card stat-card"><div class="stat-top"><div class="stat-label"><i data-lucide="users" class="kpi-glyph kg-blue"></i>Total Leads</div></div><div class="stat-val-row"><div class="stat-val" id="val-total-leads">—</div><div class="spark" id="spark-leads-total"></div></div><div class="stat-hint">All contacts in Zoho CRM</div></div>
+      <div class="card stat-card"><div class="stat-top"><div class="stat-label"><i data-lucide="users" class="kpi-glyph kg-blue"></i>Total Leads</div></div><div class="stat-val-row"><div class="stat-val" id="val-total-leads">—</div><div class="spark" id="spark-leads-total"></div></div><div class="stat-hint">All contacts in your CRM</div></div>
       <div class="card stat-card"><div class="stat-top"><div class="stat-label"><i data-lucide="user-plus" class="kpi-glyph kg-blue"></i><span id="label-leads-new">New Leads (30d)</span></div></div><div class="stat-val" id="val-leads-new">—</div><div class="stat-delta-row" id="delta-leads-new"></div><div class="stat-hint">Created in the selected period</div></div>
       <div class="card stat-card"><div class="stat-top"><div class="stat-label"><i data-lucide="badge-check" class="kpi-glyph kg-green"></i>Qualified Leads</div></div><div class="stat-val" id="val-leads-qualified">—</div><div class="stat-hint">Leads Flowaify has categorized</div></div>
       <div class="card stat-card"><div class="stat-top"><div class="stat-label"><i data-lucide="calendar-check" class="kpi-glyph kg-teal"></i>Booked Calls</div></div><div class="stat-val" id="val-leads-booked">—</div><div class="stat-hint">Deals or contacts marked booked</div></div>
@@ -1938,10 +2007,10 @@
           <div><span class="bp-val" id="bp-conv">—</span><span class="bp-label">Conv. Rate</span></div>
         </div>
         <div class="chart-wrap" style="padding:10px 18px 16px;height:160px;"><canvas id="an-leads"></canvas><div class="chart-empty"><i data-lucide="trending-up"></i><div class="chart-empty-title">No leads in this period</div><div class="chart-empty-text">Widen the date range to see lead volume over time.</div></div></div></div>
-      <div class="card"><div class="sec-head"><div class="sec-title">Response Time Trend</div><span class="state-pill awaiting" id="pill-resp-an"><span class="sp-dot"></span>Awaiting automation data</span></div><div class="chart-wrap" style="padding:18px;"><canvas id="an-resp"></canvas><div class="chart-empty"><i data-lucide="activity"></i><div class="chart-empty-title">Awaiting automation data</div><div class="chart-empty-text">Fills in automatically once Flowaify automations start responding to leads.</div></div></div></div>
-      <div class="card"><div class="sec-head"><div class="sec-title">Source Performance</div></div><div style="padding:16px 16px 12px;min-height:200px;" id="an-srclist" class="src-list"><div class="empty-state" style="padding:50px 20px;"><i data-lucide="pie-chart"></i><div class="empty-state-title">No source data in this period</div><div class="empty-state-sub">Widen the date range to compare lead sources.</div></div></div></div>
+      <div class="card"><div class="sec-head"><div class="sec-title">Response Time Trend</div><span class="state-pill awaiting" id="pill-resp-an"><span class="sp-dot"></span>No data yet</span></div><div class="chart-wrap" style="padding:18px;"><canvas id="an-resp"></canvas><div class="chart-empty"><i data-lucide="activity"></i><div class="chart-empty-title">No data yet</div><div class="chart-empty-text">Fills in once automations start responding to leads.</div></div></div></div>
+      <div class="card"><div class="sec-head"><div class="sec-title">Source Performance</div></div><div id="an-srclist"><div class="empty-state" style="padding:50px 20px;"><i data-lucide="pie-chart"></i><div class="empty-state-title">No source data in this period</div><div class="empty-state-sub">Widen the date range to compare lead sources.</div></div></div></div>
       <div class="card"><div class="sec-head"><div class="sec-title">Status Breakdown</div><button class="exq-btn" onclick="flowyExplain('my lead status breakdown')" title="Ask Flowy to explain"><i data-lucide="sparkles"></i></button></div><div class="chart-wrap" style="padding:18px;"><canvas id="an-status"></canvas><div class="chart-empty"><i data-lucide="bar-chart-2"></i><div class="chart-empty-title">No status data in this period</div><div class="chart-empty-text">Lead statuses (HOT, WARM, BOOKED) will chart here as Flowaify categorizes leads.</div></div></div></div>
-      <div class="card"><div class="sec-head"><div class="sec-title">Booked Calls Over Time</div><span class="state-pill awaiting" id="pill-booked"><span class="sp-dot"></span>Awaiting automation data</span></div><div class="chart-wrap" style="padding:18px;"><canvas id="an-booked-chart"></canvas><div class="chart-empty"><i data-lucide="calendar-check"></i><div class="chart-empty-title">Awaiting automation data</div><div class="chart-empty-text">Booked calls will chart over time once your automations start converting leads.</div></div></div></div>
+      <div class="card"><div class="sec-head"><div class="sec-title">Booked Calls Over Time</div><span class="state-pill awaiting" id="pill-booked"><span class="sp-dot"></span>No data yet</span></div><div class="chart-wrap" style="padding:18px;"><canvas id="an-booked-chart"></canvas><div class="chart-empty"><i data-lucide="calendar-check"></i><div class="chart-empty-title">No data yet</div><div class="chart-empty-text">Charts once your automations start converting leads to booked calls.</div></div></div></div>
       <div class="card"><div class="sec-head"><div class="sec-title">New Leads by Day of Week</div></div><div class="chart-wrap" style="padding:18px;"><canvas id="an-dow"></canvas><div class="chart-empty"><i data-lucide="calendar-days"></i><div class="chart-empty-title">No leads in this period</div><div class="chart-empty-text">See which days bring in the most leads — useful for scheduling ads and staffing.</div></div></div></div>
     </div>
     <div class="card"><div class="sec-head"><div class="sec-title">Pipeline Value by Stage</div><div style="display:flex;align-items:center;gap:8px;"><button class="exq-btn" onclick="flowyExplain('my pipeline by stage')" title="Ask Flowy to explain"><i data-lucide="sparkles"></i></button><div class="sec-sub">All time</div></div></div><div id="stage-list" style="padding:14px 16px;min-height:140px;"><div class="empty-state" style="padding:36px 20px;"><i data-lucide="bar-chart-2"></i><div class="empty-state-title">No deals yet</div><div class="empty-state-sub">Pipeline value by stage will appear once deals exist in your CRM.</div></div></div></div>
@@ -2477,7 +2546,7 @@
 
 <div id="toast"><div class="toast-icon"><i data-lucide="check"></i></div><div id="toast-msg" style="font-size:12.5px;font-weight:600;color:var(--text-s);line-height:1.45;"></div></div>
 
-<script src="crm.js?v=23"></script>
+<script src="crm.js?v=24"></script>
 <script src="teams.js?v=3"></script>
 <script src="invoice.js?v=3"></script>
 <script src="inbox.js?v=2"></script>
@@ -3107,6 +3176,90 @@ function initKpiDrag() {
 
 restoreKpiOrder();
 setTimeout(initKpiDrag, 400);
+
+/* ── Overview customize layout ──────────────────────────────────────────── */
+var _ovCustActive = false;
+var _ovMidSort = null;
+
+function ovCustToggle() {
+  _ovCustActive = !_ovCustActive;
+  document.body.classList.toggle('ov-customize', _ovCustActive);
+  const grid = document.getElementById('ov-mid-grid');
+  if (_ovCustActive && grid && typeof Sortable !== 'undefined') {
+    _ovMidSort = Sortable.create(grid, {
+      animation: 160,
+      ghostClass: 'sortable-ghost',
+      dragClass: 'sortable-drag',
+      onEnd: function() { _ovMidSaveLayout(); }
+    });
+  } else if (_ovMidSort) {
+    _ovMidSort.destroy();
+    _ovMidSort = null;
+  }
+  document.querySelectorAll('.card-ctx-menu.open').forEach(function(m) { m.classList.remove('open'); });
+}
+window.ovCustToggle = ovCustToggle;
+
+function ovCustSave() {
+  _ovMidSaveLayout();
+  _ovCustActive = false;
+  document.body.classList.remove('ov-customize');
+  if (_ovMidSort) { _ovMidSort.destroy(); _ovMidSort = null; }
+  showToast('Layout saved.');
+}
+window.ovCustSave = ovCustSave;
+
+function ovCustCancel() {
+  _ovCustActive = false;
+  document.body.classList.remove('ov-customize');
+  if (_ovMidSort) { _ovMidSort.destroy(); _ovMidSort = null; }
+  _ovMidRestoreLayout();
+}
+window.ovCustCancel = ovCustCancel;
+
+function _ovMidSaveLayout() {
+  const grid = document.getElementById('ov-mid-grid');
+  if (!grid) return;
+  const ids = Array.from(grid.children).filter(function(el) { return el.id; }).map(function(el) { return el.id; });
+  try { localStorage.setItem('flw_ov_layout_' + (window.__userSub || 'anon'), JSON.stringify(ids)); } catch(e) {}
+}
+
+function _ovMidRestoreLayout() {
+  const grid = document.getElementById('ov-mid-grid');
+  if (!grid) return;
+  try {
+    const saved = JSON.parse(localStorage.getItem('flw_ov_layout_' + (window.__userSub || 'anon')) || 'null');
+    if (!saved || !Array.isArray(saved)) return;
+    saved.forEach(function(id) {
+      const el = document.getElementById(id);
+      if (el && el.parentElement === grid) grid.appendChild(el);
+    });
+  } catch(e) {}
+}
+
+function cardCtxOpen(e, cardId) {
+  e.stopPropagation();
+  const wasOpen = document.getElementById('ctx-' + cardId) && document.getElementById('ctx-' + cardId).classList.contains('open');
+  document.querySelectorAll('.card-ctx-menu.open').forEach(function(m) { m.classList.remove('open'); });
+  if (!wasOpen) {
+    const menu = document.getElementById('ctx-' + cardId);
+    if (menu) menu.classList.add('open');
+  }
+}
+window.cardCtxOpen = cardCtxOpen;
+
+function cardCtxHide(cardId) {
+  document.querySelectorAll('.card-ctx-menu.open').forEach(function(m) { m.classList.remove('open'); });
+  const card = document.getElementById(cardId);
+  if (card) { card.style.display = 'none'; _ovMidSaveLayout(); showToast('Card hidden. Customize layout to restore it.'); }
+}
+window.cardCtxHide = cardCtxHide;
+
+document.addEventListener('click', function() {
+  document.querySelectorAll('.card-ctx-menu.open').forEach(function(m) { m.classList.remove('open'); });
+});
+
+setTimeout(_ovMidRestoreLayout, 100);
 
 initAuth();
 </script>

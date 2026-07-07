@@ -288,12 +288,12 @@ function setAwaitPill(id, isLive) {
   if (!el) return;
   el.innerHTML = isLive
     ? '<span class="dot-live" title="Live"></span>'
-    : '<span class="dot-await" title="Awaiting automation data"></span>';
+    : '<span class="dot-await" title="No data yet"></span>';
   // Swap the hint line if this stat has one (hint id mirrors the await id)
   const hint = document.getElementById(id.replace('await-', 'hint-'));
   if (hint) {
     const liveText = hint.getAttribute('data-live');
-    hint.textContent = isLive && liveText ? liveText : 'Awaiting automation';
+    hint.textContent = isLive && liveText ? liveText : 'No data yet';
   }
 }
 
@@ -325,28 +325,57 @@ function chartOverlay(id, show) {
 function renderSourceList(containerId, counts, emptyTitle, emptySub) {
   const el = document.getElementById(containerId);
   if (!el) return;
+  if (!window.__srcCharts) window.__srcCharts = {};
   const names = Object.keys(counts).sort(function(a, b) { return counts[b] - counts[a]; });
   if (names.length === 0) {
     el.innerHTML = '<div class="empty-state" style="padding:50px 20px;">' +
       '<i data-lucide="pie-chart"></i>' +
       '<div class="empty-state-title">' + escDash(emptyTitle) + '</div>' +
       '<div class="empty-state-sub">' + escDash(emptySub) + '</div></div>';
+    if (typeof lucide !== 'undefined') lucide.createIcons();
     return;
   }
-  const max = counts[names[0]] || 1;
   let total = 0;
   names.forEach(function(n) { total += counts[n]; });
-  el.innerHTML = names.map(function(name, i) {
-    const n = counts[name];
-    const pct = Math.max(3, Math.round((n / max) * 100));
-    const color = PALETTE[i % PALETTE.length];
-    return '<div class="src-row">' +
-      '<div class="src-name" title="' + escDash(name) + '">' + escDash(name) + '</div>' +
-      '<div class="src-track"><div class="src-fill" style="width:' + pct + '%;background:' + color + ';"></div></div>' +
-      '<div class="src-count">' + n + '</div>' +
-      '</div>';
-  }).join('') +
-  '<div class="src-foot">' + total + ' lead' + (total === 1 ? '' : 's') + ' · ' + names.length + ' source' + (names.length === 1 ? '' : 's') + '</div>';
+  const shown = names.slice(0, 6);
+  const donutColors = ['#3b82f6','#0f172a','#64748b','#0057FF','#94a3b8','#475569'];
+  const legendHtml = shown.map(function(name, i) {
+    return '<div class="src-leg-row">' +
+      '<div class="src-leg-dot" style="background:' + donutColors[i % donutColors.length] + ';"></div>' +
+      '<div class="src-leg-name" title="' + escDash(name) + '">' + escDash(name) + '</div>' +
+      '<div class="src-leg-cnt">' + counts[name] + '</div>' +
+    '</div>';
+  }).join('');
+  el.innerHTML = '<div class="src-donut-wrap">' +
+    '<div class="src-donut-pos">' +
+      '<canvas id="' + containerId + '-canvas" width="100" height="100"></canvas>' +
+      '<div class="src-donut-center">' +
+        '<div class="src-donut-num">' + total + '</div>' +
+        '<div class="src-donut-lbl">Total Leads</div>' +
+      '</div>' +
+    '</div>' +
+    '<div class="src-legend">' + legendHtml + '</div>' +
+  '</div>' +
+  '<div class="src-foot2">' + total + ' lead' + (total === 1 ? '' : 's') + ' · ' + names.length + ' source' + (names.length === 1 ? '' : 's') + '</div>';
+  if (typeof Chart !== 'undefined') {
+    const canvas = document.getElementById(containerId + '-canvas');
+    if (canvas) {
+      if (!window.__srcCharts) window.__srcCharts = {};
+      if (window.__srcCharts[containerId]) { window.__srcCharts[containerId].destroy(); }
+      window.__srcCharts[containerId] = new Chart(canvas, {
+        type: 'doughnut',
+        data: {
+          labels: shown,
+          datasets: [{ data: shown.map(function(n) { return counts[n]; }), backgroundColor: donutColors, borderWidth: 0, hoverOffset: 3 }]
+        },
+        options: {
+          cutout: '68%',
+          plugins: { legend: { display: false }, tooltip: { callbacks: { label: function(ctx) { return ' ' + ctx.label + ': ' + ctx.parsed; } } } },
+          animation: { duration: 500 }
+        }
+      });
+    }
+  }
 }
 
 function groupCount(items, keyFn) {
@@ -1217,38 +1246,75 @@ function scoreRank(status) {
   return 0;
 }
 
+var _plFilter = 'all';
+
+function ovSetLeadFilter(f) {
+  _plFilter = f;
+  document.querySelectorAll('.pl-tab').forEach(function(t) {
+    t.classList.toggle('active', (t.dataset.filter || t.getAttribute('data-filter')) === f);
+  });
+  if (window.__crmData) renderTopLeads(window.__crmData.contacts || []);
+}
+window.ovSetLeadFilter = ovSetLeadFilter;
+
 function renderTopLeads(contacts) {
   const el = document.getElementById('top-leads-list');
   if (!el) return;
-  if (!contacts || contacts.length === 0) {
+  const all = contacts || [];
+
+  const hot  = all.filter(function(c) { return scoreRank(c.status) >= 4; });
+  const warm = all.filter(function(c) { return scoreRank(c.status) === 2; });
+  const cold = all.filter(function(c) { return scoreRank(c.status) === 1; });
+
+  const cntAll  = document.getElementById('pl-cnt-all');
+  const cntHot  = document.getElementById('pl-cnt-hot');
+  const cntWarm = document.getElementById('pl-cnt-warm');
+  const cntCold = document.getElementById('pl-cnt-cold');
+  if (cntAll)  cntAll.textContent  = all.length  || '';
+  if (cntHot)  cntHot.textContent  = hot.length  || '';
+  if (cntWarm) cntWarm.textContent = warm.length || '';
+  if (cntCold) cntCold.textContent = cold.length || '';
+
+  let filtered;
+  if (_plFilter === 'hot')  filtered = hot;
+  else if (_plFilter === 'warm') filtered = warm;
+  else if (_plFilter === 'cold') filtered = cold;
+  else filtered = all;
+
+  if (filtered.length === 0) {
+    const lbl = _plFilter === 'all' ? 'leads' : _plFilter + ' leads';
     el.innerHTML = '<div class="empty-state" style="padding:34px 20px;"><i data-lucide="users"></i>' +
-      '<div class="empty-state-title">No leads yet</div>' +
-      '<div class="empty-state-sub">Your top 5 scored leads will rank here once contacts exist in Zoho CRM.</div></div>';
+      '<div class="empty-state-title">No ' + lbl + ' yet</div>' +
+      '<div class="empty-state-sub">Priority leads appear here as contacts come in.</div></div>';
+    if (typeof lucide !== 'undefined') lucide.createIcons();
     return;
   }
-  const top = contacts.slice().sort(function(a, b) {
+
+  const top = filtered.slice().sort(function(a, b) {
     const r = scoreRank(b.status) - scoreRank(a.status);
     if (r !== 0) return r;
     const ta = a.createdAt ? new Date(a.createdAt).getTime() : 0;
     const tb = b.createdAt ? new Date(b.createdAt).getTime() : 0;
     return tb - ta;
-  }).slice(0, 5);
+  }).slice(0, 8);
 
-  el.innerHTML = top.map(function(c, i) {
-    const scored = scoreRank(c.status) > 0;
-    const right = scored
-      ? statusBadge(c.status)
-      : '<span class="state-pill awaiting"><span class="sp-dot"></span>Awaiting score</span>';
-    const sub = [c.source, c.createdAt ? relTime(new Date(c.createdAt).getTime()) : null]
-      .filter(Boolean).map(escDash).join(' · ') || '—';
+  el.innerHTML = top.map(function(c) {
     const safeId = c.id ? String(c.id).replace(/[^\w-]/g, '') : '';
-    return '<div class="tl-row" onclick="bellOpenLead(\'' + safeId + '\', \'' + String(c.name || '').replace(/[^\w\s.@-]/g, '') + '\')">' +
-      '<span class="tl-rank">' + (i + 1) + '</span>' +
+    const safeName = String(c.name || '').replace(/[^\w\s.@-]/g, '');
+    const lastAct = c.lastTouchAt
+      ? relTime(new Date(c.lastTouchAt).getTime())
+      : (c.createdAt ? relTime(new Date(c.createdAt).getTime()) : '—');
+    const rank = scoreRank(c.status);
+    const scorePct = rank > 0 ? Math.round((rank / 4) * 100) + '%' : '—';
+    return '<div class="pl-row" onclick="bellOpenLead(\'' + safeId + '\', \'' + safeName + '\')">' +
       avatarHtml(c.name) +
-      '<div class="tl-body"><div class="tl-name">' + escDash(c.name) + '</div>' +
-      '<div class="tl-sub">' + sub + '</div></div>' +
-      right +
-      '</div>';
+      '<div class="pl-body">' +
+        '<div class="pl-name">' + escDash(c.name || '—') + '</div>' +
+        '<div class="pl-meta">' + (c.source ? escDash(c.source) + ' · ' : '') + lastAct + '</div>' +
+      '</div>' +
+      statusBadge(c.status) +
+      '<div class="pl-score">' + scorePct + '</div>' +
+    '</div>';
   }).join('');
 }
 
@@ -1475,7 +1541,7 @@ function selectLead(id) {
   if (c.summary) {
     rows.push('<div style="font-size:12px;color:var(--text-s);line-height:1.6;">' + escDash(c.summary) + '</div>');
   } else {
-    rows.push('<span class="state-pill awaiting"><span class="sp-dot"></span>Awaiting automation data</span>');
+    rows.push('<span class="state-pill awaiting"><span class="sp-dot"></span>No data yet</span>');
   }
   rows.push('<div style="font-size:11px;font-weight:700;color:var(--text-m);text-transform:uppercase;letter-spacing:.4px;margin:14px 0 8px;">Automation Insights</div>');
   if (c.score || c.insight) {
