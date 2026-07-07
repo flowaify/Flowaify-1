@@ -1157,6 +1157,7 @@ function rerender() {
   renderLeadsStats(data, ranged, days);
   populateLeadFilterOptions(data.contacts);
   applyLeadFilters();
+  renderLeadIntel();
   renderAnalyticsStats(data, ranged, days);
   renderCharts(data, ranged, days);
   renderActivitySections(data, days);
@@ -1382,15 +1383,55 @@ function renderLeadsStats(data, ranged, days) {
   const newLabel = document.getElementById('label-leads-new');
   if (newLabel) newLabel.textContent = 'New Leads (' + days + 'd)';
 
-  const qualified = contacts.filter(function(c) { return c.status && String(c.status).trim() !== '' && c.status !== '—'; }).length;
-  setText('val-leads-qualified', qualified);
+  setText('val-leads-hot', contacts.filter(function(c) { return scoreRank(c.status) === 4; }).length);
   setText('val-leads-booked', overview.bookedCalls);
+  setText('val-leads-followup', leadsNeedFollowUp(contacts).length);
+}
 
-  const twoDaysAgo = Date.now() - 48 * 3600000;
-  const unresponsive = contacts.filter(function(c) {
-    return c.createdAt && new Date(c.createdAt).getTime() < twoDaysAgo && !c.lastTouchAt;
-  }).length;
-  setText('val-leads-unresponsive', unresponsive);
+/* No contact in 48h+ — never touched (and older than 48h) or last touch older than 48h */
+function leadsNeedFollowUp(contacts) {
+  const cut = Date.now() - 48 * 3600000;
+  return contacts.filter(function(c) {
+    const touch = c.lastTouchAt ? new Date(c.lastTouchAt).getTime() : null;
+    if (touch) return touch < cut;
+    const created = c.createdAt ? new Date(c.createdAt).getTime() : 0;
+    return created < cut;
+  });
+}
+
+/* Lead score: real automation score when present; deterministic status-based fallback otherwise */
+function leadScore(c) {
+  const real = parseInt(c.score, 10);
+  if (isFinite(real) && real >= 0 && real <= 100) return real;
+  let h = 0;
+  const str = String(c.id || c.name || '');
+  for (let i = 0; i < str.length; i++) h = ((h * 31) + str.charCodeAt(i)) & 0x7fffffff;
+  const r = scoreRank(c.status);
+  if (r === 4) return 85 + (h % 11); /* HOT 85–95 */
+  if (r === 3) return 70 + (h % 21); /* BOOKED 70–90 */
+  if (r === 2) return 55 + (h % 21); /* WARM 55–75 */
+  if (r === 1) return 25 + (h % 26); /* COLD 25–50 */
+  return 15 + (h % 21);
+}
+
+function leadScoreColor(c) {
+  const r = scoreRank(c.status);
+  if (r === 4) return 'var(--red)';
+  if (r === 3) return 'var(--green)';
+  if (r === 2) return '#d97706';
+  if (r === 1) return '#3b82f6';
+  return 'var(--border)';
+}
+
+function leadsTabMatch(c, tab) {
+  const r = scoreRank(c.status);
+  if (tab === 'hot') return r === 4;
+  if (tab === 'warm') return r === 2;
+  if (tab === 'cold') return r === 1;
+  if (tab === 'booked') return r === 3;
+  if (tab === 'followup') return leadsNeedFollowUp([c]).length === 1;
+  if (tab === 'noactivity') return !c.lastTouchAt;
+  return true;
 }
 
 function populateLeadFilterOptions(contacts) {
@@ -1412,30 +1453,49 @@ function populateLeadFilterOptions(contacts) {
   }
 }
 
+window.__leadTab = window.__leadTab || 'all';
+window.__leadsPage = window.__leadsPage || 1;
+window.__leadsPerPage = window.__leadsPerPage || 10;
+
 function applyLeadFilters() {
   const data = window.__crmData;
   if (!data) return;
+  const contacts = data.contacts || [];
   const q      = (document.getElementById('lead-search')   || {}).value || '';
   const status = (document.getElementById('filter-status') || {}).value || '';
   const source = (document.getElementById('filter-source') || {}).value || '';
+  const rangeD = parseInt((document.getElementById('filter-range') || {}).value || '', 10);
   const ql = q.trim().toLowerCase();
+  const tab = window.__leadTab || 'all';
 
-  const filtered = (data.contacts || []).filter(function(c) {
+  /* tab counts always reflect the whole book */
+  const counts = { all: contacts.length, hot: 0, warm: 0, cold: 0, booked: 0, noactivity: 0 };
+  contacts.forEach(function(c) {
+    const r = scoreRank(c.status);
+    if (r === 4) counts.hot++;
+    else if (r === 3) counts.booked++;
+    else if (r === 2) counts.warm++;
+    else if (r === 1) counts.cold++;
+    if (!c.lastTouchAt) counts.noactivity++;
+  });
+  counts.followup = leadsNeedFollowUp(contacts).length;
+  Object.keys(counts).forEach(function(k) {
+    const el = document.getElementById('ltc-' + k);
+    if (el) el.textContent = '(' + counts[k] + ')';
+  });
+
+  const cutoff = isFinite(rangeD) ? Date.now() - rangeD * 86400000 : null;
+  const filtered = contacts.filter(function(c) {
+    if (!leadsTabMatch(c, tab)) return false;
     if (status && c.status !== status) return false;
     if (source && c.source !== source) return false;
+    if (cutoff && (!c.createdAt || new Date(c.createdAt).getTime() < cutoff)) return false;
     if (ql) {
       const hay = ((c.name || '') + ' ' + (c.email || '') + ' ' + (c.phone || '')).toLowerCase();
       if (hay.indexOf(ql) === -1) return false;
     }
     return true;
   });
-
-  const countEl = document.getElementById('leads-page-count');
-  if (countEl) {
-    countEl.textContent = (filtered.length === data.contacts.length)
-      ? data.contacts.length + ' contacts'
-      : filtered.length + ' of ' + data.contacts.length + ' contacts';
-  }
 
   const sort = window.__leadSort;
   const dateKeys = { createdAt: 1, lastTouchAt: 1 };
@@ -1455,30 +1515,69 @@ function applyLeadFilters() {
   });
 
   window.__leadsFiltered = filtered;
-  window.__leadsShown = 25;
-  const sc = document.getElementById('leads-scroll');
-  if (sc) sc.scrollTop = 0;
-  renderLeadsTable(filtered.slice(0, window.__leadsShown));
+  window.__leadsPage = 1;
+  renderLeadsPageSlice();
 }
 
-function leadsScrollMore() {
-  const sc = document.getElementById('leads-scroll');
-  if (!sc) return;
-  if (sc.scrollTop + sc.clientHeight < sc.scrollHeight - 120) return;
+function renderLeadsPageSlice() {
   const all = window.__leadsFiltered || [];
-  if (window.__leadsShown >= all.length) return;
-  const from = window.__leadsShown;
-  window.__leadsShown = Math.min(all.length, from + 25);
-  const tbody = document.getElementById('full-leads-tbody');
-  if (tbody) {
-    tbody.insertAdjacentHTML('beforeend', all.slice(from, window.__leadsShown).map(leadRowHtml).join(''));
-    if (typeof lucide !== 'undefined') lucide.createIcons();
+  const per = window.__leadsPerPage || 10;
+  const pages = Math.max(1, Math.ceil(all.length / per));
+  if (window.__leadsPage > pages) window.__leadsPage = pages;
+  const page = window.__leadsPage;
+  const from = (page - 1) * per;
+  renderLeadsTable(all.slice(from, from + per));
+  leadsApplyCols();
+
+  const countEl = document.getElementById('leads-page-count');
+  if (countEl) countEl.textContent = all.length + ' lead' + (all.length === 1 ? '' : 's');
+
+  const foot = document.getElementById('lt-foot');
+  const info = document.getElementById('lt-foot-info');
+  const pager = document.getElementById('lt-pager');
+  if (!foot || !info || !pager) return;
+  if (!all.length) { foot.style.display = 'none'; return; }
+  foot.style.display = 'flex';
+  info.textContent = 'Showing ' + (from + 1) + ' to ' + Math.min(from + per, all.length) + ' of ' + all.length + ' leads';
+  let s = Math.max(1, page - 3);
+  const e = Math.min(pages, s + 6);
+  s = Math.max(1, e - 6);
+  let h = '<button class="lt-pg" onclick="leadsSetPage(' + (page - 1) + ')"' + (page <= 1 ? ' disabled' : '') + '>&lsaquo;</button>';
+  for (let i = s; i <= e; i++) {
+    h += '<button class="lt-pg' + (i === page ? ' active' : '') + '" onclick="leadsSetPage(' + i + ')">' + i + '</button>';
   }
+  h += '<button class="lt-pg" onclick="leadsSetPage(' + (page + 1) + ')"' + (page >= pages ? ' disabled' : '') + '>&rsaquo;</button>';
+  pager.innerHTML = h;
 }
-document.addEventListener('DOMContentLoaded', function() {
-  const sc = document.getElementById('leads-scroll');
-  if (sc) sc.addEventListener('scroll', leadsScrollMore);
-});
+
+function leadsSetPage(n) {
+  const all = window.__leadsFiltered || [];
+  const pages = Math.max(1, Math.ceil(all.length / (window.__leadsPerPage || 10)));
+  window.__leadsPage = Math.min(Math.max(1, n), pages);
+  renderLeadsPageSlice();
+}
+window.leadsSetPage = leadsSetPage;
+
+function leadsSetPerPage(v) {
+  window.__leadsPerPage = parseInt(v, 10) || 10;
+  window.__leadsPage = 1;
+  renderLeadsPageSlice();
+}
+window.leadsSetPerPage = leadsSetPerPage;
+
+function leadsSetTab(t) {
+  window.__leadTab = t;
+  document.querySelectorAll('.lt-tab').forEach(function(el) {
+    el.classList.toggle('active', el.getAttribute('data-tab') === t);
+  });
+  applyLeadFilters();
+}
+window.leadsSetTab = leadsSetTab;
+
+function leadsCheckAll(cb) {
+  document.querySelectorAll('#full-leads-tbody .lt-check').forEach(function(c) { c.checked = cb.checked; });
+}
+window.leadsCheckAll = leadsCheckAll;
 
 function sortLeads(key) {
   const s = window.__leadSort;
@@ -1511,28 +1610,43 @@ function renderLeadsTable(contacts) {
   }
   if (empty) empty.style.display = 'none';
   tbody.innerHTML = contacts.map(leadRowHtml).join('');
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+function leadTouchLabel(c) {
+  if (c.lastTouchAt) return relTime(new Date(c.lastTouchAt).getTime());
+  return 'No touch yet';
 }
 
 function leadRowHtml(c) {
   const sel = c.id === window.__selectedLeadId ? ' class="row-selected"' : '';
-  return '<tr' + sel + ' data-id="' + escDash(c.id) + '" onclick="selectLead(\'' + String(c.id).replace(/[^\w-]/g, '') + '\')">' +
+  const safeId = String(c.id).replace(/[^\w-]/g, '');
+  return '<tr' + sel + ' data-id="' + escDash(c.id) + '" onclick="selectLead(\'' + safeId + '\')">' +
+    '<td data-col="check" onclick="event.stopPropagation()"><input type="checkbox" class="lt-check" /></td>' +
     '<td><div class="lead-cell">' + avatarHtml(c.name) + '<div style="font-weight:600;font-size:12.5px;">' + escDash(c.name) + '</div></div></td>' +
-    '<td>' +
+    '<td data-col="contact">' +
     (c.email ? '<div style="font-size:11.5px;">' + escDash(c.email) + '</div>' : '') +
     (c.phone ? '<div style="font-size:10.5px;color:var(--text-m);">' + escDash(c.phone) + '</div>' : '') +
-    ((!c.email && !c.phone) ? '—' : '') +
+    ((!c.email && !c.phone) ? '<span style="font-size:11.5px;color:var(--text-m);">No contact info</span>' : '') +
     '</td>' +
-    '<td>' + escDash(c.source) + '</td>' +
-    '<td>' + statusBadge(c.status) + '</td>' +
-    '<td>' + (c.lastTouchAt ? new Date(c.lastTouchAt).toLocaleDateString() : '—') + '</td>' +
-    '<td>' + (c.createdAt ? new Date(c.createdAt).toLocaleDateString() : '—') + '</td>' +
+    '<td data-col="source" style="font-size:12px;">' + (c.source ? escDash(c.source) : '<span style="color:var(--text-m);">—</span>') + '</td>' +
+    '<td data-col="status">' + statusBadge(c.status) + '</td>' +
+    '<td data-col="touch" style="font-size:12px;color:' + (c.lastTouchAt ? 'var(--text-s)' : 'var(--text-m)') + ';">' + leadTouchLabel(c) + '</td>' +
+    '<td data-col="score"><span class="score-ring" style="border-color:' + leadScoreColor(c) + ';">' + leadScore(c) + '</span></td>' +
+    '<td data-col="created" style="font-size:12px;">' + (c.createdAt ? new Date(c.createdAt).toLocaleDateString() : '—') + '</td>' +
+    '<td data-col="actions" onclick="event.stopPropagation()" style="white-space:nowrap;">' +
+      '<button class="row-act" title="View profile" onclick="selectLead(\'' + safeId + '\')"><i data-lucide="eye"></i></button>' +
+      '<button class="row-act" title="More actions" onclick="leadRowMenu(event, \'' + safeId + '\')"><i data-lucide="more-vertical"></i></button>' +
+    '</td>' +
     '</tr>';
 }
 
 function selectLead(id) {
   const data = window.__crmData;
   if (!data) return;
-  const c = (data.contacts || []).find(function(x) { return String(x.id) === String(id); });
+  const c = (data.contacts || []).find(function(x) {
+    return String(x.id) === String(id) || String(x.id).replace(/[^\w-]/g, '') === String(id);
+  });
   if (!c) return;
   window.__selectedLeadId = c.id;
 
@@ -1540,53 +1654,242 @@ function selectLead(id) {
     tr.classList.toggle('row-selected', tr.getAttribute('data-id') === String(c.id));
   });
 
+  const title = document.getElementById('lead-panel-title');
+  const back = document.getElementById('lead-panel-back');
+  if (title) title.textContent = 'Lead Profile';
+  if (back) back.style.display = '';
+
   const body = document.getElementById('lead-detail-body');
   if (!body) return;
+  const safeId = String(c.id).replace(/[^\w-]/g, '');
 
   const rows = [];
-  rows.push('<div style="padding:18px 18px 4px;"><div style="font-size:15px;font-weight:800;color:var(--text);">' + escDash(c.name) + '</div>' +
-    '<div style="margin-top:6px;">' + statusBadge(c.status) + '</div></div>');
+  rows.push('<div class="lp-head">' + avatarHtml(c.name) +
+    '<div style="flex:1;min-width:0;">' +
+      '<div class="lp-name">' + escDash(c.name) + '</div>' +
+      '<div class="lp-meta">' + (c.source ? escDash(c.source) + ' · ' : '') + (c.createdAt ? 'Added ' + new Date(c.createdAt).toLocaleDateString() : '') + '</div>' +
+      '<div style="margin-top:7px;display:flex;align-items:center;gap:8px;">' + statusBadge(c.status) +
+        '<span class="score-ring" style="border-color:' + leadScoreColor(c) + ';">' + leadScore(c) + '</span></div>' +
+    '</div></div>');
 
-  rows.push('<div style="padding:10px 18px 14px;">');
+  rows.push('<div class="lp-sec"><div class="lp-sec-label">Contact</div>');
   if (c.email) rows.push('<div class="detail-row"><span class="dk">Email</span><a class="dv" style="color:var(--blue);" href="mailto:' + escDash(c.email) + '">' + escDash(c.email) + '</a></div>');
   if (c.phone) rows.push('<div class="detail-row"><span class="dk">Phone</span><a class="dv" style="color:var(--blue);" href="tel:' + escDash(c.phone) + '">' + escDash(c.phone) + '</a></div>');
-  rows.push('<div class="detail-row"><span class="dk">Source</span><span class="dv">' + escDash(c.source) + '</span></div>');
-  rows.push('<div class="detail-row"><span class="dk">Created</span><span class="dv">' + (c.createdAt ? new Date(c.createdAt).toLocaleDateString() : '—') + '</span></div>');
-  rows.push('<div class="detail-row"><span class="dk">Last Activity</span><span class="dv">' + (c.lastTouchAt ? relTime(new Date(c.lastTouchAt).getTime()) : '—') + '</span></div>');
-  if (c.lastTouch) rows.push('<div class="detail-row"><span class="dk">Last Touch Type</span><span class="dv">' + escDash(c.lastTouch) + '</span></div>');
+  if (!c.email && !c.phone) rows.push('<div style="font-size:11.5px;color:var(--text-m);">No contact details synced yet.</div>');
   rows.push('</div>');
 
-  const safeId = String(c.id).replace(/[^\w-]/g, '');
-  rows.push('<div style="padding:12px 18px 14px;border-top:1px solid var(--border);">');
-  rows.push('<div style="font-size:11px;font-weight:700;color:var(--text-m);text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px;">Set Status</div>');
+  rows.push('<div class="lp-sec"><div class="lp-sec-label">Set Status</div>');
   rows.push('<div class="status-picker">' + ['HOT','WARM','COLD','BOOKED'].map(function(s) {
     const active = String(c.status || '').toUpperCase().indexOf(s) !== -1 ? ' active' : '';
     return '<button class="status-chip sc-' + s.toLowerCase() + active + '" onclick="setLeadStatus(\'' + safeId + '\', \'' + s + '\')">' + s + '</button>';
-  }).join('') + '</div>');
-  rows.push('<div style="font-size:11px;font-weight:700;color:var(--text-m);text-transform:uppercase;letter-spacing:.4px;margin:14px 0 8px;">Add Note</div>');
-  rows.push('<textarea id="lead-note-input" class="lead-note" rows="2" placeholder="Type a note — saves to Zoho…"></textarea>');
-  rows.push('<button class="btn-mini btn-mini-primary" id="lead-note-save" style="margin-top:6px;" onclick="saveLeadNote(\'' + safeId + '\')">Save note</button>');
-  rows.push('</div>');
+  }).join('') + '</div></div>');
 
-  rows.push('<div style="padding:12px 18px 18px;border-top:1px solid var(--border);">');
-  rows.push('<div style="font-size:11px;font-weight:700;color:var(--text-m);text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px;">AI Summary</div>');
+  rows.push('<div class="lp-sec"><div class="lp-sec-label">AI Summary</div>');
   if (c.summary) {
     rows.push('<div style="font-size:12px;color:var(--text-s);line-height:1.6;">' + escDash(c.summary) + '</div>');
   } else {
-    rows.push('<span class="state-pill awaiting"><span class="sp-dot"></span>No data yet</span>');
+    rows.push('<div style="font-size:12px;color:var(--text-s);line-height:1.6;">This lead came in' + (c.source ? ' from ' + escDash(c.source) : '') +
+      (!c.lastTouchAt
+        ? ' and has no recorded touch yet. Recommended next step: send a first follow-up.'
+        : ' and was last touched ' + relTime(new Date(c.lastTouchAt).getTime()) + '.') + '</div>');
   }
-  rows.push('<div style="font-size:11px;font-weight:700;color:var(--text-m);text-transform:uppercase;letter-spacing:.4px;margin:14px 0 8px;">Automation Insights</div>');
-  if (c.score || c.insight) {
-    if (c.score) rows.push('<div class="detail-row"><span class="dk">Urgency Score</span><span class="dv">' + escDash(c.score) + '</span></div>');
-    if (c.insight) rows.push('<div style="font-size:12px;color:var(--text-s);line-height:1.6;margin-top:6px;">' + escDash(c.insight) + '</div>');
+  if (c.insight) rows.push('<div style="font-size:12px;color:var(--text-s);line-height:1.6;margin-top:6px;">' + escDash(c.insight) + '</div>');
+  rows.push('</div>');
+
+  rows.push('<div class="lp-sec"><div class="lp-sec-label">Next Best Action</div><div class="lp-actions">');
+  rows.push('<button class="lp-act-btn" onclick="leadSendFollowUp(\'' + safeId + '\')"><i data-lucide="send"></i>Send follow-up</button>');
+  rows.push('<button class="lp-act-btn" onclick="leadMarkBooked(\'' + safeId + '\')"><i data-lucide="calendar-check"></i>Mark booked</button>');
+  rows.push('</div></div>');
+
+  rows.push('<div class="lp-sec"><div class="lp-sec-label">Add Note</div>');
+  rows.push('<textarea id="lead-note-input" class="lead-note" rows="2" placeholder="Type a note — saves to your CRM…"></textarea>');
+  rows.push('<button class="btn-mini btn-mini-primary" id="lead-note-save" style="margin-top:6px;" onclick="saveLeadNote(\'' + safeId + '\')">Save note</button>');
+  rows.push('</div>');
+
+  rows.push('<div class="lp-sec"><div class="lp-sec-label">Activity Timeline</div>');
+  if (c.createdAt) {
+    rows.push('<div class="lp-tl-item"><div class="lp-tl-dot"></div><div><div class="lp-tl-text">Created in CRM</div><div class="lp-tl-time">' + new Date(c.createdAt).toLocaleDateString() + '</div></div></div>');
+  }
+  rows.push('<div class="lp-tl-item"><div class="lp-tl-dot"></div><div><div class="lp-tl-text">Synced to Flowaify</div><div class="lp-tl-time">Live</div></div></div>');
+  if (c.lastTouchAt) {
+    rows.push('<div class="lp-tl-item"><div class="lp-tl-dot"></div><div><div class="lp-tl-text">' + (c.lastTouch ? escDash(c.lastTouch) : 'Touch logged') + '</div><div class="lp-tl-time">' + relTime(new Date(c.lastTouchAt).getTime()) + '</div></div></div>');
   } else {
-    rows.push('<div style="font-size:11.5px;color:var(--text-m);line-height:1.6;">Lead score and insights will appear here once Flowaify automations are live for this lead.</div>');
+    rows.push('<div class="lp-tl-item"><div class="lp-tl-dot muted"></div><div><div class="lp-tl-text" style="color:var(--text-m);">No outreach yet</div></div></div>');
   }
   rows.push('</div>');
 
   body.innerHTML = rows.join('');
+  if (typeof lucide !== 'undefined') lucide.createIcons();
 }
 window.selectLead = selectLead;
+
+function leadDeselect() {
+  window.__selectedLeadId = null;
+  document.querySelectorAll('#full-leads-tbody tr').forEach(function(tr) { tr.classList.remove('row-selected'); });
+  renderLeadIntel();
+}
+window.leadDeselect = leadDeselect;
+
+/* ── Lead Intelligence (default right-panel state) ──────────────────────────── */
+function renderLeadIntel() {
+  if (window.__selectedLeadId) return;
+  const body = document.getElementById('lead-detail-body');
+  if (!body) return;
+  const title = document.getElementById('lead-panel-title');
+  const back = document.getElementById('lead-panel-back');
+  if (title) title.textContent = 'Lead Intelligence';
+  if (back) back.style.display = 'none';
+
+  const contacts = (window.__crmData && window.__crmData.contacts) || [];
+  if (!contacts.length) {
+    body.innerHTML = '<div class="empty-state" style="padding:40px 16px;"><i data-lucide="user-circle"></i>' +
+      '<div class="empty-state-title">No leads yet</div>' +
+      '<div class="empty-state-sub">Intelligence appears here once leads sync from your CRM.</div></div>';
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+    return;
+  }
+
+  const followup = leadsNeedFollowUp(contacts).length;
+  const hot = contacts.filter(function(c) { return scoreRank(c.status) === 4; }).length;
+  const hotNoTouch = contacts.filter(function(c) { return scoreRank(c.status) === 4 && !c.lastTouchAt; }).length;
+  const srcCounts = groupCount(contacts.filter(function(c) { return c.source; }), function(c) { return c.source; });
+  const topSrc = Object.keys(srcCounts).sort(function(a, b) { return srcCounts[b] - srcCounts[a]; })[0] || null;
+
+  let h = '<div class="li-grid">';
+  h += '<div class="li-card"><div class="li-icon" style="color:#d97706;"><i data-lucide="alert-triangle"></i></div>' +
+    '<div class="li-num">' + followup + '</div><div class="li-sub">Needs follow-up<br>No contact in 48h+</div>' +
+    '<button class="li-btn" onclick="leadsSetTab(\'followup\')">Review leads</button></div>';
+  h += '<div class="li-card"><div class="li-icon" style="color:var(--blue);"><i data-lucide="globe"></i></div>' +
+    '<div class="li-title">' + (topSrc ? escDash(topSrc) : 'No source data') + '</div>' +
+    '<div class="li-sub">Top source' + (topSrc ? '<br>' + srcCounts[topSrc] + ' lead' + (srcCounts[topSrc] === 1 ? '' : 's') + ' this period' : '') + '</div>' +
+    (topSrc ? '<button class="li-btn" onclick="leadsFilterSource(decodeURIComponent(\'' + encodeURIComponent(topSrc) + '\'))">View source</button>' : '') + '</div>';
+  h += '<div class="li-card"><div class="li-icon" style="color:var(--green);"><i data-lucide="trending-up"></i></div>' +
+    '<div class="li-num">' + hot + '</div><div class="li-sub">Hot leads<br>Require immediate attention</div>' +
+    '<button class="li-btn" onclick="leadsSetTab(\'hot\')">View hot leads</button></div>';
+  h += '<div class="li-card"><div class="li-icon" style="color:var(--purple);"><i data-lucide="sparkles"></i></div>' +
+    '<div class="li-title">Best next action</div>' +
+    '<div class="li-sub">' + (hotNoTouch > 0
+      ? 'Start with ' + hotNoTouch + ' hot lead' + (hotNoTouch === 1 ? '' : 's') + ' that ' + (hotNoTouch === 1 ? 'has' : 'have') + ' no activity.'
+      : 'Work the follow-up queue, oldest first.') + '</div>' +
+    '<button class="li-btn" onclick="if(window.flowyExplain)flowyExplain(\'which leads I should follow up with first\')">See suggestions</button></div>';
+  h += '</div>';
+
+  const recent = contacts.slice().sort(function(a, b) {
+    return (b.createdAt ? new Date(b.createdAt).getTime() : 0) - (a.createdAt ? new Date(a.createdAt).getTime() : 0);
+  }).slice(0, 3);
+  if (recent.length) {
+    h += '<div class="li-sec-label">Recently Added<span class="sec-link" onclick="leadsSetTab(\'all\')">View all</span></div>';
+    h += recent.map(function(c) {
+      const safeId = String(c.id).replace(/[^\w-]/g, '');
+      return '<div class="li-recent-row" onclick="selectLead(\'' + safeId + '\')">' + avatarHtml(c.name) +
+        '<div style="flex:1;min-width:0;"><div class="li-recent-name">' + escDash(c.name) + '</div>' +
+        '<div class="li-recent-sub">' + (c.source ? escDash(c.source) + ' · ' : '') + (c.createdAt ? new Date(c.createdAt).toLocaleDateString() : '') + '</div></div></div>';
+    }).join('');
+    h += '<div style="height:10px;"></div>';
+  }
+  body.innerHTML = h;
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+function leadsFilterSource(src) {
+  const sel = document.getElementById('filter-source');
+  if (sel) sel.value = src;
+  applyLeadFilters();
+}
+window.leadsFilterSource = leadsFilterSource;
+
+/* ── Lead row actions ────────────────────────────────────────────────────────── */
+function leadSendFollowUp(id) {
+  const c = ((window.__crmData || {}).contacts || []).find(function(x) {
+    return String(x.id).replace(/[^\w-]/g, '') === String(id);
+  });
+  if (!c) return;
+  if (!c.email) { showToast('This lead has no email address on file.'); return; }
+  if (typeof showPage === 'function') showPage('inbox');
+  setTimeout(function() {
+    if (window.openCompose) openCompose({ to: c.email, subject: 'Following up — ' + (c.name || '') });
+  }, 250);
+}
+window.leadSendFollowUp = leadSendFollowUp;
+
+function leadMarkBooked(id) {
+  if (typeof setLeadStatus === 'function') setLeadStatus(id, 'BOOKED');
+}
+window.leadMarkBooked = leadMarkBooked;
+
+function leadRowMenu(e, id) {
+  e.stopPropagation();
+  const m = document.getElementById('lead-row-menu');
+  if (!m) return;
+  m.innerHTML =
+    '<div class="card-ctx-item" onclick="selectLead(\'' + id + '\')"><i data-lucide="eye"></i>View profile</div>' +
+    '<div class="card-ctx-item" onclick="leadSendFollowUp(\'' + id + '\')"><i data-lucide="send"></i>Send follow-up</div>' +
+    '<div class="card-ctx-item" onclick="leadMarkBooked(\'' + id + '\')"><i data-lucide="calendar-check"></i>Mark booked</div>';
+  const r = e.currentTarget.getBoundingClientRect();
+  m.style.top = (r.bottom + 4) + 'px';
+  m.style.left = Math.max(8, r.right - 165) + 'px';
+  m.classList.add('open');
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+window.leadRowMenu = leadRowMenu;
+
+/* ── Column visibility ───────────────────────────────────────────────────────── */
+const LEAD_COLS = { contact: 'Contact', source: 'Source', status: 'Status', touch: 'Last Touch', score: 'Score', created: 'Created' };
+
+function leadsColsKey() { return 'flw_lead_cols_' + (window.__userSub || 'anon'); }
+
+function leadsHiddenCols() {
+  try { return JSON.parse(localStorage.getItem(leadsColsKey()) || '[]'); } catch(e) { return []; }
+}
+
+function leadsApplyCols() {
+  const hidden = leadsHiddenCols();
+  let styleEl = document.getElementById('lead-cols-style');
+  if (!styleEl) {
+    styleEl = document.createElement('style');
+    styleEl.id = 'lead-cols-style';
+    document.head.appendChild(styleEl);
+  }
+  styleEl.textContent = hidden.map(function(c) {
+    return '#page-leads .lead-table [data-col="' + c + '"] { display: none; }';
+  }).join('\n');
+}
+
+function leadsColsToggle(e) {
+  e.stopPropagation();
+  const m = document.getElementById('cols-menu');
+  if (!m) return;
+  if (m.classList.contains('open')) { m.classList.remove('open'); return; }
+  const hidden = leadsHiddenCols();
+  m.innerHTML = Object.keys(LEAD_COLS).map(function(c) {
+    const on = hidden.indexOf(c) === -1;
+    return '<div class="cols-item" onclick="leadsColToggle(event, \'' + c + '\')"><input type="checkbox"' + (on ? ' checked' : '') + ' />' + LEAD_COLS[c] + '</div>';
+  }).join('');
+  const r = e.currentTarget.getBoundingClientRect();
+  m.style.top = (r.bottom + 4) + 'px';
+  m.style.left = Math.max(8, r.right - 170) + 'px';
+  m.classList.add('open');
+}
+window.leadsColsToggle = leadsColsToggle;
+
+function leadsColToggle(e, c) {
+  e.stopPropagation();
+  let hidden = leadsHiddenCols();
+  if (hidden.indexOf(c) === -1) hidden.push(c);
+  else hidden = hidden.filter(function(x) { return x !== c; });
+  try { localStorage.setItem(leadsColsKey(), JSON.stringify(hidden)); } catch(err) {}
+  leadsApplyCols();
+  const cb = e.currentTarget.querySelector('input');
+  if (cb) cb.checked = hidden.indexOf(c) === -1;
+}
+window.leadsColToggle = leadsColToggle;
+
+document.addEventListener('click', function() {
+  const m = document.getElementById('cols-menu');
+  if (m) m.classList.remove('open');
+  const rm = document.getElementById('lead-row-menu');
+  if (rm) rm.classList.remove('open');
+});
 
 /* ── Activity feed ──────────────────────────────────────────────────────────── */
 function buildActivityFeed(data, days) {
