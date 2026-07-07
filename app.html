@@ -534,13 +534,37 @@
     .card-handle:hover { background: var(--hover); opacity: 1 !important; }
     .card-handle span { width: 11px; height: 1.5px; background: var(--text-m); border-radius: 1px; display: block; }
     .card:hover > .card-handle { opacity: 0.45; }
-    body.ov-customize .ov-mid > .card { outline: 1px dashed rgba(59,130,246,.3); }
+    body.ov-customize #ov-kpi-grid > .card, body.ov-customize #ov-mid-grid > .card, body.ov-customize #ov-bot-side > .card, body.ov-customize #card-leads { outline: 1px dashed rgba(59,130,246,.35); outline-offset: -1px; }
     body.ov-customize .card-handle { opacity: 0.7 !important; cursor: grab; }
-    .ov-customize-bar { display: none; align-items: center; gap: 8px; padding: 0 0 10px; }
-    body.ov-customize .ov-customize-bar { display: flex; }
-    .ov-cust-label { font-size: 12px; font-weight: 600; color: var(--blue); flex: 1; }
-    .card-ctx-menu { position: absolute; top: 30px; right: 8px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 5px; box-shadow: 0 4px 16px rgba(0,0,0,.12); z-index: 300; min-width: 130px; overflow: hidden; display: none; }
+    body.ov-customize .main { margin-right: 300px; }
+    .card-ctx-menu { position: fixed; background: var(--bg-card); border: 1px solid var(--border); border-radius: 5px; box-shadow: 0 4px 16px rgba(0,0,0,.12); z-index: 560; min-width: 150px; overflow: hidden; display: none; }
     .card-ctx-menu.open { display: block; }
+
+    /* WIDGET CATALOG PANEL */
+    #ov-catalog { position: fixed; top: var(--hdr); right: 0; bottom: 0; width: 300px; background: var(--bg-card); border-left: 1px solid var(--border); z-index: 450; display: flex; flex-direction: column; transform: translateX(105%); transition: transform 0.22s var(--ease); }
+    #ov-catalog.open { transform: translateX(0); }
+    .ovc-head { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border-bottom: 1px solid var(--border); font-size: 13.5px; font-weight: 700; color: var(--text); flex-shrink: 0; }
+    .ovc-x { width: 26px; height: 26px; border-radius: 4px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text-m); }
+    .ovc-x:hover { background: var(--hover); }
+    .ovc-x i, .ovc-x svg { width: 15px; height: 15px; }
+    .ovc-sub { padding: 12px 16px 4px; font-size: 11.5px; color: var(--text-m); line-height: 1.55; flex-shrink: 0; }
+    .ovc-list { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+    .ovc-tile { display: flex; align-items: center; gap: 10px; padding: 11px 12px; border: 1px solid var(--border); border-radius: 4px; cursor: pointer; transition: border-color 0.12s, background 0.12s; }
+    .ovc-tile:hover { border-color: var(--blue); background: var(--blue-dim); }
+    .ovc-tile i, .ovc-tile svg { width: 15px; height: 15px; color: var(--text-m); flex-shrink: 0; }
+    .ovc-tile-label { flex: 1; font-size: 12.5px; font-weight: 600; color: var(--text); }
+    .ovc-add { font-size: 11px; font-weight: 700; color: var(--blue); white-space: nowrap; }
+    .ovc-empty { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 40px 16px; text-align: center; font-size: 12px; color: var(--text-s); }
+    .ovc-empty i, .ovc-empty svg { width: 22px; height: 22px; color: var(--text-m); }
+    .ovc-empty-sub { font-size: 11px; color: var(--text-m); }
+    .ovc-foot { display: flex; gap: 8px; padding: 12px 16px; border-top: 1px solid var(--border); flex-shrink: 0; }
+    .ovc-foot .btn-mini { flex: 1; justify-content: center; }
+    @media (max-width: 900px) {
+      #ov-kpi-grid { flex-wrap: wrap; }
+      #ov-kpi-grid .stat-card { flex: 1 1 calc(50% - 6px); }
+      body.ov-customize .main { margin-right: 0; }
+      #ov-catalog { width: min(320px, 92vw); }
+    }
     .card-ctx-item { padding: 8px 12px; font-size: 12px; cursor: pointer; color: var(--text); display: flex; align-items: center; gap: 8px; }
     .card-ctx-item:hover { background: var(--hover); }
     .card-ctx-item.ctx-danger { color: var(--red); }
@@ -828,16 +852,15 @@
     .stat-card.sortable-ghost { background: var(--blue-dim); border-color: var(--blue); opacity: 0.6; }
     #ov-kpi-grid .stat-card { cursor: grab; }
     #ov-kpi-grid .stat-card:active { cursor: grabbing; }
-    #page-overview .stats-grid { flex-shrink: 0; }
-    #page-overview .ov-mid { flex-shrink: 0; }
-    #top-leads-list { overflow-y: auto; flex: 1; }
-    #ov-activity { overflow-y: auto; flex: 1; }
-    #insights-list { overflow-y: auto; flex: 1; }
-    #attn-list { overflow-y: auto; flex: 1; }
-    /* ov-bot column cards fill height */
+    #page-overview { overflow-y: auto; }
+    /* KPI strip: separate cards with gaps (not the joined stats-grid look) */
+    #ov-kpi-grid { display: flex; gap: 12px; background: transparent; border: none; border-radius: 0; overflow: visible; }
+    #ov-kpi-grid .stat-card { flex: 1 1 0; min-width: 0; margin: 0; background: var(--bg-card); border: 1px solid var(--card-border); border-radius: 4px; }
+    #ov-kpi-grid .stat-top { padding-right: 18px; }
+    /* ov-bot columns size to content; page scrolls naturally */
     .ov-bot > .card { display: flex; flex-direction: column; }
-    .ov-bot > div { display: flex; flex-direction: column; gap: 12px; }
-    .ov-bot > div > .card { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+    #ov-bot-side { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+    #ov-bot-side > .card { display: flex; flex-direction: column; }
     /* Automations KPI strip */
     #page-automations .stats-grid { flex-shrink: 0; }
     /* Pages that need internal scroll (too many sections) */
@@ -1273,7 +1296,8 @@
     #mob-overlay.open { display: block; }
 
     /* GRID LAYOUTS */
-    .ov-bot { display: grid; grid-template-columns: 1fr 300px; gap: 12px; margin-top: 12px; flex: 1; min-height: 0; align-items: stretch; }
+    .ov-bot { display: grid; grid-template-columns: 1fr 380px; gap: 12px; margin-top: 12px; align-items: stretch; }
+    .ov-bot.solo { grid-template-columns: 1fr; }
     .leads-split { display: grid; grid-template-columns: 1fr 300px; gap: 16px; align-items: start; }
     .settings-grid-v2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
     .analytics-charts { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
@@ -1547,57 +1571,40 @@
 
   <!-- OVERVIEW -->
   <div class="page active" id="page-overview">
-    <div class="stats-grid sg-7" id="ov-kpi-grid">
-      <div class="card stat-card" data-wid="new-leads"><div class="stat-top"><div class="stat-label"><i data-lucide="user-plus" class="kpi-glyph kg-blue"></i>New Leads Today</div></div><div class="stat-val-row"><div class="stat-val" id="val-new-leads">—</div><div class="spark" id="spark-new-leads"></div></div><div class="stat-delta-row" id="delta-new-leads"></div><div class="stat-hint">Leads captured today</div></div>
-      <div class="card stat-card" data-wid="response-time"><div class="stat-top"><div class="stat-label"><i data-lucide="zap" class="kpi-glyph kg-green"></i>Avg Response</div><div id="await-response"></div></div><div class="stat-val" id="val-response-time">—</div><div class="stat-hint" id="hint-response" data-live="First-touch speed on new leads">No data yet</div></div>
-      <div class="card stat-card" data-wid="ai-replies"><div class="stat-top"><div class="stat-label"><i data-lucide="sparkles" class="kpi-glyph kg-purple"></i>AI Replies</div><div id="await-ai-replies"></div></div><div class="stat-val" id="val-ai-replies">—</div><div class="stat-hint" id="hint-ai-replies" data-live="Instant responses sent by Flowaify AI">No data yet</div></div>
-      <div class="card stat-card" data-wid="follow-ups"><div class="stat-top"><div class="stat-label"><i data-lucide="repeat-2" class="kpi-glyph kg-amber"></i>Sequences</div><div id="await-follow-ups"></div></div><div class="stat-val" id="val-follow-ups">—</div><div class="stat-hint" id="hint-follow-ups" data-live="HOT + WARM leads in follow-up">No data yet</div></div>
-      <div class="card stat-card stat-hero" data-wid="pipeline"><div class="stat-top"><div class="stat-label"><i data-lucide="dollar-sign" class="kpi-glyph kg-green"></i>Pipeline Value</div></div><div class="stat-val" id="val-pipeline">—</div><div id="delta-pipeline"></div><div class="stat-hint">Total value of all open deals</div></div>
-      <div class="card stat-card" data-wid="booked-calls"><div class="stat-top"><div class="stat-label"><i data-lucide="calendar-check" class="kpi-glyph kg-teal"></i>Booked Calls</div></div><div class="stat-val" id="val-booked-calls">—</div><div class="stat-hint">Deals or contacts marked as booked</div></div>
-    </div>
-
-    <div class="ov-customize-bar">
-      <span class="ov-cust-label">Drag cards to reorder the middle row</span>
-      <button class="btn-mini btn-mini-primary" onclick="ovCustSave()">Save Layout</button>
-      <button class="btn-mini btn-mini-ghost" onclick="ovCustCancel()">Cancel</button>
+    <div class="stats-grid" id="ov-kpi-grid">
+      <div class="card stat-card" id="kpi-new-leads" data-wid="new-leads"><div class="card-handle" onclick="cardCtxOpen(event,'kpi-new-leads')" title="Card options"><span></span><span></span><span></span></div><div class="stat-top"><div class="stat-label"><i data-lucide="user-plus" class="kpi-glyph kg-blue"></i>New Leads Today</div></div><div class="stat-val-row"><div class="stat-val" id="val-new-leads">—</div><div class="spark" id="spark-new-leads"></div></div><div class="stat-delta-row" id="delta-new-leads"></div><div class="stat-hint">Leads captured today</div></div>
+      <div class="card stat-card" id="kpi-response" data-wid="response-time"><div class="card-handle" onclick="cardCtxOpen(event,'kpi-response')" title="Card options"><span></span><span></span><span></span></div><div class="stat-top"><div class="stat-label"><i data-lucide="zap" class="kpi-glyph kg-green"></i>Avg Response</div><div id="await-response"></div></div><div class="stat-val" id="val-response-time">—</div><div class="stat-hint" id="hint-response" data-live="First-touch speed on new leads">No data yet</div></div>
+      <div class="card stat-card" id="kpi-ai-replies" data-wid="ai-replies"><div class="card-handle" onclick="cardCtxOpen(event,'kpi-ai-replies')" title="Card options"><span></span><span></span><span></span></div><div class="stat-top"><div class="stat-label"><i data-lucide="sparkles" class="kpi-glyph kg-purple"></i>AI Replies</div><div id="await-ai-replies"></div></div><div class="stat-val" id="val-ai-replies">—</div><div class="stat-hint" id="hint-ai-replies" data-live="Instant responses sent by Flowaify AI">No data yet</div></div>
+      <div class="card stat-card" id="kpi-follow-ups" data-wid="follow-ups"><div class="card-handle" onclick="cardCtxOpen(event,'kpi-follow-ups')" title="Card options"><span></span><span></span><span></span></div><div class="stat-top"><div class="stat-label"><i data-lucide="repeat-2" class="kpi-glyph kg-amber"></i>Sequences</div><div id="await-follow-ups"></div></div><div class="stat-val" id="val-follow-ups">—</div><div class="stat-hint" id="hint-follow-ups" data-live="HOT + WARM leads in follow-up">No data yet</div></div>
+      <div class="card stat-card" id="kpi-pipeline" data-wid="pipeline"><div class="card-handle" onclick="cardCtxOpen(event,'kpi-pipeline')" title="Card options"><span></span><span></span><span></span></div><div class="stat-top"><div class="stat-label"><i data-lucide="dollar-sign" class="kpi-glyph kg-green"></i>Pipeline Value</div></div><div class="stat-val" id="val-pipeline">—</div><div id="delta-pipeline"></div><div class="stat-hint">Total value of all open deals</div></div>
+      <div class="card stat-card" id="kpi-booked-calls" data-wid="booked-calls"><div class="card-handle" onclick="cardCtxOpen(event,'kpi-booked-calls')" title="Card options"><span></span><span></span><span></span></div><div class="stat-top"><div class="stat-label"><i data-lucide="calendar-check" class="kpi-glyph kg-teal"></i>Booked Calls</div></div><div class="stat-val" id="val-booked-calls">—</div><div class="stat-hint">Deals or contacts marked as booked</div></div>
     </div>
 
     <div class="g3 mb20 ov-mid" id="ov-mid-grid">
       <div class="card" id="card-sources">
         <div class="card-handle" onclick="cardCtxOpen(event,'card-sources')" title="Card options"><span></span><span></span><span></span></div>
-        <div class="card-ctx-menu" id="ctx-card-sources">
-          <div class="card-ctx-item ctx-danger" onclick="cardCtxHide('card-sources')"><i data-lucide="eye-off"></i>Hide card</div>
-          <div class="card-ctx-item" onclick="ovCustToggle()"><i data-lucide="move"></i>Customize layout</div>
-        </div>
         <div class="sec-head"><div class="sec-title">Lead Sources</div><button class="exq-btn" onclick="flowyExplain('my lead sources')" title="Ask Flowy to explain"><i data-lucide="sparkles"></i></button></div>
         <div id="src-list"></div>
       </div>
       <div class="card card-tint-blue" id="card-goal">
         <div class="card-handle" onclick="cardCtxOpen(event,'card-goal')" title="Card options"><span></span><span></span><span></span></div>
-        <div class="card-ctx-menu" id="ctx-card-goal">
-          <div class="card-ctx-item ctx-danger" onclick="cardCtxHide('card-goal')"><i data-lucide="eye-off"></i>Hide card</div>
-          <div class="card-ctx-item" onclick="ovCustToggle()"><i data-lucide="move"></i>Customize layout</div>
-        </div>
         <div class="sec-head"><div class="sec-title">Monthly Lead Goal</div><div class="sec-sub" id="goal-month-label"></div></div>
         <div id="goal-gauge" style="padding:14px 16px;"></div>
       </div>
       <div class="card card-tint-amber" id="card-resp">
         <div class="card-handle" onclick="cardCtxOpen(event,'card-resp')" title="Card options"><span></span><span></span><span></span></div>
-        <div class="card-ctx-menu" id="ctx-card-resp">
-          <div class="card-ctx-item ctx-danger" onclick="cardCtxHide('card-resp')"><i data-lucide="eye-off"></i>Hide card</div>
-          <div class="card-ctx-item" onclick="ovCustToggle()"><i data-lucide="move"></i>Customize layout</div>
-        </div>
         <div class="sec-head"><div class="sec-title">Response Time</div><span class="state-pill awaiting" id="pill-resp-ov"><span class="sp-dot"></span>Awaiting data</span></div>
         <div class="chart-wrap" style="padding:12px 16px;height:80px;"><canvas id="ch-resp"></canvas><div class="chart-empty"><i data-lucide="trending-up"></i><div class="chart-empty-title">No data yet</div><div class="chart-empty-text">Fills in once automations start responding to leads.</div></div></div>
         <div class="benchmark-note">Target: under 90 seconds</div>
       </div>
     </div>
 
-    <div class="ov-bot">
-      <div class="card">
+    <div class="ov-bot" id="ov-bot">
+      <div class="card" id="card-leads">
+        <div class="card-handle" onclick="cardCtxOpen(event,'card-leads')" title="Card options"><span></span><span></span><span></span></div>
         <div class="sec-head">
           <div class="sec-title">Priority Leads</div>
-          <div style="display:flex;align-items:center;gap:8px;">
+          <div style="display:flex;align-items:center;gap:8px;padding-right:20px;">
             <div class="pl-tabs">
               <div class="pl-tab active" data-filter="all" onclick="ovSetLeadFilter('all')">All <span class="pl-tab-cnt" id="pl-cnt-all"></span></div>
               <div class="pl-tab" data-filter="hot" onclick="ovSetLeadFilter('hot')">Hot <span class="pl-tab-cnt" id="pl-cnt-hot"></span></div>
@@ -1611,18 +1618,21 @@
           <div class="empty-state" style="padding:34px 20px;"><i data-lucide="users"></i><div class="empty-state-title">No leads yet</div><div class="empty-state-sub">Priority leads appear here as contacts come in.</div></div>
         </div>
       </div>
-      <div style="display:flex;flex-direction:column;gap:16px;">
-        <div class="card">
-          <div class="sec-head"><div class="sec-title">Insights</div><span class="state-pill live"><span class="sp-dot"></span>Auto</span></div>
+      <div id="ov-bot-side">
+        <div class="card" id="card-insights">
+          <div class="card-handle" onclick="cardCtxOpen(event,'card-insights')" title="Card options"><span></span><span></span><span></span></div>
+          <div class="sec-head"><div class="sec-title">Insights</div><span class="state-pill live" style="margin-right:18px;"><span class="sp-dot"></span>Auto</span></div>
           <div id="insights-list"></div>
         </div>
-        <div class="card">
-          <div class="sec-head"><div class="sec-title">Needs Attention</div><div class="sec-link" onclick="showPage('leads')">View all</div></div>
+        <div class="card" id="card-attn">
+          <div class="card-handle" onclick="cardCtxOpen(event,'card-attn')" title="Card options"><span></span><span></span><span></span></div>
+          <div class="sec-head"><div class="sec-title">Needs Attention</div><div class="sec-link" onclick="showPage('leads')" style="margin-right:18px;">View all</div></div>
           <div id="attn-list"></div>
           <div class="empty-state" id="attn-empty" style="padding:22px 18px;"><i data-lucide="shield-alert"></i><div class="empty-state-title">All clear</div><div class="empty-state-sub">No leads need immediate attention.</div></div>
         </div>
-        <div class="card">
-          <div class="sec-head"><div class="sec-title">Live Activity</div><div style="display:flex;align-items:center;gap:6px;"><div class="live-dot"></div><span style="font-size:10.5px;font-weight:700;color:var(--green);">Live</span></div></div>
+        <div class="card" id="card-activity">
+          <div class="card-handle" onclick="cardCtxOpen(event,'card-activity')" title="Card options"><span></span><span></span><span></span></div>
+          <div class="sec-head"><div class="sec-title">Live Activity</div><div style="display:flex;align-items:center;gap:6px;margin-right:18px;"><div class="live-dot"></div><span style="font-size:10.5px;font-weight:700;color:var(--green);">Live</span></div></div>
           <div id="ov-activity"><div class="empty-state" style="padding:22px 18px;"><i data-lucide="activity"></i><div class="empty-state-title">No activity yet</div><div class="empty-state-sub">New leads, touches, and booked calls will appear here as they happen.</div></div></div>
         </div>
       </div>
@@ -2526,6 +2536,22 @@
 </div>
 
 <!-- NOTIFICATION DRAWER -->
+<!-- OVERVIEW WIDGET CATALOG -->
+<div id="ov-catalog">
+  <div class="ovc-head">Customize Layout<div class="ovc-x" onclick="ovCustCancel()"><i data-lucide="x"></i></div></div>
+  <div class="ovc-sub">Drag any card by its handle to rearrange. Hidden widgets appear below — click one to add it back to the dashboard.</div>
+  <div class="ovc-list" id="ovc-list"></div>
+  <div class="ovc-foot">
+    <button class="btn-mini btn-mini-ghost" onclick="ovRestoreDefaults()">Reset</button>
+    <button class="btn-mini btn-mini-ghost" onclick="ovCustCancel()">Cancel</button>
+    <button class="btn-mini btn-mini-primary" onclick="ovCustSave()">Save</button>
+  </div>
+</div>
+<div class="card-ctx-menu" id="card-ctx-menu">
+  <div class="card-ctx-item" onclick="cardCtxCustomize()"><i data-lucide="layout-grid"></i>Customize layout</div>
+  <div class="card-ctx-item ctx-danger" onclick="cardCtxHide()"><i data-lucide="eye-off"></i>Hide card</div>
+</div>
+
 <div id="notif-overlay" onclick="closeNotifDrawer()"></div>
 <div id="notif-drawer">
   <div class="notif-head">
@@ -3140,126 +3166,235 @@ function initCharts() {
   eLine('an-leads'); eLine('an-resp'); eBar('an-status'); eBar('an-booked-chart'); eBar('an-dow');
 }
 
-/* ── KPI drag-to-reorder ── */
-function kpiDragKey() { return 'flw_kpi_order_' + (window.__userSub || 'anon'); }
+/* ── Overview widgets: registry, drag zones, customize mode ── */
+const OV_WIDGETS = {
+  'kpi-new-leads':    { zone: 'kpi',  label: 'New Leads Today',   icon: 'user-plus' },
+  'kpi-response':     { zone: 'kpi',  label: 'Avg Response',      icon: 'zap' },
+  'kpi-ai-replies':   { zone: 'kpi',  label: 'AI Replies',        icon: 'sparkles' },
+  'kpi-follow-ups':   { zone: 'kpi',  label: 'Sequences',         icon: 'repeat-2' },
+  'kpi-pipeline':     { zone: 'kpi',  label: 'Pipeline Value',    icon: 'dollar-sign' },
+  'kpi-booked-calls': { zone: 'kpi',  label: 'Booked Calls',      icon: 'calendar-check' },
+  'card-sources':     { zone: 'mid',  label: 'Lead Sources',      icon: 'pie-chart' },
+  'card-goal':        { zone: 'mid',  label: 'Monthly Lead Goal', icon: 'target' },
+  'card-resp':        { zone: 'mid',  label: 'Response Time',     icon: 'trending-up' },
+  'card-leads':       { zone: 'main', label: 'Priority Leads',    icon: 'users' },
+  'card-insights':    { zone: 'side', label: 'Insights',          icon: 'lightbulb' },
+  'card-attn':        { zone: 'side', label: 'Needs Attention',   icon: 'shield-alert' },
+  'card-activity':    { zone: 'side', label: 'Live Activity',     icon: 'activity', defaultHidden: true }
+};
+const OV_ZONES = { kpi: 'ov-kpi-grid', mid: 'ov-mid-grid', side: 'ov-bot-side' };
 
-function restoreKpiOrder() {
-  try {
-    const saved = JSON.parse(localStorage.getItem(kpiDragKey()) || 'null');
-    if (!saved || !Array.isArray(saved)) return;
-    const grid = document.getElementById('ov-kpi-grid');
-    if (!grid) return;
-    saved.forEach(function(wid) {
-      const card = grid.querySelector('[data-wid="' + wid + '"]');
-      if (card) grid.appendChild(card);
-    });
-  } catch(e) {}
-}
+function ovLayoutKey() { return 'flw_ov_layout2_' + (window.__userSub || 'anon'); }
 
-function initKpiDrag() {
-  const grid = document.getElementById('ov-kpi-grid');
-  if (!grid || typeof Sortable === 'undefined') return;
-  Sortable.create(grid, {
-    animation: 160,
-    ghostClass: 'sortable-ghost',
-    dragClass: 'sortable-drag',
-    onEnd: function() {
-      try {
-        const order = Array.from(grid.querySelectorAll('[data-wid]')).map(function(c) {
-          return c.getAttribute('data-wid');
-        });
-        localStorage.setItem(kpiDragKey(), JSON.stringify(order));
-      } catch(e) {}
-    }
+function ovLayoutState() {
+  const hidden = Object.keys(OV_WIDGETS).filter(function(id) {
+    const el = document.getElementById(id);
+    return el && el.style.display === 'none';
   });
+  const order = {};
+  Object.keys(OV_ZONES).forEach(function(z) {
+    const grid = document.getElementById(OV_ZONES[z]);
+    order[z] = grid ? Array.from(grid.children).map(function(el) { return el.id; }).filter(Boolean) : [];
+  });
+  return { order: order, hidden: hidden };
 }
 
-restoreKpiOrder();
-setTimeout(initKpiDrag, 400);
-
-/* ── Overview customize layout ──────────────────────────────────────────── */
-var _ovCustActive = false;
-var _ovMidSort = null;
-
-function ovCustToggle() {
-  _ovCustActive = !_ovCustActive;
-  document.body.classList.toggle('ov-customize', _ovCustActive);
-  const grid = document.getElementById('ov-mid-grid');
-  if (_ovCustActive && grid && typeof Sortable !== 'undefined') {
-    _ovMidSort = Sortable.create(grid, {
-      animation: 160,
-      ghostClass: 'sortable-ghost',
-      dragClass: 'sortable-drag',
-      onEnd: function() { _ovMidSaveLayout(); }
-    });
-  } else if (_ovMidSort) {
-    _ovMidSort.destroy();
-    _ovMidSort = null;
-  }
-  document.querySelectorAll('.card-ctx-menu.open').forEach(function(m) { m.classList.remove('open'); });
-}
-window.ovCustToggle = ovCustToggle;
-
-function ovCustSave() {
-  _ovMidSaveLayout();
-  _ovCustActive = false;
-  document.body.classList.remove('ov-customize');
-  if (_ovMidSort) { _ovMidSort.destroy(); _ovMidSort = null; }
-  showToast('Layout saved.');
-}
-window.ovCustSave = ovCustSave;
-
-function ovCustCancel() {
-  _ovCustActive = false;
-  document.body.classList.remove('ov-customize');
-  if (_ovMidSort) { _ovMidSort.destroy(); _ovMidSort = null; }
-  _ovMidRestoreLayout();
-}
-window.ovCustCancel = ovCustCancel;
-
-function _ovMidSaveLayout() {
-  const grid = document.getElementById('ov-mid-grid');
-  if (!grid) return;
-  const ids = Array.from(grid.children).filter(function(el) { return el.id; }).map(function(el) { return el.id; });
-  try { localStorage.setItem('flw_ov_layout_' + (window.__userSub || 'anon'), JSON.stringify(ids)); } catch(e) {}
+function ovLayoutSave() {
+  try { localStorage.setItem(ovLayoutKey(), JSON.stringify(ovLayoutState())); } catch(e) {}
 }
 
-function _ovMidRestoreLayout() {
-  const grid = document.getElementById('ov-mid-grid');
-  if (!grid) return;
-  try {
-    const saved = JSON.parse(localStorage.getItem('flw_ov_layout_' + (window.__userSub || 'anon')) || 'null');
-    if (!saved || !Array.isArray(saved)) return;
-    saved.forEach(function(id) {
+function ovLayoutApply(state) {
+  if (!state) return;
+  Object.keys(OV_ZONES).forEach(function(z) {
+    const grid = document.getElementById(OV_ZONES[z]);
+    if (!grid || !state.order || !Array.isArray(state.order[z])) return;
+    state.order[z].forEach(function(id) {
       const el = document.getElementById(id);
       if (el && el.parentElement === grid) grid.appendChild(el);
     });
-  } catch(e) {}
+  });
+  const hidden = Array.isArray(state.hidden) ? state.hidden : [];
+  Object.keys(OV_WIDGETS).forEach(function(id) {
+    const el = document.getElementById(id);
+    if (el) el.style.display = hidden.indexOf(id) !== -1 ? 'none' : '';
+  });
+  ovSyncZones();
 }
+
+function ovLayoutLoadSaved() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(ovLayoutKey()) || 'null');
+    if (saved) { ovLayoutApply(saved); return; }
+  } catch(e) {}
+  const hidden = Object.keys(OV_WIDGETS).filter(function(id) { return OV_WIDGETS[id].defaultHidden; });
+  ovLayoutApply({ order: {}, hidden: hidden });
+}
+
+/* Collapse zones with nothing visible so no empty space is left behind */
+function ovSyncZones() {
+  ['kpi', 'mid'].forEach(function(z) {
+    const grid = document.getElementById(OV_ZONES[z]);
+    if (!grid) return;
+    const anyVisible = Array.from(grid.children).some(function(el) { return el.style.display !== 'none'; });
+    grid.style.display = anyVisible ? '' : 'none';
+  });
+  const bot = document.getElementById('ov-bot');
+  const side = document.getElementById('ov-bot-side');
+  const leads = document.getElementById('card-leads');
+  if (!bot || !side || !leads) return;
+  const sideVisible = Array.from(side.children).some(function(el) { return el.style.display !== 'none'; });
+  const leadsVisible = leads.style.display !== 'none';
+  side.style.display = sideVisible ? '' : 'none';
+  bot.style.display = (sideVisible || leadsVisible) ? '' : 'none';
+  bot.classList.toggle('solo', !(sideVisible && leadsVisible));
+  /* stretch the last visible side card so the column has no dead space */
+  let lastVis = null;
+  Array.from(side.children).forEach(function(el) { el.style.flex = ''; if (el.style.display !== 'none') lastVis = el; });
+  if (lastVis) lastVis.style.flex = '1';
+}
+
+var _ovSorts = [];
+function initOvSortables() {
+  if (typeof Sortable === 'undefined') return;
+  Object.keys(OV_ZONES).forEach(function(z) {
+    const grid = document.getElementById(OV_ZONES[z]);
+    if (!grid) return;
+    _ovSorts.push(Sortable.create(grid, {
+      animation: 160,
+      ghostClass: 'sortable-ghost',
+      dragClass: 'sortable-drag',
+      onEnd: function() { ovLayoutSave(); }
+    }));
+  });
+}
+
+/* ── Customize mode + widget catalog ── */
+var _ovCustSnapshot = null;
+
+function ovCustOpen() {
+  _ovCustSnapshot = ovLayoutState();
+  document.body.classList.add('ov-customize');
+  const p = document.getElementById('ov-catalog');
+  if (p) p.classList.add('open');
+  cardCtxClose();
+  ovCatalogRender();
+}
+window.ovCustOpen = ovCustOpen;
+
+function ovCustClose(save) {
+  if (save) { ovLayoutSave(); showToast('Layout saved.'); }
+  else if (_ovCustSnapshot) { ovLayoutApply(_ovCustSnapshot); ovLayoutSave(); }
+  _ovCustSnapshot = null;
+  document.body.classList.remove('ov-customize');
+  const p = document.getElementById('ov-catalog');
+  if (p) p.classList.remove('open');
+}
+
+function ovCustSave() { ovCustClose(true); }
+window.ovCustSave = ovCustSave;
+function ovCustCancel() { ovCustClose(false); }
+window.ovCustCancel = ovCustCancel;
+function ovCustToggle() {
+  if (document.body.classList.contains('ov-customize')) ovCustClose(true);
+  else ovCustOpen();
+}
+window.ovCustToggle = ovCustToggle;
+
+function ovRestoreDefaults() {
+  const order = {};
+  Object.keys(OV_ZONES).forEach(function(z) {
+    order[z] = Object.keys(OV_WIDGETS).filter(function(id) { return OV_WIDGETS[id].zone === z; });
+  });
+  const hidden = Object.keys(OV_WIDGETS).filter(function(id) { return OV_WIDGETS[id].defaultHidden; });
+  ovLayoutApply({ order: order, hidden: hidden });
+  ovLayoutSave();
+  ovCatalogRender();
+}
+window.ovRestoreDefaults = ovRestoreDefaults;
+
+function ovCatalogRender() {
+  const list = document.getElementById('ovc-list');
+  if (!list) return;
+  const hidden = Object.keys(OV_WIDGETS).filter(function(id) {
+    const el = document.getElementById(id);
+    return el && el.style.display === 'none';
+  });
+  if (!hidden.length) {
+    list.innerHTML = '<div class="ovc-empty"><i data-lucide="layout-grid"></i>' +
+      '<div>All widgets are on your dashboard.</div>' +
+      '<div class="ovc-empty-sub">Hide a card with its handle menu and it will appear here.</div></div>';
+  } else {
+    list.innerHTML = hidden.map(function(id) {
+      const w = OV_WIDGETS[id];
+      return '<div class="ovc-tile" onclick="ovWidgetShow(\'' + id + '\')">' +
+        '<i data-lucide="' + w.icon + '"></i>' +
+        '<div class="ovc-tile-label">' + w.label + '</div>' +
+        '<span class="ovc-add">+ Add</span>' +
+      '</div>';
+    }).join('');
+  }
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+function ovWidgetShow(id) {
+  const el = document.getElementById(id);
+  if (el) el.style.display = '';
+  ovSyncZones();
+  ovLayoutSave();
+  ovCatalogRender();
+}
+window.ovWidgetShow = ovWidgetShow;
+
+function ovWidgetHide(id) {
+  cardCtxClose();
+  const el = document.getElementById(id);
+  if (el) el.style.display = 'none';
+  ovSyncZones();
+  ovLayoutSave();
+  ovCatalogRender();
+  if (!document.body.classList.contains('ov-customize')) {
+    showToast('Card hidden — open Customize layout to add it back.');
+  }
+}
+window.ovWidgetHide = ovWidgetHide;
+
+/* ── Shared card context menu (floats near the clicked handle) ── */
+var _ctxTarget = null;
 
 function cardCtxOpen(e, cardId) {
   e.stopPropagation();
-  const wasOpen = document.getElementById('ctx-' + cardId) && document.getElementById('ctx-' + cardId).classList.contains('open');
-  document.querySelectorAll('.card-ctx-menu.open').forEach(function(m) { m.classList.remove('open'); });
-  if (!wasOpen) {
-    const menu = document.getElementById('ctx-' + cardId);
-    if (menu) menu.classList.add('open');
-  }
+  const menu = document.getElementById('card-ctx-menu');
+  if (!menu) return;
+  if (_ctxTarget === cardId && menu.classList.contains('open')) { cardCtxClose(); return; }
+  _ctxTarget = cardId;
+  const r = e.currentTarget.getBoundingClientRect();
+  menu.style.top = (r.bottom + 4) + 'px';
+  menu.style.left = Math.max(8, r.right - 160) + 'px';
+  menu.classList.add('open');
+  if (typeof lucide !== 'undefined') lucide.createIcons();
 }
 window.cardCtxOpen = cardCtxOpen;
 
-function cardCtxHide(cardId) {
-  document.querySelectorAll('.card-ctx-menu.open').forEach(function(m) { m.classList.remove('open'); });
-  const card = document.getElementById(cardId);
-  if (card) { card.style.display = 'none'; _ovMidSaveLayout(); showToast('Card hidden. Customize layout to restore it.'); }
+function cardCtxClose() {
+  const menu = document.getElementById('card-ctx-menu');
+  if (menu) menu.classList.remove('open');
+  _ctxTarget = null;
 }
+
+function cardCtxHide() { if (_ctxTarget) ovWidgetHide(_ctxTarget); }
 window.cardCtxHide = cardCtxHide;
 
-document.addEventListener('click', function() {
-  document.querySelectorAll('.card-ctx-menu.open').forEach(function(m) { m.classList.remove('open'); });
-});
+function cardCtxCustomize() {
+  cardCtxClose();
+  if (!document.body.classList.contains('ov-customize')) ovCustOpen();
+}
+window.cardCtxCustomize = cardCtxCustomize;
 
-setTimeout(_ovMidRestoreLayout, 100);
+document.addEventListener('click', cardCtxClose);
+
+ovLayoutLoadSaved();
+setTimeout(ovLayoutLoadSaved, 1200); /* re-apply once __userSub is set after auth */
+setTimeout(initOvSortables, 400);
 
 initAuth();
 </script>
