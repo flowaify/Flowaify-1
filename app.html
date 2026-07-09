@@ -320,6 +320,8 @@
     .kg-amber  { color: #d97706; }
     .kg-teal   { color: #0d9488; }
     .kg-red    { color: var(--red); }
+    /* restrained KPI icons — muted monochrome, color reserved for meaning */
+    .stat-label .kpi-glyph { color: var(--text-m); }
     .stat-val-row { display: flex; align-items: flex-end; justify-content: space-between; gap: 10px; }
     .spark { flex-shrink: 0; opacity: 0.9; }
     .spark svg { display: block; }
@@ -451,6 +453,7 @@
     .th-sort.desc::after { content: ' ▼'; font-size: 8px; }
 
     /* OVERVIEW MID ROW */
+    .ov-mid { margin-bottom: 12px; }
     .ov-mid > .card { display: flex; flex-direction: column; }
     .ov-mid .src-list { flex: 1; }
 
@@ -1437,7 +1440,7 @@
     #mob-overlay.open { display: block; }
 
     /* GRID LAYOUTS */
-    .ov-bot { display: grid; grid-template-columns: 1fr 380px; gap: 12px; margin-top: 12px; align-items: stretch; }
+    .ov-bot { display: grid; grid-template-columns: 1fr 380px; gap: 12px; align-items: stretch; }
     .ov-bot.solo { grid-template-columns: 1fr; }
     .leads-split { display: grid; grid-template-columns: 1fr 345px; gap: 12px; align-items: start; }
     .settings-grid-v2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
@@ -1738,18 +1741,18 @@
       <div class="card stat-card" id="kpi-booked-calls" data-wid="booked-calls"><div class="card-handle" onclick="cardCtxOpen(event,'kpi-booked-calls')" title="Card options"><span></span><span></span><span></span></div><div class="stat-top"><div class="stat-label"><i data-lucide="calendar-check" class="kpi-glyph kg-teal"></i>Booked Calls</div></div><div class="stat-val" id="val-booked-calls">—</div><div class="stat-hint">Deals or contacts marked as booked</div></div>
     </div>
 
-    <div class="g3 mb20 ov-mid" id="ov-mid-grid">
+    <div class="g3 ov-mid" id="ov-mid-grid">
       <div class="card" id="card-sources">
         <div class="card-handle" onclick="cardCtxOpen(event,'card-sources')" title="Card options"><span></span><span></span><span></span></div>
         <div class="sec-head"><div class="sec-title">Lead Sources</div><button class="exq-btn" onclick="flowyExplain('my lead sources')" title="Ask Flowy to explain"><i data-lucide="sparkles"></i></button></div>
         <div id="src-list"></div>
       </div>
-      <div class="card card-tint-blue" id="card-goal">
+      <div class="card" id="card-goal">
         <div class="card-handle" onclick="cardCtxOpen(event,'card-goal')" title="Card options"><span></span><span></span><span></span></div>
         <div class="sec-head"><div class="sec-title">Monthly Lead Goal</div><div class="sec-sub" id="goal-month-label"></div></div>
         <div id="goal-gauge" style="padding:14px 16px;"></div>
       </div>
-      <div class="card card-tint-amber" id="card-resp">
+      <div class="card" id="card-resp">
         <div class="card-handle" onclick="cardCtxOpen(event,'card-resp')" title="Card options"><span></span><span></span><span></span></div>
         <div class="sec-head"><div class="sec-title">Response Time</div><span class="state-pill awaiting" id="pill-resp-ov"><span class="sp-dot"></span>Awaiting data</span></div>
         <div class="chart-wrap" style="padding:12px 16px;height:80px;"><canvas id="ch-resp"></canvas><div class="chart-empty"><i data-lucide="trending-up"></i><div class="chart-empty-title">No data yet</div><div class="chart-empty-text">Fills in once automations start responding to leads.</div></div></div>
