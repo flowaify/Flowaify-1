@@ -774,14 +774,14 @@
       opacity: var(--spotlight-opacity, 0);
       transition: opacity 300ms ease;
       background: radial-gradient(150px at var(--mouse-x, -1000px) var(--mouse-y, -1000px),
-        color-mix(in oklab, var(--blue) 85%, transparent),
-        color-mix(in oklab, var(--blue) 35%, transparent) 45%,
+        color-mix(in oklab, var(--blue) 78%, white),
+        color-mix(in oklab, var(--blue) 60%, transparent) 42%,
         transparent 72%);
       -webkit-mask-image: radial-gradient(circle, black 1.2px, transparent 1.2px);
       -webkit-mask-size: 12px 12px;
       mask-image: radial-gradient(circle, black 1.2px, transparent 1.2px);
       mask-size: 12px 12px;
-      filter: blur(1.5px);
+      filter: blur(2px);
     }
     #flowy-panel > *:not(.interactive-dot-bg) { position: relative; z-index: 1; }
 
@@ -4309,14 +4309,20 @@ function initInteractiveDotBg(containerId) {
   let cx = -1000, cy = -1000;   /* current (eased) */
   let raf = null;
   let hovering = false;
+  let lastT = 0;
 
-  function tick() {
-    cx += (tx - cx) * 0.14;
-    cy += (ty - cy) * 0.14;
-    bg.style.setProperty('--mouse-x', cx.toFixed(1) + 'px');
-    bg.style.setProperty('--mouse-y', cy.toFixed(1) + 'px');
-    const settled = Math.abs(tx - cx) < 0.3 && Math.abs(ty - cy) < 0.3;
-    if (settled && !hovering) { raf = null; return; }
+  function tick(now) {
+    /* time-based exponential smoothing — identical feel at any frame rate,
+       no visible stepping when frames drop */
+    const dt = lastT ? Math.min((now - lastT) / 1000, 0.05) : 1 / 60;
+    lastT = now;
+    const k = 1 - Math.exp(-9 * dt);
+    cx += (tx - cx) * k;
+    cy += (ty - cy) * k;
+    bg.style.setProperty('--mouse-x', cx.toFixed(2) + 'px');
+    bg.style.setProperty('--mouse-y', cy.toFixed(2) + 'px');
+    const settled = Math.abs(tx - cx) < 0.2 && Math.abs(ty - cy) < 0.2;
+    if (settled && !hovering) { raf = null; lastT = 0; return; }
     raf = requestAnimationFrame(tick);
   }
 
