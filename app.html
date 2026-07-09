@@ -1480,7 +1480,8 @@
     .ov-bot { display: grid; grid-template-columns: 1fr 380px; gap: 12px; align-items: stretch; }
     .ov-bot.solo { grid-template-columns: 1fr; }
     .leads-split { display: grid; grid-template-columns: 1fr 345px; gap: 12px; align-items: start; }
-    .settings-grid-v2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .settings-grid-v2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-items: start; }
+    .settings-grid-v2.one-col { grid-template-columns: 1fr; max-width: 760px; margin: 0 auto; }
     .analytics-charts { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 
     /* TABLE SKELETON */
@@ -1523,7 +1524,7 @@
     .save-status { font-size: 11.5px; color: var(--green); opacity: 0; transition: opacity 0.3s; align-self: center; font-weight: 600; }
     .save-status.visible { opacity: 1; }
     .st-actions { display: flex; gap: 10px; justify-content: flex-end; align-items: center; padding-top: 14px; border-top: 1px solid var(--border); margin-top: 14px; }
-    .st-plan { border: 1px solid var(--border); border-radius: 5px; padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .st-plan { border: 1px solid var(--border); border-radius: 4px; padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
     .st-plan-name { font-size: 14.5px; font-weight: 700; color: var(--text); }
     .st-plan-desc { font-size: 11.5px; color: var(--text-m); margin-top: 2px; }
     .toggle-label { font-size: 12.5px; color: var(--text-s); font-weight: 500; }
@@ -2788,9 +2789,9 @@
       <div class="card">
         <div class="sec-head"><div class="sec-title">AI Persona &amp; Templates</div></div>
         <div class="p20">
-          <div class="field"><label>AI Persona</label><textarea id="s-personaText" rows="3" maxlength="1000" placeholder="Write in a warm, professional tone. Always reference the lead's specific request. Sign off as the team." style="width:100%;background:var(--input-bg);border:1px solid var(--input-border);border-radius:5px;color:var(--text);font-size:12.5px;padding:9px 11px;font-family:inherit;resize:vertical;"></textarea>
+          <div class="field"><label>AI Persona</label><textarea id="s-personaText" rows="3" maxlength="1000" placeholder="Write in a warm, professional tone. Always reference the lead's specific request. Sign off as the team."></textarea>
             <div style="font-size:11px;color:var(--text-m);margin-top:4px;">Injected into every outgoing AI reply as style guidance. Max 1,000 characters.</div></div>
-          <div class="field" style="margin-bottom:0;"><label>Fallback Email Template</label><textarea id="s-fallbackTemplate" rows="3" maxlength="2000" placeholder="Hi {{first_name}}, thanks for reaching out! A member of our team will be in touch shortly." style="width:100%;background:var(--input-bg);border:1px solid var(--input-border);border-radius:5px;color:var(--text);font-size:12.5px;padding:9px 11px;font-family:inherit;resize:vertical;"></textarea>
+          <div class="field" style="margin-bottom:0;"><label>Fallback Email Template</label><textarea id="s-fallbackTemplate" rows="3" maxlength="2000" placeholder="Hi {{first_name}}, thanks for reaching out! A member of our team will be in touch shortly."></textarea>
             <div style="font-size:11px;color:var(--text-m);margin-top:4px;">Sent automatically if AI generation fails — keep this filled in. Use {{first_name}} for the lead's name.</div></div>
           <div class="st-actions"><span class="save-status" id="ss-persona-status">Saved</span><button class="btn-mini btn-mini-primary" onclick="savePersonaSettings()">Save</button></div>
         </div>
