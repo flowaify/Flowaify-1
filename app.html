@@ -488,8 +488,8 @@
     .card-tint-green  { border-left: 3px solid var(--green); }
     .card-tint-amber  { border-left: 3px solid var(--amber); }
     .card-tint-purple { border-left: 3px solid var(--purple); }
-    .stats-grid .stat-hero { background: linear-gradient(135deg, rgba(5,150,105,0.06), transparent 60%); }
-    [data-theme="dark"] .stats-grid .stat-hero { background: linear-gradient(135deg, rgba(52,211,153,0.10), transparent 60%); }
+    /* calm surfaces — no decorative gradients on stat cards */
+    .main input:focus, .main select:focus, .main textarea:focus { outline: none; border-color: var(--blue); }
 
     /* TOP LEADS */
     .score-legend { display: inline-flex; align-items: center; gap: 5px; font-size: 10px; color: var(--text-m); font-weight: 500; white-space: nowrap; }
@@ -620,6 +620,8 @@
       body.ov-customize .main { margin-right: 0; }
       #ov-catalog { width: min(320px, 92vw); }
       .leads-split > .card:last-child { position: static; max-height: none; overflow-y: visible; }
+      .act-split { grid-template-columns: 1fr; }
+      #act-side { position: static; }
     }
     .card-ctx-item { padding: 8px 12px; font-size: 12px; cursor: pointer; color: var(--text); display: flex; align-items: center; gap: 8px; }
     .card-ctx-item:hover { background: var(--hover); }
@@ -922,11 +924,30 @@
     /* Pages that need internal scroll (too many sections) */
     #page-analytics { overflow-y: auto; }
     #page-settings .pivot-bar { flex-shrink: 0; }
-    /* Activity page */
-    #page-activity .feed-grid { flex: 1; min-height: 0; align-items: stretch; }
-    #page-activity .feed-grid > .card { display: flex; flex-direction: column; }
-    #activity-feed { flex: 1; overflow-y: auto; }
-    #page-activity .feed-grid > div { display: flex; flex-direction: column; gap: 12px; }
+    /* Activity page — operational history & review */
+    #page-activity { overflow-y: auto; }
+    #page-activity > * { flex-shrink: 0; }
+    .act-split { display: grid; grid-template-columns: 1fr 360px; gap: 12px; align-items: start; }
+    #act-side { display: flex; flex-direction: column; gap: 12px; position: sticky; top: 0; }
+    .act-row { display: flex; align-items: center; gap: 11px; padding: 10px 16px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.1s; }
+    .act-row:last-child { border-bottom: none; }
+    .act-row:hover { background: var(--hover); }
+    .act-row.sel { background: var(--hover); box-shadow: inset 2px 0 0 var(--blue); }
+    .act-ico { width: 28px; height: 28px; border-radius: 4px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; background: var(--hover); color: var(--text-m); }
+    .act-ico i, .act-ico svg { width: 14px; height: 14px; }
+    .act-body { flex: 1; min-width: 0; }
+    .act-title { font-size: 12.5px; font-weight: 600; color: var(--text); }
+    .act-sub { font-size: 11px; color: var(--text-m); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .act-pill { display: inline-flex; align-items: center; gap: 5px; font-size: 10.5px; font-weight: 600; color: var(--text-s); white-space: nowrap; flex-shrink: 0; }
+    .act-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+    .act-time { font-size: 10.5px; color: var(--text-m); white-space: nowrap; width: 54px; text-align: right; flex-shrink: 0; }
+    .act-view { opacity: 0; transition: opacity 0.12s; flex-shrink: 0; }
+    .act-row:hover .act-view, .act-row.sel .act-view { opacity: 1; }
+    .imp-row { display: flex; align-items: center; gap: 10px; padding: 10px 16px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.1s; }
+    .imp-row:hover { background: var(--hover); }
+    .imp-row:last-child { border-bottom: none; }
+    .imp-title { font-size: 12px; font-weight: 600; color: var(--text); line-height: 1.35; }
+    .imp-sub { font-size: 10.5px; color: var(--text-m); }
     /* Calendar page */
     #page-calendar .feed-grid { flex: 1; min-height: 0; align-items: stretch; }
     #page-calendar .feed-grid > .card { display: flex; flex-direction: column; }
@@ -1710,9 +1731,9 @@
   <div class="page active" id="page-overview">
     <div class="stats-grid" id="ov-kpi-grid">
       <div class="card stat-card" id="kpi-new-leads" data-wid="new-leads"><div class="card-handle" onclick="cardCtxOpen(event,'kpi-new-leads')" title="Card options"><span></span><span></span><span></span></div><div class="stat-top"><div class="stat-label"><i data-lucide="user-plus" class="kpi-glyph kg-blue"></i>New Leads Today</div></div><div class="stat-val-row"><div class="stat-val" id="val-new-leads">—</div><div class="spark" id="spark-new-leads"></div></div><div class="stat-delta-row" id="delta-new-leads"></div><div class="stat-hint">Leads captured today</div></div>
-      <div class="card stat-card" id="kpi-response" data-wid="response-time"><div class="card-handle" onclick="cardCtxOpen(event,'kpi-response')" title="Card options"><span></span><span></span><span></span></div><div class="stat-top"><div class="stat-label"><i data-lucide="zap" class="kpi-glyph kg-green"></i>Avg Response</div><div id="await-response"></div></div><div class="stat-val" id="val-response-time">—</div><div class="stat-hint" id="hint-response" data-live="First-touch speed on new leads">No data yet</div></div>
-      <div class="card stat-card" id="kpi-ai-replies" data-wid="ai-replies"><div class="card-handle" onclick="cardCtxOpen(event,'kpi-ai-replies')" title="Card options"><span></span><span></span><span></span></div><div class="stat-top"><div class="stat-label"><i data-lucide="sparkles" class="kpi-glyph kg-purple"></i>AI Replies</div><div id="await-ai-replies"></div></div><div class="stat-val" id="val-ai-replies">—</div><div class="stat-hint" id="hint-ai-replies" data-live="Instant responses sent by Flowaify AI">No data yet</div></div>
-      <div class="card stat-card" id="kpi-follow-ups" data-wid="follow-ups"><div class="card-handle" onclick="cardCtxOpen(event,'kpi-follow-ups')" title="Card options"><span></span><span></span><span></span></div><div class="stat-top"><div class="stat-label"><i data-lucide="repeat-2" class="kpi-glyph kg-amber"></i>Sequences</div><div id="await-follow-ups"></div></div><div class="stat-val" id="val-follow-ups">—</div><div class="stat-hint" id="hint-follow-ups" data-live="HOT + WARM leads in follow-up">No data yet</div></div>
+      <div class="card stat-card" id="kpi-response" data-wid="response-time"><div class="card-handle" onclick="cardCtxOpen(event,'kpi-response')" title="Card options"><span></span><span></span><span></span></div><div class="stat-top"><div class="stat-label"><i data-lucide="zap" class="kpi-glyph kg-green"></i>Avg Response</div><div id="await-response"></div></div><div class="stat-val" id="val-response-time">—</div><div class="stat-hint" id="hint-response" data-live="First-touch speed on new leads" data-empty="Tracks once replies start sending">Tracks once replies start sending</div></div>
+      <div class="card stat-card" id="kpi-ai-replies" data-wid="ai-replies"><div class="card-handle" onclick="cardCtxOpen(event,'kpi-ai-replies')" title="Card options"><span></span><span></span><span></span></div><div class="stat-top"><div class="stat-label"><i data-lucide="sparkles" class="kpi-glyph kg-purple"></i>AI Replies</div><div id="await-ai-replies"></div></div><div class="stat-val" id="val-ai-replies">—</div><div class="stat-hint" id="hint-ai-replies" data-live="Instant responses sent by Flowaify AI" data-empty="Counts each automated reply sent">Counts each automated reply sent</div></div>
+      <div class="card stat-card" id="kpi-follow-ups" data-wid="follow-ups"><div class="card-handle" onclick="cardCtxOpen(event,'kpi-follow-ups')" title="Card options"><span></span><span></span><span></span></div><div class="stat-top"><div class="stat-label"><i data-lucide="repeat-2" class="kpi-glyph kg-amber"></i>Sequences</div><div id="await-follow-ups"></div></div><div class="stat-val" id="val-follow-ups">—</div><div class="stat-hint" id="hint-follow-ups" data-live="HOT + WARM leads in follow-up" data-empty="Active sequences appear here">Active sequences appear here</div></div>
       <div class="card stat-card" id="kpi-pipeline" data-wid="pipeline"><div class="card-handle" onclick="cardCtxOpen(event,'kpi-pipeline')" title="Card options"><span></span><span></span><span></span></div><div class="stat-top"><div class="stat-label"><i data-lucide="dollar-sign" class="kpi-glyph kg-green"></i>Pipeline Value</div></div><div class="stat-val" id="val-pipeline">—</div><div id="delta-pipeline"></div><div class="stat-hint">Total value of all open deals</div></div>
       <div class="card stat-card" id="kpi-booked-calls" data-wid="booked-calls"><div class="card-handle" onclick="cardCtxOpen(event,'kpi-booked-calls')" title="Card options"><span></span><span></span><span></span></div><div class="stat-top"><div class="stat-label"><i data-lucide="calendar-check" class="kpi-glyph kg-teal"></i>Booked Calls</div></div><div class="stat-val" id="val-booked-calls">—</div><div class="stat-hint">Deals or contacts marked as booked</div></div>
     </div>
@@ -1905,25 +1926,48 @@
 
   <!-- ACTIVITY -->
   <div class="page" id="page-activity">
-    <div class="feed-grid">
+
+    <div class="stats-grid sg-4">
+      <div class="card stat-card"><div class="stat-top"><div class="stat-label"><i data-lucide="bell" class="kpi-glyph kg-blue"></i>Key Activity</div></div><div class="stat-val" id="act-kpi-key">—</div><div class="stat-hint">In the selected period</div></div>
+      <div class="card stat-card" style="cursor:pointer;" onclick="showPage('leads');setTimeout(function(){if(window.leadsSetTab)leadsSetTab('followup');},120);" title="Review leads needing follow-up"><div class="stat-top"><div class="stat-label"><i data-lucide="clock" class="kpi-glyph kg-amber"></i>Needs Follow-Up</div></div><div class="stat-val" id="act-kpi-followup">—</div><div class="stat-hint">No contact in 48h+</div></div>
+      <div class="card stat-card" style="cursor:pointer;" onclick="actSetTab('bookings')" title="Show bookings"><div class="stat-top"><div class="stat-label"><i data-lucide="calendar-check" class="kpi-glyph kg-teal"></i>Bookings</div></div><div class="stat-val" id="act-kpi-bookings">—</div><div class="stat-hint">In the selected period</div></div>
+      <div class="card stat-card"><div class="stat-top"><div class="stat-label"><i data-lucide="database" class="kpi-glyph kg-blue"></i>Record Updates</div></div><div class="stat-val" id="act-kpi-updates">—</div><div class="stat-hint">Created or updated</div></div>
+    </div>
+
+    <div class="card mb20" style="display:flex;align-items:center;gap:9px;flex-wrap:wrap;padding:11px 14px;">
+      <div style="flex:1;min-width:200px;position:relative;">
+        <i data-lucide="search" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);width:13px;height:13px;color:var(--text-m);"></i>
+        <input type="text" id="act-search" placeholder="Search activity by lead name…" oninput="renderActTimeline()" style="width:100%;padding:8px 12px 8px 32px;background:var(--input-bg);border:1px solid var(--input-border);border-radius:5px;font-size:12.5px;font-family:inherit;outline:none;" />
+      </div>
+      <button class="btn-mini btn-mini-ghost" onclick="actExport()" style="display:inline-flex;align-items:center;gap:6px;"><i data-lucide="download" style="width:13px;height:13px;"></i>Export</button>
+    </div>
+
+    <div class="lt-tabs" id="act-tabs">
+      <div class="lt-tab active" data-tab="all" onclick="actSetTab('all')">All <span id="act-cnt-all"></span></div>
+      <div class="lt-tab" data-tab="leads" onclick="actSetTab('leads')">Leads <span id="act-cnt-leads"></span></div>
+      <div class="lt-tab" data-tab="followups" onclick="actSetTab('followups')">Follow-ups <span id="act-cnt-followups"></span></div>
+      <div class="lt-tab" data-tab="deals" onclick="actSetTab('deals')">Record Updates <span id="act-cnt-deals"></span></div>
+      <div class="lt-tab" data-tab="bookings" onclick="actSetTab('bookings')">Bookings <span id="act-cnt-bookings"></span></div>
+      <div class="lt-tab" data-tab="warnings" onclick="actSetTab('warnings')">Warnings <span id="act-cnt-warnings"></span></div>
+    </div>
+
+    <div class="act-split">
       <div class="card">
-        <div class="sec-head"><div class="sec-title">Timeline</div><div class="sec-sub range-label">Last 30 days</div></div>
-        <div id="activity-feed">
-          <div class="empty-state" style="padding:40px 20px;"><i data-lucide="activity"></i><div class="empty-state-title">No activity in this period</div><div class="empty-state-sub">New leads, automation touches, and booked calls will appear here as they happen.</div></div>
+        <div class="sec-head"><div class="sec-title">Activity Timeline</div><div class="sec-sub range-label">Last 30 days</div></div>
+        <div id="act-timeline">
+          <div class="empty-state" style="padding:40px 20px;"><i data-lucide="activity"></i><div class="empty-state-title">No activity yet</div><div class="empty-state-sub">Events appear as leads come in, follow-ups send, and records update.</div></div>
         </div>
       </div>
-      <div style="display:flex;flex-direction:column;gap:16px;">
+      <div id="act-side">
         <div class="card">
-          <div class="sec-head"><div class="sec-title">This Period</div><div class="sec-sub range-label">Last 30 days</div></div>
-          <div class="p20" style="padding-top:8px;padding-bottom:8px;">
-            <div class="feed-summary-row"><div class="feed-summary-label"><i data-lucide="user-plus"></i>New Leads</div><div class="feed-summary-val" id="feed-count-leads">—</div></div>
-            <div class="feed-summary-row"><div class="feed-summary-label"><i data-lucide="sparkles"></i>Automation Touches</div><div class="feed-summary-val" id="feed-count-touches">—</div></div>
-            <div class="feed-summary-row"><div class="feed-summary-label"><i data-lucide="dollar-sign"></i>Open Deals</div><div class="feed-summary-val" id="feed-count-deals">—</div></div>
-          </div>
+          <div class="sec-head"><div class="sec-title">Important Activity</div></div>
+          <div id="act-important"></div>
         </div>
         <div class="card">
-          <div class="sec-head"><div class="sec-title">Conversations</div><span class="state-pill awaiting"><span class="sp-dot"></span>Coming soon</span></div>
-          <div class="p20" style="font-size:11.5px;color:var(--text-m);line-height:1.6;">AI conversations with your leads will merge into this timeline once Flowaify messaging goes live — replies, handoffs, and booking confirmations, all in one feed.</div>
+          <div class="sec-head"><div class="sec-title">Activity Detail</div><div class="sec-link" id="act-detail-close" style="display:none;" onclick="actDeselect()">✕ Close</div></div>
+          <div id="act-detail">
+            <div class="empty-state" style="padding:26px 16px;"><i data-lucide="mouse-pointer-click"></i><div class="empty-state-title">Select an event</div><div class="empty-state-sub">Click any row in the timeline to review what happened.</div></div>
+          </div>
         </div>
       </div>
     </div>
@@ -2957,7 +3001,7 @@
 
 <div id="toast"><div class="toast-icon"><i data-lucide="check"></i></div><div id="toast-msg" style="font-size:12.5px;font-weight:600;color:var(--text-s);line-height:1.45;"></div></div>
 
-<script src="crm.js?v=28"></script>
+<script src="crm.js?v=29"></script>
 <script src="teams.js?v=4"></script>
 <script src="settings.js?v=1"></script>
 <script src="invoice.js?v=3"></script>

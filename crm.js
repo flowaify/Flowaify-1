@@ -293,7 +293,8 @@ function setAwaitPill(id, isLive) {
   const hint = document.getElementById(id.replace('await-', 'hint-'));
   if (hint) {
     const liveText = hint.getAttribute('data-live');
-    hint.textContent = isLive && liveText ? liveText : 'No data yet';
+    const emptyText = hint.getAttribute('data-empty');
+    hint.textContent = isLive && liveText ? liveText : (emptyText || 'No data yet');
   }
 }
 
@@ -1981,11 +1982,16 @@ function buildActivityFeed(data, days) {
   (data.contacts || []).forEach(function(c) {
     if (c.createdAt) {
       const t = new Date(c.createdAt).getTime();
-      if (t >= cutoff) events.push({ type: 'lead_created', ts: t, name: c.name, source: c.source });
+      if (t >= cutoff) events.push({ type: 'lead_created', ts: t, name: c.name, source: c.source, id: c.id });
     }
     if (c.lastTouchAt) {
       const t2 = new Date(c.lastTouchAt).getTime();
-      if (t2 >= cutoff) events.push({ type: 'touch', ts: t2, name: c.name, touchType: c.lastTouch, status: c.status });
+      if (t2 >= cutoff) {
+        events.push({ type: 'touch', ts: t2, name: c.name, touchType: c.lastTouch, status: c.status, id: c.id });
+        if (scoreRank(c.status) === 3) {
+          events.push({ type: 'booking', ts: t2, name: c.name, source: c.source, id: c.id });
+        }
+      }
     }
   });
 
@@ -1994,6 +2000,14 @@ function buildActivityFeed(data, days) {
       const t3 = new Date(d.createdAt).getTime();
       if (t3 >= cutoff) events.push({ type: 'deal', ts: t3, name: d.name, stage: d.stage, amount: d.amount });
     }
+  });
+
+  /* warning fires 48h after creation with no recorded touch */
+  (data.needsAttention || []).forEach(function(c) {
+    const created = c.createdAt ? new Date(c.createdAt).getTime() : 0;
+    if (!created) return;
+    const t4 = Math.min(created + 48 * 3600000, Date.now());
+    if (t4 >= cutoff) events.push({ type: 'warning', ts: t4, name: c.name, status: c.status, id: c.id });
   });
 
   events.sort(function(a, b) { return b.ts - a.ts; });
@@ -2005,6 +2019,8 @@ const FEED_ICON = {
   touch:        { icon: 'sparkles',            bg: 'rgba(139,92,246,.13)',  color: '#8b5cf6' },
   ai_reply:     { icon: 'sparkles',            bg: 'rgba(139,92,246,.13)',  color: '#8b5cf6' },
   deal:         { icon: 'dollar-sign',    bg: 'rgba(5,150,105,.13)',   color: '#059669' },
+  booking:      { icon: 'calendar-check', bg: 'rgba(5,150,105,.13)',   color: '#059669' },
+  warning:      { icon: 'alert-triangle', bg: 'rgba(217,119,6,.13)',   color: '#d97706' },
 };
 
 function feedItemText(ev) {
@@ -2016,6 +2032,12 @@ function feedItemText(ev) {
   }
   if (ev.type === 'deal') {
     return 'Deal <strong>' + escDash(ev.name) + '</strong>' + (ev.stage ? ' · ' + escDash(ev.stage) : '') + (ev.amount != null ? ' · ' + fmtMoney(ev.amount) : '');
+  }
+  if (ev.type === 'booking') {
+    return 'Call booked with <strong>' + escDash(ev.name) + '</strong>';
+  }
+  if (ev.type === 'warning') {
+    return '<strong>' + escDash(ev.name) + '</strong> has had no contact in 48h+';
   }
   return escDash(ev.name);
 }
@@ -2078,7 +2100,7 @@ function renderActivitySections(data, days) {
   const events = buildActivityFeed(data, days);
 
   // Full Activity page
-  renderActivityFeed(events, 'activity-feed', { groupByDay: true });
+  renderActivityPage(data, days, events);
 
   // Overview "Live Activity" (compact)
   renderActivityFeed(events, 'ov-activity', {
@@ -2096,13 +2118,273 @@ function renderActivitySections(data, days) {
     emptySub: 'AI replies, follow-ups, and sequence events will appear here once your flows go live.',
   });
 
-  // "This period" summary card on Activity page
-  const leadsN   = events.filter(function(e) { return e.type === 'lead_created'; }).length;
-  const touchesN = events.filter(function(e) { return e.type === 'touch' || e.type === 'ai_reply'; }).length;
-  setText('feed-count-leads',   leadsN);
-  setText('feed-count-touches', touchesN);
-  setText('feed-count-deals',   (data.deals || []).length);
 }
+
+/* ── Activity page — operational history & review ───────────────────────────── */
+var _actTab = 'all';
+var _actSel = null;
+
+const ACT_META = {
+  lead_created: { title: 'New lead entered pipeline', pill: 'New Lead',     dot: '#3b82f6' },
+  touch:        { title: 'Follow-up sent',            pill: 'Completed',    dot: 'var(--green)' },
+  ai_reply:     { title: 'AI reply sent',             pill: 'Completed',    dot: 'var(--green)' },
+  deal:         { title: 'Deal record updated',       pill: 'Updated',      dot: '#64748b' },
+  booking:      { title: 'Call booked',               pill: 'Completed',    dot: 'var(--green)' },
+  warning:      { title: 'No contact in 48h+',        pill: 'Needs Review', dot: '#d97706' }
+};
+
+function actEvSub(ev) {
+  if (ev.type === 'lead_created') return escDash(ev.name) + (ev.source ? ' came in via ' + escDash(ev.source) : ' entered the pipeline');
+  if (ev.type === 'touch' || ev.type === 'ai_reply') return (ev.touchType ? escDash(ev.touchType) + ' sent to ' : 'Touch logged for ') + escDash(ev.name);
+  if (ev.type === 'deal') return escDash(ev.name) + (ev.stage ? ' · ' + escDash(ev.stage) : '') + (ev.amount != null ? ' · ' + fmtMoney(ev.amount) : '');
+  if (ev.type === 'booking') return 'Call booked with ' + escDash(ev.name);
+  if (ev.type === 'warning') return escDash(ev.name) + ' has not been contacted in 48 hours';
+  return escDash(ev.name);
+}
+
+function actTabMatch(ev, tab) {
+  if (tab === 'leads') return ev.type === 'lead_created';
+  if (tab === 'followups') return ev.type === 'touch' || ev.type === 'ai_reply';
+  if (tab === 'deals') return ev.type === 'deal';
+  if (tab === 'bookings') return ev.type === 'booking';
+  if (tab === 'warnings') return ev.type === 'warning';
+  return true;
+}
+
+function renderActivityPage(data, days, events) {
+  window.__actEvents = events;
+  const contacts = data.contacts || [];
+
+  setText('act-kpi-key', events.length);
+  setText('act-kpi-followup', leadsNeedFollowUp(contacts).length);
+  setText('act-kpi-bookings', events.filter(function(e) { return e.type === 'booking'; }).length);
+  setText('act-kpi-updates', events.filter(function(e) { return e.type === 'lead_created' || e.type === 'touch' || e.type === 'ai_reply'; }).length);
+
+  const counts = { all: events.length, leads: 0, followups: 0, deals: 0, bookings: 0, warnings: 0 };
+  events.forEach(function(ev) {
+    if (ev.type === 'lead_created') counts.leads++;
+    else if (ev.type === 'touch' || ev.type === 'ai_reply') counts.followups++;
+    else if (ev.type === 'deal') counts.deals++;
+    else if (ev.type === 'booking') counts.bookings++;
+    else if (ev.type === 'warning') counts.warnings++;
+  });
+  Object.keys(counts).forEach(function(k) {
+    const el = document.getElementById('act-cnt-' + k);
+    if (el) el.textContent = '(' + counts[k] + ')';
+  });
+
+  renderActTimeline();
+  renderActImportant(data, days, events);
+  if (_actSel == null) actDetailEmpty();
+}
+
+function renderActTimeline() {
+  const el = document.getElementById('act-timeline');
+  if (!el) return;
+  const q = (((document.getElementById('act-search') || {}).value) || '').trim().toLowerCase();
+  const all = window.__actEvents || [];
+  const shown = [];
+  all.forEach(function(ev, i) {
+    if (!actTabMatch(ev, _actTab)) return;
+    if (q && String(ev.name || '').toLowerCase().indexOf(q) === -1) return;
+    shown.push({ ev: ev, i: i });
+  });
+
+  if (!shown.length) {
+    el.innerHTML = '<div class="empty-state" style="padding:40px 20px;"><i data-lucide="activity"></i>' +
+      '<div class="empty-state-title">No activity here yet</div>' +
+      '<div class="empty-state-sub">' + (q ? 'No events match your search.' : 'Events appear as leads come in, follow-ups send, and records update.') + '</div></div>';
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+    return;
+  }
+
+  const groups = [];
+  let curLabel = null;
+  shown.forEach(function(item) {
+    const lbl = dayLabel(item.ev.ts);
+    if (lbl !== curLabel) { groups.push({ label: lbl, items: [] }); curLabel = lbl; }
+    groups[groups.length - 1].items.push(item);
+  });
+
+  el.innerHTML = groups.map(function(g) {
+    return '<div class="feed-day">' + g.label + '</div>' + g.items.map(function(item) {
+      const ev = item.ev;
+      const meta = ACT_META[ev.type] || ACT_META.lead_created;
+      const icon = (FEED_ICON[ev.type] || FEED_ICON.lead_created).icon;
+      const sel = item.i === _actSel ? ' sel' : '';
+      const time = new Date(ev.ts).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+      return '<div class="act-row' + sel + '" onclick="actSelect(' + item.i + ')">' +
+        '<div class="act-ico"><i data-lucide="' + icon + '"></i></div>' +
+        '<div class="act-body"><div class="act-title">' + meta.title + '</div>' +
+        '<div class="act-sub">' + actEvSub(ev) + '</div></div>' +
+        '<span class="act-pill"><span class="act-dot" style="background:' + meta.dot + ';"></span>' + meta.pill + '</span>' +
+        '<span class="act-time">' + time + '</span>' +
+        '<button class="btn-mini btn-mini-ghost act-view" onclick="actView(' + item.i + ', event)">View</button>' +
+      '</div>';
+    }).join('');
+  }).join('');
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+window.renderActTimeline = renderActTimeline;
+
+function actSetTab(t) {
+  _actTab = t;
+  document.querySelectorAll('#act-tabs .lt-tab').forEach(function(el) {
+    el.classList.toggle('active', el.getAttribute('data-tab') === t);
+  });
+  renderActTimeline();
+}
+window.actSetTab = actSetTab;
+
+function actSelect(i) {
+  _actSel = i;
+  renderActTimeline();
+  actDetailRender();
+}
+window.actSelect = actSelect;
+
+function actDeselect() {
+  _actSel = null;
+  renderActTimeline();
+  actDetailEmpty();
+}
+window.actDeselect = actDeselect;
+
+function actView(i, e) {
+  if (e) e.stopPropagation();
+  const ev = (window.__actEvents || [])[i];
+  if (!ev) return;
+  if (ev.id) bellOpenLead(String(ev.id).replace(/[^\w-]/g, ''), String(ev.name || '').replace(/[^\w\s.@-]/g, ''));
+  else if (ev.name) bellOpenLead('', String(ev.name).replace(/[^\w\s.@-]/g, ''));
+}
+window.actView = actView;
+
+function actDetailEmpty() {
+  const el = document.getElementById('act-detail');
+  if (!el) return;
+  const x = document.getElementById('act-detail-close');
+  if (x) x.style.display = 'none';
+  el.innerHTML = '<div class="empty-state" style="padding:26px 16px;"><i data-lucide="mouse-pointer-click"></i>' +
+    '<div class="empty-state-title">Select an event</div>' +
+    '<div class="empty-state-sub">Click any row in the timeline to review what happened.</div></div>';
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+function actDetailRender() {
+  const el = document.getElementById('act-detail');
+  const ev = (window.__actEvents || [])[_actSel];
+  if (!el || !ev) return;
+  const x = document.getElementById('act-detail-close');
+  if (x) x.style.display = '';
+  const meta = ACT_META[ev.type] || ACT_META.lead_created;
+  const when = new Date(ev.ts).toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' }) +
+    ' at ' + new Date(ev.ts).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+  let what = actEvSub(ev) + '.';
+  let next = '';
+  if (ev.type === 'warning') next = 'Send a follow-up now — leads contacted within 48 hours convert significantly better.';
+  else if (ev.type === 'lead_created') next = 'Review the lead and confirm the first touch went out.';
+  else if (ev.type === 'booking') next = 'Confirm the appointment is on the calendar.';
+
+  el.innerHTML =
+    '<div style="padding:14px 16px;">' +
+      '<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">' +
+        '<div class="act-ico"><i data-lucide="' + (FEED_ICON[ev.type] || FEED_ICON.lead_created).icon + '"></i></div>' +
+        '<div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:700;color:var(--text);">' + meta.title + '</div>' +
+        '<div style="font-size:10.5px;color:var(--text-m);">' + when + '</div></div>' +
+        '<span class="act-pill"><span class="act-dot" style="background:' + meta.dot + ';"></span>' + meta.pill + '</span>' +
+      '</div>' +
+      (ev.name ? '<div class="detail-row"><span class="dk">Lead</span><span class="dv">' + escDash(ev.name) + '</span></div>' : '') +
+      (ev.source ? '<div class="detail-row"><span class="dk">Source</span><span class="dv">' + escDash(ev.source) + '</span></div>' : '') +
+      (ev.status ? '<div class="detail-row"><span class="dk">Status</span><span class="dv">' + escDash(ev.status) + '</span></div>' : '') +
+      (ev.stage ? '<div class="detail-row"><span class="dk">Stage</span><span class="dv">' + escDash(ev.stage) + '</span></div>' : '') +
+      (ev.amount != null ? '<div class="detail-row"><span class="dk">Value</span><span class="dv">' + fmtMoney(ev.amount) + '</span></div>' : '') +
+      '<div style="font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-m);margin:12px 0 5px;">What happened</div>' +
+      '<div style="font-size:12px;color:var(--text-s);line-height:1.6;">' + what + '</div>' +
+      (next ? '<div style="font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-m);margin:12px 0 5px;">Next step</div>' +
+        '<div style="font-size:12px;color:var(--text-s);line-height:1.6;">' + next + '</div>' : '') +
+      ((ev.id || ev.name) && ev.type !== 'deal'
+        ? '<button class="btn-mini btn-mini-primary" style="width:100%;justify-content:center;margin-top:14px;display:inline-flex;" onclick="actView(' + _actSel + ')">View lead</button>'
+        : '') +
+    '</div>';
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+function renderActImportant(data, days, events) {
+  const el = document.getElementById('act-important');
+  if (!el) return;
+  const contacts = data.contacts || [];
+  const followup = leadsNeedFollowUp(contacts).length;
+  const warnings = events.filter(function(e) { return e.type === 'warning'; }).length;
+  const bookings = events.filter(function(e) { return e.type === 'booking'; }).length;
+  const srcCounts = groupCount(contacts.filter(function(c) { return c.source; }), function(c) { return c.source; });
+  const topSrc = Object.keys(srcCounts).sort(function(a, b) { return srcCounts[b] - srcCounts[a]; })[0] || null;
+  const srcPct = topSrc && contacts.length ? Math.round((srcCounts[topSrc] / contacts.length) * 100) : 0;
+
+  const rows = [];
+  rows.push({
+    icon: 'clock', color: '#d97706',
+    title: followup + ' lead' + (followup === 1 ? '' : 's') + ' need follow-up',
+    sub: 'No contact in 48h+',
+    run: "showPage('leads');setTimeout(function(){if(window.leadsSetTab)leadsSetTab('followup');},120);"
+  });
+  if (topSrc) {
+    rows.push({
+      icon: 'layers', color: 'var(--blue)',
+      title: escDash(topSrc) + ' is top source',
+      sub: srcPct + '% of leads this period',
+      run: "showPage('analytics');"
+    });
+  }
+  rows.push({
+    icon: 'calendar-check', color: 'var(--green)',
+    title: bookings + ' booking' + (bookings === 1 ? '' : 's') + ' recorded this period',
+    sub: bookings > 0 ? 'Keep the momentum going' : 'Bookings will appear as calls get scheduled',
+    run: "actSetTab('bookings');"
+  });
+  rows.push({
+    icon: warnings > 0 ? 'alert-triangle' : 'check-circle-2',
+    color: warnings > 0 ? '#d97706' : 'var(--green)',
+    title: warnings > 0 ? warnings + ' lead' + (warnings === 1 ? '' : 's') + ' flagged for review' : 'No warnings detected',
+    sub: warnings > 0 ? 'Review recommended' : 'All automations running normally',
+    run: warnings > 0 ? "actSetTab('warnings');" : ''
+  });
+
+  el.innerHTML = rows.map(function(r) {
+    return '<div class="imp-row"' + (r.run ? ' onclick="' + r.run + '"' : '') + '>' +
+      '<div class="act-ico" style="color:' + r.color + ';"><i data-lucide="' + r.icon + '"></i></div>' +
+      '<div style="flex:1;min-width:0;"><div class="imp-title">' + r.title + '</div>' +
+      '<div class="imp-sub">' + r.sub + '</div></div>' +
+      '<i data-lucide="chevron-right" style="width:14px;height:14px;color:var(--text-m);flex-shrink:0;"></i>' +
+    '</div>';
+  }).join('');
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+function actExport() {
+  const events = window.__actEvents || [];
+  if (!events.length) { if (typeof showToast === 'function') showToast('No activity to export.'); return; }
+  const esc = function(v) { return '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"'; };
+  const head = ['Date', 'Time', 'Event', 'Lead', 'Detail', 'Status'];
+  const lines = [head.map(esc).join(',')].concat(events.map(function(ev) {
+    const meta = ACT_META[ev.type] || {};
+    return [
+      new Date(ev.ts).toLocaleDateString(),
+      new Date(ev.ts).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }),
+      meta.title || ev.type,
+      ev.name || '',
+      actEvSub(ev).replace(/<[^>]*>/g, ''),
+      meta.pill || ''
+    ].map(esc).join(',');
+  }));
+  const blob = new Blob(['﻿' + lines.join('\n')], { type: 'text/csv;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'flowaify-activity-' + new Date().toISOString().slice(0, 10) + '.csv';
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(a.href);
+  if (typeof showToast === 'function') showToast('Exported ' + events.length + ' events to CSV.');
+}
+window.actExport = actExport;
 
 /* ── Automations page ───────────────────────────────────────────────────────── */
 function renderAutomationStats(data) {
