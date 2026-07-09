@@ -759,6 +759,29 @@
     .pal-item .pal-sub { margin-left: auto; font-size: 10.5px; color: var(--text-m); }
 
     /* FLOWY PANEL (Copilot rail) */
+    /* INTERACTIVE DOT BACKGROUND — reusable assistant-panel ambience.
+       Dot grid via radial-gradient; mouse-following glow revealed only
+       through the dots via a matching mask. Token-based, both themes. */
+    .interactive-dot-bg { position: absolute; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+    .interactive-dot-bg::before {
+      content: ""; position: absolute; inset: 0;
+      background-image: radial-gradient(circle, color-mix(in oklab, var(--border) 55%, transparent) 1px, transparent 1px);
+      background-size: 12px 12px;
+      opacity: 0.5;
+    }
+    .interactive-dot-bg::after {
+      content: ""; position: absolute; inset: 0;
+      opacity: var(--spotlight-opacity, 0);
+      transition: opacity 200ms ease;
+      background: radial-gradient(80px at var(--mouse-x, -1000px) var(--mouse-y, -1000px),
+        color-mix(in oklab, var(--blue) 45%, transparent), transparent 70%);
+      -webkit-mask-image: radial-gradient(circle, black 1px, transparent 1px);
+      -webkit-mask-size: 12px 12px;
+      mask-image: radial-gradient(circle, black 1px, transparent 1px);
+      mask-size: 12px 12px;
+    }
+    #flowy-panel > *:not(.interactive-dot-bg) { position: relative; z-index: 1; }
+
     #flowy-panel {
       position: fixed; top: var(--hdr); right: 0; bottom: 0; width: 360px; z-index: 70;
       background: var(--bg-card); border-left: 1px solid var(--card-border);
@@ -3034,6 +3057,7 @@
 
 <!-- FLOWY AI PANEL -->
 <aside id="flowy-panel">
+  <div class="interactive-dot-bg" aria-hidden="true"></div>
   <div class="fl-head">
     <div class="fl-orb"><img class="logo-white" src="logo-transparent.png" alt="" /></div>
     <div class="fl-title">Flowy</div>
@@ -4268,6 +4292,22 @@ ovLayoutLoadSaved();
 setTimeout(ovLayoutLoadSaved, 1200); /* re-apply once __userSub is set after auth */
 setTimeout(initOvSortables, 400);
 setTimeout(function() { if (window.ovTeamWidgetRefresh) ovTeamWidgetRefresh(); }, 4000);
+
+/* ── InteractiveDotBackground — reusable mouse-following dot-grid glow ──── */
+function initInteractiveDotBg(containerId) {
+  const host = document.getElementById(containerId);
+  if (!host) return;
+  const bg = host.querySelector('.interactive-dot-bg');
+  if (!bg) return;
+  host.addEventListener('mousemove', function(e) {
+    const r = host.getBoundingClientRect();
+    bg.style.setProperty('--mouse-x', (e.clientX - r.left) + 'px');
+    bg.style.setProperty('--mouse-y', (e.clientY - r.top) + 'px');
+  });
+  host.addEventListener('mouseenter', function() { bg.style.setProperty('--spotlight-opacity', '1'); });
+  host.addEventListener('mouseleave', function() { bg.style.setProperty('--spotlight-opacity', '0'); });
+}
+initInteractiveDotBg('flowy-panel');
 
 initAuth();
 </script>
