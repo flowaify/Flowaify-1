@@ -212,6 +212,32 @@
 
     footer { text-align: center; font-size: 10.5px; color: var(--text-m); padding: 26px 0 0; }
 
+    /* ── INTERACTIVE DOT BACKGROUND (same component as the dashboard) ── */
+    .interactive-dot-bg { position: absolute; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+    .interactive-dot-bg::before {
+      content: ""; position: absolute; inset: 0;
+      background-image: radial-gradient(circle, color-mix(in oklab, var(--border) 55%, transparent) 1px, transparent 1px);
+      background-size: 12px 12px;
+      opacity: 0.5;
+      -webkit-mask-image: radial-gradient(115px at var(--mouse-x, -1000px) var(--mouse-y, -1000px),
+        transparent, rgba(0,0,0,0.45) 45%, black 72%);
+      mask-image: radial-gradient(115px at var(--mouse-x, -1000px) var(--mouse-y, -1000px),
+        transparent, rgba(0,0,0,0.45) 45%, black 72%);
+    }
+    .interactive-dot-bg::after {
+      content: ""; position: absolute; inset: 0;
+      opacity: var(--spotlight-opacity, 0);
+      transition: opacity 300ms ease;
+      background-image: radial-gradient(circle, color-mix(in oklab, var(--blue) 80%, white) 1px, transparent 1px);
+      background-size: 12px 12px;
+      -webkit-mask-image: radial-gradient(115px at var(--mouse-x, -1000px) var(--mouse-y, -1000px),
+        black, rgba(0,0,0,0.55) 45%, transparent 72%);
+      mask-image: radial-gradient(115px at var(--mouse-x, -1000px) var(--mouse-y, -1000px),
+        black, rgba(0,0,0,0.55) 45%, transparent 72%);
+    }
+    #flowy-card { position: relative; }
+    #flowy-card > *:not(.interactive-dot-bg) { position: relative; z-index: 1; }
+
     /* ── FLOWY (portal rail) ── */
     .flowy-card { display: flex; flex-direction: column; border-left: 3px solid var(--blue); }
     .flowy-card .fl-msgs { height: 300px; flex: none; overflow-y: auto; }
@@ -411,6 +437,7 @@
 
     <!-- FLOWY -->
     <div class="card flowy-card mb16" id="flowy-card">
+      <div class="interactive-dot-bg" aria-hidden="true"></div>
       <div class="fl-head">
         <div class="fl-orb"><img class="logo-white" src="logo-transparent.png" alt="" /></div>
         <div class="fl-title">Flowy</div>
@@ -746,6 +773,61 @@ function toggleTheme() {
   syncThemeIcon();
 }
 
+
+/* ── InteractiveDotBackground — same component as the dashboard ── */
+function initInteractiveDotBg(containerId) {
+  const host = document.getElementById(containerId);
+  if (!host) return;
+  const bg = host.querySelector('.interactive-dot-bg');
+  if (!bg) return;
+
+  let tx = -1000, ty = -1000;
+  let cx = -1000, cy = -1000;
+  let raf = null;
+  let hovering = false;
+  let lastT = 0;
+  let parkTimer = null;
+
+  function tick(now) {
+    const dt = lastT ? Math.min((now - lastT) / 1000, 0.05) : 1 / 60;
+    lastT = now;
+    const k = 1 - Math.exp(-24 * dt);
+    cx += (tx - cx) * k;
+    cy += (ty - cy) * k;
+    bg.style.setProperty('--mouse-x', cx.toFixed(2) + 'px');
+    bg.style.setProperty('--mouse-y', cy.toFixed(2) + 'px');
+    const settled = Math.abs(tx - cx) < 0.2 && Math.abs(ty - cy) < 0.2;
+    if (settled && !hovering) { raf = null; lastT = 0; return; }
+    raf = requestAnimationFrame(tick);
+  }
+
+  host.addEventListener('mousemove', function(e) {
+    const r = host.getBoundingClientRect();
+    tx = e.clientX - r.left;
+    ty = e.clientY - r.top;
+    if (!raf) raf = requestAnimationFrame(tick);
+  });
+  host.addEventListener('mouseenter', function(e) {
+    hovering = true;
+    clearTimeout(parkTimer);
+    const r = host.getBoundingClientRect();
+    tx = cx = e.clientX - r.left;
+    ty = cy = e.clientY - r.top;
+    bg.style.setProperty('--spotlight-opacity', '1');
+    if (!raf) raf = requestAnimationFrame(tick);
+  });
+  host.addEventListener('mouseleave', function() {
+    hovering = false;
+    bg.style.setProperty('--spotlight-opacity', '0');
+    clearTimeout(parkTimer);
+    parkTimer = setTimeout(function() {
+      tx = cx = -1000; ty = cy = -1000;
+      bg.style.setProperty('--mouse-x', '-1000px');
+      bg.style.setProperty('--mouse-y', '-1000px');
+    }, 320);
+  });
+}
+initInteractiveDotBg('flowy-card');
 
 initAuth();
 </script>
