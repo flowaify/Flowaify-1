@@ -26,6 +26,8 @@ async function teamsInit() {
     if (computed === 'none') return;
   }
   await teamsLoadChannels();
+  twTasksLoad();
+  twPinsLoad();
   _teamsPollingId = setInterval(teamsPoll, 8000);
 }
 window.teamsInit = teamsInit;
@@ -41,6 +43,7 @@ function teamsTab(name, silent) {
   });
   if (!silent) {
     if (name === 'activity') teamsLoadActivity();
+    if (name === 'tasks') twTasksLoad();
     if (name === 'chat' && _teamsCurrentChannel) teamsScrollBottom();
   }
 }
@@ -108,17 +111,19 @@ function teamsRenderChannels(channels) {
   el.innerHTML = channels.map(function(ch) {
     var active = _teamsCurrentChannel && _teamsCurrentChannel.id === ch.id;
     var chId = twEsc(ch.id); var chName = twEsc(ch.name);
+    var meta = twChMeta(ch.name);
     return '<div class="teams-ch-item' + (active ? ' active' : '') + '" data-chid="' + chId + '" onclick="teamsSelectChannel(\'' + chId + '\',\'' + chName + '\')">' +
-      '<span class="teams-ch-icon">#</span>' +
+      '<span class="teams-ch-icon"><i data-lucide="' + meta.icon + '"></i></span>' +
       '<div class="teams-ch-item-body">' +
         '<div class="teams-ch-name-row">' +
           '<span class="teams-ch-item-name">' + twEsc(ch.name) + '</span>' +
           (ch.unread ? '<span class="teams-ch-unread">' + Math.min(ch.unread, 99) + '</span>' : '') +
         '</div>' +
-        '<div class="teams-ch-preview">' + twEsc(ch.lastMessage || 'No messages yet') + '</div>' +
+        '<div class="teams-ch-preview">' + twEsc(meta.desc) + '</div>' +
       '</div>' +
     '</div>';
   }).join('');
+  if (typeof lucide !== 'undefined') lucide.createIcons();
 }
 
 async function teamsSelectChannel(id, name) {
@@ -126,8 +131,12 @@ async function teamsSelectChannel(id, name) {
   _teamsLastMsgTs = 0;
   var nameEl = document.getElementById('teams-active-name');
   if (nameEl) nameEl.textContent = name;
+  var descEl = document.getElementById('teams-active-desc');
+  if (descEl) descEl.textContent = twChMeta(name).desc;
   var inputEl = document.getElementById('teams-input');
-  if (inputEl) inputEl.placeholder = 'Message #' + name + '…';
+  if (inputEl) inputEl.placeholder = 'Message ' + name + '…';
+  twSubTab('posts');
+  twRenderBrief();
   // Highlight active channel
   document.querySelectorAll('.teams-ch-item').forEach(function(item) {
     item.classList.toggle('active', item.dataset.chid === id);
@@ -219,16 +228,7 @@ function teamsRenderMessages(msgs, append) {
 function twMsgBody(msg) {
   if (msg.type === 'lead' && msg.payload) {
     var lead = msg.payload;
-    return '<div class="teams-msg-text">' + twEsc(msg.content || '') + '</div>' +
-      '<div class="teams-share-card">' +
-        '<div class="teams-share-card-title">Lead</div>' +
-        '<div class="teams-share-card-name">' + twEsc(lead.name || '—') + '</div>' +
-        '<div class="teams-share-card-meta">' +
-          (lead.status ? twStatusBadge(lead.status) : '') +
-          (lead.source ? '<span style="font-size:11.5px;color:var(--text-m);">' + twEsc(lead.source) + '</span>' : '') +
-          '<span class="teams-share-card-link" onclick="teamsOpenLead(\'' + twEsc(lead.id || '') + '\')">View lead →</span>' +
-        '</div>' +
-      '</div>';
+    return '<div class="teams-msg-text">' + twEsc(msg.content || '') + '</div>' + twLeadCard(lead);
   }
   if (msg.type === 'invoice' && msg.payload) {
     var inv = msg.payload;
@@ -757,3 +757,412 @@ function twLinkify(text) {
   return text.replace(/(https?:\/\/[^\s&lt;&gt;]+)/g,
     '<a href="$1" target="_blank" rel="noopener" style="color:var(--blue);">$1</a>');
 }
+
+// ═══ Team Workspace v5 — channel meta, sub-tabs, lead cards, pins, tasks, brief ═══
+
+var TW_CH_META = {
+  'general':       { icon: 'building-2',     desc: 'Company-wide updates' },
+  'lead handoffs': { icon: 'users',          desc: 'Ownership and next steps' },
+  'leads':         { icon: 'users',          desc: 'Lead discussion and handoffs' },
+  'follow-ups':    { icon: 'clock',          desc: 'Due this week' },
+  'bookings':      { icon: 'calendar-check', desc: 'Confirmed meetings' },
+  'announcements': { icon: 'megaphone',      desc: 'Read-only updates' }
+};
+function twChMeta(name) {
+  return TW_CH_META[String(name || '').toLowerCase()] || { icon: 'message-square', desc: 'Team discussion' };
+}
+
+// ── Center sub-tabs: Posts / Shared Leads / Tasks ────────────────────────────
+
+var _twSubTab = 'posts';
+
+function twSubTab(name) {
+  _twSubTab = name;
+  document.querySelectorAll('#teams-subtabs .tw-subtab').forEach(function(t) {
+    t.classList.toggle('active', t.getAttribute('data-sub') === name);
+  });
+  var posts = document.getElementById('teams-posts-pane');
+  var shared = document.getElementById('teams-shared-pane');
+  var tasks = document.getElementById('teams-chtasks-pane');
+  if (posts) posts.style.display = name === 'posts' ? '' : 'none';
+  if (shared) shared.style.display = name === 'shared' ? '' : 'none';
+  if (tasks) tasks.style.display = name === 'tasks' ? '' : 'none';
+  if (name === 'shared') twRenderSharedLeads();
+  if (name === 'tasks') twRenderChannelTasks();
+  if (name === 'posts') teamsScrollBottom();
+}
+window.twSubTab = twSubTab;
+
+// ── Shared lead card (used in posts + shared leads pane) ────────────────────
+
+function twLeadLive(id) {
+  var contacts = (window.__crmData || {}).contacts || [];
+  return contacts.find(function(c) { return String(c.id) === String(id); }) || null;
+}
+
+function twLeadCard(lead) {
+  var live = lead.id ? twLeadLive(lead.id) : null;
+  var status = (live && live.status) || lead.status || '';
+  var source = (live && live.source) || lead.source || '';
+  var score = (live && typeof leadScore === 'function') ? leadScore(live) : null;
+  var lastAct = live && live.lastTouchAt
+    ? (typeof relTime === 'function' ? relTime(new Date(live.lastTouchAt).getTime()) : '')
+    : 'No recent activity';
+  var safeId = twEsc(lead.id || '');
+  var safeName = twEsc(lead.name || 'Lead');
+  return '<div class="tw-lead-card">' +
+    '<div class="tw-lead-head">' +
+      '<span class="tw-lead-name">' + safeName + '</span>' +
+      (status ? twStatusBadge(status) : '<span class="tw-lead-dim">Status not set</span>') +
+    '</div>' +
+    '<div class="tw-lead-fields">' +
+      '<div class="tw-lf"><span class="tw-lf-k">Source</span><span class="tw-lf-v">' + (source ? twEsc(source) : 'Not set') + '</span></div>' +
+      '<div class="tw-lf"><span class="tw-lf-k">Score</span><span class="tw-lf-v">' + (score != null ? score : 'Unavailable') + '</span></div>' +
+      '<div class="tw-lf"><span class="tw-lf-k">Last activity</span><span class="tw-lf-v">' + twEsc(lastAct) + '</span></div>' +
+      '<div class="tw-lf"><span class="tw-lf-k">Owner</span><span class="tw-lf-v">Unassigned</span></div>' +
+    '</div>' +
+    '<div class="tw-lead-acts">' +
+      '<button class="btn-mini btn-mini-ghost" onclick="teamsOpenLead(\'' + safeId + '\')">View lead</button>' +
+      '<button class="btn-mini btn-mini-ghost" onclick="twPinLead(\'' + safeId + '\',\'' + safeName.replace(/'/g, '') + '\',\'' + twEsc(status) + '\')">Pin</button>' +
+      '<button class="btn-mini btn-mini-ghost" onclick="twTaskModalOpen({leadId:\'' + safeId + '\',leadName:\'' + safeName.replace(/'/g, '') + '\'})">Create task</button>' +
+    '</div>' +
+  '</div>';
+}
+
+async function twRenderSharedLeads() {
+  var el = document.getElementById('teams-shared-pane');
+  if (!el || !_teamsCurrentChannel) return;
+  el.innerHTML = '<div class="teams-loading">Loading shared leads…</div>';
+  var r = await twFetch('GET', '/team/messages?channel=' + encodeURIComponent(_teamsCurrentChannel.id));
+  var msgs = (r && r.data && r.data.messages) || [];
+  var leads = msgs.filter(function(m) { return m.type === 'lead' && m.payload; });
+  if (!leads.length) {
+    el.innerHTML = '<div class="empty-state" style="padding:40px 20px;"><i data-lucide="user-plus"></i>' +
+      '<div class="empty-state-title">No leads shared yet</div>' +
+      '<div class="empty-state-sub">Share a lead from the composer to hand it off to a teammate.</div></div>';
+  } else {
+    var seen = {};
+    el.innerHTML = '<div style="padding:12px 16px;">' + leads.slice().reverse().filter(function(m) {
+      var k = m.payload.id || m.payload.name;
+      if (seen[k]) return false;
+      seen[k] = 1;
+      return true;
+    }).map(function(m) {
+      return '<div style="margin-bottom:10px;">' +
+        '<div style="font-size:10.5px;color:var(--text-m);margin-bottom:4px;">Shared by ' + twEsc(m.authorName || 'Member') + ' · ' + twDayLabel(m.ts || Date.now()) + '</div>' +
+        twLeadCard(m.payload) + '</div>';
+    }).join('') + '</div>';
+  }
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+// ── Pinned leads ─────────────────────────────────────────────────────────────
+
+var _twPins = [];
+
+async function twPinsLoad() {
+  var r = await twFetch('GET', '/team/pins');
+  _twPins = (r && r.data && r.data.pins) || [];
+  twRenderPins();
+}
+
+async function twPinLead(id, name, status) {
+  var r = await twFetch('POST', '/team/pins', { id: id, name: name, status: status });
+  if (r && r.status === 200) {
+    var wasPinned = _twPins.some(function(p) { return p.id === id; });
+    _twPins = (r.data && r.data.pins) || [];
+    twRenderPins();
+    if (typeof showToast === 'function') showToast(wasPinned ? 'Lead unpinned.' : 'Lead pinned to the workspace.');
+  }
+}
+window.twPinLead = twPinLead;
+
+function twRenderPins() {
+  ['teams-pins-side', 'teams-brief-pins'].forEach(function(cid) {
+    var el = document.getElementById(cid);
+    if (!el) return;
+    if (!_twPins.length) {
+      el.innerHTML = '<div class="teams-empty-note" style="padding:8px 12px;">No pinned leads yet</div>';
+      return;
+    }
+    el.innerHTML = _twPins.slice(0, 5).map(function(p) {
+      return '<div class="tw-pin-row" onclick="teamsOpenLead(\'' + twEsc(p.id) + '\')">' +
+        '<span class="tw-pin-name">' + twEsc(p.name) + '</span>' +
+        (p.status ? twStatusBadge(p.status) : '') +
+      '</div>';
+    }).join('');
+  });
+}
+
+// ── Tasks ────────────────────────────────────────────────────────────────────
+
+var _twTasks = [];
+var _twTaskFilter = 'all';
+
+async function twTasksLoad() {
+  var r = await twFetch('GET', '/team/tasks');
+  _twTasks = (r && r.data && r.data.tasks) || [];
+  twTasksRenderAll();
+}
+window.twTasksLoad = twTasksLoad;
+
+function twTasksRenderAll() {
+  twRenderBriefTasks();
+  twRenderTasksTab();
+  if (_twSubTab === 'tasks') twRenderChannelTasks();
+}
+
+function twTaskDueLabel(t) {
+  if (!t.due) return 'No due date';
+  var d = new Date(t.due);
+  var today = new Date(); today.setHours(0, 0, 0, 0);
+  var days = Math.floor((t.due - today.getTime()) / 86400000);
+  if (days < 0) return 'Overdue';
+  if (days === 0) return 'Due today';
+  if (days === 1) return 'Due tomorrow';
+  return 'Due ' + d.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' });
+}
+
+function twTaskDueColor(t) {
+  if (!t.due || t.status === 'done') return 'var(--text-m)';
+  var days = Math.floor((t.due - Date.now()) / 86400000);
+  if (days < 0) return 'var(--red)';
+  if (days <= 1) return '#d97706';
+  return 'var(--text-m)';
+}
+
+async function twTaskToggle(id) {
+  var t = _twTasks.find(function(x) { return x.id === id; });
+  if (!t) return;
+  var next = t.status === 'done' ? 'open' : 'done';
+  var r = await twFetch('PUT', '/team/tasks', { id: id, status: next });
+  if (r && r.status === 200) {
+    _twTasks = (r.data && r.data.tasks) || _twTasks;
+    twTasksRenderAll();
+    if (next === 'done') twFetch('POST', '/team/activity', { text: 'completed task “' + t.title + '”' });
+  }
+}
+window.twTaskToggle = twTaskToggle;
+
+function twTaskModalOpen(opts) {
+  opts = opts || {};
+  var m = document.getElementById('tw-task-modal');
+  if (!m) return;
+  var titleEl = document.getElementById('twt-title');
+  if (titleEl) titleEl.value = opts.leadName ? 'Follow up with ' + opts.leadName : '';
+  var leadSel = document.getElementById('twt-lead');
+  if (leadSel) {
+    var contacts = ((window.__crmData || {}).contacts || []).slice(0, 60);
+    leadSel.innerHTML = '<option value="">No linked lead</option>' + contacts.map(function(c) {
+      var sel = opts.leadId && String(c.id) === String(opts.leadId) ? ' selected' : '';
+      return '<option value="' + twEsc(c.id) + '"' + sel + '>' + twEsc(c.name) + '</option>';
+    }).join('');
+  }
+  var ownerSel = document.getElementById('twt-owner');
+  if (ownerSel) {
+    var members = (window.__teamDoc && window.__teamDoc.members) || [];
+    ownerSel.innerHTML = '<option value="">Unassigned</option>' + members.map(function(mm) {
+      return '<option value="' + twEsc(mm.name || mm.email) + '">' + twEsc(mm.name || mm.email) + '</option>';
+    }).join('');
+  }
+  var due = document.getElementById('twt-due');
+  if (due) due.value = '';
+  var pri = document.getElementById('twt-priority');
+  if (pri) pri.value = 'normal';
+  m.classList.add('open');
+  if (titleEl) titleEl.focus();
+}
+window.twTaskModalOpen = twTaskModalOpen;
+
+function twTaskModalClose() {
+  var m = document.getElementById('tw-task-modal');
+  if (m) m.classList.remove('open');
+}
+window.twTaskModalClose = twTaskModalClose;
+
+async function twTaskSave() {
+  var title = ((document.getElementById('twt-title') || {}).value || '').trim();
+  if (!title) { if (typeof showToast === 'function') showToast('Give the task a title first.'); return; }
+  var leadSel = document.getElementById('twt-lead');
+  var leadId = leadSel ? leadSel.value : '';
+  var leadName = leadSel && leadSel.selectedIndex > 0 ? leadSel.options[leadSel.selectedIndex].text : null;
+  var dueVal = (document.getElementById('twt-due') || {}).value;
+  var payload = {
+    title: title,
+    leadId: leadId || null,
+    leadName: leadName,
+    owner: (document.getElementById('twt-owner') || {}).value || '',
+    due: dueVal ? new Date(dueVal + 'T12:00:00').getTime() : null,
+    priority: (document.getElementById('twt-priority') || {}).value || 'normal',
+    channelId: _teamsCurrentChannel ? _teamsCurrentChannel.id : null
+  };
+  var r = await twFetch('POST', '/team/tasks', payload);
+  if (r && r.status === 200) {
+    _twTasks = (r.data && r.data.tasks) || _twTasks;
+    twTaskModalClose();
+    twTasksRenderAll();
+    twFetch('POST', '/team/activity', { text: 'created task “' + title + '”' + (payload.owner ? ' for ' + payload.owner : '') });
+    if (typeof showToast === 'function') showToast('Task created.');
+  } else {
+    if (typeof showToast === 'function') showToast('Could not create the task — try again.');
+  }
+}
+window.twTaskSave = twTaskSave;
+
+function twTaskRowHtml(t, compact) {
+  var done = t.status === 'done';
+  return '<div class="tw-task-row' + (done ? ' done' : '') + '">' +
+    '<input type="checkbox" class="lt-check" ' + (done ? 'checked' : '') + ' onchange="twTaskToggle(\'' + twEsc(t.id) + '\')" />' +
+    '<div class="tw-task-body">' +
+      '<div class="tw-task-title">' + twEsc(t.title) + (t.priority === 'high' ? ' <span class="tw-task-pri">High</span>' : '') + '</div>' +
+      (compact ? '' : '<div class="tw-task-sub">' +
+        (t.leadName ? twEsc(t.leadName) + ' · ' : '') +
+        (t.owner ? twEsc(t.owner) : 'Unassigned') + '</div>') +
+    '</div>' +
+    '<span class="tw-task-due" style="color:' + twTaskDueColor(t) + ';">' + twTaskDueLabel(t) + '</span>' +
+    (t.leadId ? '<button class="row-act" title="View lead" onclick="teamsOpenLead(\'' + twEsc(t.leadId) + '\')"><i data-lucide="eye"></i></button>' : '') +
+  '</div>';
+}
+
+function twRenderChannelTasks() {
+  var el = document.getElementById('teams-chtasks-pane');
+  if (!el) return;
+  var chId = _teamsCurrentChannel ? _teamsCurrentChannel.id : null;
+  var tasks = _twTasks.filter(function(t) { return t.channelId === chId; });
+  var h = '<div style="padding:12px 16px;">' +
+    '<button class="btn-mini btn-mini-primary" style="margin-bottom:12px;" onclick="twTaskModalOpen()">New task</button>';
+  if (!tasks.length) {
+    h += '<div class="empty-state" style="padding:30px 16px;"><i data-lucide="check-square"></i>' +
+      '<div class="empty-state-title">No tasks in this channel</div>' +
+      '<div class="empty-state-sub">Create a task from the composer or a shared lead card.</div></div>';
+  } else {
+    h += tasks.map(function(t) { return twTaskRowHtml(t, false); }).join('');
+  }
+  el.innerHTML = h + '</div>';
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+function twTasksSetFilter(f) {
+  _twTaskFilter = f;
+  document.querySelectorAll('#tw-task-filters .lt-tab').forEach(function(el) {
+    el.classList.toggle('active', el.getAttribute('data-tab') === f);
+  });
+  twRenderTasksTab();
+}
+window.twTasksSetFilter = twTasksSetFilter;
+
+function twRenderTasksTab() {
+  var tbody = document.getElementById('tw-tasks-tbody');
+  if (!tbody) return;
+  var mySub = window.__userSub || '';
+  var me = '';
+  try {
+    var members = (window.__teamDoc && window.__teamDoc.members) || [];
+    var meM = members.find(function(m) { return m.sub === mySub; });
+    me = meM ? (meM.name || meM.email) : '';
+  } catch (e) {}
+  var soon = Date.now() + 72 * 3600000;
+  var shown = _twTasks.filter(function(t) {
+    if (_twTaskFilter === 'mine') return me && t.owner === me;
+    if (_twTaskFilter === 'due') return t.status === 'open' && t.due && t.due <= soon;
+    if (_twTaskFilter === 'done') return t.status === 'done';
+    return true;
+  });
+  var cnt = document.getElementById('tw-tasks-count');
+  if (cnt) cnt.textContent = shown.length + ' task' + (shown.length === 1 ? '' : 's');
+  if (!shown.length) {
+    tbody.innerHTML = '<tr><td colspan="7"><div class="empty-state" style="padding:36px 20px;"><i data-lucide="check-square"></i>' +
+      '<div class="empty-state-title">' + (_twTaskFilter === 'done' ? 'Nothing completed yet' : 'No tasks here') + '</div>' +
+      '<div class="empty-state-sub">Create a task to assign follow-up work to your team.</div></div></td></tr>';
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+    return;
+  }
+  tbody.innerHTML = shown.map(function(t) {
+    var done = t.status === 'done';
+    return '<tr class="' + (done ? 'tw-tr-done' : '') + '">' +
+      '<td style="width:34px;"><input type="checkbox" class="lt-check" ' + (done ? 'checked' : '') + ' onchange="twTaskToggle(\'' + twEsc(t.id) + '\')" /></td>' +
+      '<td style="font-size:12.5px;font-weight:600;color:var(--text);">' + twEsc(t.title) + '</td>' +
+      '<td style="font-size:12px;">' + (t.leadName ? '<span class="sec-link" onclick="teamsOpenLead(\'' + twEsc(t.leadId || '') + '\')">' + twEsc(t.leadName) + '</span>' : '<span style="color:var(--text-m);">None</span>') + '</td>' +
+      '<td style="font-size:12px;">' + (t.owner ? twEsc(t.owner) : '<span style="color:var(--text-m);">Unassigned</span>') + '</td>' +
+      '<td style="font-size:11.5px;white-space:nowrap;color:' + twTaskDueColor(t) + ';">' + twTaskDueLabel(t) + '</td>' +
+      '<td>' + (done
+        ? '<span class="badge b-conn">Done</span>'
+        : '<span class="badge b-low">Open</span>') + '</td>' +
+      '<td style="font-size:11.5px;">' + (t.priority === 'high' ? '<span style="color:var(--red);font-weight:700;">High</span>' : '<span style="color:var(--text-m);">Normal</span>') + '</td>' +
+    '</tr>';
+  }).join('');
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+// ── Channel Brief (right panel) ──────────────────────────────────────────────
+
+function twRenderBrief() {
+  var name = _teamsCurrentChannel ? _teamsCurrentChannel.name : 'General';
+  var meta = twChMeta(name);
+  var t = document.getElementById('teams-brief-chname');
+  if (t) t.textContent = name;
+  var d = document.getElementById('teams-brief-desc');
+  if (d) {
+    var descMap = {
+      'lead handoffs': 'Use this space to discuss lead ownership, follow-ups, and handoffs between teammates.',
+      'general': 'Company-wide updates and team-wide coordination.',
+      'follow-ups': 'Track and discuss follow-up work due this week.',
+      'bookings': 'Coordinate confirmed meetings and appointments.',
+      'announcements': 'Read-only updates from workspace owners.'
+    };
+    d.textContent = descMap[String(name).toLowerCase()] || 'Team discussion for ' + name + '.';
+  }
+  var i = document.getElementById('teams-brief-icon');
+  if (i) i.innerHTML = '<i data-lucide="' + meta.icon + '"></i>';
+  twRenderBriefTasks();
+  twRenderPins();
+  teamsRenderInfoMembers();
+  twRenderBriefActivity();
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+function twRenderBriefTasks() {
+  var el = document.getElementById('teams-brief-tasks');
+  if (!el) return;
+  var open = _twTasks.filter(function(t) { return t.status === 'open'; }).slice(0, 3);
+  var cnt = document.getElementById('teams-brief-tasks-count');
+  var totalOpen = _twTasks.filter(function(t) { return t.status === 'open'; }).length;
+  if (cnt) cnt.textContent = '(' + totalOpen + ')';
+  if (!open.length) {
+    el.innerHTML = '<div class="teams-empty-note" style="padding:8px 12px;">No open tasks — nice work.</div>';
+    return;
+  }
+  el.innerHTML = open.map(function(t) { return twTaskRowHtml(t, true); }).join('');
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+async function twRenderBriefActivity() {
+  var el = document.getElementById('teams-brief-activity');
+  if (!el) return;
+  var r = await twFetch('GET', '/team/activity');
+  var log = ((r && r.data && r.data.log) || []).slice(-3).reverse();
+  if (!log.length) {
+    el.innerHTML = '<div class="teams-empty-note" style="padding:8px 12px;">Collaboration activity shows here.</div>';
+    return;
+  }
+  el.innerHTML = log.map(function(e) {
+    return '<div class="tw-brief-act"><span class="tw-brief-dot"></span>' +
+      '<div style="flex:1;min-width:0;"><div class="tw-brief-act-text">' + twEsc((e.name || 'Member') + ' ' + (e.text || '')) + '</div>' +
+      '<div class="tw-brief-act-time">' + twTimeStr(e.ts || Date.now()) + '</div></div></div>';
+  }).join('');
+}
+
+// ── Composer helpers ─────────────────────────────────────────────────────────
+
+function twMention() {
+  var ta = document.getElementById('teams-input');
+  if (!ta) return;
+  ta.value = (ta.value ? ta.value + ' ' : '') + '@';
+  ta.focus();
+}
+window.twMention = twMention;
+
+function twAttachStub() {
+  if (typeof showToast === 'function') showToast('File attachments aren’t available yet — share leads, invoices, and reports instead.');
+}
+window.twAttachStub = twAttachStub;

@@ -90,6 +90,14 @@ export default {
         return handleTeamReact(request, env, corsHeaders);
       }
 
+      if (url.pathname === '/team/tasks') {
+        return handleTeamTasks(request, env, corsHeaders);
+      }
+
+      if (url.pathname === '/team/pins') {
+        return handleTeamPins(request, env, corsHeaders);
+      }
+
       if (url.pathname === '/team/activity') {
         return handleTeamActivity(request, env, corsHeaders);
       }
@@ -1726,4 +1734,77 @@ async function handleSettingsPut(request, env, corsHeaders) {
     return json({ error: 'Failed to save settings' }, 500, corsHeaders);
   }
   return json({ ok: true, config: cleaned }, 200, corsHeaders);
+}
+
+// ─── /team/tasks — shared team task list (GET / POST create / PUT update) ────
+async function handleTeamTasks(request, env, corsHeaders) {
+  const auth = await resolveTeamsAuth(request, env, corsHeaders);
+  if (auth.err) return auth.err;
+  const key = auth.pfx + ':tasks';
+  let tasks = [];
+  try { tasks = JSON.parse((await env.TEAM_KV.get(key)) || '[]'); } catch (e) {}
+
+  if (request.method === 'GET') return json({ tasks }, 200, corsHeaders);
+
+  let body;
+  try { body = await request.json(); } catch (e) { return json({ error: 'Invalid JSON body' }, 400, corsHeaders); }
+
+  if (request.method === 'POST') {
+    const t = {
+      id: 'tk_' + Math.random().toString(36).slice(2, 10),
+      title: String(body.title || '').trim().slice(0, 200),
+      leadId: body.leadId ? String(body.leadId).slice(0, 60) : null,
+      leadName: body.leadName ? String(body.leadName).slice(0, 120) : null,
+      owner: body.owner ? String(body.owner).slice(0, 120) : '',
+      ownerSub: body.ownerSub ? String(body.ownerSub).slice(0, 80) : '',
+      due: (typeof body.due === 'number' && isFinite(body.due)) ? body.due : null,
+      priority: body.priority === 'high' ? 'high' : 'normal',
+      status: 'open',
+      channelId: body.channelId ? String(body.channelId).slice(0, 40) : null,
+      createdBy: auth.name,
+      createdAt: Date.now()
+    };
+    if (!t.title) return json({ error: 'Missing title' }, 400, corsHeaders);
+    tasks.unshift(t);
+    tasks = tasks.slice(0, 200);
+    await env.TEAM_KV.put(key, JSON.stringify(tasks));
+    return json({ ok: true, tasks }, 200, corsHeaders);
+  }
+
+  if (request.method === 'PUT') {
+    const idx = tasks.findIndex(t => t.id === body.id);
+    if (idx === -1) return json({ error: 'Task not found' }, 404, corsHeaders);
+    const t = tasks[idx];
+    if (body.status === 'open' || body.status === 'done') t.status = body.status;
+    if (typeof body.title === 'string' && body.title.trim()) t.title = body.title.trim().slice(0, 200);
+    if (body.priority === 'high' || body.priority === 'normal') t.priority = body.priority;
+    if (typeof body.due === 'number' || body.due === null) t.due = body.due;
+    if (typeof body.owner === 'string') t.owner = body.owner.slice(0, 120);
+    t.updatedAt = Date.now();
+    await env.TEAM_KV.put(key, JSON.stringify(tasks));
+    return json({ ok: true, tasks }, 200, corsHeaders);
+  }
+  return json({ error: 'Method not allowed' }, 405, corsHeaders);
+}
+
+// ─── /team/pins — pinned leads (GET / POST toggle) ───────────────────────────
+async function handleTeamPins(request, env, corsHeaders) {
+  const auth = await resolveTeamsAuth(request, env, corsHeaders);
+  if (auth.err) return auth.err;
+  const key = auth.pfx + ':pins';
+  let pins = [];
+  try { pins = JSON.parse((await env.TEAM_KV.get(key)) || '[]'); } catch (e) {}
+
+  if (request.method === 'GET') return json({ pins }, 200, corsHeaders);
+
+  let body;
+  try { body = await request.json(); } catch (e) { return json({ error: 'Invalid JSON body' }, 400, corsHeaders); }
+  const id = String(body.id || '').slice(0, 60);
+  if (!id) return json({ error: 'Missing id' }, 400, corsHeaders);
+  const idx = pins.findIndex(p => p.id === id);
+  if (idx !== -1) pins.splice(idx, 1);
+  else pins.unshift({ id, name: String(body.name || '').slice(0, 120), status: String(body.status || '').slice(0, 30), ts: Date.now() });
+  pins = pins.slice(0, 20);
+  await env.TEAM_KV.put(key, JSON.stringify(pins));
+  return json({ ok: true, pins }, 200, corsHeaders);
 }

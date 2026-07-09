@@ -1008,8 +1008,13 @@
     .teams-section { display: none; flex: 1; min-height: 0; flex-direction: column; }
     .teams-section.active { display: flex; }
     /* Chat layout */
-    .teams-chat-layout { display: grid; grid-template-columns: 200px 1fr; flex: 1; min-height: 0; overflow: hidden; }
-    .teams-info-panel-open .teams-chat-layout { grid-template-columns: 200px 1fr 220px; }
+    .teams-chat-layout { display: grid; grid-template-columns: 230px 1fr 290px; flex: 1; min-height: 0; overflow: hidden; }
+    @media (max-width: 1180px) {
+      .teams-chat-layout { grid-template-columns: 230px 1fr; }
+      .teams-info-panel { display: none; }
+      .teams-info-panel-open .teams-chat-layout { grid-template-columns: 230px 1fr 290px; }
+      .teams-info-panel-open .teams-info-panel { display: flex; }
+    }
     .teams-ch-sidebar { border-right: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; background: var(--bg); }
     .teams-ch-head { display: flex; align-items: center; padding: 12px 12px 8px; flex-shrink: 0; }
     .teams-ch-head-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: var(--text-m); flex: 1; }
@@ -1020,7 +1025,8 @@
     .teams-ch-item { display: flex; align-items: flex-start; gap: 6px; padding: 7px 8px; border-radius: 4px; cursor: pointer; transition: background 0.1s; }
     .teams-ch-item:hover { background: var(--hover); }
     .teams-ch-item.active { background: var(--blue-dim); }
-    .teams-ch-icon { font-size: 13px; color: var(--text-m); flex-shrink: 0; margin-top: 1px; font-weight: 600; line-height: 1.2; }
+    .teams-ch-icon { color: var(--text-m); flex-shrink: 0; margin-top: 2px; display: flex; }
+    .teams-ch-icon i, .teams-ch-icon svg { width: 14px; height: 14px; }
     .teams-ch-item.active .teams-ch-icon { color: var(--blue); }
     .teams-ch-item-body { flex: 1; min-width: 0; }
     .teams-ch-name-row { display: flex; align-items: center; justify-content: space-between; gap: 4px; }
@@ -1081,8 +1087,59 @@
     .teams-send-btn:hover { opacity: 0.85; }
     .teams-send-btn i, .teams-send-btn svg { width: 14px; height: 14px; }
     /* Info panel */
-    .teams-info-panel { width: 220px; border-left: 1px solid var(--border); display: none; flex-direction: column; overflow: hidden; background: var(--bg-card); }
-    .teams-info-panel-open .teams-info-panel { display: flex; }
+    .teams-info-panel { width: 290px; border-left: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; background: var(--bg-card); }
+    .tw-brief-scroll { flex: 1; overflow-y: auto; padding-bottom: 12px; }
+    .tw-brief-ch { display: flex; align-items: center; gap: 9px; padding: 14px 14px 4px; }
+    .tw-brief-icon { display: flex; color: var(--text-m); }
+    .tw-brief-icon i, .tw-brief-icon svg { width: 16px; height: 16px; }
+    .tw-brief-chname { font-size: 13.5px; font-weight: 700; color: var(--text); }
+    .tw-brief-desc { padding: 0 14px 6px; font-size: 11.5px; color: var(--text-m); line-height: 1.55; }
+    .tw-brief-act { display: flex; gap: 8px; padding: 6px 14px; align-items: flex-start; }
+    .tw-brief-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--blue); margin-top: 5px; flex-shrink: 0; }
+    .tw-brief-act-text { font-size: 11.5px; color: var(--text-s); line-height: 1.45; }
+    .tw-brief-act-time { font-size: 10px; color: var(--text-m); }
+
+    /* workspace sub-tabs */
+    .tw-subtabs { display: flex; gap: 2px; padding: 0 14px; border-bottom: 1px solid var(--border); flex-shrink: 0; background: var(--bg-card); }
+    .tw-subtab { position: relative; background: none; border: none; font-family: inherit; font-size: 12px; font-weight: 500; color: var(--text-m); padding: 8px 11px; cursor: pointer; white-space: nowrap; transition: color 0.12s; margin-bottom: -1px; }
+    .tw-subtab:hover { color: var(--text); }
+    .tw-subtab.active { color: var(--blue); font-weight: 600; }
+    .tw-subtab.active::after { content: ''; position: absolute; left: 8px; right: 8px; bottom: 0; height: 2px; background: var(--blue); border-radius: 2px; }
+
+    /* composer action bar */
+    .tw-compose-bar { display: flex; align-items: center; gap: 4px; padding-top: 8px; flex-wrap: wrap; }
+    .tw-compose-act { display: inline-flex; align-items: center; gap: 6px; padding: 5px 9px; background: transparent; border: none; border-radius: 4px; font-size: 11.5px; font-weight: 500; color: var(--text-m); cursor: pointer; font-family: inherit; transition: background 0.12s, color 0.12s; }
+    .tw-compose-act:hover { background: var(--hover); color: var(--text); }
+    .tw-compose-act i, .tw-compose-act svg { width: 13px; height: 13px; }
+
+    /* shared lead card */
+    .tw-lead-card { border: 1px solid var(--border); border-radius: 4px; margin-top: 6px; max-width: 480px; background: var(--bg); }
+    .tw-lead-head { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-bottom: 1px solid var(--border); }
+    .tw-lead-name { font-size: 13px; font-weight: 700; color: var(--text); flex: 1; min-width: 0; }
+    .tw-lead-dim { font-size: 11px; color: var(--text-m); }
+    .tw-lead-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 16px; padding: 10px 14px; }
+    .tw-lf { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+    .tw-lf-k { font-size: 9.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; color: var(--text-m); }
+    .tw-lf-v { font-size: 12px; color: var(--text-s); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .tw-lead-acts { display: flex; gap: 7px; padding: 9px 14px; border-top: 1px solid var(--border); flex-wrap: wrap; }
+
+    /* pinned leads */
+    .tw-pin-row { display: flex; align-items: center; gap: 8px; padding: 7px 14px; cursor: pointer; transition: background 0.1s; }
+    .tw-pin-row:hover { background: var(--hover); }
+    .tw-pin-name { flex: 1; min-width: 0; font-size: 12px; font-weight: 600; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    /* task rows */
+    .tw-task-row { display: flex; align-items: center; gap: 10px; padding: 8px 14px; border-bottom: 1px solid var(--border); }
+    .tw-task-row:last-child { border-bottom: none; }
+    .tw-task-row.done .tw-task-title { text-decoration: line-through; color: var(--text-m); }
+    .tw-task-body { flex: 1; min-width: 0; }
+    .tw-task-title { font-size: 12px; font-weight: 600; color: var(--text); line-height: 1.35; }
+    .tw-task-pri { font-size: 9.5px; font-weight: 700; color: var(--red); text-transform: uppercase; letter-spacing: 0.3px; margin-left: 4px; }
+    .tw-task-sub { font-size: 10.5px; color: var(--text-m); }
+    .tw-task-due { font-size: 10.5px; font-weight: 600; white-space: nowrap; flex-shrink: 0; }
+    .tw-tr-done td { opacity: 0.55; }
+    .teams-tasks-card { flex: 1; min-height: 0; display: flex; flex-direction: column; margin: 16px; }
+    .teams-tasks-card .table-wrap { flex: 1; overflow-y: auto; }
     .teams-info-header { display: flex; align-items: center; padding: 12px 14px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
     .teams-info-title { font-size: 13px; font-weight: 600; color: var(--text); flex: 1; }
     .teams-info-close { width: 24px; height: 24px; background: transparent; border: none; border-radius: 3px; color: var(--text-m); cursor: pointer; display: flex; align-items: center; justify-content: center; }
@@ -2083,7 +2140,10 @@
       <!-- Tab bar -->
       <div class="teams-tabs">
         <button class="teams-tab active" data-tab="chat" onclick="teamsTab('chat')">
-          <i data-lucide="message-square"></i><span>Chat</span>
+          <i data-lucide="layout-panel-left"></i><span>Workspace</span>
+        </button>
+        <button class="teams-tab" data-tab="tasks" onclick="teamsTab('tasks')">
+          <i data-lucide="check-square"></i><span>Tasks</span>
         </button>
         <button class="teams-tab" data-tab="members" onclick="teamsTab('members')">
           <i data-lucide="users"></i><span>Members</span>
@@ -2093,7 +2153,7 @@
         </button>
       </div>
 
-      <!-- Chat section -->
+      <!-- Workspace section -->
       <div class="teams-section active" id="teams-section-chat">
         <div class="teams-chat-layout">
 
@@ -2106,48 +2166,105 @@
             <div id="teams-ch-list">
               <div class="teams-loading" style="padding:16px 12px;font-size:12.5px;">Loading…</div>
             </div>
+            <div class="teams-ch-head" style="border-top:1px solid var(--border);"><span class="teams-ch-head-label">Pinned leads</span></div>
+            <div id="teams-pins-side" style="flex-shrink:0;max-height:150px;overflow-y:auto;padding-bottom:8px;">
+              <div class="teams-empty-note" style="padding:8px 12px;">No pinned leads yet</div>
+            </div>
           </div>
 
-          <!-- Message area -->
+          <!-- Center workspace -->
           <div class="teams-main">
             <div class="teams-main-header" id="teams-main-header">
-              <div class="teams-main-title">
-                <span class="teams-hash">#</span><span id="teams-active-name">General</span>
+              <div style="flex:1;min-width:0;">
+                <div class="teams-main-title"><span id="teams-active-name">General</span></div>
+                <div class="teams-main-desc" id="teams-active-desc">Company-wide updates</div>
               </div>
               <div class="teams-main-actions">
                 <span class="teams-member-count" id="teams-ch-member-count"></span>
-                <button class="teams-hdr-btn" onclick="teamsToggleInfo()" title="Members &amp; info"><i data-lucide="panel-right"></i></button>
+                <button class="teams-hdr-btn" onclick="teamsToggleInfo()" title="Channel brief"><i data-lucide="panel-right"></i></button>
               </div>
             </div>
-            <div class="teams-messages-wrap" id="teams-messages-wrap">
-              <div id="teams-messages">
-                <div class="teams-loading">Loading messages…</div>
-              </div>
+            <div class="tw-subtabs" id="teams-subtabs">
+              <button class="tw-subtab active" data-sub="posts" onclick="twSubTab('posts')">Posts</button>
+              <button class="tw-subtab" data-sub="shared" onclick="twSubTab('shared')">Shared Leads</button>
+              <button class="tw-subtab" data-sub="tasks" onclick="twSubTab('tasks')">Tasks</button>
             </div>
-            <div class="teams-compose">
-              <div class="teams-compose-inner">
-                <textarea id="teams-input" class="teams-input-ta" placeholder="Message #General…" rows="1" onkeydown="teamsKeyDown(event)" oninput="teamsAutoResize(this)"></textarea>
-                <div class="teams-compose-actions">
-                  <button class="teams-compose-btn" onclick="teamsPickLead()" title="Share lead"><i data-lucide="user-plus"></i></button>
-                  <button class="teams-send-btn" onclick="teamsSendMsg()" title="Send"><i data-lucide="send"></i></button>
+            <div id="teams-posts-pane" style="display:flex;flex-direction:column;flex:1;min-height:0;">
+              <div class="teams-messages-wrap" id="teams-messages-wrap">
+                <div id="teams-messages">
+                  <div class="teams-loading">Loading messages…</div>
+                </div>
+              </div>
+              <div class="teams-compose">
+                <div class="teams-compose-inner">
+                  <textarea id="teams-input" class="teams-input-ta" placeholder="Message General…" rows="1" onkeydown="teamsKeyDown(event)" oninput="teamsAutoResize(this)"></textarea>
+                </div>
+                <div class="tw-compose-bar">
+                  <button class="tw-compose-act" onclick="twAttachStub()"><i data-lucide="paperclip"></i>Attach</button>
+                  <button class="tw-compose-act" onclick="teamsPickLead()"><i data-lucide="user-plus"></i>Attach lead</button>
+                  <button class="tw-compose-act" onclick="twTaskModalOpen()"><i data-lucide="check-square"></i>Create task</button>
+                  <button class="tw-compose-act" onclick="twMention()"><i data-lucide="at-sign"></i>Mention</button>
+                  <div style="flex:1;"></div>
+                  <button class="btn-mini btn-mini-primary" style="display:inline-flex;align-items:center;gap:6px;" onclick="teamsSendMsg()"><i data-lucide="send" style="width:12px;height:12px;"></i>Send</button>
                 </div>
               </div>
             </div>
+            <div id="teams-shared-pane" style="display:none;flex:1;min-height:0;overflow-y:auto;"></div>
+            <div id="teams-chtasks-pane" style="display:none;flex:1;min-height:0;overflow-y:auto;"></div>
           </div>
 
-          <!-- Info panel (togglable) -->
+          <!-- Channel Brief panel -->
           <div class="teams-info-panel" id="teams-info-panel">
             <div class="teams-info-header">
-              <span class="teams-info-title">Members</span>
+              <span class="teams-info-title">Channel Brief</span>
               <button class="teams-info-close" onclick="teamsToggleInfo()"><i data-lucide="x"></i></button>
             </div>
-            <div id="teams-info-members">
-              <div class="teams-empty-note" style="padding:12px 14px;">Loading…</div>
+            <div class="tw-brief-scroll">
+              <div class="tw-brief-ch">
+                <span class="tw-brief-icon" id="teams-brief-icon"><i data-lucide="users"></i></span>
+                <span class="tw-brief-chname" id="teams-brief-chname">General</span>
+              </div>
+              <div class="tw-brief-desc" id="teams-brief-desc">Company-wide updates and team-wide coordination.</div>
+              <div class="teams-info-sep">Open tasks <span id="teams-brief-tasks-count" style="font-weight:500;"></span></div>
+              <div id="teams-brief-tasks"><div class="teams-empty-note" style="padding:8px 12px;">No open tasks yet.</div></div>
+              <div class="teams-info-sep">Pinned leads</div>
+              <div id="teams-brief-pins"><div class="teams-empty-note" style="padding:8px 12px;">No pinned leads yet</div></div>
+              <div class="teams-info-sep">Members</div>
+              <div id="teams-info-members">
+                <div class="teams-empty-note" style="padding:12px 14px;">Loading…</div>
+              </div>
+              <div class="teams-info-sep">Recent activity</div>
+              <div id="teams-brief-activity"><div class="teams-empty-note" style="padding:8px 12px;">Collaboration activity shows here.</div></div>
             </div>
-            <div class="teams-info-sep">Pinned</div>
-            <div id="teams-info-pinned"><div class="teams-empty-note" style="padding:4px 0;">No pinned items</div></div>
           </div>
 
+        </div>
+      </div>
+
+      <!-- Tasks section -->
+      <div class="teams-section" id="teams-section-tasks">
+        <div class="card teams-tasks-card">
+          <div class="sec-head">
+            <div class="sec-title">Team Tasks</div>
+            <div style="display:flex;align-items:center;gap:10px;">
+              <div class="sec-sub" id="tw-tasks-count">0 tasks</div>
+              <button class="btn-mini btn-mini-primary" onclick="twTaskModalOpen()">New task</button>
+            </div>
+          </div>
+          <div class="lt-tabs" id="tw-task-filters" style="padding:12px 16px 0;margin-bottom:0;">
+            <div class="lt-tab active" data-tab="all" onclick="twTasksSetFilter('all')">All</div>
+            <div class="lt-tab" data-tab="mine" onclick="twTasksSetFilter('mine')">Assigned to me</div>
+            <div class="lt-tab" data-tab="due" onclick="twTasksSetFilter('due')">Due soon</div>
+            <div class="lt-tab" data-tab="done" onclick="twTasksSetFilter('done')">Completed</div>
+          </div>
+          <div class="table-wrap" style="margin-top:12px;">
+            <table class="skel-table">
+              <thead><tr><th style="width:34px;"></th><th>Task</th><th>Linked Lead</th><th>Owner</th><th>Due</th><th>Status</th><th>Priority</th></tr></thead>
+              <tbody id="tw-tasks-tbody">
+                <tr><td colspan="7"><div class="empty-state" style="padding:36px 20px;"><i data-lucide="check-square"></i><div class="empty-state-title">No tasks yet</div><div class="empty-state-sub">Create a task to assign follow-up work to your team.</div></div></td></tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
 
@@ -2223,6 +2340,29 @@
     </div><!-- /teams-hub -->
 
     <!-- New channel modal -->
+    <!-- New task modal -->
+    <div class="teams-ch-modal" id="tw-task-modal">
+      <div class="teams-ch-modal-box">
+        <div class="teams-ch-modal-head">
+          <span class="teams-ch-modal-title">New Task</span>
+          <button class="teams-info-close" onclick="twTaskModalClose()"><i data-lucide="x"></i></button>
+        </div>
+        <div class="teams-ch-modal-body" style="display:flex;flex-direction:column;gap:12px;">
+          <div class="field" style="margin-bottom:0;"><label>Task</label><input id="twt-title" type="text" placeholder="Follow up with…" maxlength="200" onkeydown="if(event.key==='Enter')twTaskSave()" /></div>
+          <div class="field" style="margin-bottom:0;"><label>Linked lead</label><select id="twt-lead"><option value="">No linked lead</option></select></div>
+          <div class="field" style="margin-bottom:0;"><label>Assign to</label><select id="twt-owner"><option value="">Unassigned</option></select></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <div class="field" style="margin-bottom:0;"><label>Due date</label><input id="twt-due" type="date" /></div>
+            <div class="field" style="margin-bottom:0;"><label>Priority</label><select id="twt-priority"><option value="normal">Normal</option><option value="high">High</option></select></div>
+          </div>
+        </div>
+        <div class="teams-ch-modal-footer">
+          <button class="btn-mini btn-mini-ghost" onclick="twTaskModalClose()">Cancel</button>
+          <button class="btn-mini btn-mini-primary" onclick="twTaskSave()">Create task</button>
+        </div>
+      </div>
+    </div>
+
     <div class="teams-ch-modal" id="teams-ch-modal">
       <div class="teams-ch-modal-box">
         <div class="teams-ch-modal-head">
@@ -3064,7 +3204,7 @@
 <div id="toast"><div class="toast-icon"><i data-lucide="check"></i></div><div id="toast-msg" style="font-size:12.5px;font-weight:600;color:var(--text-s);line-height:1.45;"></div></div>
 
 <script src="crm.js?v=31"></script>
-<script src="teams.js?v=4"></script>
+<script src="teams.js?v=5"></script>
 <script src="settings.js?v=1"></script>
 <script src="invoice.js?v=3"></script>
 <script src="inbox.js?v=2"></script>
