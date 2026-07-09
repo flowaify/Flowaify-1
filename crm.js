@@ -1846,7 +1846,7 @@ function renderLeadIntel() {
     '<div class="li-title">' + (topSrc ? escDash(topSrc) : 'No source data') + '</div>' +
     '<div class="li-sub">Top source' + (topSrc ? '<br>' + srcCounts[topSrc] + ' lead' + (srcCounts[topSrc] === 1 ? '' : 's') + ' this period' : '') + '</div>' +
     (topSrc ? '<button class="li-btn" onclick="leadsFilterSource(decodeURIComponent(\'' + encodeURIComponent(topSrc) + '\'))">View source</button>' : '') + '</div>';
-  h += '<div class="li-card"><div class="li-icon" style="color:var(--green);"><i data-lucide="trending-up"></i></div>' +
+  h += '<div class="li-card"><div class="li-icon" style="color:var(--red);"><i data-lucide="flame"></i></div>' +
     '<div class="li-num">' + hot + '</div><div class="li-sub">Hot leads<br>Require immediate attention</div>' +
     '<button class="li-btn" onclick="leadsSetTab(\'hot\')">View hot leads</button></div>';
   h += '<div class="li-card"><div class="li-icon" style="color:var(--purple);"><i data-lucide="sparkles"></i></div>' +
