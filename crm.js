@@ -509,95 +509,379 @@ function renderStageList(deals) {
 }
 
 /* ── Calendar ───────────────────────────────────────────────────────────────── */
-function renderCalendar() {
-  const data = window.__crmData;
-  const grid = document.getElementById('cal-grid');
-  if (!grid || !data) return;
-  const base = window.__calMonth || new Date();
-  window.__calMonth = base;
-  const y = base.getFullYear(), m = base.getMonth();
+/* ── Calendar — planning workspace (agenda / month / week / list) ───────────── */
+var _calView = 'agenda';
+var _calSelDay = null;
+var _calSelEv = null;
 
-  const title = document.getElementById('cal-title');
-  if (title) title.textContent = base.toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
+const CAL_TYPES = {
+  booking:  { label: 'Booking',   color: 'var(--green)', dim: 'var(--green-dim)' },
+  followup: { label: 'Follow-up', color: '#d97706',      dim: 'var(--amber-dim)' },
+  due:      { label: 'Due',       color: 'var(--blue)',  dim: 'var(--blue-dim)' }
+};
 
-  const dealsByDay = {}, leadsByDay = {};
+function calKey(d) {
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+}
+
+/* Booking = confirmed appointment (booked lead's touch time).
+   Follow-up = due 48h after the last touch (or creation) — derived, honest.
+   Due = deal closing dates from the CRM. */
+function calBuildEvents(data) {
+  const evs = [];
+  (data.contacts || []).forEach(function(c) {
+    const booked = scoreRank(c.status) === 3;
+    if (booked && c.lastTouchAt) {
+      evs.push({ type: 'booking', ts: new Date(c.lastTouchAt).getTime(), name: c.name, desc: 'Confirmed appointment', id: c.id, hasTime: true });
+    }
+    if (!booked) {
+      const baseT = c.lastTouchAt ? new Date(c.lastTouchAt).getTime() : (c.createdAt ? new Date(c.createdAt).getTime() : 0);
+      if (baseT) {
+        evs.push({ type: 'followup', ts: baseT + 48 * 3600000, name: c.name,
+          desc: c.lastTouchAt ? 'Follow-up due — keep the thread warm' : 'First follow-up due', id: c.id, hasTime: true });
+      }
+    }
+  });
   (data.deals || []).forEach(function(d) {
     if (!d.closingDate) return;
-    const key = String(d.closingDate).slice(0, 10);
-    (dealsByDay[key] = dealsByDay[key] || []).push(d);
+    evs.push({ type: 'due', ts: new Date(d.closingDate).getTime(), name: d.name,
+      desc: (d.stage ? d.stage : 'Closing') + (d.amount != null ? ' · ' + fmtMoney(d.amount) : ''), amount: d.amount, hasTime: false });
   });
-  (data.contacts || []).forEach(function(c) {
+  evs.sort(function(a, b) { return a.ts - b.ts; });
+  return evs;
+}
+
+function calTypeFilter() { return ((document.getElementById('cal-filter') || {}).value) || ''; }
+
+function calShown() {
+  const f = calTypeFilter();
+  const out = [];
+  (window.__calEvents || []).forEach(function(ev, i) {
+    if (f && ev.type !== f) return;
+    out.push({ ev: ev, i: i });
+  });
+  return out;
+}
+
+function calEvTime(ev) {
+  if (!ev.hasTime) return 'Time not set';
+  return new Date(ev.ts).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+}
+
+function calPill(ev) {
+  const t = CAL_TYPES[ev.type] || CAL_TYPES.due;
+  return '<span class="ag-pill" style="background:' + t.dim + ';color:' + t.color + ';">' + t.label + '</span>';
+}
+
+function calAgRow(item, showDate) {
+  const ev = item.ev;
+  const t = CAL_TYPES[ev.type] || CAL_TYPES.due;
+  const sel = item.i === _calSelEv ? ' sel' : '';
+  const timeCol = showDate
+    ? '<div class="ag-time">' + new Date(ev.ts).toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' }) + '<small>' + calEvTime(ev) + '</small></div>'
+    : '<div class="ag-time">' + calEvTime(ev) + '</div>';
+  return '<div class="ag-row' + sel + '" onclick="calSelectEv(' + item.i + ')">' +
+    timeCol +
+    '<span class="ag-dot" style="background:' + t.color + ';"></span>' +
+    '<div class="ag-body"><div class="ag-name">' + escDash(ev.name) + ' ' + calPill(ev) + '</div>' +
+    '<div class="ag-desc">' + escDash(ev.desc) + '</div></div>' +
+    (ev.id ? '<button class="btn-mini btn-mini-ghost ag-view" onclick="calViewLead(' + item.i + ', event)">View</button>' : '') +
+  '</div>';
+}
+
+function calEmptyHtml(title, sub, icon) {
+  return '<div class="empty-state" style="padding:40px 20px;"><i data-lucide="' + (icon || 'calendar') + '"></i>' +
+    '<div class="empty-state-title">' + title + '</div>' +
+    '<div class="empty-state-sub">' + sub + '</div></div>';
+}
+
+function renderCalendar() {
+  const data = window.__crmData;
+  if (!data || !document.getElementById('cal-main')) return;
+  window.__calMonth = window.__calMonth || new Date();
+  window.__calView = _calView;
+  window.__calEvents = calBuildEvents(data);
+  const contacts = data.contacts || [];
+
+  const dayStart = new Date(); dayStart.setHours(0, 0, 0, 0);
+  const now = Date.now();
+  const evs = window.__calEvents;
+  const upcoming = evs.filter(function(e) { return e.ts >= dayStart.getTime(); });
+  const followupsDue = evs.filter(function(e) { return e.type === 'followup' && e.ts <= now; });
+  const unscheduled = contacts.filter(function(c) { return scoreRank(c.status) !== 3 && !c.lastTouchAt; });
+
+  setText('cal-kpi-upcoming', upcoming.length);
+  setText('cal-kpi-bookings', evs.filter(function(e) { return e.type === 'booking'; }).length);
+  setText('cal-kpi-followups', followupsDue.length);
+  setText('cal-kpi-unscheduled', unscheduled.length);
+
+  const base = window.__calMonth;
+  const title = document.getElementById('cal-title');
+  if (title) {
+    title.textContent = _calView === 'agenda'
+      ? new Date().toLocaleDateString([], { month: 'long', year: 'numeric' })
+      : base.toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
+  }
+
+  if (_calView === 'agenda') renderCalAgenda();
+  else if (_calView === 'month') renderCalMonth();
+  else if (_calView === 'week') renderCalWeek();
+  else renderCalList();
+
+  renderCalSide();
+  renderCalHealth(followupsDue.length, unscheduled.length);
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+window.renderCalendar = renderCalendar;
+
+function calMainHead(t, s) {
+  const mt = document.getElementById('cal-main-title');
+  const ms = document.getElementById('cal-main-sub');
+  if (mt) mt.textContent = t;
+  if (ms) ms.textContent = s || '';
+}
+
+function renderCalAgenda() {
+  const el = document.getElementById('cal-main');
+  if (!el) return;
+  const today = new Date();
+  calMainHead('Today Agenda', today.toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' }));
+  const dayStart = new Date(); dayStart.setHours(0, 0, 0, 0);
+  const dayEnd = dayStart.getTime() + 86400000;
+  const weekEnd = dayStart.getTime() + 7 * 86400000;
+  const shown = calShown();
+  const todayEvs = shown.filter(function(x) { return x.ev.ts >= dayStart.getTime() && x.ev.ts < dayEnd; });
+  const laterEvs = shown.filter(function(x) { return x.ev.ts >= dayEnd && x.ev.ts < weekEnd; }).slice(0, 8);
+
+  let h = '';
+  if (!todayEvs.length) {
+    h += calEmptyHtml('No scheduled activity today',
+      'Upcoming items will appear here when bookings, follow-ups, or reviews are scheduled.');
+  } else {
+    h += todayEvs.map(function(x) { return calAgRow(x, false); }).join('');
+  }
+  h += '<div class="ag-sec">Later this week</div>';
+  if (!laterEvs.length) {
+    h += '<div style="padding:14px 16px;font-size:12px;color:var(--text-m);">Nothing else scheduled this week.</div>';
+  } else {
+    h += laterEvs.map(function(x) { return calAgRow(x, true); }).join('');
+  }
+  h += '<div style="padding:12px 16px;text-align:center;"><span class="sec-link" onclick="calSetView(\'month\')">View full calendar</span></div>';
+  el.innerHTML = h;
+}
+
+function renderCalMonth() {
+  const el = document.getElementById('cal-main');
+  if (!el) return;
+  const base = window.__calMonth;
+  const y = base.getFullYear(), m = base.getMonth();
+  calMainHead('Month', base.toLocaleDateString(undefined, { month: 'long', year: 'numeric' }));
+
+  const byDay = {};
+  calShown().forEach(function(x) {
+    const key = calKey(new Date(x.ev.ts));
+    (byDay[key] = byDay[key] || []).push(x);
+  });
+  const leadsByDay = {};
+  ((window.__crmData || {}).contacts || []).forEach(function(c) {
     if (!c.createdAt) return;
-    const key = new Date(c.createdAt).toISOString().slice(0, 10);
+    const key = calKey(new Date(c.createdAt));
     leadsByDay[key] = (leadsByDay[key] || 0) + 1;
   });
 
-  const firstDow = (new Date(y, m, 1).getDay() + 6) % 7; // Mon=0
+  const firstDow = (new Date(y, m, 1).getDay() + 6) % 7;
   const start = new Date(y, m, 1 - firstDow);
-  const todayKey = new Date().toISOString().slice(0, 10);
+  const todayKey = calKey(new Date());
 
-  let htmlOut = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map(function(d) {
+  let h = '<div class="cal-grid">' + ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map(function(d) {
     return '<div class="cal-dow">' + d + '</div>';
   }).join('');
 
   for (let i = 0; i < 42; i++) {
     const d = new Date(start.getFullYear(), start.getMonth(), start.getDate() + i);
-    const key = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
-    const other = d.getMonth() !== m ? ' other' : '';
-    const today = key === todayKey ? ' today' : '';
-    let cell = '<div class="cal-cell' + other + today + '"><span class="cal-daynum">' + d.getDate() + '</span>';
-    const dd = dealsByDay[key] || [];
-    dd.slice(0, 2).forEach(function(deal) {
-      const col = stageColor(deal.stage);
-      cell += '<span class="cal-chip" style="background:' + col + '2e;color:' + col + ';" title="' + escDash(deal.name) + ' · ' + fmtMoney(deal.amount) + '">' + escDash(deal.name) + '</span>';
+    const key = calKey(d);
+    const cls = (d.getMonth() !== m ? ' other' : '') + (key === todayKey ? ' today' : '') + (key === _calSelDay ? ' selday' : '');
+    let cell = '<div class="cal-cell' + cls + '" onclick="calSelectDay(\'' + key + '\')"><span class="cal-daynum">' + d.getDate() + '</span>';
+    const dd = byDay[key] || [];
+    dd.slice(0, 2).forEach(function(x) {
+      const t = CAL_TYPES[x.ev.type] || CAL_TYPES.due;
+      cell += '<span class="cal-chip" style="background:' + t.dim + ';color:' + t.color + ';" title="' + escDash(x.ev.name) + ' · ' + t.label + '">' + escDash(x.ev.name) + '</span>';
     });
     if (dd.length > 2) cell += '<span class="cal-chip" style="background:var(--hover);color:var(--text-m);">+' + (dd.length - 2) + ' more</span>';
     if (leadsByDay[key]) cell += '<span class="cal-dot-badge">' + leadsByDay[key] + ' lead' + (leadsByDay[key] === 1 ? '' : 's') + '</span>';
     cell += '</div>';
-    htmlOut += cell;
+    h += cell;
   }
-  grid.innerHTML = htmlOut;
+  el.innerHTML = h + '</div>';
+}
 
-  // Upcoming closings
-  const up = document.getElementById('cal-upcoming');
-  if (up) {
-    const nowT = new Date(); nowT.setHours(0, 0, 0, 0);
-    const upcoming = (data.deals || [])
-      .filter(function(d) { return d.closingDate && new Date(d.closingDate).getTime() >= nowT.getTime(); })
-      .sort(function(a, b) { return new Date(a.closingDate) - new Date(b.closingDate); })
-      .slice(0, 5);
-    if (upcoming.length === 0) {
-      up.innerHTML = '<div class="empty-state" style="padding:30px 16px;"><i data-lucide="calendar-check"></i>' +
-        '<div class="empty-state-title">No upcoming closings</div>' +
-        '<div class="empty-state-sub">Deals with closing dates will appear here.</div></div>';
-    } else {
-      up.innerHTML = upcoming.map(function(d) {
-        return '<div class="cal-up-item">' +
-          '<span class="lead-avatar" style="background:' + stageColor(d.stage) + ';">$</span>' +
-          '<div><div class="cal-up-name">' + escDash(d.name) + '</div>' +
-          '<div class="cal-up-sub">' + new Date(d.closingDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) + (d.stage ? ' · ' + escDash(d.stage) : '') + '</div></div>' +
-          (d.amount != null ? '<div class="cal-up-amt">' + fmtMoney(d.amount) + '</div>' : '') +
-          '</div>';
-      }).join('');
+function renderCalWeek() {
+  const el = document.getElementById('cal-main');
+  if (!el) return;
+  const base = window.__calMonth;
+  const monday = new Date(base);
+  monday.setDate(base.getDate() - ((base.getDay() + 6) % 7));
+  monday.setHours(0, 0, 0, 0);
+  const sunday = new Date(monday.getTime() + 6 * 86400000);
+  calMainHead('Week', monday.toLocaleDateString([], { month: 'short', day: 'numeric' }) + ' – ' + sunday.toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' }));
+
+  const byDay = {};
+  calShown().forEach(function(x) {
+    const key = calKey(new Date(x.ev.ts));
+    (byDay[key] = byDay[key] || []).push(x);
+  });
+  const todayKey = calKey(new Date());
+
+  let h = '<div class="cal-grid">';
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(monday.getTime() + i * 86400000);
+    h += '<div class="cal-dow">' + d.toLocaleDateString([], { weekday: 'short' }) + ' ' + d.getDate() + '</div>';
+  }
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(monday.getTime() + i * 86400000);
+    const key = calKey(d);
+    const cls = (key === todayKey ? ' today' : '') + (key === _calSelDay ? ' selday' : '');
+    let cell = '<div class="cal-cell cal-wcell' + cls + '" onclick="calSelectDay(\'' + key + '\')">';
+    (byDay[key] || []).slice(0, 6).forEach(function(x) {
+      const t = CAL_TYPES[x.ev.type] || CAL_TYPES.due;
+      cell += '<span class="cal-chip" style="background:' + t.dim + ';color:' + t.color + ';" title="' + escDash(x.ev.name) + '">' +
+        (x.ev.hasTime ? new Date(x.ev.ts).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) + ' ' : '') + escDash(x.ev.name) + '</span>';
+    });
+    cell += '</div>';
+    h += cell;
+  }
+  el.innerHTML = h + '</div>';
+}
+
+function renderCalList() {
+  const el = document.getElementById('cal-main');
+  if (!el) return;
+  calMainHead('Upcoming', 'Next 90 days');
+  const dayStart = new Date(); dayStart.setHours(0, 0, 0, 0);
+  const horizon = dayStart.getTime() + 90 * 86400000;
+  const shown = calShown().filter(function(x) { return x.ev.ts >= dayStart.getTime() && x.ev.ts < horizon; });
+  if (!shown.length) {
+    el.innerHTML = calEmptyHtml('Nothing scheduled ahead',
+      'Bookings, follow-ups, and due dates will appear here as they are scheduled.');
+    return;
+  }
+  const groups = [];
+  let cur = null;
+  shown.forEach(function(x) {
+    const lbl = dayLabel(x.ev.ts);
+    if (lbl !== cur) { groups.push({ label: lbl, items: [] }); cur = lbl; }
+    groups[groups.length - 1].items.push(x);
+  });
+  el.innerHTML = groups.map(function(g) {
+    return '<div class="feed-day">' + g.label + '</div>' + g.items.map(function(x) { return calAgRow(x, false); }).join('');
+  }).join('');
+}
+
+/* ── right rail ── */
+function renderCalSide() {
+  const el = document.getElementById('cal-upcoming');
+  const titleEl = document.getElementById('cal-up-title');
+  const back = document.getElementById('cal-up-back');
+  if (!el) return;
+
+  if (_calSelEv != null) {
+    const ev = (window.__calEvents || [])[_calSelEv];
+    if (ev) {
+      const t = CAL_TYPES[ev.type] || CAL_TYPES.due;
+      if (titleEl) titleEl.textContent = 'Event Detail';
+      if (back) back.style.display = '';
+      el.innerHTML = '<div style="padding:14px 16px;">' +
+        '<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">' +
+          '<span class="ag-dot" style="background:' + t.color + ';width:9px;height:9px;"></span>' +
+          '<div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:700;color:var(--text);">' + escDash(ev.name) + '</div>' +
+          '<div style="font-size:10.5px;color:var(--text-m);">' + new Date(ev.ts).toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' }) + ' · ' + calEvTime(ev) + '</div></div>' +
+          calPill(ev) +
+        '</div>' +
+        '<div style="font-size:12px;color:var(--text-s);line-height:1.6;">' + escDash(ev.desc) + '</div>' +
+        (ev.type === 'followup' ? '<div style="font-size:12px;color:var(--text-s);line-height:1.6;margin-top:8px;">Next action: reach out before this lead goes cold.</div>' : '') +
+        (ev.id ? '<button class="btn-mini btn-mini-primary" style="width:100%;justify-content:center;margin-top:14px;display:inline-flex;" onclick="calViewLead(' + _calSelEv + ')">View lead</button>' : '') +
+      '</div>';
+      return;
     }
   }
 
-  // Month counts
-  const mStart = new Date(y, m, 1).getTime(), mEnd = new Date(y, m + 1, 1).getTime();
-  setText('cal-count-leads', (data.contacts || []).filter(function(c) {
-    if (!c.createdAt) return false;
-    const t = new Date(c.createdAt).getTime();
-    return t >= mStart && t < mEnd;
-  }).length);
-  setText('cal-count-closings', (data.deals || []).filter(function(d) {
-    if (!d.closingDate) return false;
-    const t = new Date(d.closingDate).getTime();
-    return t >= mStart && t < mEnd;
-  }).length);
+  if (_calSelDay) {
+    const d = new Date(_calSelDay + 'T12:00:00');
+    if (titleEl) titleEl.textContent = d.toLocaleDateString([], { weekday: 'long', month: 'short', day: 'numeric' });
+    if (back) back.style.display = '';
+    const items = calShown().filter(function(x) { return calKey(new Date(x.ev.ts)) === _calSelDay; });
+    el.innerHTML = items.length
+      ? items.map(function(x) { return calAgRow(x, false); }).join('')
+      : calEmptyHtml('Nothing scheduled', 'No bookings, follow-ups, or due dates on this day.');
+    return;
+  }
 
-  if (typeof lucide !== 'undefined') lucide.createIcons();
+  if (titleEl) titleEl.textContent = 'Upcoming Schedule';
+  if (back) back.style.display = 'none';
+  const dayStart = new Date(); dayStart.setHours(0, 0, 0, 0);
+  const next = calShown().filter(function(x) { return x.ev.ts >= dayStart.getTime(); }).slice(0, 5);
+  el.innerHTML = next.length
+    ? next.map(function(x) { return calAgRow(x, true); }).join('')
+    : calEmptyHtml('Nothing scheduled ahead', 'Upcoming bookings and follow-ups will appear here.');
 }
-window.renderCalendar = renderCalendar;
+
+function renderCalHealth(followupsDue, unscheduled) {
+  const el = document.getElementById('cal-health');
+  if (!el) return;
+  const evs = window.__calEvents || [];
+  const now = Date.now();
+  const bookings = evs.filter(function(e) { return e.type === 'booking'; }).length;
+  const overdue = evs.filter(function(e) { return (e.type === 'followup' || e.type === 'due') && e.ts < now - 86400000; }).length;
+
+  function row(icon, label, n, color) {
+    return '<div class="ch-row"><div class="ch-label"><i data-lucide="' + icon + '"></i>' + label + '</div>' +
+      '<span class="ch-num" style="color:' + (n > 0 ? color : 'var(--text-m)') + ';">' + n + '</span></div>';
+  }
+  el.innerHTML =
+    row('calendar-check', 'Bookings confirmed', bookings, 'var(--green)') +
+    row('clock', 'Follow-ups due', followupsDue, '#d97706') +
+    row('user-x', 'Leads missing next step', unscheduled, 'var(--blue)') +
+    row('alert-circle', 'Overdue items', overdue, 'var(--red)');
+}
+
+/* ── interactions ── */
+function calSetView(v) {
+  _calView = v;
+  window.__calView = v;
+  document.querySelectorAll('#cal-views .cal-seg-btn').forEach(function(b) {
+    b.classList.toggle('active', b.getAttribute('data-view') === v);
+  });
+  renderCalendar();
+}
+window.calSetView = calSetView;
+
+function calSelectDay(key) {
+  _calSelEv = null;
+  _calSelDay = (_calSelDay === key) ? null : key;
+  renderCalendar();
+}
+window.calSelectDay = calSelectDay;
+
+function calSelectEv(i) {
+  _calSelEv = i;
+  renderCalendar();
+}
+window.calSelectEv = calSelectEv;
+
+function calClearSel() {
+  _calSelEv = null;
+  _calSelDay = null;
+  renderCalendar();
+}
+window.calClearSel = calClearSel;
+
+function calViewLead(i, e) {
+  if (e) e.stopPropagation();
+  const ev = (window.__calEvents || [])[i];
+  if (!ev || !ev.id) return;
+  bellOpenLead(String(ev.id).replace(/[^\w-]/g, ''), String(ev.name || '').replace(/[^\w\s.@-]/g, ''));
+}
+window.calViewLead = calViewLead;
 
 /* ── Notification bell ──────────────────────────────────────────────────────── */
 function renderBell(needsAttention) {
