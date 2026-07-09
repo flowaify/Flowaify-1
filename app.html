@@ -4316,7 +4316,7 @@ function initInteractiveDotBg(containerId) {
        no visible stepping when frames drop */
     const dt = lastT ? Math.min((now - lastT) / 1000, 0.05) : 1 / 60;
     lastT = now;
-    const k = 1 - Math.exp(-9 * dt);
+    const k = 1 - Math.exp(-24 * dt);
     cx += (tx - cx) * k;
     cy += (ty - cy) * k;
     bg.style.setProperty('--mouse-x', cx.toFixed(2) + 'px');
