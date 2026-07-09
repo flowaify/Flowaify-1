@@ -129,7 +129,7 @@ async function saveLeadNote(contactId) {
   if (btn) { btn.disabled = false; btn.textContent = 'Save note'; }
   if (ok) {
     ta.value = '';
-    if (typeof showToast === 'function') showToast('Note saved to Zoho.');
+    if (typeof showToast === 'function') showToast('Note saved to your CRM.');
   }
 }
 window.saveLeadNote = saveLeadNote;

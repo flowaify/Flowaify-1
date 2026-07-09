@@ -117,6 +117,13 @@ export default {
       if (url.pathname === '/inbox/disconnect' && request.method === 'POST') return handleInboxDisconnect(request, env, corsHeaders);
       if (url.pathname.startsWith('/inbox/thread/')) return handleInboxThread(request, env, corsHeaders, url.pathname.slice('/inbox/thread/'.length));
 
+      if (url.pathname === '/settings' && request.method === 'GET') {
+        return handleSettingsGet(request, env, corsHeaders);
+      }
+      if (url.pathname === '/settings' && request.method === 'PUT') {
+        return handleSettingsPut(request, env, corsHeaders);
+      }
+
       return json({ error: 'Not found' }, 404, corsHeaders);
 
     } catch (err) {
@@ -1512,4 +1519,211 @@ function json(data, status = 200, extraHeaders = {}) {
     status,
     headers: { 'Content-Type': 'application/json', ...extraHeaders },
   });
+}
+
+// ─── /settings — per-client Unified Config (Engine Spec Section 4) ───────────
+// KV key: settings:{CLIENTID}. Clients edit preferences; LOCKED fields
+// (SMS provisioning, fromEmail, Twilio number, plan, zoho, clientId) are
+// restored from the stored config on every write by sanitizeSettings().
+
+function settingsKvKey(clientId) {
+  return 'settings:' + clientId.toUpperCase().replace(/[^A-Z0-9]/g, '_');
+}
+
+function defaultSettings(clientId) {
+  return {
+    clientId: clientId,
+    version: 1,
+    profile: {
+      businessName: '',
+      contactEmail: '',
+      phone: '',
+      website: '',
+      industry: '',
+      timezone: 'America/New_York',
+      monthlyLeadGoal: 0
+    },
+    operations: {
+      fromEmail: '',
+      twilioFromNumber: ''
+    },
+    channels: {
+      sms: false,
+      smsSegments: ['HOT', 'WARM']
+    },
+    ai: {
+      responseDelayMinutes: 0,
+      pauseOutsideHours: false,
+      requireApproval: false,
+      escalation: false,
+      escalationThreshold: 60,
+      personaText: '',
+      fallbackTemplate: ''
+    },
+    behavioralSignal: false,
+    followupCadence: {
+      email: [3, 7],
+      sms: [0, 5, 7]
+    },
+    reportDays: ['Mon'],
+    reportMode: 'rolling7day',
+    webhookUrl: null,
+    notifications: {
+      newLead: true,
+      bookedCall: true,
+      unresponsiveLead: false,
+      weeklyReport: true
+    },
+    zoho: {
+      datacenter: 'https://www.zohoapis.com'
+    },
+    plan: 'starter',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  };
+}
+
+function sanitizeSettings(incoming, existing) {
+  const cfg = JSON.parse(JSON.stringify(existing));
+
+  if (incoming.profile && typeof incoming.profile === 'object') {
+    const p = incoming.profile;
+    if (typeof p.businessName === 'string') cfg.profile.businessName = p.businessName.trim().slice(0, 120);
+    if (typeof p.contactEmail === 'string') cfg.profile.contactEmail = p.contactEmail.trim().toLowerCase().slice(0, 254);
+    if (typeof p.phone === 'string')        cfg.profile.phone = p.phone.trim().slice(0, 30);
+    if (typeof p.website === 'string')      cfg.profile.website = p.website.trim().slice(0, 254);
+    if (typeof p.industry === 'string')     cfg.profile.industry = p.industry.trim().slice(0, 80);
+    if (typeof p.timezone === 'string')     cfg.profile.timezone = p.timezone.trim().slice(0, 60);
+    if (typeof p.monthlyLeadGoal === 'number' && p.monthlyLeadGoal >= 0) {
+      cfg.profile.monthlyLeadGoal = Math.floor(p.monthlyLeadGoal);
+    }
+  }
+
+  // channels.sms is LOCKED; smsSegments is an editable filter preference
+  if (incoming.channels && typeof incoming.channels === 'object') {
+    const allowed = ['HOT', 'WARM', 'COLD'];
+    if (Array.isArray(incoming.channels.smsSegments)) {
+      cfg.channels.smsSegments = incoming.channels.smsSegments.filter(s => allowed.includes(s));
+      if (cfg.channels.sms && cfg.channels.smsSegments.length === 0) {
+        cfg.channels.smsSegments = ['HOT'];
+      }
+    }
+  }
+
+  if (incoming.ai && typeof incoming.ai === 'object') {
+    const a = incoming.ai;
+    if (typeof a.responseDelayMinutes === 'number') {
+      cfg.ai.responseDelayMinutes = Math.max(0, Math.min(60, Math.floor(a.responseDelayMinutes)));
+    }
+    if (typeof a.pauseOutsideHours === 'boolean') cfg.ai.pauseOutsideHours = a.pauseOutsideHours;
+    if (typeof a.requireApproval === 'boolean')   cfg.ai.requireApproval = a.requireApproval;
+    if (typeof a.escalation === 'boolean')        cfg.ai.escalation = a.escalation;
+    if (typeof a.escalationThreshold === 'number') {
+      cfg.ai.escalationThreshold = Math.max(0, Math.min(100, Math.floor(a.escalationThreshold)));
+    }
+    if (typeof a.personaText === 'string')      cfg.ai.personaText = a.personaText.trim().slice(0, 1000);
+    if (typeof a.fallbackTemplate === 'string') cfg.ai.fallbackTemplate = a.fallbackTemplate.trim().slice(0, 2000);
+  }
+
+  if (typeof incoming.behavioralSignal === 'boolean') {
+    cfg.behavioralSignal = incoming.behavioralSignal;
+  }
+
+  if (incoming.followupCadence && typeof incoming.followupCadence === 'object') {
+    const fc = incoming.followupCadence;
+    // null means "channel disabled" — Array.isArray(null) is false, so null must
+    // be accepted explicitly or a disable request would be silently ignored
+    if (Array.isArray(fc.email) || fc.email === null) {
+      cfg.followupCadence.email = fc.email === null ? null :
+        fc.email.filter(d => typeof d === 'number' && d >= 0).slice(0, 10);
+    }
+    if (Array.isArray(fc.sms) || fc.sms === null) {
+      cfg.followupCadence.sms = fc.sms === null ? null :
+        fc.sms.filter(d => typeof d === 'number' && d >= 0).slice(0, 10);
+    }
+  }
+
+  const validDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  if (Array.isArray(incoming.reportDays)) {
+    cfg.reportDays = incoming.reportDays.filter(d => validDays.includes(d)).slice(0, 7);
+  }
+  if (['rolling7day', 'fullPipeline'].includes(incoming.reportMode)) {
+    cfg.reportMode = incoming.reportMode;
+  }
+
+  if (incoming.webhookUrl === null || typeof incoming.webhookUrl === 'string') {
+    const u = incoming.webhookUrl;
+    if (u === null || u === '') cfg.webhookUrl = null;
+    else if (u.startsWith('https://')) cfg.webhookUrl = u.trim().slice(0, 500);
+    // non-https silently rejected
+  }
+
+  if (incoming.notifications && typeof incoming.notifications === 'object') {
+    const n = incoming.notifications;
+    if (typeof n.newLead === 'boolean')          cfg.notifications.newLead = n.newLead;
+    if (typeof n.bookedCall === 'boolean')       cfg.notifications.bookedCall = n.bookedCall;
+    if (typeof n.unresponsiveLead === 'boolean') cfg.notifications.unresponsiveLead = n.unresponsiveLead;
+    if (typeof n.weeklyReport === 'boolean')     cfg.notifications.weeklyReport = n.weeklyReport;
+  }
+
+  // LOCKED fields — always restored from stored config, never from the client
+  cfg.clientId     = existing.clientId;
+  cfg.plan         = existing.plan;
+  cfg.createdAt    = existing.createdAt;
+  cfg.zoho         = existing.zoho;
+  cfg.operations   = existing.operations;
+  cfg.channels.sms = existing.channels.sms;
+
+  cfg.updatedAt = new Date().toISOString();
+  cfg.version = 1;
+  return cfg;
+}
+
+async function handleSettingsGet(request, env, corsHeaders) {
+  const auth = await flowyAuth(request, env, corsHeaders);
+  if (auth.err) return auth.err;
+
+  const kvKey = settingsKvKey(auth.clientId);
+  let config;
+  try {
+    const raw = await env.TEAM_KV.get(kvKey);
+    // New client with no KV entry gets defaults; first PUT persists them
+    config = raw ? JSON.parse(raw) : defaultSettings(auth.clientId);
+  } catch (err) {
+    console.error('Settings KV read error:', err.message);
+    return json({ error: 'Failed to read settings' }, 500, corsHeaders);
+  }
+  return json({ ok: true, config }, 200, corsHeaders);
+}
+
+async function handleSettingsPut(request, env, corsHeaders) {
+  const auth = await flowyAuth(request, env, corsHeaders);
+  if (auth.err) return auth.err;
+
+  let incoming;
+  try {
+    incoming = await request.json();
+  } catch (e) {
+    return json({ error: 'Invalid JSON body' }, 400, corsHeaders);
+  }
+
+  const kvKey = settingsKvKey(auth.clientId);
+  let existing;
+  try {
+    const raw = await env.TEAM_KV.get(kvKey);
+    existing = raw ? JSON.parse(raw) : defaultSettings(auth.clientId);
+  } catch (err) {
+    console.error('Settings KV read error on PUT:', err.message);
+    return json({ error: 'Failed to read existing settings' }, 500, corsHeaders);
+  }
+
+  const cleaned = sanitizeSettings(incoming, existing);
+
+  try {
+    await env.TEAM_KV.put(kvKey, JSON.stringify(cleaned));
+  } catch (err) {
+    console.error('Settings KV write error:', err.message);
+    return json({ error: 'Failed to save settings' }, 500, corsHeaders);
+  }
+  return json({ ok: true, config: cleaned }, 200, corsHeaders);
 }

@@ -1448,6 +1448,23 @@
     .field input[disabled], .field select[disabled] { opacity: 0.55; cursor: not-allowed; }
     .toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); gap: 12px; }
     .toggle-row:last-child { border-bottom: none; }
+
+    /* SETTINGS v2 — segment chips, sliders, save flash */
+    .seg-chips { display: flex; gap: 7px; flex-wrap: wrap; }
+    .seg-chip { padding: 5px 13px; border-radius: 4px; font-size: 11.5px; font-weight: 700; cursor: pointer; border: 1px solid var(--border); background: transparent; color: var(--text-m); transition: all 0.13s; user-select: none; font-family: inherit; }
+    .seg-chip.active[data-seg="HOT"], .seg-chip.active[data-day] { border-color: var(--blue); color: var(--blue); background: var(--blue-dim); }
+    .seg-chip.active[data-seg="HOT"] { border-color: var(--red); color: var(--red); background: var(--red-dim); }
+    .seg-chip.active[data-seg="WARM"] { border-color: #d97706; color: #d97706; background: var(--amber-dim); }
+    .seg-chip.active[data-seg="COLD"] { border-color: #3b82f6; color: #3b82f6; background: rgba(59,130,246,0.10); }
+    .range-row { display: flex; align-items: center; gap: 12px; }
+    .range-row input[type=range] { flex: 1; accent-color: var(--blue); }
+    .range-val { min-width: 34px; text-align: center; font-size: 13px; font-weight: 700; color: var(--blue); font-variant-numeric: tabular-nums; }
+    .save-status { font-size: 11.5px; color: var(--green); opacity: 0; transition: opacity 0.3s; align-self: center; font-weight: 600; }
+    .save-status.visible { opacity: 1; }
+    .st-actions { display: flex; gap: 10px; justify-content: flex-end; align-items: center; padding-top: 14px; border-top: 1px solid var(--border); margin-top: 14px; }
+    .st-plan { border: 1px solid var(--border); border-radius: 5px; padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .st-plan-name { font-size: 14.5px; font-weight: 700; color: var(--text); }
+    .st-plan-desc { font-size: 11.5px; color: var(--text-m); margin-top: 2px; }
     .toggle-label { font-size: 12.5px; color: var(--text-s); font-weight: 500; }
     .toggle-sub   { font-size: 10.5px; color: var(--text-m); margin-top: 1px; }
     .toggle { position: relative; width: 38px; height: 20px; background: var(--input-bg); border: 1px solid var(--input-border); border-radius: 99px; cursor: pointer; transition: background 0.15s, border-color 0.15s; flex-shrink: 0; }
@@ -2504,87 +2521,251 @@
   <div class="page" id="page-settings">
 
     <div class="pivot-bar">
-      <button class="pivot-tab active" data-pane="general" onclick="showSettingsTab('general')">General</button>
-      <button class="pivot-tab" data-pane="team" onclick="showSettingsTab('team')">Team</button>
-      <button class="pivot-tab" data-pane="crm" onclick="showSettingsTab('crm')">CRM</button>
-      <button class="pivot-tab" data-pane="notifications" onclick="showSettingsTab('notifications')">Notifications</button>
-      <button class="pivot-tab" data-pane="ai" onclick="showSettingsTab('ai')">AI</button>
-      <button class="pivot-tab" data-pane="billing" onclick="showSettingsTab('billing')">Billing & Security</button>
+      <button class="pivot-tab active" data-stab="general" onclick="settingsTab('general')">General</button>
+      <button class="pivot-tab" data-stab="team" onclick="settingsTab('team')">Team</button>
+      <button class="pivot-tab" data-stab="channels" onclick="settingsTab('channels')">Channels</button>
+      <button class="pivot-tab" data-stab="crm" onclick="settingsTab('crm')">CRM</button>
+      <button class="pivot-tab" data-stab="ai" onclick="settingsTab('ai')">AI</button>
+      <button class="pivot-tab" data-stab="notifications" onclick="settingsTab('notifications')">Notifications</button>
+      <button class="pivot-tab" data-stab="billing" onclick="settingsTab('billing')">Billing &amp; Security</button>
     </div>
 
-    <div class="pivot-pane active one-col" id="pane-general">
+    <!-- ─── GENERAL ─── -->
+    <div class="pivot-pane active" id="st-general">
     <div class="settings-grid-v2">
       <div class="card">
-        <div class="sec-head"><div class="sec-title">Workspace Profile</div><span class="state-pill live" id="settings-saved-pill" style="display:none;"><span class="sp-dot"></span>Saved</span></div>
-        <div class="p20"><div class="field"><label>Business Name</label><input type="text" id="s2-biz-name" placeholder="Your Business Name" onchange="saveDashSettings()" /></div><div class="field"><label>Contact Email</label><input type="email" id="s2-biz-email" placeholder="contact@yourbusiness.com" onchange="saveDashSettings()" /></div><div class="field"><label>Phone</label><input type="text" id="s2-biz-phone" placeholder="(555) 000-0000" onchange="saveDashSettings()" /></div><div class="field"><label>Website</label><input type="text" id="s2-biz-site" placeholder="yourbusiness.com" onchange="saveDashSettings()" /></div><div class="field"><label>Industry</label><select id="s2-industry" onchange="saveDashSettings()"><option>Select…</option><option>Real Estate</option><option>Insurance</option><option>Mortgage</option><option>Med Spa</option><option>Dental</option><option>Service Business</option></select></div><div class="field"><label>Monthly Lead Goal</label><input type="number" id="s2-goal-leads" min="1" placeholder="50" onchange="saveDashSettings();if(window.rerender)rerender();" /></div><div class="field" style="margin-bottom:0;"><label>Time Zone</label><select id="s2-tz" onchange="saveDashSettings()"><option>EST (UTC-5)</option><option>CST (UTC-6)</option><option>MST (UTC-7)</option><option>PST (UTC-8)</option></select></div></div>
-      </div>
-    </div>
-    </div>
-
-    <div class="pivot-pane one-col" id="pane-team">
-    <div class="settings-grid-v2">
-      <div class="card">
-        <div class="sec-head"><div class="sec-title">Users &amp; Permissions</div><button class="btn-mini btn-mini-primary" onclick="showPage('team')">Manage team</button></div>
+        <div class="sec-head"><div class="sec-title">Business Profile</div></div>
         <div class="p20">
-          <div style="display:flex;align-items:center;gap:11px;padding-bottom:14px;border-bottom:1px solid var(--border);margin-bottom:14px;">
-            <div class="profile-card-avatar" style="background:linear-gradient(135deg,#0057FF,#8b5cf6);" id="settings-avatar">—</div>
-            <div style="flex:1;"><div style="font-size:12.5px;font-weight:700;color:var(--text);" id="settings-name">User</div><div style="font-size:10.5px;color:var(--text-m);" id="settings-email">—</div></div>
-            <span class="badge b-low">Owner</span>
-          </div>
-          <div style="font-size:12px;color:var(--text-s);line-height:1.6;">Seats, member roles, invites, and the team activity log now live on the <span class="sec-link" onclick="showPage('team')">Team page</span> — including seat purchases and pending provisioning status.</div>
+          <div class="field"><label>Business Name</label><input type="text" id="s-bizName" placeholder="Your Business Name" maxlength="120" /></div>
+          <div class="field"><label>Industry</label><input type="text" id="s-industry" placeholder="Real Estate" maxlength="80" /></div>
+          <div class="field"><label>Contact Email</label><input type="email" id="s-contactEmail" placeholder="you@company.com" maxlength="254" /></div>
+          <div class="field"><label>Phone</label><input type="tel" id="s-phone" placeholder="+1 (555) 000-0000" maxlength="30" /></div>
+          <div class="field"><label>Website</label><input type="url" id="s-website" placeholder="https://yoursite.com" maxlength="254" /></div>
+          <div class="field"><label>Timezone</label><select id="s-timezone">
+            <option value="America/New_York">Eastern (ET)</option>
+            <option value="America/Chicago">Central (CT)</option>
+            <option value="America/Denver">Mountain (MT)</option>
+            <option value="America/Los_Angeles">Pacific (PT)</option>
+            <option value="America/Phoenix">Arizona (no DST)</option>
+            <option value="Pacific/Honolulu">Hawaii (HT)</option>
+            <option value="America/Anchorage">Alaska (AK)</option>
+            <option value="UTC">UTC</option>
+          </select></div>
+          <div class="field" style="margin-bottom:0;"><label>Monthly Lead Goal</label><input type="number" id="s-leadGoal" min="0" max="9999" placeholder="50" />
+            <div style="font-size:11px;color:var(--text-m);margin-top:4px;">Used for goal tracking on the Overview page.</div></div>
+          <div class="st-actions"><span class="save-status" id="ss-general-status">Saved</span><button class="btn-mini btn-mini-primary" onclick="saveGeneralSettings()">Save Profile</button></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="sec-head"><div class="sec-title">Webhook</div></div>
+        <div class="p20">
+          <div style="font-size:12px;color:var(--text-s);line-height:1.6;margin-bottom:14px;">Receive a real-time POST when a high-intent lead comes in or a lead replies. Must be an HTTPS URL — leave blank to disable.</div>
+          <div class="field" style="margin-bottom:0;"><label>Webhook URL</label><input type="url" id="s-webhookUrl" placeholder="https://your-endpoint.com/webhook" maxlength="500" />
+            <div style="font-size:11px;color:var(--text-m);margin-top:4px;">Fires on two events: AI escalation at lead intake, and a lead replying to any email.</div></div>
+          <div class="st-actions"><span class="save-status" id="ss-webhook-status">Saved</span><button class="btn-mini btn-mini-primary" onclick="saveWebhookSettings()">Save Webhook</button></div>
         </div>
       </div>
     </div>
     </div>
 
-    <div class="pivot-pane" id="pane-crm">
-    <div class="settings-grid-v2">
+    <!-- ─── TEAM ─── -->
+    <div class="pivot-pane" id="st-team">
+    <div class="settings-grid-v2 one-col">
       <div class="card">
-        <div class="sec-head"><div class="sec-title">CRM Settings</div><span class="badge b-conn">Connected · Zoho</span></div>
-        <div class="p20"><div class="field"><label>Sync Frequency</label><select><option>Every 5 minutes</option><option>Every 15 minutes</option><option>Every 30 minutes</option><option>Hourly</option></select></div><div class="field" style="margin-bottom:0;"><label>Default Pipeline</label><select><option>Flowaify Pipeline (Flow CRM)</option><option>Sales Pipeline</option><option>Custom Pipeline</option></select></div><div style="margin-top:14px;font-size:11px;color:var(--text-m);line-height:1.6;">Your CRM connection is managed by the Flowaify team. Data syncs automatically on every dashboard load — hit Refresh in the top bar to pull the latest.</div></div>
-      </div>
-
-      <div class="card">
-        <div class="sec-head"><div class="sec-title">Lead Routing</div></div>
-        <div class="p20"><div class="field"><label>Routing Rule</label><select><option>Auto-assign to owner</option><option>Round-robin distribution</option><option>Manual assignment</option></select></div><div class="toggle-row"><div><div class="toggle-label">Auto-assign new leads</div><div class="toggle-sub">Route new leads as soon as they arrive</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div><div class="toggle-row" style="border-bottom:none;"><div><div class="toggle-label">Notify owner when lead waits over 90 seconds</div><div class="toggle-sub">Escalate if a lead hasn't been responded to</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div></div>
-      </div>
-    </div>
-    </div>
-
-    <div class="pivot-pane one-col" id="pane-notifications">
-    <div class="settings-grid-v2">
-      <div class="card">
-        <div class="sec-head"><div class="sec-title">Notification Rules</div></div>
-        <div class="p20"><div class="toggle-row"><div><div class="toggle-label">New lead alert</div><div class="toggle-sub">SMS + Email when a lead comes in</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div><div class="toggle-row"><div><div class="toggle-label">Failed sync alert</div><div class="toggle-sub">Instant alert on Flow CRM error</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div><div class="toggle-row"><div><div class="toggle-label">Send daily summary email</div><div class="toggle-sub">Digest delivered every morning at 8 AM</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div><div class="toggle-row" style="border-bottom:none;"><div><div class="toggle-label">Weekly report</div><div class="toggle-sub">Performance summary every Monday</div></div><div class="toggle" onclick="this.classList.toggle('on')"></div></div></div>
-      </div>
-    </div>
-    </div>
-
-    <div class="pivot-pane one-col" id="pane-ai">
-    <div class="settings-grid-v2">
-      <div class="card">
-        <div class="sec-head"><div class="sec-title">AI Reply Settings</div></div>
-        <div class="p20"><div class="field"><label>AI Response Delay</label><select><option>30 seconds</option><option>1 minute</option><option>2 minutes</option><option>5 minutes</option></select></div><div class="toggle-row"><div><div class="toggle-label">Pause AI replies outside business hours</div><div class="toggle-sub">AI waits until working hours to respond</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div><div class="toggle-row" style="border-bottom:none;"><div><div class="toggle-label">Require approval before AI sends reply</div><div class="toggle-sub">Review AI drafts before they're sent</div></div><div class="toggle" onclick="this.classList.toggle('on')"></div></div></div>
-      </div>
-    </div>
-    </div>
-
-    <div class="pivot-pane" id="pane-billing">
-    <div class="settings-grid-v2">
-      <div class="card">
-        <div class="sec-head"><div class="sec-title">Billing / Plan</div></div>
+        <div class="sec-head"><div class="sec-title">Team Members</div><button class="btn-mini btn-mini-primary" onclick="stInvite()">Invite Member</button></div>
         <div class="p20">
-          <div style="display:flex;align-items:center;justify-content:space-between;padding-bottom:14px;border-bottom:1px solid var(--border);margin-bottom:14px;"><div><div style="font-size:13px;font-weight:700;color:var(--text);">Current Plan</div><div style="font-size:11px;color:var(--text-m);margin-top:2px;">Manage your subscription and payment details</div></div><button class="btn-mini btn-mini-ghost" onclick="comingSoon('Billing management')">Manage Billing</button></div>
-          <div class="empty-state" style="padding:14px 8px;"><i data-lucide="receipt"></i><div class="empty-state-title">No billing history yet</div><div class="empty-state-sub">Invoices and payment history will appear here.</div></div>
+          <div id="st-team-list"><div style="font-size:12px;color:var(--text-m);">Loading members…</div></div>
+          <div style="margin-top:14px;font-size:12px;color:var(--text-s);line-height:1.6;">Roles, seat purchases, and the team activity log live on the <span class="sec-link" onclick="showPage('team')">Team page</span>.</div>
+        </div>
+      </div>
+    </div>
+    </div>
+
+    <!-- ─── CHANNELS ─── -->
+    <div class="pivot-pane" id="st-channels">
+    <div class="settings-grid-v2">
+      <div class="card">
+        <div class="sec-head"><div class="sec-title">SMS</div><span class="badge b-low" id="s-smsStatusBadge">Checking…</span></div>
+        <div class="p20">
+          <div style="font-size:12px;color:var(--text-s);line-height:1.6;margin-bottom:14px;">SMS is provisioned during onboarding. Contact Flowaify to enable or change your SMS number.</div>
+          <div class="field" style="margin-bottom:8px;"><label>Send SMS to these lead segments</label>
+            <div style="font-size:11px;color:var(--text-m);line-height:1.55;margin-bottom:10px;">The AI scores every lead HOT, WARM, or COLD automatically. This filter only controls which scored leads also receive a text — it never changes how leads are scored.</div>
+            <div class="seg-chips" id="s-smsSegments">
+              <button class="seg-chip active" data-seg="HOT" onclick="toggleSeg(this)">HOT</button>
+              <button class="seg-chip active" data-seg="WARM" onclick="toggleSeg(this)">WARM</button>
+              <button class="seg-chip" data-seg="COLD" onclick="toggleSeg(this)">COLD</button>
+            </div>
+          </div>
+          <div class="st-actions"><span class="save-status" id="ss-channels-status">Saved</span><button class="btn-mini btn-mini-primary" onclick="saveChannelsSettings()">Save</button></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="sec-head"><div class="sec-title">Email</div></div>
+        <div class="p20">
+          <div class="field" style="margin-bottom:0;"><label>From Email Address</label><input type="email" id="s-fromEmail" readonly style="opacity:0.6;cursor:not-allowed;" />
+            <div style="font-size:11px;color:var(--text-m);margin-top:4px;">Configured during onboarding. Contact Flowaify to change your sending address.</div></div>
+          <div class="toggle-row" style="margin-top:14px;">
+            <div><div class="toggle-label">Inbox Connection</div><div class="toggle-sub" id="s-gmailDesc">Not connected</div></div>
+            <div style="display:flex;gap:8px;align-items:center;">
+              <span class="badge b-low" id="s-gmailBadge">Disconnected</span>
+              <button class="btn-mini btn-mini-ghost" id="s-gmailBtn" onclick="handleGmailToggle()">Connect</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    </div>
+
+    <!-- ─── CRM ─── -->
+    <div class="pivot-pane" id="st-crm">
+    <div class="settings-grid-v2">
+      <div class="card">
+        <div class="sec-head"><div class="sec-title">CRM Connection</div><span class="badge b-low" id="s-crmBadge">Checking…</span></div>
+        <div class="p20">
+          <div style="font-size:12px;color:var(--text-s);line-height:1.6;margin-bottom:14px;">Your CRM is the system of record. The connection is managed by the Flowaify team — data syncs automatically on every dashboard load.</div>
+          <div class="field" style="margin-bottom:0;"><label>Data Region</label><input type="text" id="s-crmRegion" readonly style="opacity:0.6;cursor:not-allowed;" />
+            <div style="font-size:11px;color:var(--text-m);margin-top:4px;">Contact Flowaify to change your data region.</div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="sec-head"><div class="sec-title">Follow-Up Cadence</div></div>
+        <div class="p20">
+          <div style="font-size:12px;color:var(--text-s);line-height:1.6;margin-bottom:14px;">Set how many days after initial contact each follow-up sends. Comma-separated day numbers — "3, 7" means Day 3 and Day 7. Clear a field to disable that channel entirely.</div>
+          <div class="field"><label>Email Follow-ups (days)</label><input type="text" id="s-cadenceEmail" placeholder="3, 7" maxlength="50" />
+            <div style="font-size:11px;color:var(--text-m);margin-top:4px;">Leave blank to disable email follow-ups.</div></div>
+          <div class="field" style="margin-bottom:0;"><label>SMS Follow-ups (days)</label><input type="text" id="s-cadenceSms" placeholder="0, 5, 7" maxlength="50" />
+            <div style="font-size:11px;color:var(--text-m);margin-top:4px;">Leave blank to disable. Day 0 = same day as intake.</div></div>
+          <div class="st-actions"><span class="save-status" id="ss-crm-status">Saved</span><button class="btn-mini btn-mini-primary" onclick="saveCRMSettings()">Save</button></div>
+        </div>
+      </div>
+    </div>
+    </div>
+
+    <!-- ─── AI ─── -->
+    <div class="pivot-pane" id="st-ai">
+    <div class="settings-grid-v2">
+      <div class="card">
+        <div class="sec-head"><div class="sec-title">Response Behavior</div></div>
+        <div class="p20">
+          <div class="toggle-row">
+            <div><div class="toggle-label">Pause AI outside business hours</div><div class="toggle-sub">Holds replies until the next business day</div></div>
+            <div class="toggle" id="t-pauseHours" onclick="stToggleAI('pauseOutsideHours', this)"></div>
+          </div>
+          <div class="toggle-row">
+            <div><div class="toggle-label">Require approval before sending</div><div class="toggle-sub">AI drafts wait for a team member to approve</div></div>
+            <div class="toggle" id="t-requireApproval" onclick="stToggleAI('requireApproval', this)"></div>
+          </div>
+          <div class="field" style="margin:14px 0 0;"><label>Response delay (minutes)</label>
+            <div class="range-row"><input type="range" id="s-responseDelay" min="0" max="60" step="5" value="0" oninput="document.getElementById('s-responseDelayVal').textContent=this.value"><span class="range-val" id="s-responseDelayVal">0</span></div>
+            <div style="font-size:11px;color:var(--text-m);margin-top:4px;">Adds a human-like delay before the AI sends. 0 = instant.</div></div>
+          <div class="st-actions"><span class="save-status" id="ss-ai-status">Saved</span><button class="btn-mini btn-mini-primary" onclick="saveAISettings()">Save</button></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="sec-head"><div class="sec-title">AI Escalation</div></div>
+        <div class="p20">
+          <div style="font-size:12px;color:var(--text-s);line-height:1.6;margin-bottom:10px;">When a lead scores above the threshold, the AI runs a deeper analysis and sends a more personalized reply. Stored now — activates with the automation engine.</div>
+          <div class="toggle-row">
+            <div><div class="toggle-label">Enable deep-scoring escalation</div><div class="toggle-sub">Premium AI analysis for high-intent leads</div></div>
+            <div class="toggle" id="t-escalation" onclick="stToggleAI('escalation', this)"></div>
+          </div>
+          <div class="field" style="margin:14px 0 0;"><label>Escalation threshold (score 0–100)</label>
+            <div class="range-row"><input type="range" id="s-escalationThreshold" min="0" max="100" step="5" value="60" oninput="document.getElementById('s-escalationThresholdVal').textContent=this.value"><span class="range-val" id="s-escalationThresholdVal">60</span></div>
+            <div style="font-size:11px;color:var(--text-m);margin-top:4px;">Leads at or above this score trigger escalation. Default: 60.</div></div>
+          <div class="st-actions"><span class="save-status" id="ss-escalation-status">Saved</span><button class="btn-mini btn-mini-primary" onclick="saveEscalationSettings()">Save</button></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="sec-head"><div class="sec-title">AI Persona &amp; Templates</div></div>
+        <div class="p20">
+          <div class="field"><label>AI Persona</label><textarea id="s-personaText" rows="3" maxlength="1000" placeholder="Write in a warm, professional tone. Always reference the lead's specific request. Sign off as the team." style="width:100%;background:var(--input-bg);border:1px solid var(--input-border);border-radius:5px;color:var(--text);font-size:12.5px;padding:9px 11px;font-family:inherit;resize:vertical;"></textarea>
+            <div style="font-size:11px;color:var(--text-m);margin-top:4px;">Injected into every outgoing AI reply as style guidance. Max 1,000 characters.</div></div>
+          <div class="field" style="margin-bottom:0;"><label>Fallback Email Template</label><textarea id="s-fallbackTemplate" rows="3" maxlength="2000" placeholder="Hi {{first_name}}, thanks for reaching out! A member of our team will be in touch shortly." style="width:100%;background:var(--input-bg);border:1px solid var(--input-border);border-radius:5px;color:var(--text);font-size:12.5px;padding:9px 11px;font-family:inherit;resize:vertical;"></textarea>
+            <div style="font-size:11px;color:var(--text-m);margin-top:4px;">Sent automatically if AI generation fails — keep this filled in. Use {{first_name}} for the lead's name.</div></div>
+          <div class="st-actions"><span class="save-status" id="ss-persona-status">Saved</span><button class="btn-mini btn-mini-primary" onclick="savePersonaSettings()">Save</button></div>
+        </div>
+      </div>
+    </div>
+    </div>
+
+    <!-- ─── NOTIFICATIONS ─── -->
+    <div class="pivot-pane" id="st-notifications">
+    <div class="settings-grid-v2">
+      <div class="card">
+        <div class="sec-head"><div class="sec-title">Alert Preferences</div></div>
+        <div class="p20">
+          <div class="toggle-row">
+            <div><div class="toggle-label">New lead received</div><div class="toggle-sub">Notify when a new lead passes qualification</div></div>
+            <div class="toggle" id="t-notifNewLead" onclick="stToggleNotif('newLead', this)"></div>
+          </div>
+          <div class="toggle-row">
+            <div><div class="toggle-label">Call booked</div><div class="toggle-sub">Notify when a lead books a call</div></div>
+            <div class="toggle" id="t-notifBooked" onclick="stToggleNotif('bookedCall', this)"></div>
+          </div>
+          <div class="toggle-row" style="border-bottom:none;">
+            <div><div class="toggle-label">Unresponsive lead</div><div class="toggle-sub">Notify when all follow-up touches are exhausted</div></div>
+            <div class="toggle" id="t-notifUnresponsive" onclick="stToggleNotif('unresponsiveLead', this)"></div>
+          </div>
+          <div class="st-actions"><span class="save-status" id="ss-notif-status">Saved</span><button class="btn-mini btn-mini-primary" onclick="saveNotifSettings()">Save</button></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="sec-head"><div class="sec-title">Weekly Report</div></div>
+        <div class="p20">
+          <div class="toggle-row">
+            <div><div class="toggle-label">Send weekly report</div><div class="toggle-sub">Automated pipeline summary by email — read-only, never modifies data</div></div>
+            <div class="toggle" id="t-weeklyReport" onclick="stToggleNotif('weeklyReport', this)"></div>
+          </div>
+          <div class="field" style="margin-top:14px;"><label>Report day(s)</label>
+            <div class="seg-chips" id="s-reportDays">
+              <button class="seg-chip" data-day="Mon" onclick="toggleReportDay(this)">Mon</button>
+              <button class="seg-chip" data-day="Tue" onclick="toggleReportDay(this)">Tue</button>
+              <button class="seg-chip" data-day="Wed" onclick="toggleReportDay(this)">Wed</button>
+              <button class="seg-chip" data-day="Thu" onclick="toggleReportDay(this)">Thu</button>
+              <button class="seg-chip" data-day="Fri" onclick="toggleReportDay(this)">Fri</button>
+            </div></div>
+          <div class="field" style="margin-bottom:0;"><label>Report mode</label><select id="s-reportMode">
+            <option value="rolling7day">Rolling 7-day (weekly snapshot)</option>
+            <option value="fullPipeline">Full pipeline (all-time cumulative)</option>
+          </select></div>
+          <div class="st-actions"><span class="save-status" id="ss-report-status">Saved</span><button class="btn-mini btn-mini-primary" onclick="saveReportSettings()">Save</button></div>
+        </div>
+      </div>
+    </div>
+    </div>
+
+    <!-- ─── BILLING & SECURITY ─── -->
+    <div class="pivot-pane" id="st-billing">
+    <div class="settings-grid-v2">
+      <div class="card">
+        <div class="sec-head"><div class="sec-title">Current Plan</div></div>
+        <div class="p20">
+          <div class="st-plan">
+            <div><div class="st-plan-name" id="s-planName">Starter</div><div class="st-plan-desc" id="s-planDesc">Core lead capture and AI replies</div></div>
+            <span class="badge b-conn">Active</span>
+          </div>
+          <div style="margin-top:14px;font-size:12px;color:var(--text-s);line-height:1.6;">Need additional features, custom automation logic, or higher volume? Code-level customization requires scheduling time with the Flowaify team.</div>
+          <a href="mailto:contact@flowaify.app?subject=Plan%20Upgrade%20Request" class="btn-mini btn-mini-primary" style="text-decoration:none;display:inline-flex;margin-top:12px;">Contact Flowaify to Upgrade</a>
         </div>
       </div>
 
       <div class="card">
         <div class="sec-head"><div class="sec-title">Security</div></div>
         <div class="p20">
-          <div class="toggle-row"><div><div class="toggle-label">Two-factor authentication</div><div class="toggle-sub">Add an extra layer of login security</div></div><div class="toggle" onclick="this.classList.toggle('on')"></div></div>
-          <div style="padding:12px 0;border-bottom:1px solid var(--border);"><button class="btn-mini btn-mini-ghost" style="width:100%;" onclick="comingSoon('Password change')">Change Password</button></div>
-          <div class="empty-state" style="padding:14px 8px 4px;"><i data-lucide="monitor-smartphone"></i><div class="empty-state-title">No other active sessions</div><div class="empty-state-sub">Devices signed in to your account will appear here.</div></div>
+          <div class="toggle-row">
+            <div><div class="toggle-label">Change password</div><div class="toggle-sub">You'll receive a reset email</div></div>
+            <button class="btn-mini btn-mini-ghost" onclick="sendPasswordReset()">Send Reset Email</button>
+          </div>
+          <div class="toggle-row" style="border-bottom:none;">
+            <div><div class="toggle-label">Sign out of all sessions</div><div class="toggle-sub">Logs out every device signed in to your account</div></div>
+            <button class="btn-mini btn-mini-ghost" style="color:var(--red);border-color:rgba(220,38,38,.35);" onclick="signOutAll()">Sign Out All</button>
+          </div>
         </div>
       </div>
     </div>
@@ -2776,8 +2957,9 @@
 
 <div id="toast"><div class="toast-icon"><i data-lucide="check"></i></div><div id="toast-msg" style="font-size:12.5px;font-weight:600;color:var(--text-s);line-height:1.45;"></div></div>
 
-<script src="crm.js?v=27"></script>
+<script src="crm.js?v=28"></script>
 <script src="teams.js?v=4"></script>
+<script src="settings.js?v=1"></script>
 <script src="invoice.js?v=3"></script>
 <script src="inbox.js?v=2"></script>
 <script src="flowy.js?v=10"></script>
@@ -2883,6 +3065,7 @@ function showPage(id) {
   document.getElementById('topbar-sub').textContent   = m.sub   || '';
   window.scrollTo(0,0); closeProfileMenu(); closeMob();
   if (id === 'overview') { if (window.ovTeamWidgetRefresh) ovTeamWidgetRefresh(); }
+  if (id === 'settings') { if (window.loadSettings) loadSettings(); }
   if (id === 'team')     { if (window.teamsInit)    teamsInit();    else if (window.teamLoad) teamLoad(); }
   if (id === 'invoices') { if (window.invoicesInit) invoicesInit(); }
   if (id === 'inbox')    { if (window.inboxInit)    inboxInit(); }
@@ -2938,6 +3121,15 @@ function toggleAuto(el, name) {
     if (t) state[id.replace('tog-','')] = t.classList.contains('on');
   });
   try { localStorage.setItem(autoTogglesKey(), JSON.stringify(state)); } catch(e) {}
+  /* Persist engine-relevant toggles to the KV config (settings.js pushSettings).
+     booking/scoring/followup have no config fields yet — visual-only by design. */
+  const AUTO_CFG_MAP = {
+    sms:       function(on) { return { followupCadence: { sms: on ? [0, 5, 7] : null } }; },
+    email:     function(on) { return { followupCadence: { email: on ? [3, 7] : null } }; },
+    /* inverted on purpose: Auto Response ON = AI sends freely = requireApproval false */
+    autoreply: function(on) { return { ai: { requireApproval: !on } }; }
+  };
+  if (AUTO_CFG_MAP[name] && window.pushSettings) pushSettings(AUTO_CFG_MAP[name](isOn), null);
   showToast((isOn ? 'Resumed: ' : 'Paused: ') + name.replace(/([A-Z])/g, ' $1').trim());
 }
 
