@@ -772,13 +772,16 @@
     .interactive-dot-bg::after {
       content: ""; position: absolute; inset: 0;
       opacity: var(--spotlight-opacity, 0);
-      transition: opacity 200ms ease;
-      background: radial-gradient(80px at var(--mouse-x, -1000px) var(--mouse-y, -1000px),
-        color-mix(in oklab, var(--blue) 45%, transparent), transparent 70%);
-      -webkit-mask-image: radial-gradient(circle, black 1px, transparent 1px);
+      transition: opacity 300ms ease;
+      background: radial-gradient(150px at var(--mouse-x, -1000px) var(--mouse-y, -1000px),
+        color-mix(in oklab, var(--blue) 85%, transparent),
+        color-mix(in oklab, var(--blue) 35%, transparent) 45%,
+        transparent 72%);
+      -webkit-mask-image: radial-gradient(circle, black 1.2px, transparent 1.2px);
       -webkit-mask-size: 12px 12px;
-      mask-image: radial-gradient(circle, black 1px, transparent 1px);
+      mask-image: radial-gradient(circle, black 1.2px, transparent 1.2px);
       mask-size: 12px 12px;
+      filter: blur(1.5px);
     }
     #flowy-panel > *:not(.interactive-dot-bg) { position: relative; z-index: 1; }
 
@@ -4293,19 +4296,49 @@ setTimeout(ovLayoutLoadSaved, 1200); /* re-apply once __userSub is set after aut
 setTimeout(initOvSortables, 400);
 setTimeout(function() { if (window.ovTeamWidgetRefresh) ovTeamWidgetRefresh(); }, 4000);
 
-/* ── InteractiveDotBackground — reusable mouse-following dot-grid glow ──── */
+/* ── InteractiveDotBackground — reusable mouse-following dot-grid glow ────
+   The glow eases toward the cursor each frame (lerp) instead of snapping,
+   which reads as smooth motion; the CSS blur softens the trailing edge. */
 function initInteractiveDotBg(containerId) {
   const host = document.getElementById(containerId);
   if (!host) return;
   const bg = host.querySelector('.interactive-dot-bg');
   if (!bg) return;
+
+  let tx = -1000, ty = -1000;   /* target (actual cursor) */
+  let cx = -1000, cy = -1000;   /* current (eased) */
+  let raf = null;
+  let hovering = false;
+
+  function tick() {
+    cx += (tx - cx) * 0.14;
+    cy += (ty - cy) * 0.14;
+    bg.style.setProperty('--mouse-x', cx.toFixed(1) + 'px');
+    bg.style.setProperty('--mouse-y', cy.toFixed(1) + 'px');
+    const settled = Math.abs(tx - cx) < 0.3 && Math.abs(ty - cy) < 0.3;
+    if (settled && !hovering) { raf = null; return; }
+    raf = requestAnimationFrame(tick);
+  }
+
   host.addEventListener('mousemove', function(e) {
     const r = host.getBoundingClientRect();
-    bg.style.setProperty('--mouse-x', (e.clientX - r.left) + 'px');
-    bg.style.setProperty('--mouse-y', (e.clientY - r.top) + 'px');
+    tx = e.clientX - r.left;
+    ty = e.clientY - r.top;
+    if (!raf) raf = requestAnimationFrame(tick);
   });
-  host.addEventListener('mouseenter', function() { bg.style.setProperty('--spotlight-opacity', '1'); });
-  host.addEventListener('mouseleave', function() { bg.style.setProperty('--spotlight-opacity', '0'); });
+  host.addEventListener('mouseenter', function(e) {
+    hovering = true;
+    const r = host.getBoundingClientRect();
+    /* start the glow at the entry point so it doesn't streak across */
+    tx = cx = e.clientX - r.left;
+    ty = cy = e.clientY - r.top;
+    bg.style.setProperty('--spotlight-opacity', '1');
+    if (!raf) raf = requestAnimationFrame(tick);
+  });
+  host.addEventListener('mouseleave', function() {
+    hovering = false;
+    bg.style.setProperty('--spotlight-opacity', '0');
+  });
 }
 initInteractiveDotBg('flowy-panel');
 
