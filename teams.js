@@ -28,6 +28,14 @@ async function teamsInit() {
   await teamsLoadChannels();
   twTasksLoad();
   twPinsLoad();
+  /* one-time: stamp app_metadata.clientId on existing roster accounts */
+  try {
+    if (!localStorage.getItem('flw_bf2')) {
+      twFetch('POST', '/team/backfill').then(function(r) {
+        if (r && r.status === 200) localStorage.setItem('flw_bf2', '1');
+      });
+    }
+  } catch (e) {}
   _teamsPollingId = setInterval(teamsPoll, 8000);
 }
 window.teamsInit = teamsInit;
@@ -893,6 +901,7 @@ async function twPinsLoad() {
 }
 
 async function twPinLead(id, name, status) {
+  if (window.flwWriteBlocked && flwWriteBlocked()) return;
   var r = await twFetch('POST', '/team/pins', { id: id, name: name, status: status });
   if (r && r.status === 200) {
     var wasPinned = _twPins.some(function(p) { return p.id === id; });
@@ -971,6 +980,7 @@ async function twTaskToggle(id) {
 window.twTaskToggle = twTaskToggle;
 
 function twTaskModalOpen(opts) {
+  if (window.flwWriteBlocked && flwWriteBlocked()) return;
   opts = opts || {};
   var m = document.getElementById('tw-task-modal');
   if (!m) return;

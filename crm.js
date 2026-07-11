@@ -100,6 +100,7 @@ async function updateLead(contactId, payload) {
 }
 
 async function setLeadStatus(contactId, status) {
+  if (typeof flwWriteBlocked === 'function' && flwWriteBlocked()) return;
   const data = window.__crmData;
   if (!data) return;
   const c = data.contacts.find(function(x) { return String(x.id) === String(contactId); });
@@ -120,6 +121,7 @@ async function setLeadStatus(contactId, status) {
 window.setLeadStatus = setLeadStatus;
 
 async function saveLeadNote(contactId) {
+  if (typeof flwWriteBlocked === 'function' && flwWriteBlocked()) return;
   const ta = document.getElementById('lead-note-input');
   if (!ta || !ta.value.trim()) return;
   const note = ta.value.trim();
@@ -1924,6 +1926,7 @@ function leadsBulkExport() {
 window.leadsBulkExport = leadsBulkExport;
 
 async function leadsBulkStatus(status) {
+  if (typeof flwWriteBlocked === 'function' && flwWriteBlocked()) return;
   const ids = leadsSelectedIds();
   if (!ids.length) return;
   const contacts = (window.__crmData || {}).contacts || [];
@@ -2933,10 +2936,34 @@ function roleChipHtml(role) {
   return '<span class="role-chip ' + cls + '">' + escDash(role) + '</span>';
 }
 
+/* My role in this workspace — roster lookup by sub/email; empty roster = owner */
+function teamMyRole(doc) {
+  var members = (doc && doc.members) || [];
+  if (!members.length) return 'owner';
+  var sub = window.__userSub || '';
+  var em = String(window.__userEmail || '').toLowerCase();
+  var m = members.find(function(x) {
+    return (x.sub && x.sub === sub) || (em && String(x.email || '').toLowerCase() === em);
+  });
+  return m ? (m.role || 'member') : 'member';
+}
+
+/* Viewer write guard — Worker enforces; this gives a friendly message first */
+function flwWriteBlocked() {
+  if (window.__myRole === 'viewer') {
+    if (typeof showToast === 'function') showToast('View-only access — ask an admin for a member seat.');
+    return true;
+  }
+  return false;
+}
+window.flwWriteBlocked = flwWriteBlocked;
+
 function renderTeam(doc) {
   var members = doc.members || [];
   var used = members.length;
   var total = doc.seatsIncluded || 3;
+  window.__myRole = teamMyRole(doc);
+  var canManage = window.__myRole === 'owner' || window.__myRole === 'admin';
   var active = members.filter(function(m) { return m.status === 'active'; }).length;
   var pending = used - active;
 
@@ -2951,9 +2978,11 @@ function renderTeam(doc) {
 
   var inviteBtn = document.getElementById('team-invite-btn');
   if (inviteBtn) {
-    inviteBtn.disabled = used >= total;
-    inviteBtn.style.opacity = used >= total ? '0.5' : '1';
-    inviteBtn.title = used >= total ? 'All seats are in use — buy more seats to invite' : 'Invite a team member';
+    var blocked = used >= total || !canManage;
+    inviteBtn.disabled = blocked;
+    inviteBtn.style.opacity = blocked ? '0.5' : '1';
+    inviteBtn.title = !canManage ? 'Only admins can invite members'
+      : (used >= total ? 'All seats are in use — buy more seats to invite' : 'Invite a team member');
   }
 
   var tbody = document.getElementById('team-tbody');
@@ -2961,20 +2990,17 @@ function renderTeam(doc) {
     tbody.innerHTML = members.map(function(m) {
       var isOwner = m.role === 'owner';
       var safeId = String(m.id).replace(/[^\w-]/g, '');
-      var roleCell = isOwner
-        ? roleChipHtml('owner')
+      var roleCell = (isOwner || !canManage)
+        ? roleChipHtml(m.role || 'member')
         : '<select class="role-sel" onchange="setRole(\'' + safeId + '\', this.value)">' +
             ['admin', 'member', 'viewer'].map(function(r) {
               return '<option value="' + r + '"' + (m.role === r ? ' selected' : '') + '>' + r.charAt(0).toUpperCase() + r.slice(1) + '</option>';
             }).join('') + '</select>';
       var statusCell = m.status === 'active'
         ? '<span class="state-pill live"><span class="sp-dot"></span>Active</span>'
-        : '<span class="state-pill awaiting"><span class="sp-dot"></span>Pending</span>';
-      var actions = isOwner ? '' :
-        (m.status === 'pending'
-          ? '<button class="team-act" onclick="resendProvision(\'' + safeId + '\')" title="Resend provisioning email"><i data-lucide="mail"></i></button>' +
-            '<button class="team-act" onclick="markActive(\'' + safeId + '\')" title="Mark active"><i data-lucide="check"></i></button>'
-          : '') +
+        : '<span class="state-pill awaiting"><span class="sp-dot"></span>Invited</span>';
+      var actions = (isOwner || !canManage) ? '' :
+        '<button class="team-act" onclick="resendProvision(\'' + safeId + '\')" title="Resend set-password email"><i data-lucide="mail"></i></button>' +
         '<button class="team-act danger" onclick="removeMember(\'' + safeId + '\')" title="Remove"><i data-lucide="trash-2"></i></button>';
       return '<tr data-mid="' + safeId + '" onclick="if(!event.target.closest(\'select,button\'))openMember(\'' + safeId + '\')" style="cursor:pointer;">' +
         '<td><div class="lead-cell">' + avatarHtml(m.name || m.email) +
@@ -3049,27 +3075,19 @@ async function inviteMember() {
     if (typeof showToast === 'function') showToast('Add a name and a valid email first.');
     return;
   }
-  if (doc.members.some(function(m) { return m.email.toLowerCase() === email.toLowerCase(); })) {
-    if (typeof showToast === 'function') showToast('That email is already on the team.');
-    return;
+  if (typeof showToast === 'function') showToast('Creating account\u2026');
+  var r = await twFetch('POST', '/team/invite', { name: name.trim(), email: email, role: role });
+  if (r && r.status === 200 && r.data && r.data.doc) {
+    window.__teamDoc = r.data.doc;
+    renderTeam(r.data.doc);
+    closeInvite();
+    if (typeof showToast === 'function') {
+      showToast('Invitation sent \u2014 ' + escDash(name.trim()) + ' will get an email to set their password.');
+    }
+  } else {
+    var msg = (r && r.data && r.data.message) || 'Could not send the invite \u2014 try again.';
+    if (typeof showToast === 'function') showToast(msg);
   }
-  var member = {
-    id: 'm' + Date.now(),
-    name: name.trim().slice(0, 80),
-    email: email.slice(0, 120),
-    role: role,
-    status: 'pending',
-    addedAt: Date.now(),
-  };
-  var prev = JSON.parse(JSON.stringify(doc));
-  doc.members.push(member);
-  teamLogPush(doc, (window.__userName || 'Owner') + ' invited ' + member.name + ' as ' + role);
-  renderTeam(doc);
-  closeInvite();
-  var ok = await teamSave(doc);
-  if (!ok) { window.__teamDoc = prev; renderTeam(prev); return; }
-  provisionMail(member);
-  if (typeof showToast === 'function') showToast('Invite recorded — Flowaify is provisioning the login.');
 }
 window.inviteMember = inviteMember;
 
@@ -3078,49 +3096,57 @@ async function setRole(id, role) {
   if (!doc) return;
   var m = doc.members.find(function(x) { return String(x.id) === String(id); });
   if (!m || m.role === 'owner') return;
-  var prev = m.role;
-  m.role = role;
-  teamLogPush(doc, m.name + ' changed to ' + role);
-  renderTeam(doc);
-  var ok = await teamSave(doc);
-  if (!ok) { m.role = prev; renderTeam(doc); }
-  else if (typeof showToast === 'function') showToast(escDash(m.name) + ' is now ' + role + '.');
+  var r = await twFetch('POST', '/team/role', { email: m.email, role: role });
+  if (r && r.status === 200 && r.data && r.data.doc) {
+    window.__teamDoc = r.data.doc;
+    renderTeam(r.data.doc);
+    if (typeof showToast === 'function') showToast(escDash(m.name) + ' is now ' + role + '.');
+  } else {
+    renderTeam(doc); /* reset the select */
+    var msg = (r && r.data && r.data.message) || 'Could not change the role.';
+    if (typeof showToast === 'function') showToast(msg);
+  }
 }
 window.setRole = setRole;
-
-async function markActive(id) {
-  var doc = window.__teamDoc;
-  if (!doc) return;
-  var m = doc.members.find(function(x) { return String(x.id) === String(id); });
-  if (!m) return;
-  m.status = 'active';
-  teamLogPush(doc, m.name + '\u2019s seat activated');
-  renderTeam(doc);
-  await teamSave(doc);
-}
-window.markActive = markActive;
 
 async function removeMember(id) {
   var doc = window.__teamDoc;
   if (!doc) return;
   var m = doc.members.find(function(x) { return String(x.id) === String(id); });
   if (!m || m.role === 'owner') return;
-  if (!confirm('Remove ' + m.name + ' from the team? Their login will be deactivated.')) return;
-  var prev = JSON.parse(JSON.stringify(doc));
-  doc.members = doc.members.filter(function(x) { return String(x.id) !== String(id); });
-  teamLogPush(doc, m.name + ' removed from the team');
-  renderTeam(doc);
-  var ok = await teamSave(doc);
-  if (!ok) { window.__teamDoc = prev; renderTeam(prev); }
-  else if (typeof showToast === 'function') showToast(escDash(m.name) + ' removed — we\u2019ll deactivate their login.');
+  if (!confirm('Remove ' + m.name + ' from the team? Their login will be blocked immediately.')) return;
+  var r = await twFetch('POST', '/team/remove', { email: m.email });
+  if (r && r.status === 200 && r.data && r.data.doc) {
+    window.__teamDoc = r.data.doc;
+    renderTeam(r.data.doc);
+    if (typeof showToast === 'function') showToast(escDash(m.name) + ' removed and their login blocked.');
+  } else {
+    var msg = (r && r.data && r.data.message) || 'Could not remove the member.';
+    if (typeof showToast === 'function') showToast(msg);
+  }
 }
 window.removeMember = removeMember;
 
-function resendProvision(id) {
+async function resendProvision(id) {
   var doc = window.__teamDoc;
   if (!doc) return;
   var m = doc.members.find(function(x) { return String(x.id) === String(id); });
-  if (m) provisionMail(m);
+  if (!m || !m.email) return;
+  /* Auth0's public change-password endpoint re-sends the set-password email */
+  try {
+    await fetch('https://auth.flowaify.app/dbconnections/change_password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        client_id: 'tx74Owqn3jVeSaVuxfFHsKloqbPqfAmN',
+        email: m.email,
+        connection: 'Username-Password-Authentication'
+      })
+    });
+    if (typeof showToast === 'function') showToast('Set-password email re-sent to ' + escDash(m.email) + '.');
+  } catch (e) {
+    if (typeof showToast === 'function') showToast('Could not re-send the email \u2014 try again.');
+  }
 }
 window.resendProvision = resendProvision;
 

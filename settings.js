@@ -186,6 +186,9 @@ async function pushSettings(partial, statusId) {
     }
     return true;
   }
+  if (r.status === 403 && typeof showToast === 'function') {
+    showToast((r.data && r.data.message) || 'Only admins can change settings.');
+  }
   if (statusEl) {
     statusEl.textContent = 'Error saving';
     statusEl.style.color = 'var(--red)';

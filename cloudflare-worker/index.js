@@ -90,6 +90,22 @@ export default {
         return handleTeamReact(request, env, corsHeaders);
       }
 
+      if (url.pathname === '/team/invite' && request.method === 'POST') {
+        return handleTeamInvite(request, env, corsHeaders);
+      }
+
+      if (url.pathname === '/team/role' && request.method === 'POST') {
+        return handleTeamRole(request, env, corsHeaders);
+      }
+
+      if (url.pathname === '/team/remove' && request.method === 'POST') {
+        return handleTeamRemove(request, env, corsHeaders);
+      }
+
+      if (url.pathname === '/team/backfill' && request.method === 'POST') {
+        return handleTeamBackfill(request, env, corsHeaders);
+      }
+
       if (url.pathname === '/team/tasks') {
         return handleTeamTasks(request, env, corsHeaders);
       }
@@ -274,6 +290,15 @@ async function handleUpdate(request, env, corsHeaders) {
     return json({ error: 'No clientId in token' }, 403, corsHeaders);
   }
 
+  // Role gate: viewers cannot write to the CRM; revoked users get nothing
+  const ugate = await resolveRole(env, clientId, payload.sub || '', payload.email || '');
+  if (!ugate.role) {
+    return json({ error: 'REVOKED', message: 'Your access to this workspace has been removed.' }, 403, corsHeaders);
+  }
+  if (!roleAtLeast(ugate.role, 'member')) {
+    return json({ error: 'FORBIDDEN', message: 'Viewers cannot edit leads.' }, 403, corsHeaders);
+  }
+
   const key = clientId.toUpperCase().replace(/[^A-Z0-9]/g, '_');
   const refreshToken = env[`REFRESH_TOKEN_${key}`];
   if (!refreshToken) {
@@ -433,7 +458,7 @@ async function flowyAuth(request, env, corsHeaders) {
   if (!clientId) {
     return { err: json({ error: 'No clientId in token' }, 403, corsHeaders) };
   }
-  return { clientId, sub: payload.sub || '' };
+  return { clientId, sub: payload.sub || '', email: payload.email || '', name: payload.name || payload.email || 'Member' };
 }
 
 async function handleAI(request, env, ctx, corsHeaders) {
@@ -592,6 +617,7 @@ function sanitizeTeamDoc(doc) {
   const members = Array.isArray(doc && doc.members) ? doc.members.slice(0, 50) : [];
   out.members = members.map(m => ({
     id:      String(m.id || '').replace(/[^\w-]/g, '').slice(0, 40),
+    sub:     String(m.sub || '').slice(0, 80),
     name:    String(m.name || '').slice(0, 80),
     email:   String(m.email || '').slice(0, 120),
     role:    TEAM_ROLES.has(String(m.role)) ? String(m.role) : 'member',
@@ -647,7 +673,14 @@ async function handleTeam(request, env, corsHeaders) {
     }
   }
 
-  // PUT
+  // PUT — roster writes are admin-only (bootstrap: empty roster acts as owner)
+  const tgate = await resolveRole(env, clientId, payload.sub || '', payload.email || '');
+  if (!tgate.role) {
+    return json({ error: 'REVOKED', message: 'Your access to this workspace has been removed.' }, 403, corsHeaders);
+  }
+  if (!roleAtLeast(tgate.role, 'admin')) {
+    return json({ error: 'FORBIDDEN', message: 'Only admins can manage the team.' }, 403, corsHeaders);
+  }
   let body;
   try {
     body = await request.json();
@@ -655,6 +688,31 @@ async function handleTeam(request, env, corsHeaders) {
     return json({ error: 'Invalid JSON body' }, 400, corsHeaders);
   }
   const doc = sanitizeTeamDoc(body);
+
+  // Server-controlled fields survive client writes: seat count, backfill
+  // flag, and the owner seat (cannot be dropped or demoted via raw PUT)
+  const exRaw = await env.TEAM_KV.get(key);
+  if (exRaw) {
+    try {
+      const ex = JSON.parse(exRaw);
+      if (Number.isFinite(Number(ex.seatsIncluded))) doc.seatsIncluded = ex.seatsIncluded;
+      if (ex.backfillDone) doc.backfillDone = true;
+      const exOwner = (ex.members || []).find(m => m.role === 'owner');
+      if (exOwner) {
+        const still = doc.members.find(m => String(m.email || '').toLowerCase() === String(exOwner.email || '').toLowerCase());
+        if (!still) doc.members.unshift(exOwner);
+        else { still.role = 'owner'; if (!still.sub && exOwner.sub) still.sub = exOwner.sub; }
+      }
+      // preserve subs the client-side doc may not carry
+      doc.members.forEach(m => {
+        if (!m.sub) {
+          const match = (ex.members || []).find(x => String(x.email || '').toLowerCase() === String(m.email || '').toLowerCase());
+          if (match && match.sub) m.sub = match.sub;
+        }
+      });
+    } catch (e) {}
+  }
+
   await env.TEAM_KV.put(key, JSON.stringify(doc));
   return json({ ok: true, doc }, 200, corsHeaders);
 }
@@ -676,7 +734,7 @@ async function resolveTeamsAuth(request, env, corsHeaders) {
   if (!clientId) return { err: json({ error: 'No clientId in token' }, 403, corsHeaders) };
   if (!env.TEAM_KV) return { err: json({ error: 'TEAM_NOT_ENABLED' }, 501, corsHeaders) };
   const pfx = 'team:' + clientId.toUpperCase().replace(/[^A-Z0-9]/g, '_');
-  return { clientId, sub: payload.sub || '', name: payload.name || payload.email || 'Member', pfx };
+  return { clientId, sub: payload.sub || '', email: payload.email || '', name: payload.name || payload.email || 'Member', pfx };
 }
 
 // ─── /team/channels (GET list, POST create) ───────────────────────────────────
@@ -703,7 +761,9 @@ async function handleTeamChannels(request, env, corsHeaders) {
     return json({ channels: result }, 200, corsHeaders);
   }
 
-  // POST — create channel
+  // POST — create channel (members and up)
+  const cgate = await requireRole(env, auth, 'member', corsHeaders);
+  if (cgate.err) return cgate.err;
   let body;
   try { body = await request.json(); } catch { return json({ error: 'Invalid JSON' }, 400, corsHeaders); }
   const chName = String(body.name || '').replace(/[^\w\s\-]/g, '').trim().slice(0, 40);
@@ -754,6 +814,8 @@ async function handleTeamMessages(request, env, corsHeaders) {
 async function handleTeamSend(request, env, corsHeaders) {
   const auth = await resolveTeamsAuth(request, env, corsHeaders);
   if (auth.err) return auth.err;
+  const mgate = await requireRole(env, auth, null, corsHeaders); /* revoked check; viewers may chat */
+  if (mgate.err) return mgate.err;
   const { pfx, sub, name } = auth;
 
   let body;
@@ -1120,7 +1182,7 @@ async function resolveInvoiceAuth(request, env, corsHeaders) {
   }
   if (!clientId) return { err: json({ error: 'No clientId in token' }, 403, corsHeaders) };
   const kvKey = 'invoices:' + clientId.toUpperCase().replace(/[^A-Z0-9]/g, '_');
-  return { clientId, kvKey };
+  return { clientId, kvKey, sub: payload.sub || '', email: payload.email || '' };
 }
 
 async function handleInvoiceList(request, env, corsHeaders) {
@@ -1135,6 +1197,8 @@ async function handleInvoiceList(request, env, corsHeaders) {
 async function handleInvoiceSave(request, env, corsHeaders) {
   const auth = await resolveInvoiceAuth(request, env, corsHeaders);
   if (auth.err) return auth.err;
+  const igate = await requireRole(env, auth, 'member', corsHeaders);
+  if (igate.err) return igate.err;
   if (!env.TEAM_KV) return json({ error: 'KV not enabled' }, 501, corsHeaders);
   let inv;
   try { inv = await request.json(); } catch (e) { return json({ error: 'Bad JSON' }, 400, corsHeaders); }
@@ -1177,6 +1241,8 @@ async function handleInvoiceSave(request, env, corsHeaders) {
 async function handleInvoiceDelete(request, env, corsHeaders) {
   const auth = await resolveInvoiceAuth(request, env, corsHeaders);
   if (auth.err) return auth.err;
+  const dgate = await requireRole(env, auth, 'member', corsHeaders);
+  if (dgate.err) return dgate.err;
   if (!env.TEAM_KV) return json({ ok: true }, 200, corsHeaders);
   const id = request.url.split('/invoice/')[1] || '';
   const safeId = id.replace(/[^\w-]/g, '');
@@ -1707,6 +1773,8 @@ async function handleSettingsGet(request, env, corsHeaders) {
 async function handleSettingsPut(request, env, corsHeaders) {
   const auth = await flowyAuth(request, env, corsHeaders);
   if (auth.err) return auth.err;
+  const sgate = await requireRole(env, auth, 'admin', corsHeaders);
+  if (sgate.err) return sgate.err;
 
   let incoming;
   try {
@@ -1740,6 +1808,8 @@ async function handleSettingsPut(request, env, corsHeaders) {
 async function handleTeamTasks(request, env, corsHeaders) {
   const auth = await resolveTeamsAuth(request, env, corsHeaders);
   if (auth.err) return auth.err;
+  const tgate = await requireRole(env, auth, request.method === 'GET' ? null : 'member', corsHeaders);
+  if (tgate.err) return tgate.err;
   const key = auth.pfx + ':tasks';
   let tasks = [];
   try { tasks = JSON.parse((await env.TEAM_KV.get(key)) || '[]'); } catch (e) {}
@@ -1791,6 +1861,8 @@ async function handleTeamTasks(request, env, corsHeaders) {
 async function handleTeamPins(request, env, corsHeaders) {
   const auth = await resolveTeamsAuth(request, env, corsHeaders);
   if (auth.err) return auth.err;
+  const pgate = await requireRole(env, auth, request.method === 'GET' ? null : 'member', corsHeaders);
+  if (pgate.err) return pgate.err;
   const key = auth.pfx + ':pins';
   let pins = [];
   try { pins = JSON.parse((await env.TEAM_KV.get(key)) || '[]'); } catch (e) {}
@@ -1807,4 +1879,276 @@ async function handleTeamPins(request, env, corsHeaders) {
   pins = pins.slice(0, 20);
   await env.TEAM_KV.put(key, JSON.stringify(pins));
   return json({ ok: true, pins }, 200, corsHeaders);
+}
+
+// ═══ Team provisioning + role enforcement (Auth0 Management API) ═════════════
+// Roles: viewer < member < admin < owner. Roster membership IS the access
+// list — removal revokes API access even with a valid token.
+
+const TW_ROLE_RANK = { viewer: 1, member: 2, admin: 3, owner: 4 };
+
+function roleAtLeast(role, min) {
+  return (TW_ROLE_RANK[role] || 0) >= (TW_ROLE_RANK[min] || 99);
+}
+
+function teamDocKey(clientId) {
+  return 'team:' + clientId.toUpperCase().replace(/[^A-Z0-9]/g, '_');
+}
+
+async function teamDocGet(env, clientId) {
+  try {
+    const raw = await env.TEAM_KV.get(teamDocKey(clientId));
+    return raw ? JSON.parse(raw) : null;
+  } catch (e) { return null; }
+}
+
+async function teamDocPut(env, clientId, doc) {
+  await env.TEAM_KV.put(teamDocKey(clientId), JSON.stringify(doc));
+}
+
+function memberOf(doc, sub, email) {
+  if (!doc || !Array.isArray(doc.members)) return null;
+  const em = String(email || '').toLowerCase();
+  return doc.members.find(m =>
+    (sub && m.sub && m.sub === sub) ||
+    (em && String(m.email || '').toLowerCase() === em)
+  ) || null;
+}
+
+// role is null when a roster exists and the user is not on it (revoked).
+// Empty/missing roster = bootstrap: first user acts as owner.
+async function resolveRole(env, clientId, sub, email) {
+  if (!env.TEAM_KV) return { role: 'owner', member: null, doc: null };
+  const doc = await teamDocGet(env, clientId);
+  if (!doc || !Array.isArray(doc.members) || doc.members.length === 0) {
+    return { role: 'owner', member: null, doc };
+  }
+  const m = memberOf(doc, sub, email);
+  return { role: m ? (m.role || 'member') : null, member: m, doc };
+}
+
+async function requireRole(env, auth, min, corsHeaders) {
+  const r = await resolveRole(env, auth.clientId, auth.sub, auth.email);
+  if (!r.role) {
+    return { err: json({ error: 'REVOKED', message: 'Your access to this workspace has been removed.' }, 403, corsHeaders) };
+  }
+  if (min && !roleAtLeast(r.role, min)) {
+    return { err: json({ error: 'FORBIDDEN', message: 'Your role does not allow this action.' }, 403, corsHeaders) };
+  }
+  return r;
+}
+
+// ── Auth0 Management API ──────────────────────────────────────────────────────
+
+async function mgmtToken(env) {
+  try {
+    const cached = await env.TEAM_KV.get('mgmt:token', 'json');
+    if (cached && cached.exp > Date.now() + 60000) return cached.token;
+  } catch (e) {}
+  if (!env.AUTH0_MGMT_CLIENT_ID || !env.AUTH0_MGMT_CLIENT_SECRET) return null;
+  const res = await fetch('https://' + AUTH0_TENANT + '/oauth/token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      grant_type: 'client_credentials',
+      client_id: env.AUTH0_MGMT_CLIENT_ID,
+      client_secret: env.AUTH0_MGMT_CLIENT_SECRET,
+      audience: 'https://' + AUTH0_TENANT + '/api/v2/'
+    })
+  });
+  if (!res.ok) { console.error('mgmt token error:', res.status); return null; }
+  const data = await res.json();
+  try {
+    await env.TEAM_KV.put('mgmt:token', JSON.stringify({
+      token: data.access_token,
+      exp: Date.now() + (data.expires_in || 3600) * 1000
+    }), { expirationTtl: Math.max(60, (data.expires_in || 3600) - 60) });
+  } catch (e) {}
+  return data.access_token;
+}
+
+async function mgmtFetch(env, method, path, body) {
+  const token = await mgmtToken(env);
+  if (!token) return { status: 0, data: null };
+  const res = await fetch('https://' + AUTH0_TENANT + '/api/v2' + path, {
+    method,
+    headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
+    body: body ? JSON.stringify(body) : undefined
+  });
+  let data = null;
+  try { data = await res.json(); } catch (e) {}
+  return { status: res.status, data };
+}
+
+function sendSetPasswordEmail(email) {
+  // Public endpoint — Auth0 emails the set-your-password link itself
+  return fetch('https://' + AUTH0_DOMAIN + '/dbconnections/change_password', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      client_id: AUTH0_CLIENT_ID,
+      email: email,
+      connection: 'Username-Password-Authentication'
+    })
+  }).catch(() => {});
+}
+
+// ── POST /team/invite — create the login, add to roster, email invite ─────────
+
+async function handleTeamInvite(request, env, corsHeaders) {
+  const auth = await resolveTeamsAuth(request, env, corsHeaders);
+  if (auth.err) return auth.err;
+  const gate = await requireRole(env, auth, 'admin', corsHeaders);
+  if (gate.err) return gate.err;
+
+  let body;
+  try { body = await request.json(); } catch (e) { return json({ error: 'Invalid JSON body' }, 400, corsHeaders); }
+  const email = String(body.email || '').trim().toLowerCase().slice(0, 120);
+  const name = (String(body.name || '').trim() || email.split('@')[0]).slice(0, 80);
+  const role = ['admin', 'member', 'viewer'].includes(body.role) ? body.role : 'member';
+  if (!email || email.indexOf('@') === -1) return json({ error: 'Valid email required' }, 400, corsHeaders);
+
+  const doc = gate.doc || { members: [] };
+  doc.members = doc.members || [];
+  if (memberOf(doc, null, email)) {
+    return json({ error: 'ALREADY_MEMBER', message: 'That email is already on the team.' }, 409, corsHeaders);
+  }
+  const seats = doc.seatsIncluded || 3;
+  if (doc.members.length >= seats) {
+    return json({ error: 'SEAT_LIMIT', message: 'All ' + seats + ' seats are in use. Contact Flowaify to add more.' }, 402, corsHeaders);
+  }
+
+  // Create the Auth0 user (or adopt an existing one)
+  let userId = null;
+  const created = await mgmtFetch(env, 'POST', '/users', {
+    email: email,
+    name: name,
+    connection: 'Username-Password-Authentication',
+    password: crypto.randomUUID() + 'Aa1!',
+    email_verified: false,
+    app_metadata: { clientId: auth.clientId }
+  });
+  if (created.status === 201) {
+    userId = created.data.user_id;
+  } else if (created.status === 409) {
+    const found = await mgmtFetch(env, 'GET', '/users-by-email?email=' + encodeURIComponent(email));
+    if (found.status === 200 && Array.isArray(found.data) && found.data[0]) {
+      userId = found.data[0].user_id;
+      await mgmtFetch(env, 'PATCH', '/users/' + encodeURIComponent(userId), {
+        app_metadata: { clientId: auth.clientId }, blocked: false
+      });
+    }
+  } else if (created.status === 0) {
+    return json({ error: 'MGMT_NOT_CONFIGURED', message: 'Provisioning credentials are not configured yet.' }, 501, corsHeaders);
+  }
+  if (!userId) {
+    console.error('Invite create failed:', created.status, JSON.stringify(created.data || {}).slice(0, 300));
+    const msg = (created.data && (created.data.message || created.data.error)) || 'Could not create the account.';
+    return json({ error: 'CREATE_FAILED', message: msg }, 502, corsHeaders);
+  }
+
+  doc.members.push({
+    id: 'm' + Date.now(),
+    sub: userId,
+    name: name,
+    email: email,
+    role: role,
+    status: 'active',
+    addedAt: Date.now()
+  });
+  await teamDocPut(env, auth.clientId, doc);
+  await sendSetPasswordEmail(email);
+  await appendTeamActivity(env, auth.pfx, auth.sub, auth.name, 'invited ' + name + ' (' + role + ')');
+  return json({ ok: true, doc }, 200, corsHeaders);
+}
+
+// ── POST /team/role — change a member's role ─────────────────────────────────
+
+async function handleTeamRole(request, env, corsHeaders) {
+  const auth = await resolveTeamsAuth(request, env, corsHeaders);
+  if (auth.err) return auth.err;
+  const gate = await requireRole(env, auth, 'admin', corsHeaders);
+  if (gate.err) return gate.err;
+
+  let body;
+  try { body = await request.json(); } catch (e) { return json({ error: 'Invalid JSON body' }, 400, corsHeaders); }
+  const email = String(body.email || '').trim().toLowerCase();
+  const role = ['admin', 'member', 'viewer'].includes(body.role) ? body.role : null;
+  if (!email || !role) return json({ error: 'email and role required' }, 400, corsHeaders);
+
+  const doc = gate.doc;
+  const target = memberOf(doc, null, email);
+  if (!target) return json({ error: 'NOT_FOUND', message: 'No member with that email.' }, 404, corsHeaders);
+  if (target.role === 'owner') return json({ error: 'FORBIDDEN', message: 'The owner role cannot be changed.' }, 403, corsHeaders);
+
+  target.role = role;
+  await teamDocPut(env, auth.clientId, doc);
+  await appendTeamActivity(env, auth.pfx, auth.sub, auth.name, 'changed ' + (target.name || email) + ' to ' + role);
+  return json({ ok: true, doc }, 200, corsHeaders);
+}
+
+// ── POST /team/remove — revoke workspace access + block the login ────────────
+
+async function handleTeamRemove(request, env, corsHeaders) {
+  const auth = await resolveTeamsAuth(request, env, corsHeaders);
+  if (auth.err) return auth.err;
+  const gate = await requireRole(env, auth, 'admin', corsHeaders);
+  if (gate.err) return gate.err;
+
+  let body;
+  try { body = await request.json(); } catch (e) { return json({ error: 'Invalid JSON body' }, 400, corsHeaders); }
+  const email = String(body.email || '').trim().toLowerCase();
+  if (!email) return json({ error: 'email required' }, 400, corsHeaders);
+
+  const doc = gate.doc;
+  const target = memberOf(doc, null, email);
+  if (!target) return json({ error: 'NOT_FOUND', message: 'No member with that email.' }, 404, corsHeaders);
+  if (target.role === 'owner') return json({ error: 'FORBIDDEN', message: 'The owner cannot be removed.' }, 403, corsHeaders);
+
+  doc.members = doc.members.filter(m => m !== target);
+  await teamDocPut(env, auth.clientId, doc);
+
+  // Block the Auth0 login (roster removal already revokes API access)
+  let subId = target.sub;
+  if (!subId) {
+    const found = await mgmtFetch(env, 'GET', '/users-by-email?email=' + encodeURIComponent(email));
+    if (found.status === 200 && Array.isArray(found.data) && found.data[0]) subId = found.data[0].user_id;
+  }
+  if (subId) await mgmtFetch(env, 'PATCH', '/users/' + encodeURIComponent(subId), { blocked: true });
+
+  await appendTeamActivity(env, auth.pfx, auth.sub, auth.name, 'removed ' + (target.name || email) + ' from the team');
+  return json({ ok: true, doc }, 200, corsHeaders);
+}
+
+// ── POST /team/backfill — stamp app_metadata.clientId on existing accounts ───
+
+async function handleTeamBackfill(request, env, corsHeaders) {
+  const auth = await resolveTeamsAuth(request, env, corsHeaders);
+  if (auth.err) return auth.err;
+  const gate = await requireRole(env, auth, 'admin', corsHeaders);
+  if (gate.err) return gate.err;
+
+  const doc = gate.doc || { members: [] };
+  if (doc.backfillDone) return json({ ok: true, skipped: true }, 200, corsHeaders);
+
+  let updated = 0;
+  for (const m of (doc.members || [])) {
+    let subId = m.sub;
+    if (!subId && m.email) {
+      const found = await mgmtFetch(env, 'GET', '/users-by-email?email=' + encodeURIComponent(String(m.email).toLowerCase()));
+      if (found.status === 200 && Array.isArray(found.data) && found.data[0]) {
+        subId = found.data[0].user_id;
+        m.sub = subId;
+      }
+    }
+    if (subId) {
+      const r = await mgmtFetch(env, 'PATCH', '/users/' + encodeURIComponent(subId), {
+        app_metadata: { clientId: auth.clientId }
+      });
+      if (r.status === 200) updated++;
+    }
+  }
+  doc.backfillDone = true;
+  await teamDocPut(env, auth.clientId, doc);
+  return json({ ok: true, updated }, 200, corsHeaders);
 }
