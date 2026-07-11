@@ -207,7 +207,7 @@ function teamsRenderMessages(msgs, append) {
 
     var metaPart = grouped ? '' :
       '<div class="teams-msg-meta">' +
-        '<span class="teams-msg-author">' + twEsc(msg.authorName || 'Member') + '</span>' +
+        '<span class="teams-msg-author">' + twEsc(twDisplayName(msg.authorSub, msg.authorName)) + '</span>' +
         '<span class="teams-msg-time">' + twTimeStr(ts) + '</span>' +
       '</div>';
 
@@ -228,7 +228,11 @@ function teamsRenderMessages(msgs, append) {
 function twMsgBody(msg) {
   if (msg.type === 'lead' && msg.payload) {
     var lead = msg.payload;
-    return '<div class="teams-msg-text">' + twEsc(msg.content || '') + '</div>' + twLeadCard(lead);
+    /* the auto-generated "Shared lead: X" line duplicates the card title —
+       only show message text when the user wrote something custom */
+    var txt = String(msg.content || '');
+    var isAuto = txt.indexOf('Shared lead:') === 0;
+    return (isAuto ? '' : '<div class="teams-msg-text">' + twEsc(txt) + '</div>') + twLeadCard(lead);
   }
   if (msg.type === 'invoice' && msg.payload) {
     var inv = msg.payload;
@@ -262,11 +266,19 @@ function twReactionsPart(msg) {
   var keys = Object.keys(rxs).filter(function(k) { return rxs[k] > 0; });
   if (!keys.length) return '';
   var mid = twEsc(msg.id || '');
-  return '<div class="teams-reactions">' + keys.map(function(emoji) {
+  /* restrained: top 4 pills by count, rest collapsed behind +N */
+  keys.sort(function(a, b) { return rxs[b] - rxs[a]; });
+  var shown = keys.slice(0, 4);
+  var hidden = keys.length - shown.length;
+  var hiddenTotal = 0;
+  keys.slice(4).forEach(function(k) { hiddenTotal += rxs[k]; });
+  return '<div class="teams-reactions">' + shown.map(function(emoji) {
     var isMine = mine.indexOf(emoji) !== -1;
     return '<span class="teams-reaction' + (isMine ? ' mine' : '') + '" onclick="teamsReact(\'' + mid + '\',\'' + twEsc(emoji) + '\')">' +
       emoji + '<span class="teams-reaction-count">' + rxs[emoji] + '</span></span>';
-  }).join('') + '</div>';
+  }).join('') +
+  (hidden > 0 ? '<span class="teams-reaction" title="' + hidden + ' more reaction type' + (hidden === 1 ? '' : 's') + '">+' + hiddenTotal + '</span>' : '') +
+  '</div>';
 }
 
 // ── Sending ───────────────────────────────────────────────────────────────────
@@ -397,11 +409,13 @@ function teamsRenderInfoMembers() {
     return;
   }
   el.innerHTML = members.map(function(m) {
-    var av = (typeof avatarHtml === 'function') ? avatarHtml(m.name || m.email, 'width:28px;height:28px;font-size:11px;flex-shrink:0;') : '';
+    var nm = String(m.name || m.email || 'Member');
+    if (nm.indexOf('@') !== -1) nm = nm.split('@')[0];
+    var av = (typeof avatarHtml === 'function') ? avatarHtml(nm, 'width:28px;height:28px;font-size:11px;flex-shrink:0;') : '';
     return '<div class="teams-info-member">' +
       '<div class="teams-presence' + (m.status === 'active' ? ' online' : '') + '"></div>' +
       av +
-      '<div><div class="teams-info-member-name">' + twEsc(m.name || m.email) + '</div>' +
+      '<div><div class="teams-info-member-name">' + twEsc(nm) + '</div>' +
       '<div class="teams-info-member-role">' + twEsc(m.role || 'member') + '</div></div>' +
     '</div>';
   }).join('');
@@ -772,6 +786,16 @@ function twChMeta(name) {
   return TW_CH_META[String(name || '').toLowerCase()] || { icon: 'message-square', desc: 'Team discussion' };
 }
 
+/* Roster display name by sub; falls back to the email prefix so raw
+   addresses never render as author names */
+function twDisplayName(sub, fallback) {
+  var members = (window.__teamDoc && window.__teamDoc.members) || [];
+  var m = members.find(function(x) { return x.sub === sub; });
+  var n = (m && m.name) || fallback || 'Member';
+  if (String(n).indexOf('@') !== -1) n = String(n).split('@')[0];
+  return n;
+}
+
 // ── Center sub-tabs: Posts / Shared Leads / Tasks ────────────────────────────
 
 var _twSubTab = 'posts';
@@ -784,7 +808,9 @@ function twSubTab(name) {
   var posts = document.getElementById('teams-posts-pane');
   var shared = document.getElementById('teams-shared-pane');
   var tasks = document.getElementById('teams-chtasks-pane');
-  if (posts) posts.style.display = name === 'posts' ? '' : 'none';
+  /* 'flex', not '' — clearing the inline display would fall back to block
+     and break the height chain, pushing the composer off-screen */
+  if (posts) posts.style.display = name === 'posts' ? 'flex' : 'none';
   if (shared) shared.style.display = name === 'shared' ? '' : 'none';
   if (tasks) tasks.style.display = name === 'tasks' ? '' : 'none';
   if (name === 'shared') twRenderSharedLeads();
@@ -849,7 +875,7 @@ async function twRenderSharedLeads() {
       return true;
     }).map(function(m) {
       return '<div style="margin-bottom:10px;">' +
-        '<div style="font-size:10.5px;color:var(--text-m);margin-bottom:4px;">Shared by ' + twEsc(m.authorName || 'Member') + ' · ' + twDayLabel(m.ts || Date.now()) + '</div>' +
+        '<div style="font-size:10.5px;color:var(--text-m);margin-bottom:4px;">Shared by ' + twEsc(twDisplayName(m.authorSub, m.authorName)) + ' · ' + twDayLabel(m.ts || Date.now()) + '</div>' +
         twLeadCard(m.payload) + '</div>';
     }).join('') + '</div>';
   }
@@ -1146,8 +1172,12 @@ async function twRenderBriefActivity() {
     return;
   }
   el.innerHTML = log.map(function(e) {
+    var nm = twDisplayName(e.sub, e.name);
+    var txt = String(e.text || '');
+    /* some log entries already begin with the actor — don't double it */
+    var line = txt.indexOf(e.name || '') === 0 && e.name ? nm + txt.slice(String(e.name).length) : nm + ' ' + txt;
     return '<div class="tw-brief-act"><span class="tw-brief-dot"></span>' +
-      '<div style="flex:1;min-width:0;"><div class="tw-brief-act-text">' + twEsc((e.name || 'Member') + ' ' + (e.text || '')) + '</div>' +
+      '<div style="flex:1;min-width:0;"><div class="tw-brief-act-text">' + twEsc(line) + '</div>' +
       '<div class="tw-brief-act-time">' + twTimeStr(e.ts || Date.now()) + '</div></div></div>';
   }).join('');
 }

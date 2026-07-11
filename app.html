@@ -1045,7 +1045,9 @@
     .teams-ch-add-btn { width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; background: transparent; border: none; border-radius: 3px; color: var(--text-m); cursor: pointer; }
     .teams-ch-add-btn:hover { background: var(--hover); color: var(--text); }
     .teams-ch-add-btn i, .teams-ch-add-btn svg { width: 13px; height: 13px; }
-    #teams-ch-list { flex: 1; overflow-y: auto; padding: 0 6px 8px; }
+    /* channels stack naturally; pinned leads sit right below — empty
+       space stays at the bottom of the rail, not in the middle */
+    #teams-ch-list { flex: 0 1 auto; max-height: 50%; overflow-y: auto; padding: 0 6px 8px; }
     .teams-ch-item { display: flex; align-items: flex-start; gap: 6px; padding: 7px 8px; border-radius: 4px; cursor: pointer; transition: background 0.1s; }
     .teams-ch-item:hover { background: var(--hover); }
     .teams-ch-item.active { background: var(--blue-dim); }
@@ -3229,7 +3231,7 @@
 <div id="toast"><div class="toast-icon"><i data-lucide="check"></i></div><div id="toast-msg" style="font-size:12.5px;font-weight:600;color:var(--text-s);line-height:1.45;"></div></div>
 
 <script src="crm.js?v=31"></script>
-<script src="teams.js?v=5"></script>
+<script src="teams.js?v=6"></script>
 <script src="settings.js?v=1"></script>
 <script src="invoice.js?v=3"></script>
 <script src="inbox.js?v=2"></script>
