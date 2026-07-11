@@ -760,33 +760,23 @@
 
     /* FLOWY PANEL (Copilot rail) */
     /* INTERACTIVE DOT BACKGROUND — reusable assistant-panel ambience.
-       Dot grid via radial-gradient; mouse-following glow revealed only
-       through the dots via a matching mask. Token-based, both themes. */
-    .interactive-dot-bg { position: absolute; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+       SINGLE layer: a blue spotlight painted over a flat gray base, then
+       the whole thing is cut by ONE dot mask. Only one dot grid can ever
+       exist, so misalignment/moiré is structurally impossible. */
+    @property --spotlight-opacity { syntax: '<number>'; inherits: true; initial-value: 0; }
+    .interactive-dot-bg { position: absolute; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; transition: --spotlight-opacity 300ms ease; }
     .interactive-dot-bg::before {
       content: ""; position: absolute; inset: 0;
-      background-image: radial-gradient(circle, color-mix(in oklab, var(--border) 55%, transparent) 1px, transparent 1px);
-      background-size: 12px 12px;
-      opacity: 0.5;
-      /* inverse of the glow mask — gray dots vacate exactly where blue
-         dots appear, so the two layers crossfade instead of stacking */
-      -webkit-mask-image: radial-gradient(115px at var(--mouse-x, -1000px) var(--mouse-y, -1000px),
-        transparent, rgba(0,0,0,0.45) 45%, black 72%);
-      mask-image: radial-gradient(115px at var(--mouse-x, -1000px) var(--mouse-y, -1000px),
-        transparent, rgba(0,0,0,0.45) 45%, black 72%);
-    }
-    .interactive-dot-bg::after {
-      content: ""; position: absolute; inset: 0;
-      opacity: var(--spotlight-opacity, 0);
-      transition: opacity 300ms ease;
-      /* identical geometry to the base grid, tinted — revealed by the
-         spotlight mask, so the dots light up instead of being overlaid */
-      background-image: radial-gradient(circle, color-mix(in oklab, var(--blue) 80%, white) 1px, transparent 1px);
-      background-size: 12px 12px;
-      -webkit-mask-image: radial-gradient(115px at var(--mouse-x, -1000px) var(--mouse-y, -1000px),
-        black, rgba(0,0,0,0.55) 45%, transparent 72%);
-      mask-image: radial-gradient(115px at var(--mouse-x, -1000px) var(--mouse-y, -1000px),
-        black, rgba(0,0,0,0.55) 45%, transparent 72%);
+      background:
+        radial-gradient(115px at var(--mouse-x, -1000px) var(--mouse-y, -1000px),
+          color-mix(in oklab, color-mix(in oklab, var(--blue) 80%, white) calc(var(--spotlight-opacity, 0) * 100%), transparent),
+          color-mix(in oklab, var(--blue) calc(var(--spotlight-opacity, 0) * 55%), transparent) 45%,
+          transparent 72%),
+        linear-gradient(color-mix(in oklab, var(--border) 28%, transparent), color-mix(in oklab, var(--border) 28%, transparent));
+      -webkit-mask-image: radial-gradient(circle, black 1px, transparent 1px);
+      -webkit-mask-size: 12px 12px;
+      mask-image: radial-gradient(circle, black 1px, transparent 1px);
+      mask-size: 12px 12px;
     }
     #flowy-panel > *:not(.interactive-dot-bg) { position: relative; z-index: 1; }
 
