@@ -225,10 +225,13 @@
           color-mix(in oklab, var(--blue) calc(var(--spotlight-opacity, 0) * 55%), transparent) 45%,
           transparent 72%),
         linear-gradient(color-mix(in oklab, var(--border) 28%, transparent), color-mix(in oklab, var(--border) 28%, transparent));
-      -webkit-mask-image: radial-gradient(circle, black 1px, transparent 1px);
-      -webkit-mask-size: 12px 12px;
-      mask-image: radial-gradient(circle, black 1px, transparent 1px);
-      mask-size: 12px 12px;
+      /* SVG tile mask: rasterized once and repeated as a bitmap, so every
+         dot is pixel-identical at any zoom/DPR — no per-tile gradient
+         rounding, no shimmer */
+      -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12'%3E%3Ccircle cx='6' cy='6' r='1.1' fill='%23000'/%3E%3C/svg%3E");
+      -webkit-mask-repeat: repeat;
+      mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12'%3E%3Ccircle cx='6' cy='6' r='1.1' fill='%23000'/%3E%3C/svg%3E");
+      mask-repeat: repeat;
     }
     #flowy-card { position: relative; }
     #flowy-card > *:not(.interactive-dot-bg) { position: relative; z-index: 1; }
