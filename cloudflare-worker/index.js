@@ -90,6 +90,14 @@ export default {
         return handleTeamReact(request, env, corsHeaders);
       }
 
+      if (url.pathname === '/team/messages/delete' && request.method === 'POST') {
+        return handleTeamMsgDelete(request, env, corsHeaders);
+      }
+
+      if (url.pathname === '/team/mentions' && request.method === 'GET') {
+        return handleTeamMentions(request, env, corsHeaders);
+      }
+
       if (url.pathname === '/team/invite' && request.method === 'POST') {
         return handleTeamInvite(request, env, corsHeaders);
       }
@@ -758,7 +766,19 @@ async function handleTeamChannels(request, env, corsHeaders) {
       const last = msgs[msgs.length - 1];
       return { ...ch, unread, lastMessage: last ? (last.content || '').slice(0, 60) : '' };
     }));
-    return json({ channels: result }, 200, corsHeaders);
+
+    // Presence heartbeat: record this poll, return everyone active <10 min
+    let presence = {};
+    try {
+      const pRaw = await env.TEAM_KV.get(pfx + ':presence');
+      presence = pRaw ? JSON.parse(pRaw) : {};
+      presence[sub] = Date.now();
+      const cutoff = Date.now() - 10 * 60 * 1000;
+      Object.keys(presence).forEach(k => { if (presence[k] < cutoff) delete presence[k]; });
+      await env.TEAM_KV.put(pfx + ':presence', JSON.stringify(presence), { expirationTtl: 3600 });
+    } catch (e) {}
+
+    return json({ channels: result, presence }, 200, corsHeaders);
   }
 
   // POST — create channel (members and up)
@@ -822,8 +842,11 @@ async function handleTeamSend(request, env, corsHeaders) {
   try { body = await request.json(); } catch { return json({ error: 'Invalid JSON' }, 400, corsHeaders); }
   const channelId = String(body.channelId || '').replace(/[^\w_-]/g, '');
   const content   = String(body.content  || '').slice(0, 4000).trim();
-  const type      = ['text', 'lead', 'report'].includes(body.type) ? body.type : 'text';
+  const type      = ['text', 'lead', 'invoice', 'report'].includes(body.type) ? body.type : 'text';
   const payload   = (type !== 'text' && body.payload && typeof body.payload === 'object') ? body.payload : null;
+  const mentions  = Array.isArray(body.mentions)
+    ? body.mentions.slice(0, 10).map(s => String(s).slice(0, 80)).filter(Boolean)
+    : [];
   if (!channelId || !content) return json({ error: 'channelId and content required' }, 400, corsHeaders);
 
   const msgsKey = pfx + ':ch:' + channelId + ':msgs';
@@ -837,6 +860,7 @@ async function handleTeamSend(request, env, corsHeaders) {
     content,
     type,
     payload,
+    mentions,
     ts:         Date.now(),
     reactions:  {},
     userReactions: {},
@@ -849,7 +873,62 @@ async function handleTeamSend(request, env, corsHeaders) {
   // Update read marker for sender
   await env.TEAM_KV.put(pfx + ':ch:' + channelId + ':read:' + sub, String(message.ts), { expirationTtl: 7 * 24 * 3600 });
 
+  // Queue a notification for each mentioned member (skip self-mentions)
+  for (const mSub of mentions) {
+    if (mSub === sub) continue;
+    try {
+      const mKey = pfx + ':mentions:' + mSub.replace(/[^\w|-]/g, '');
+      const mRaw = await env.TEAM_KV.get(mKey);
+      const list = mRaw ? JSON.parse(mRaw) : [];
+      list.unshift({ by: name, text: content.slice(0, 120), channelId, ts: message.ts });
+      await env.TEAM_KV.put(mKey, JSON.stringify(list.slice(0, 20)), { expirationTtl: 14 * 24 * 3600 });
+    } catch (e) {}
+  }
+
   return json({ message: { ...message, myReactions: [] } }, 200, corsHeaders);
+}
+
+// ─── /team/messages/delete (POST) — own messages, or any for admins ──────────
+
+async function handleTeamMsgDelete(request, env, corsHeaders) {
+  const auth = await resolveTeamsAuth(request, env, corsHeaders);
+  if (auth.err) return auth.err;
+  const gate = await requireRole(env, auth, null, corsHeaders);
+  if (gate.err) return gate.err;
+
+  let body;
+  try { body = await request.json(); } catch { return json({ error: 'Invalid JSON' }, 400, corsHeaders); }
+  const channelId = String(body.channelId || '').replace(/[^\w_-]/g, '');
+  const msgId = String(body.msgId || '');
+  if (!channelId || !msgId) return json({ error: 'channelId and msgId required' }, 400, corsHeaders);
+
+  const msgsKey = auth.pfx + ':ch:' + channelId + ':msgs';
+  const raw = await env.TEAM_KV.get(msgsKey);
+  if (!raw) return json({ error: 'Channel not found' }, 404, corsHeaders);
+  const msgs = JSON.parse(raw);
+  const idx = msgs.findIndex(m => m.id === msgId);
+  if (idx === -1) return json({ error: 'Message not found' }, 404, corsHeaders);
+  const isAdmin = roleAtLeast(gate.role, 'admin');
+  if (msgs[idx].authorSub !== auth.sub && !isAdmin) {
+    return json({ error: 'FORBIDDEN', message: 'You can only delete your own messages.' }, 403, corsHeaders);
+  }
+  msgs.splice(idx, 1);
+  await env.TEAM_KV.put(msgsKey, JSON.stringify(msgs));
+  return json({ ok: true }, 200, corsHeaders);
+}
+
+// ─── /team/mentions (GET) — mention notifications for the requester ──────────
+
+async function handleTeamMentions(request, env, corsHeaders) {
+  const auth = await resolveTeamsAuth(request, env, corsHeaders);
+  if (auth.err) return auth.err;
+  const mKey = auth.pfx + ':mentions:' + auth.sub.replace(/[^\w|-]/g, '');
+  let list = [];
+  try {
+    const raw = await env.TEAM_KV.get(mKey);
+    list = raw ? JSON.parse(raw) : [];
+  } catch (e) {}
+  return json({ mentions: list }, 200, corsHeaders);
 }
 
 // ─── /team/react (POST) ───────────────────────────────────────────────────────

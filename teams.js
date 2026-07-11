@@ -116,6 +116,14 @@ function teamsRenderChannels(channels) {
     el.innerHTML = '<div class="teams-empty-note" style="padding:12px 8px;">No channels yet</div>';
     return;
   }
+  /* mobile channel switcher mirrors the list */
+  var mob = document.getElementById('teams-ch-mobile');
+  if (mob) {
+    mob.innerHTML = channels.map(function(ch) {
+      var sel = _teamsCurrentChannel && _teamsCurrentChannel.id === ch.id ? ' selected' : '';
+      return '<option value="' + twEsc(ch.id) + '"' + sel + '>' + twEsc(ch.name) + (ch.unread ? ' (' + ch.unread + ')' : '') + '</option>';
+    }).join('');
+  }
   el.innerHTML = channels.map(function(ch) {
     var active = _teamsCurrentChannel && _teamsCurrentChannel.id === ch.id;
     var chId = twEsc(ch.id); var chName = twEsc(ch.name);
@@ -223,9 +231,12 @@ function teamsRenderMessages(msgs, append) {
     var rxPart   = twReactionsPart(msg);
     var mid      = twEsc(msg.id || '');
 
+    var mySub = window.__userSub || '';
+    var canDel = msg.authorSub === mySub || window.__myRole === 'admin' || window.__myRole === 'owner';
     row.innerHTML = avatarPart +
       '<div class="teams-msg-body">' + metaPart + bodyPart + rxPart + '</div>' +
-      '<button class="teams-msg-react-btn" onclick="teamsReactPicker(\'' + mid + '\')" title="React">☺</button>';
+      '<button class="teams-msg-react-btn" onclick="teamsReactPicker(\'' + mid + '\')" title="React">☺</button>' +
+      (canDel ? '<button class="teams-msg-del-btn" onclick="twMsgDelete(\'' + mid + '\')" title="Delete message">✕</button>' : '');
 
     container.appendChild(row);
   });
@@ -265,7 +276,20 @@ function twMsgBody(msg) {
         '</div>' +
       '</div>';
   }
-  return '<div class="teams-msg-text">' + twLinkify(twEsc(msg.content || '')) + '</div>';
+  return '<div class="teams-msg-text">' + twHighlightMentions(twLinkify(twEsc(msg.content || ''))) + '</div>';
+}
+
+/* Wrap @Name for every roster member in a highlight span */
+function twHighlightMentions(html) {
+  var members = (window.__teamDoc && window.__teamDoc.members) || [];
+  members.forEach(function(m) {
+    var nm = String(m.name || '').trim();
+    if (nm && nm.indexOf('@') !== -1) nm = nm.split('@')[0];
+    if (!nm) return;
+    var esc = twEsc(nm).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    html = html.replace(new RegExp('@' + esc, 'g'), '<span class="tw-mention">@' + twEsc(nm) + '</span>');
+  });
+  return html;
 }
 
 function twReactionsPart(msg) {
@@ -309,8 +333,17 @@ async function teamsSendMsg() {
   teamsRenderMessages([tempMsg], true);
   teamsScrollBottom();
 
+  /* collect mentions still present in the sent text */
+  var mentions = [];
+  var membersM = (window.__teamDoc && window.__teamDoc.members) || [];
+  membersM.forEach(function(m) {
+    var nm = String(m.name || '').trim();
+    if (nm.indexOf('@') !== -1) nm = nm.split('@')[0];
+    if (nm && m.sub && text.indexOf('@' + nm) !== -1) mentions.push(m.sub);
+  });
+
   var r = await twFetch('POST', '/team/messages/send', {
-    channelId: _teamsCurrentChannel.id, content: text, type: 'text'
+    channelId: _teamsCurrentChannel.id, content: text, type: 'text', mentions: mentions
   });
   if (r && r.status === 200 && r.data && r.data.message) {
     var real = r.data.message;
@@ -349,12 +382,44 @@ async function teamsPoll() {
       teamsScrollBottom();
     }
   }
-  // Refresh channel badges
+  // Refresh channel badges + presence + sidebar nav badge
   var cr = await twFetch('GET', '/team/channels');
   if (cr && cr.status === 200) {
     var channels = (cr.data && cr.data.channels) || [];
     _teamsChannels = channels;
+    window.__twPresence = (cr.data && cr.data.presence) || {};
     teamsRenderChannels(channels);
+    teamsRenderInfoMembers();
+    twNavBadge(channels);
+  }
+  // Mention notifications (throttled to ~every 3rd poll)
+  _twMentionTick = (_twMentionTick || 0) + 1;
+  if (_twMentionTick % 3 === 1) {
+    var mr = await twFetch('GET', '/team/mentions');
+    if (mr && mr.status === 200) {
+      window.__twMentions = (mr.data && mr.data.mentions) || [];
+      if (typeof buildNotifList === 'function') buildNotifList();
+    }
+  }
+}
+var _twMentionTick = 0;
+
+/* Aggregate unread count on the sidebar Team nav item */
+function twNavBadge(channels) {
+  var total = 0;
+  (channels || []).forEach(function(c) { total += c.unread || 0; });
+  var nav = document.querySelector('.nav-item[data-page="team"]');
+  if (!nav) return;
+  var badge = nav.querySelector('.nav-badge');
+  if (total > 0) {
+    if (!badge) {
+      badge = document.createElement('span');
+      badge.className = 'nav-badge';
+      nav.appendChild(badge);
+    }
+    badge.textContent = Math.min(total, 99);
+  } else if (badge) {
+    badge.remove();
   }
 }
 
@@ -416,12 +481,15 @@ function teamsRenderInfoMembers() {
     el.innerHTML = '<div class="teams-empty-note" style="padding:12px 14px;">No members yet</div>';
     return;
   }
+  var presence = window.__twPresence || {};
+  var pCut = Date.now() - 5 * 60 * 1000;
   el.innerHTML = members.map(function(m) {
     var nm = String(m.name || m.email || 'Member');
     if (nm.indexOf('@') !== -1) nm = nm.split('@')[0];
     var av = (typeof avatarHtml === 'function') ? avatarHtml(nm, 'width:28px;height:28px;font-size:11px;flex-shrink:0;') : '';
+    var online = m.sub && presence[m.sub] && presence[m.sub] > pCut;
     return '<div class="teams-info-member">' +
-      '<div class="teams-presence' + (m.status === 'active' ? ' online' : '') + '"></div>' +
+      '<div class="teams-presence' + (online ? ' online' : '') + '"></div>' +
       av +
       '<div><div class="teams-info-member-name">' + twEsc(nm) + '</div>' +
       '<div class="teams-info-member-role">' + twEsc(m.role || 'member') + '</div></div>' +
@@ -1206,3 +1274,143 @@ function twAttachStub() {
   if (typeof showToast === 'function') showToast('File attachments aren’t available yet — share leads, invoices, and reports instead.');
 }
 window.twAttachStub = twAttachStub;
+
+// ═══ Composer extensions v8 — share pickers, mention menu, delete ═════════════
+
+// ── Attach invoice / report pickers ──────────────────────────────────────────
+
+async function twPickShare(kind) {
+  var ov = document.getElementById('tw-share-picker');
+  var list = document.getElementById('tw-share-list');
+  var title = document.getElementById('tw-share-title');
+  if (!ov || !list) return;
+  if (!_teamsCurrentChannel) {
+    if (typeof showToast === 'function') showToast('Select a channel first.');
+    return;
+  }
+  title.textContent = kind === 'invoice' ? 'Share an invoice' : 'Share a report';
+  list.innerHTML = '<div style="padding:20px 16px;text-align:center;font-size:12.5px;color:var(--text-m);">Loading…</div>';
+  ov.classList.add('open');
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+
+  if (kind === 'invoice') {
+    var r = await twFetch('GET', '/invoice/list');
+    var invoices = (r && r.data && r.data.invoices) || [];
+    if (!invoices.length) {
+      list.innerHTML = '<div style="padding:24px 16px;text-align:center;font-size:12.5px;color:var(--text-m);">No invoices yet — create one on the Invoices page.</div>';
+      return;
+    }
+    window.__twShareInvoices = invoices;
+    list.innerHTML = invoices.slice(0, 30).map(function(inv, i) {
+      return '<div class="tw-share-row" onclick="twShareInvoicePick(' + i + ')">' +
+        '<div style="flex:1;min-width:0;"><div class="tw-share-name">' + twEsc(inv.number || 'Invoice') + ' · ' + twEsc((inv.billTo || {}).name || '') + '</div>' +
+        '<div class="tw-share-sub">' + (inv.total != null ? '$' + Number(inv.total).toFixed(2) : '') + (inv.dueDate ? ' · due ' + twEsc(inv.dueDate) : '') + '</div></div>' +
+        twStatusBadge((inv.status || 'draft').toUpperCase()) +
+      '</div>';
+    }).join('');
+  } else {
+    var reports = [];
+    try { reports = JSON.parse(localStorage.getItem('flw_reports_' + (window.__userSub || 'anon')) || '[]'); } catch (e) {}
+    if (!reports.length) {
+      list.innerHTML = '<div style="padding:24px 16px;text-align:center;font-size:12.5px;color:var(--text-m);">No reports yet — generate one on the Reports page.</div>';
+      return;
+    }
+    window.__twShareReports = reports;
+    list.innerHTML = reports.slice(0, 30).map(function(rpt, i) {
+      var date = rpt.createdAt ? new Date(rpt.createdAt).toLocaleDateString() : (rpt.dateStr || '');
+      return '<div class="tw-share-row" onclick="twShareReportPick(' + i + ')">' +
+        '<div style="flex:1;min-width:0;"><div class="tw-share-name">' + twEsc(rpt.title || 'Report') + '</div>' +
+        '<div class="tw-share-sub">' + twEsc(date) + (rpt.reportFor ? ' · ' + twEsc(rpt.reportFor) : '') + '</div></div>' +
+      '</div>';
+    }).join('');
+  }
+}
+window.twPickShare = twPickShare;
+
+function twCloseSharePicker() {
+  var ov = document.getElementById('tw-share-picker');
+  if (ov) ov.classList.remove('open');
+}
+window.twCloseSharePicker = twCloseSharePicker;
+
+function twShareInvoicePick(i) {
+  var inv = (window.__twShareInvoices || [])[i];
+  twCloseSharePicker();
+  if (inv && typeof teamsShareInvoice === 'function') teamsShareInvoice(inv);
+}
+window.twShareInvoicePick = twShareInvoicePick;
+
+function twShareReportPick(i) {
+  var rpt = (window.__twShareReports || [])[i];
+  twCloseSharePicker();
+  if (rpt && typeof teamsShareReport === 'function') teamsShareReport(rpt);
+}
+window.twShareReportPick = twShareReportPick;
+
+// ── Mention picker ────────────────────────────────────────────────────────────
+
+function twMentionMenu() {
+  var menu = document.getElementById('tw-mention-menu');
+  if (!menu) return;
+  if (menu.classList.contains('open')) { menu.classList.remove('open'); return; }
+  var members = (window.__teamDoc && window.__teamDoc.members) || [];
+  if (!members.length) {
+    if (typeof showToast === 'function') showToast('No team members to mention yet.');
+    return;
+  }
+  menu.innerHTML = members.map(function(m) {
+    var nm = String(m.name || m.email || 'Member');
+    if (nm.indexOf('@') !== -1) nm = nm.split('@')[0];
+    return '<div class="tw-mention-item" onclick="twMentionPick(\'' + twEsc(nm).replace(/'/g, '') + '\')">' +
+      ((typeof avatarHtml === 'function') ? avatarHtml(nm, 'width:22px;height:22px;font-size:9px;flex-shrink:0;') : '') +
+      '<span>' + twEsc(nm) + '</span>' +
+      '<span style="margin-left:auto;font-size:10px;color:var(--text-m);text-transform:capitalize;">' + twEsc(m.role || 'member') + '</span>' +
+    '</div>';
+  }).join('');
+  menu.classList.add('open');
+}
+window.twMentionMenu = twMentionMenu;
+
+function twMentionPick(name) {
+  var menu = document.getElementById('tw-mention-menu');
+  if (menu) menu.classList.remove('open');
+  var ta = document.getElementById('teams-input');
+  if (!ta) return;
+  /* replace a trailing bare '@' (typed trigger) or append */
+  if (/@$/.test(ta.value)) ta.value = ta.value.slice(0, -1);
+  ta.value = (ta.value && !/\s$/.test(ta.value) ? ta.value + ' ' : ta.value) + '@' + name + ' ';
+  ta.focus();
+  teamsAutoResize(ta);
+}
+window.twMentionPick = twMentionPick;
+
+/* typing '@' opens the picker */
+document.addEventListener('input', function(e) {
+  if (e.target && e.target.id === 'teams-input') {
+    var v = e.target.value;
+    var menu = document.getElementById('tw-mention-menu');
+    if (v.slice(-1) === '@' && (v.length === 1 || /\s/.test(v.slice(-2, -1)))) {
+      twMentionMenu();
+    } else if (menu && menu.classList.contains('open') && v.slice(-1) !== '@') {
+      menu.classList.remove('open');
+    }
+  }
+});
+
+// ── Delete message ────────────────────────────────────────────────────────────
+
+async function twMsgDelete(msgId) {
+  if (!_teamsCurrentChannel || !msgId) return;
+  if (!confirm('Delete this message?')) return;
+  var r = await twFetch('POST', '/team/messages/delete', {
+    channelId: _teamsCurrentChannel.id, msgId: msgId
+  });
+  if (r && r.status === 200) {
+    var row = document.querySelector('.teams-msg-row[data-mid="' + msgId + '"]');
+    if (row) row.remove();
+  } else {
+    var msg = (r && r.data && r.data.message) || 'Could not delete the message.';
+    if (typeof showToast === 'function') showToast(msg);
+  }
+}
+window.twMsgDelete = twMsgDelete;
