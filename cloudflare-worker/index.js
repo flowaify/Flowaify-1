@@ -74,6 +74,14 @@ export default {
         return handleTeam(request, env, corsHeaders);
       }
 
+      if (url.pathname === '/team/channels/update' && request.method === 'POST') {
+        return handleChannelUpdate(request, env, corsHeaders);
+      }
+
+      if (url.pathname === '/team/channels/delete' && request.method === 'POST') {
+        return handleChannelDelete(request, env, corsHeaders);
+      }
+
       if (url.pathname === '/team/channels') {
         return handleTeamChannels(request, env, corsHeaders);
       }
@@ -764,7 +772,7 @@ async function handleTeamChannels(request, env, corsHeaders) {
       const lastRead = lastReadRaw ? parseInt(lastReadRaw, 10) : 0;
       const unread = msgs.filter(m => m.ts > lastRead && m.authorSub !== sub).length;
       const last = msgs[msgs.length - 1];
-      return { ...ch, unread, lastMessage: last ? (last.content || '').slice(0, 60) : '' };
+      return { ...ch, unread, lastMessage: last ? (last.content || '').slice(0, 60) : '', lastTs: last ? last.ts : 0 };
     }));
 
     // Presence heartbeat: record this poll, return everyone active <10 min
@@ -848,6 +856,16 @@ async function handleTeamSend(request, env, corsHeaders) {
     ? body.mentions.slice(0, 10).map(s => String(s).slice(0, 80)).filter(Boolean)
     : [];
   if (!channelId || !content) return json({ error: 'channelId and content required' }, 400, corsHeaders);
+
+  // Announcements is broadcast-only: owners and admins may post
+  try {
+    const chRaw = await env.TEAM_KV.get(pfx + ':channels');
+    const chList = chRaw ? JSON.parse(chRaw) : [];
+    const ch = chList.find(c => c.id === channelId);
+    if (ch && /announcement/i.test(ch.name || '') && !roleAtLeast(mgate.role, 'admin')) {
+      return json({ error: 'POST_RESTRICTED', message: 'Only owners and admins can post in Announcements.' }, 403, corsHeaders);
+    }
+  } catch (e) {}
 
   const msgsKey = pfx + ':ch:' + channelId + ':msgs';
   const msgsRaw = await env.TEAM_KV.get(msgsKey);
@@ -2230,4 +2248,59 @@ async function handleTeamBackfill(request, env, corsHeaders) {
   doc.backfillDone = true;
   await teamDocPut(env, auth.clientId, doc);
   return json({ ok: true, updated }, 200, corsHeaders);
+}
+
+// ─── Channel management — rename / delete (admins; defaults protected) ────────
+
+const TW_PROTECTED_CHANNELS = /^(general|lead handoffs|leads|follow-ups|bookings|announcements)$/i;
+
+async function handleChannelUpdate(request, env, corsHeaders) {
+  const auth = await resolveTeamsAuth(request, env, corsHeaders);
+  if (auth.err) return auth.err;
+  const gate = await requireRole(env, auth, 'admin', corsHeaders);
+  if (gate.err) return gate.err;
+
+  let body;
+  try { body = await request.json(); } catch { return json({ error: 'Invalid JSON' }, 400, corsHeaders); }
+  const id = String(body.id || '').replace(/[^\w_-]/g, '');
+  const name = String(body.name || '').replace(/[^\w\s\-]/g, '').trim().slice(0, 40);
+  if (!id || !name) return json({ error: 'id and name required' }, 400, corsHeaders);
+
+  const raw = await env.TEAM_KV.get(auth.pfx + ':channels');
+  const channels = raw ? JSON.parse(raw) : [];
+  const ch = channels.find(c => c.id === id);
+  if (!ch) return json({ error: 'Channel not found' }, 404, corsHeaders);
+  if (channels.some(c => c.id !== id && c.name.toLowerCase() === name.toLowerCase())) {
+    return json({ error: 'A channel with that name already exists.' }, 409, corsHeaders);
+  }
+  const oldName = ch.name;
+  ch.name = name;
+  await env.TEAM_KV.put(auth.pfx + ':channels', JSON.stringify(channels));
+  await appendTeamActivity(env, auth.pfx, auth.sub, auth.name, 'renamed #' + oldName + ' to #' + name);
+  return json({ ok: true, channels }, 200, corsHeaders);
+}
+
+async function handleChannelDelete(request, env, corsHeaders) {
+  const auth = await resolveTeamsAuth(request, env, corsHeaders);
+  if (auth.err) return auth.err;
+  const gate = await requireRole(env, auth, 'admin', corsHeaders);
+  if (gate.err) return gate.err;
+
+  let body;
+  try { body = await request.json(); } catch { return json({ error: 'Invalid JSON' }, 400, corsHeaders); }
+  const id = String(body.id || '').replace(/[^\w_-]/g, '');
+  if (!id) return json({ error: 'id required' }, 400, corsHeaders);
+
+  const raw = await env.TEAM_KV.get(auth.pfx + ':channels');
+  let channels = raw ? JSON.parse(raw) : [];
+  const ch = channels.find(c => c.id === id);
+  if (!ch) return json({ error: 'Channel not found' }, 404, corsHeaders);
+  if (TW_PROTECTED_CHANNELS.test(ch.name || '')) {
+    return json({ error: 'PROTECTED', message: 'Default channels cannot be deleted.' }, 403, corsHeaders);
+  }
+  channels = channels.filter(c => c.id !== id);
+  await env.TEAM_KV.put(auth.pfx + ':channels', JSON.stringify(channels));
+  await env.TEAM_KV.delete(auth.pfx + ':ch:' + id + ':msgs');
+  await appendTeamActivity(env, auth.pfx, auth.sub, auth.name, 'deleted channel #' + ch.name);
+  return json({ ok: true, channels }, 200, corsHeaders);
 }

@@ -1032,12 +1032,53 @@
     .teams-section { display: none; flex: 1; min-height: 0; flex-direction: column; }
     .teams-section.active { display: flex; }
     /* Chat layout */
-    .teams-chat-layout { display: grid; grid-template-columns: 230px 1fr 290px; flex: 1; min-height: 0; overflow: hidden; }
-    @media (max-width: 1180px) {
-      .teams-chat-layout { grid-template-columns: 230px 1fr; }
-      .teams-info-panel { display: none; }
-      .teams-info-panel-open .teams-chat-layout { grid-template-columns: 230px 1fr 290px; }
-      .teams-info-panel-open .teams-info-panel { display: flex; }
+    .teams-chat-layout { display: grid; grid-template-columns: 240px 1fr auto; flex: 1; min-height: 0; overflow: hidden; }
+
+    /* Team header block */
+    .tw-team-head { display: flex; gap: 10px; padding: 14px 14px 12px; border-bottom: 1px solid var(--border); align-items: flex-start; flex-shrink: 0; }
+    .tw-team-avatar { width: 34px; height: 34px; border-radius: 6px; background: var(--blue); color: #fff; font-weight: 800; font-size: 15px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .tw-team-name { font-size: 13px; font-weight: 700; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .tw-team-sub { font-size: 10.5px; color: var(--text-m); line-height: 1.45; }
+
+    .tw-hdr-avs { display: flex; align-items: center; }
+    .tw-hdr-avs > * { margin-left: -6px; border: 2px solid var(--bg-card); }
+    .tw-hdr-avs > *:first-child { margin-left: 0; }
+    /* Channel row extras */
+    .teams-ch-time { margin-left: auto; font-size: 9.5px; color: var(--text-m); flex-shrink: 0; }
+    .teams-ch-kebab { opacity: 0; border: none; background: transparent; color: var(--text-m); cursor: pointer; font-size: 14px; padding: 2px 5px; border-radius: 3px; flex-shrink: 0; align-self: flex-start; transition: opacity 0.12s; }
+    .teams-ch-item:hover .teams-ch-kebab { opacity: 1; }
+    .teams-ch-kebab:hover { background: var(--hover); color: var(--text); }
+
+    /* Focus bar */
+    .tw-focus { display: flex; align-items: center; gap: 8px; padding: 8px 16px; border-bottom: 1px solid var(--border); font-size: 11.5px; color: var(--text-s); flex-shrink: 0; background: var(--bg-card); flex-wrap: wrap; }
+    .tw-focus:empty { display: none; }
+    .tw-focus-label { font-weight: 700; color: var(--text); margin-right: 4px; }
+    .tw-focus-warn { color: var(--red); font-weight: 700; }
+    .tw-focus-ok { color: var(--text-m); }
+    .tw-focus-dot { color: var(--text-m); }
+
+    /* Teams-style message bubbles */
+    .teams-msg-text { display: inline-block; background: var(--hover); border-radius: 6px; padding: 7px 12px; max-width: 540px; text-align: left; }
+    .teams-msg-row.mine { flex-direction: row-reverse; padding-right: 16px; }
+    .teams-msg-row.mine .teams-msg-body { display: flex; flex-direction: column; align-items: flex-end; }
+    .teams-msg-row.mine .teams-msg-text { background: var(--blue-dim); }
+    .teams-msg-row.mine .teams-msg-react-btn { right: auto; left: 12px; }
+    .teams-msg-row.mine .teams-msg-del-btn { right: auto; left: 48px; }
+    .teams-msg-row.mine .tw-lead-card, .teams-msg-row.mine .teams-share-card { text-align: left; }
+
+    /* Composer locked (Announcements for non-admins) */
+    .compose-locked .tw-compose-bar { display: none; }
+    .compose-locked .teams-compose-inner { opacity: 0.6; }
+
+    /* Channel Overview toggle — center expands when closed */
+    .teams-info-panel { transition: width 0.18s var(--ease), opacity 0.15s ease; }
+    .teams-section.brief-closed .teams-info-panel { width: 0; opacity: 0; border-left: none; overflow: hidden; }
+    @media (max-width: 900px) {
+      .teams-section.brief-open .teams-info-panel {
+        display: flex !important; position: fixed; top: var(--hdr); right: 0; bottom: 0; z-index: 85;
+        width: min(300px, 88vw); opacity: 1; border-left: 1px solid var(--border);
+        box-shadow: -6px 0 24px rgba(0,0,0,0.2); background: var(--bg-card);
+      }
     }
     .teams-ch-sidebar { border-right: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; background: var(--bg); }
     .teams-ch-head { display: flex; align-items: center; padding: 12px 12px 8px; flex-shrink: 0; }
@@ -2066,6 +2107,7 @@
     </div>
 
     <div class="cols-menu" id="cols-menu"></div>
+    <div class="card-ctx-menu" id="tw-ch-menu"></div>
     <div class="card-ctx-menu" id="lead-row-menu"></div>
   </div>
 
@@ -2147,6 +2189,7 @@
         <option value="booking">Bookings</option>
         <option value="followup">Follow-ups</option>
         <option value="due">Due dates</option>
+        <option value="task">Team tasks</option>
       </select>
     </div>
 
@@ -2206,6 +2249,13 @@
 
           <!-- Channel sidebar -->
           <div class="teams-ch-sidebar">
+            <div class="tw-team-head">
+              <div class="tw-team-avatar" id="tw-team-avatar">T</div>
+              <div style="flex:1;min-width:0;">
+                <div class="tw-team-name" id="tw-team-name">Your Team</div>
+                <div class="tw-team-sub">Collaborate with your team and manage leads together.</div>
+              </div>
+            </div>
             <div class="teams-ch-head">
               <span class="teams-ch-head-label">Channels</span>
               <button class="teams-ch-add-btn" onclick="teamsNewChannel()" title="New channel"><i data-lucide="plus"></i></button>
@@ -2228,15 +2278,17 @@
               </div>
               <div class="teams-main-actions">
                 <select id="teams-ch-mobile" class="lt-select" onchange="var o=this.options[this.selectedIndex];teamsSelectChannel(this.value, o.text.replace(/ \(\d+\)$/,''))"></select>
+                <span class="tw-hdr-avs" id="teams-hdr-avatars"></span>
                 <span class="teams-member-count" id="teams-ch-member-count"></span>
-                <button class="teams-hdr-btn" onclick="teamsToggleInfo()" title="Channel brief"><i data-lucide="panel-right"></i></button>
+                <button class="teams-hdr-btn" onclick="teamsToggleInfo()" title="Channel overview"><i data-lucide="panel-right"></i></button>
               </div>
             </div>
             <div class="tw-subtabs" id="teams-subtabs">
               <button class="tw-subtab active" data-sub="posts" onclick="twSubTab('posts')">Posts</button>
-              <button class="tw-subtab" data-sub="shared" onclick="twSubTab('shared')">Shared Leads</button>
+              <button class="tw-subtab" data-sub="shared" onclick="twSubTab('shared')">Shared Items</button>
               <button class="tw-subtab" data-sub="tasks" onclick="twSubTab('tasks')">Tasks</button>
             </div>
+            <div class="tw-focus" id="teams-focus"></div>
             <div id="teams-posts-pane" style="display:flex;flex-direction:column;flex:1;min-height:0;">
               <div class="teams-messages-wrap" id="teams-messages-wrap">
                 <div id="teams-messages">
@@ -2266,7 +2318,7 @@
           <!-- Channel Brief panel -->
           <div class="teams-info-panel" id="teams-info-panel">
             <div class="teams-info-header">
-              <span class="teams-info-title">Channel Brief</span>
+              <span class="teams-info-title">Channel Overview</span>
               <button class="teams-info-close" onclick="teamsToggleInfo()"><i data-lucide="x"></i></button>
             </div>
             <div class="tw-brief-scroll">
@@ -3265,8 +3317,8 @@
 
 <div id="toast"><div class="toast-icon"><i data-lucide="check"></i></div><div id="toast-msg" style="font-size:12.5px;font-weight:600;color:var(--text-s);line-height:1.45;"></div></div>
 
-<script src="crm.js?v=32"></script>
-<script src="teams.js?v=8"></script>
+<script src="crm.js?v=33"></script>
+<script src="teams.js?v=9"></script>
 <script src="settings.js?v=2"></script>
 <script src="invoice.js?v=3"></script>
 <script src="inbox.js?v=2"></script>

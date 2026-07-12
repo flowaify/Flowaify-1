@@ -26,6 +26,7 @@ async function teamsInit() {
     if (computed === 'none') return;
   }
   await teamsLoadChannels();
+  twApplyBrief();
   twTasksLoad();
   twPinsLoad();
   /* one-time: stamp app_metadata.clientId on existing roster accounts */
@@ -124,22 +125,34 @@ function teamsRenderChannels(channels) {
       return '<option value="' + twEsc(ch.id) + '"' + sel + '>' + twEsc(ch.name) + (ch.unread ? ' (' + ch.unread + ')' : '') + '</option>';
     }).join('');
   }
+  var canManage = window.__myRole === 'owner' || window.__myRole === 'admin';
   el.innerHTML = channels.map(function(ch) {
     var active = _teamsCurrentChannel && _teamsCurrentChannel.id === ch.id;
     var chId = twEsc(ch.id); var chName = twEsc(ch.name);
     var meta = twChMeta(ch.name);
     return '<div class="teams-ch-item' + (active ? ' active' : '') + '" data-chid="' + chId + '" onclick="teamsSelectChannel(\'' + chId + '\',\'' + chName + '\')">' +
-      '<span class="teams-ch-icon"><i data-lucide="' + meta.icon + '"></i></span>' +
       '<div class="teams-ch-item-body">' +
         '<div class="teams-ch-name-row">' +
           '<span class="teams-ch-item-name">' + twEsc(ch.name) + '</span>' +
           (ch.unread ? '<span class="teams-ch-unread">' + Math.min(ch.unread, 99) + '</span>' : '') +
+          (ch.lastTs ? '<span class="teams-ch-time">' + twShortTime(ch.lastTs) + '</span>' : '') +
         '</div>' +
         '<div class="teams-ch-preview">' + twEsc(meta.desc) + '</div>' +
       '</div>' +
+      (canManage ? '<button class="teams-ch-kebab" onclick="twChMenu(event,\'' + chId + '\',\'' + chName.replace(/'/g, '') + '\')" title="Channel options">⋮</button>' : '') +
     '</div>';
   }).join('');
-  if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+function twShortTime(ts) {
+  var d = new Date(ts);
+  var now = new Date();
+  if (d.toDateString() === now.toDateString()) {
+    return d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+  }
+  var yd = new Date(now.getTime() - 86400000);
+  if (d.toDateString() === yd.toDateString()) return 'Yesterday';
+  return d.toLocaleDateString([], { month: 'short', day: 'numeric' });
 }
 
 async function teamsSelectChannel(id, name) {
@@ -149,10 +162,19 @@ async function teamsSelectChannel(id, name) {
   if (nameEl) nameEl.textContent = name;
   var descEl = document.getElementById('teams-active-desc');
   if (descEl) descEl.textContent = twChMeta(name).desc;
+  /* Announcements is broadcast-only for members/viewers */
+  var isAnnounce = /announcement/i.test(name || '');
+  var canPost = !isAnnounce || window.__myRole === 'admin' || window.__myRole === 'owner';
   var inputEl = document.getElementById('teams-input');
-  if (inputEl) inputEl.placeholder = 'Message ' + name + '…';
+  if (inputEl) {
+    inputEl.disabled = !canPost;
+    inputEl.placeholder = canPost ? 'Type a message…' : 'Only owners and admins can post here.';
+  }
+  var composeEl = document.querySelector('#teams-posts-pane .teams-compose');
+  if (composeEl) composeEl.classList.toggle('compose-locked', !canPost);
   twSubTab('posts');
   twRenderBrief();
+  twRenderFocusBar();
   // Highlight active channel
   document.querySelectorAll('.teams-ch-item').forEach(function(item) {
     item.classList.toggle('active', item.dataset.chid === id);
@@ -211,28 +233,32 @@ function teamsRenderMessages(msgs, append) {
     prevAuthor = msg.authorSub;
     prevTs = ts;
 
+    var mySub = window.__userSub || '';
+    var isMine = msg.authorSub === mySub;
+
     var row = document.createElement('div');
-    row.className = 'teams-msg-row';
+    row.className = 'teams-msg-row' + (isMine ? ' mine' : '');
     row.dataset.mid    = msg.id || '';
     row.dataset.author = msg.authorSub || '';
     row.dataset.ts     = ts;
 
-    var avatarPart = grouped
+    /* Teams-style: own messages align right with no avatar or name */
+    var avatarPart = isMine ? '' : (grouped
       ? '<div class="teams-msg-avatar-spacer"></div>'
-      : '<div class="teams-msg-avatar" style="background:' + twColor(msg.authorSub) + ';">' + twInitials(msg.authorName || '?') + '</div>';
+      : '<div class="teams-msg-avatar" style="background:' + twColor(msg.authorSub) + ';">' + twInitials(msg.authorName || '?') + '</div>');
 
-    var metaPart = grouped ? '' :
-      '<div class="teams-msg-meta">' +
-        '<span class="teams-msg-author">' + twEsc(twDisplayName(msg.authorSub, msg.authorName)) + '</span>' +
-        '<span class="teams-msg-time">' + twTimeStr(ts) + '</span>' +
-      '</div>';
+    var metaPart = grouped ? '' : (isMine
+      ? '<div class="teams-msg-meta"><span class="teams-msg-time">' + twTimeStr(ts) + '</span></div>'
+      : '<div class="teams-msg-meta">' +
+          '<span class="teams-msg-author">' + twEsc(twDisplayName(msg.authorSub, msg.authorName)) + '</span>' +
+          '<span class="teams-msg-time">' + twTimeStr(ts) + '</span>' +
+        '</div>');
 
     var bodyPart = twMsgBody(msg);
     var rxPart   = twReactionsPart(msg);
     var mid      = twEsc(msg.id || '');
 
-    var mySub = window.__userSub || '';
-    var canDel = msg.authorSub === mySub || window.__myRole === 'admin' || window.__myRole === 'owner';
+    var canDel = isMine || window.__myRole === 'admin' || window.__myRole === 'owner';
     row.innerHTML = avatarPart +
       '<div class="teams-msg-body">' + metaPart + bodyPart + rxPart + '</div>' +
       '<button class="teams-msg-react-btn" onclick="teamsReactPicker(\'' + mid + '\')" title="React">☺</button>' +
@@ -463,10 +489,22 @@ window.teamsReact = teamsReact;
 
 // ── Info panel ────────────────────────────────────────────────────────────────
 
-function teamsToggleInfo() {
-  _teamsInfoOpen = !_teamsInfoOpen;
+/* Channel Overview toggle — default open on desktop, closed on narrow.
+   The info button and the panel's X both flip it; the center expands. */
+var _briefOpen = null;
+
+function twApplyBrief() {
   var sec = document.getElementById('teams-section-chat');
-  if (sec) sec.classList.toggle('teams-info-panel-open', _teamsInfoOpen);
+  if (!sec) return;
+  if (_briefOpen === null) _briefOpen = window.innerWidth > 1180;
+  sec.classList.toggle('brief-closed', !_briefOpen);
+  sec.classList.toggle('brief-open', _briefOpen);
+}
+
+function teamsToggleInfo() {
+  if (_briefOpen === null) _briefOpen = window.innerWidth > 1180;
+  _briefOpen = !_briefOpen;
+  twApplyBrief();
 }
 window.teamsToggleInfo = teamsToggleInfo;
 
@@ -477,6 +515,14 @@ function teamsRenderInfoMembers() {
   var members = doc && doc.members ? doc.members : [];
   var countEl = document.getElementById('teams-ch-member-count');
   if (countEl) countEl.textContent = members.length + ' member' + (members.length === 1 ? '' : 's');
+  var avsEl = document.getElementById('teams-hdr-avatars');
+  if (avsEl && typeof avatarHtml === 'function') {
+    avsEl.innerHTML = members.slice(0, 4).map(function(m) {
+      var nm = String(m.name || m.email || '?');
+      if (nm.indexOf('@') !== -1) nm = nm.split('@')[0];
+      return avatarHtml(nm, 'width:22px;height:22px;font-size:9px;flex-shrink:0;');
+    }).join('') + (members.length > 4 ? '<span style="font-size:10px;color:var(--text-m);margin-left:4px;">+' + (members.length - 4) + '</span>' : '');
+  }
   if (!members.length) {
     el.innerHTML = '<div class="teams-empty-note" style="padding:12px 14px;">No members yet</div>';
     return;
@@ -931,28 +977,47 @@ function twLeadCard(lead) {
   '</div>';
 }
 
+var _twSharedFilter = 'all';
+
+function twSharedSetFilter(f) {
+  _twSharedFilter = f;
+  twRenderSharedLeads();
+}
+window.twSharedSetFilter = twSharedSetFilter;
+
 async function twRenderSharedLeads() {
   var el = document.getElementById('teams-shared-pane');
   if (!el || !_teamsCurrentChannel) return;
-  el.innerHTML = '<div class="teams-loading">Loading shared leads…</div>';
+  el.innerHTML = '<div class="teams-loading">Loading shared items…</div>';
   var r = await twFetch('GET', '/team/messages?channel=' + encodeURIComponent(_teamsCurrentChannel.id));
   var msgs = (r && r.data && r.data.messages) || [];
-  var leads = msgs.filter(function(m) { return m.type === 'lead' && m.payload; });
-  if (!leads.length) {
-    el.innerHTML = '<div class="empty-state" style="padding:40px 20px;"><i data-lucide="user-plus"></i>' +
-      '<div class="empty-state-title">No leads shared yet</div>' +
-      '<div class="empty-state-sub">Share a lead from the composer to hand it off to a teammate.</div></div>';
+  var shared = msgs.filter(function(m) {
+    if (!m.payload) return false;
+    if (_twSharedFilter === 'all') return m.type === 'lead' || m.type === 'invoice' || m.type === 'report';
+    return m.type === _twSharedFilter;
+  });
+
+  var chips = '<div class="lt-tabs" style="padding:12px 16px 0;margin-bottom:0;">' +
+    [['all', 'All'], ['lead', 'Leads'], ['invoice', 'Invoices'], ['report', 'Reports']].map(function(f) {
+      return '<div class="lt-tab' + (_twSharedFilter === f[0] ? ' active' : '') + '" onclick="twSharedSetFilter(\'' + f[0] + '\')">' + f[1] + '</div>';
+    }).join('') + '</div>';
+
+  if (!shared.length) {
+    el.innerHTML = chips + '<div class="empty-state" style="padding:36px 20px;"><i data-lucide="share-2"></i>' +
+      '<div class="empty-state-title">Nothing shared here yet</div>' +
+      '<div class="empty-state-sub">Share leads, invoices, and reports from the composer.</div></div>';
   } else {
     var seen = {};
-    el.innerHTML = '<div style="padding:12px 16px;">' + leads.slice().reverse().filter(function(m) {
-      var k = m.payload.id || m.payload.name;
+    el.innerHTML = chips + '<div style="padding:12px 16px;">' + shared.slice().reverse().filter(function(m) {
+      var k = m.type + ':' + (m.payload.id || m.payload.number || m.payload.title || m.payload.name);
       if (seen[k]) return false;
       seen[k] = 1;
       return true;
     }).map(function(m) {
+      var body = (m.type === 'lead') ? twLeadCard(m.payload) : twMsgBody(m);
       return '<div style="margin-bottom:10px;">' +
         '<div style="font-size:10.5px;color:var(--text-m);margin-bottom:4px;">Shared by ' + twEsc(twDisplayName(m.authorSub, m.authorName)) + ' · ' + twDayLabel(m.ts || Date.now()) + '</div>' +
-        twLeadCard(m.payload) + '</div>';
+        body + '</div>';
     }).join('') + '</div>';
   }
   if (typeof lucide !== 'undefined') lucide.createIcons();
@@ -1012,7 +1077,10 @@ window.twTasksLoad = twTasksLoad;
 function twTasksRenderAll() {
   twRenderBriefTasks();
   twRenderTasksTab();
+  twRenderFocusBar();
   if (_twSubTab === 'tasks') twRenderChannelTasks();
+  /* tasks with due dates surface on the Calendar page */
+  if (typeof renderCalendar === 'function') renderCalendar();
 }
 
 function twTaskDueLabel(t) {
@@ -1414,3 +1482,112 @@ async function twMsgDelete(msgId) {
   }
 }
 window.twMsgDelete = twMsgDelete;
+
+// ═══ Workspace v9 — focus bar, channel management, calendar task feed ═════════
+
+// ── Focus bar: channel task health at a glance ───────────────────────────────
+
+function twRenderFocusBar() {
+  var el = document.getElementById('teams-focus');
+  if (!el) return;
+  var chId = _teamsCurrentChannel ? _teamsCurrentChannel.id : null;
+  var tasks = _twTasks.filter(function(t) { return t.channelId === chId && t.status === 'open'; });
+  var now = Date.now();
+  var dayEnd = new Date(); dayEnd.setHours(23, 59, 59, 999);
+  var overdue = 0, dueToday = 0, unassigned = 0;
+  tasks.forEach(function(t) {
+    if (t.due && t.due < now - 86400000) overdue++;
+    else if (t.due && t.due <= dayEnd.getTime()) dueToday++;
+    if (!t.owner) unassigned++;
+  });
+  if (!tasks.length) {
+    el.innerHTML = '<span class="tw-focus-label">Focus for this channel</span><span class="tw-focus-ok">All clear — no open tasks.</span>';
+    return;
+  }
+  var parts = [];
+  if (overdue) parts.push('<span class="tw-focus-warn">' + overdue + ' overdue</span>');
+  if (dueToday) parts.push('<span>' + dueToday + ' due today</span>');
+  if (unassigned) parts.push('<span>' + unassigned + ' unassigned</span>');
+  if (!parts.length) parts.push('<span>' + tasks.length + ' open task' + (tasks.length === 1 ? '' : 's') + '</span>');
+  el.innerHTML = '<span class="tw-focus-label">Focus for this channel</span>' + parts.join('<span class="tw-focus-dot">·</span>');
+}
+window.twRenderFocusBar = twRenderFocusBar;
+
+// ── Channel manage menu (rename / delete — admins) ───────────────────────────
+
+function twChMenu(e, id, name) {
+  e.stopPropagation();
+  var m = document.getElementById('tw-ch-menu');
+  if (!m) return;
+  var protectedCh = /^(general|lead handoffs|leads|follow-ups|bookings|announcements)$/i.test(name || '');
+  m.innerHTML =
+    '<div class="card-ctx-item" onclick="twChRename(\'' + id + '\',\'' + twEsc(name).replace(/'/g, '') + '\')"><i data-lucide="pencil"></i>Rename channel</div>' +
+    (protectedCh
+      ? '<div class="card-ctx-item" style="opacity:.45;cursor:default;" title="Default channels cannot be deleted"><i data-lucide="lock"></i>Default channel</div>'
+      : '<div class="card-ctx-item ctx-danger" onclick="twChDelete(\'' + id + '\',\'' + twEsc(name).replace(/'/g, '') + '\')"><i data-lucide="trash-2"></i>Delete channel</div>');
+  var r = e.currentTarget.getBoundingClientRect();
+  m.style.top = (r.bottom + 4) + 'px';
+  m.style.left = Math.max(8, r.right - 170) + 'px';
+  m.classList.add('open');
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+window.twChMenu = twChMenu;
+
+document.addEventListener('click', function() {
+  var m = document.getElementById('tw-ch-menu');
+  if (m) m.classList.remove('open');
+});
+
+async function twChRename(id, oldName) {
+  var m = document.getElementById('tw-ch-menu');
+  if (m) m.classList.remove('open');
+  var name = prompt('Rename channel:', oldName);
+  if (!name || !name.trim() || name.trim() === oldName) return;
+  var r = await twFetch('POST', '/team/channels/update', { id: id, name: name.trim() });
+  if (r && r.status === 200) {
+    _teamsChannels = (r.data && r.data.channels) || _teamsChannels;
+    if (_teamsCurrentChannel && _teamsCurrentChannel.id === id) _teamsCurrentChannel.name = name.trim();
+    teamsRenderChannels(_teamsChannels);
+    if (typeof showToast === 'function') showToast('Channel renamed.');
+  } else {
+    if (typeof showToast === 'function') showToast((r && r.data && r.data.message) || (r && r.data && r.data.error) || 'Could not rename the channel.');
+  }
+}
+window.twChRename = twChRename;
+
+async function twChDelete(id, name) {
+  var m = document.getElementById('tw-ch-menu');
+  if (m) m.classList.remove('open');
+  if (!confirm('Delete the "' + name + '" channel? Its messages will be permanently removed.')) return;
+  var r = await twFetch('POST', '/team/channels/delete', { id: id });
+  if (r && r.status === 200) {
+    _teamsChannels = (r.data && r.data.channels) || [];
+    teamsRenderChannels(_teamsChannels);
+    if (_teamsCurrentChannel && _teamsCurrentChannel.id === id && _teamsChannels[0]) {
+      teamsSelectChannel(_teamsChannels[0].id, _teamsChannels[0].name);
+    }
+    if (typeof showToast === 'function') showToast('Channel deleted.');
+  } else {
+    if (typeof showToast === 'function') showToast((r && r.data && r.data.message) || 'Could not delete the channel.');
+  }
+}
+window.twChDelete = twChDelete;
+
+// ── Team header block name (business name from settings mirror) ──────────────
+
+function twTeamHeadName() {
+  var el = document.getElementById('tw-team-name');
+  if (!el) return;
+  var name = '';
+  try {
+    var saved = JSON.parse(localStorage.getItem('flw_settings_' + (window.__userSub || 'anon')) || '{}');
+    name = ((saved.biz || {})['s2-biz-name'] || saved.businessName || '').trim();
+  } catch (e) {}
+  el.textContent = (name || 'Your') + ' Team';
+  var av = document.getElementById('tw-team-avatar');
+  if (av) av.textContent = (name || 'T').charAt(0).toUpperCase();
+}
+
+/* boot: load tasks early so due-dated tasks appear on the Calendar even
+   before the Team page is ever opened */
+setTimeout(function() { twTasksLoad(); twTeamHeadName(); }, 5000);

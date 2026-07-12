@@ -519,7 +519,8 @@ var _calSelEv = null;
 const CAL_TYPES = {
   booking:  { label: 'Booking',   color: 'var(--green)', dim: 'var(--green-dim)' },
   followup: { label: 'Follow-up', color: '#d97706',      dim: 'var(--amber-dim)' },
-  due:      { label: 'Due',       color: 'var(--blue)',  dim: 'var(--blue-dim)' }
+  due:      { label: 'Due',       color: 'var(--blue)',  dim: 'var(--blue-dim)' },
+  task:     { label: 'Task',      color: 'var(--purple)', dim: 'rgba(139,92,246,0.12)' }
 };
 
 function calKey(d) {
@@ -548,6 +549,13 @@ function calBuildEvents(data) {
     if (!d.closingDate) return;
     evs.push({ type: 'due', ts: new Date(d.closingDate).getTime(), name: d.name,
       desc: (d.stage ? d.stage : 'Closing') + (d.amount != null ? ' · ' + fmtMoney(d.amount) : ''), amount: d.amount, hasTime: false });
+  });
+  /* open team tasks with due dates (loaded by teams.js) */
+  (window.__twTasks || []).forEach(function(t) {
+    if (!t.due || t.status !== 'open') return;
+    evs.push({ type: 'task', ts: t.due, name: t.title,
+      desc: 'Team task' + (t.owner ? ' · ' + t.owner : ' · Unassigned') + (t.leadName ? ' · ' + t.leadName : ''),
+      id: t.leadId || null, hasTime: false });
   });
   evs.sort(function(a, b) { return a.ts - b.ts; });
   return evs;
