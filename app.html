@@ -954,6 +954,7 @@
     #page-automations .stats-grid { flex-shrink: 0; }
     /* Pages that need internal scroll (too many sections) */
     #page-analytics { overflow-y: auto; }
+    #page-analytics > * { flex-shrink: 0; }
     #page-settings .pivot-bar { flex-shrink: 0; }
     /* Activity page — operational history & review */
     #page-activity { overflow-y: auto; }
@@ -2568,11 +2569,15 @@
   <!-- ANALYTICS -->
   <div class="page" id="page-analytics">
 
+    <div style="display:flex;align-items:center;justify-content:flex-end;margin-bottom:12px;">
+      <button class="btn-mini btn-mini-ghost" style="display:inline-flex;align-items:center;gap:6px;" onclick="if(window.openReportEditor)openReportEditor()"><i data-lucide="bar-chart-2" style="width:13px;height:13px;"></i>Generate report</button>
+    </div>
+
     <div class="stats-grid sg-6">
       <div class="card stat-card"><div class="stat-top"><div class="stat-label"><i data-lucide="users" class="kpi-glyph kg-blue"></i>Leads This Period</div></div><div class="stat-val-row"><div class="stat-val" id="val-an-total">—</div><div class="spark" id="spark-an-total"></div></div><div class="stat-delta-row" id="delta-an-total"></div></div>
-      <div class="card stat-card"><div class="stat-top"><div class="stat-label"><i data-lucide="percent" class="kpi-glyph kg-green"></i>Conversion Rate</div></div><div class="stat-val" id="val-an-conv">—</div></div>
+      <div class="card stat-card"><div class="stat-top"><div class="stat-label"><i data-lucide="percent" class="kpi-glyph kg-green"></i>Conversion Rate</div></div><div class="stat-val" id="val-an-conv">—</div><div class="stat-delta-row" id="delta-an-conv"></div></div>
       <div class="card stat-card"><div class="stat-top"><div class="stat-label"><i data-lucide="zap" class="kpi-glyph kg-green"></i>Avg Response</div></div><div class="stat-val" id="val-an-response">—</div></div>
-      <div class="card stat-card"><div class="stat-top"><div class="stat-label"><i data-lucide="calendar-check" class="kpi-glyph kg-teal"></i>Booked Calls</div></div><div class="stat-val" id="val-an-booked">—</div></div>
+      <div class="card stat-card"><div class="stat-top"><div class="stat-label"><i data-lucide="calendar-check" class="kpi-glyph kg-teal"></i>Booked Calls</div></div><div class="stat-val" id="val-an-booked">—</div><div class="stat-delta-row" id="delta-an-booked"></div></div>
       <div class="card stat-card"><div class="stat-top"><div class="stat-label"><i data-lucide="dollar-sign" class="kpi-glyph kg-green"></i>Pipeline Value</div></div><div class="stat-val" id="val-an-pipeline">—</div></div>
       <div class="card stat-card"><div class="stat-top"><div class="stat-label"><i data-lucide="pie-chart" class="kpi-glyph kg-purple"></i>Lead Sources</div></div><div class="stat-val" id="val-an-sources">—</div></div>
     </div>
@@ -3320,6 +3325,7 @@
 <script src="crm.js?v=33"></script>
 <script src="teams.js?v=9"></script>
 <script src="settings.js?v=2"></script>
+<script src="analytics.js?v=1"></script>
 <script src="invoice.js?v=3"></script>
 <script src="inbox.js?v=2"></script>
 <script src="flowy.js?v=10"></script>
@@ -3426,6 +3432,7 @@ function showPage(id) {
   window.scrollTo(0,0); closeProfileMenu(); closeMob();
   if (id === 'overview') { if (window.ovTeamWidgetRefresh) ovTeamWidgetRefresh(); }
   if (id === 'settings') { if (window.loadSettings) loadSettings(); }
+  if (id === 'analytics') { if (window.analyticsInit) analyticsInit(); }
   if (id === 'team')     { if (window.teamsInit)    teamsInit();    else if (window.teamLoad) teamLoad(); }
   if (id === 'invoices') { if (window.invoicesInit) invoicesInit(); }
   if (id === 'inbox')    { if (window.inboxInit)    inboxInit(); }
