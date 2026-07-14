@@ -407,12 +407,14 @@ function invRowMenu(e, id) {
     if (admin) it('trash-2', 'Delete draft', 'invDeleteDraft(\'' + id + '\')', true);
   } else if (st === 'open' || st === 'overdue' || st === 'partially_paid') {
     it('link', 'Copy payment link', 'invCopyLink(\'' + id + '\')');
+    it('external-link', 'Open client page', 'invOpenPublic(\'' + id + '\')');
     it('download', 'Download invoice', 'invDoPrint(\'' + id + '\')');
     if (admin) it('banknote', 'Record payment', 'invPaymentDialog(\'' + id + '\')');
     if (member) it('copy', 'Duplicate', 'invDuplicate(\'' + id + '\')');
     if (admin) it('rotate-ccw', 'Regenerate link', 'invRegenLink(\'' + id + '\')');
     if (admin) it('ban', 'Void invoice', 'invVoidDialog(\'' + id + '\')', true);
   } else if (st === 'paid') {
+    it('external-link', 'Open client page', 'invOpenPublic(\'' + id + '\')');
     it('download', 'Download invoice', 'invDoPrint(\'' + id + '\')');
     if (admin) it('undo-2', 'Record refund', 'invRefundDialog(\'' + id + '\')');
     if (member) it('copy', 'Duplicate', 'invDuplicate(\'' + id + '\')');
@@ -486,10 +488,12 @@ function invRenderPanel() {
     if (member) actions += ghost('check-circle', 'Finalize & Assign Number', 'invFinalize(\'' + inv.id + '\')');
   } else if (st === 'open' || st === 'overdue' || st === 'partially_paid') {
     actions += primary('link', 'Copy Payment Link', 'invCopyLink(\'' + inv.id + '\')');
+    actions += ghost('external-link', 'View Client Page', 'invOpenPublic(\'' + inv.id + '\')');
     actions += ghost('download', 'Download Invoice', 'invDoPrint(\'' + inv.id + '\')');
     if (admin) actions += ghost('banknote', 'Record Payment', 'invPaymentDialog(\'' + inv.id + '\')');
   } else if (st === 'paid') {
     actions += primary('download', 'Download Invoice', 'invDoPrint(\'' + inv.id + '\')');
+    actions += ghost('external-link', 'View Client Page', 'invOpenPublic(\'' + inv.id + '\')');
     if (admin) actions += ghost('undo-2', 'Record Refund', 'invRefundDialog(\'' + inv.id + '\')');
   } else if (st === 'void') {
     actions += ghost('download', 'Download Invoice', 'invDoPrint(\'' + inv.id + '\')');
@@ -548,6 +552,14 @@ function invRenderPanel() {
 function invPublicUrl(inv) {
   return 'https://flowaify.app/invoice.html?i=' + inv.token;
 }
+
+function invOpenPublic(id) {
+  var inv = invById(id);
+  if (!inv || !inv.token) { showToast('Finalize the invoice to get a client page.'); return; }
+  // pv=1 keeps the owner's own visit from stamping "Client viewed invoice"
+  window.open(invPublicUrl(inv) + '&pv=1', '_blank', 'noopener');
+}
+window.invOpenPublic = invOpenPublic;
 
 async function invCopyLink(id) {
   var inv = invById(id);

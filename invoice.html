@@ -105,7 +105,8 @@
     return;
   }
 
-  fetch(WORKER + '/pub/invoice?t=' + token)
+  var pv = new URLSearchParams(location.search).get('pv') === '1' ? '&pv=1' : '';
+  fetch(WORKER + '/pub/invoice?t=' + token + pv)
     .then(function(r) { return r.json().then(function(d) { return { s: r.status, d: d }; }); })
     .then(function(res) {
       if (res.s === 410) { state('Invoice no longer payable', 'This invoice was cancelled by the sender. Contact them if you believe this is a mistake.'); return; }

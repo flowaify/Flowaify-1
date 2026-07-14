@@ -1697,8 +1697,9 @@ async function handlePublicInvoice(url, env, corsHeaders) {
   if (!inv) return json({ error: 'NOT_FOUND' }, 404, pub);
   if (inv.status === 'void') return json({ error: 'VOID', message: 'This invoice is no longer payable.' }, 410, pub);
 
-  // First view stamps viewedAt (single KV write, no per-hit writes after that)
-  if (!inv.viewedAt) {
+  // First view stamps viewedAt (single KV write, no per-hit writes after that).
+  // pv=1 = owner preview from the dashboard — never counts as a client view.
+  if (!inv.viewedAt && url.searchParams.get('pv') !== '1') {
     inv.viewedAt = Date.now();
     invEvent(inv, 'viewed', 'client');
     await env.TEAM_KV.put(map.kvKey, JSON.stringify(store));
