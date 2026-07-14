@@ -67,6 +67,19 @@ function applySettingsToUI(cfg) {
   var tz = document.getElementById('s-timezone');
   if (tz) tz.value = p.timezone || 'America/New_York';
 
+  var bl = cfg.billing || {};
+  stSet('s-inv-legal', bl.legalName);
+  stSet('s-inv-addr1', bl.address1);
+  stSet('s-inv-addr2', bl.address2);
+  stSet('s-inv-city', bl.city);
+  stSet('s-inv-region', bl.region);
+  stSet('s-inv-postal', bl.postal);
+  stSet('s-inv-country', bl.country);
+  stSet('s-inv-supportEmail', bl.supportEmail);
+  stSet('s-inv-taxId', bl.taxId);
+  var curSel = document.getElementById('s-inv-currency');
+  if (curSel) curSel.value = bl.defaultCurrency || 'USD';
+
   stSet('s-webhookUrl', cfg.webhookUrl);
 
   // Channels — SMS status is read-only (provisioned by Flowaify)
@@ -227,6 +240,19 @@ function saveWebhookSettings() {
   pushSettings({ webhookUrl: url || null }, 'ss-webhook-status');
 }
 window.saveWebhookSettings = saveWebhookSettings;
+
+function saveBillingSettings() {
+  function v(id) { return ((document.getElementById(id) || {}).value || '').trim(); }
+  pushSettings({
+    billing: {
+      legalName: v('s-inv-legal'), address1: v('s-inv-addr1'), address2: v('s-inv-addr2'),
+      city: v('s-inv-city'), region: v('s-inv-region'), postal: v('s-inv-postal'),
+      country: v('s-inv-country'), supportEmail: v('s-inv-supportEmail'), taxId: v('s-inv-taxId'),
+      defaultCurrency: v('s-inv-currency') || 'USD'
+    }
+  }, 'ss-billing-status');
+}
+window.saveBillingSettings = saveBillingSettings;
 
 function saveChannelsSettings() {
   var segs = [];

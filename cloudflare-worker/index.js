@@ -134,12 +134,40 @@ export default {
         return handleTeamActivity(request, env, corsHeaders);
       }
 
+      if (url.pathname === '/pub/invoice' && request.method === 'GET') {
+        return handlePublicInvoice(url, env, corsHeaders);
+      }
+
       if (url.pathname === '/invoice/list' && request.method === 'GET') {
         return handleInvoiceList(request, env, corsHeaders);
       }
 
       if (url.pathname === '/invoice/save' && request.method === 'POST') {
         return handleInvoiceSave(request, env, corsHeaders);
+      }
+
+      if (url.pathname === '/invoice/finalize' && request.method === 'POST') {
+        return handleInvoiceFinalize(request, env, corsHeaders);
+      }
+
+      if (url.pathname === '/invoice/sent' && request.method === 'POST') {
+        return handleInvoiceMarkSent(request, env, corsHeaders);
+      }
+
+      if (url.pathname === '/invoice/payment' && request.method === 'POST') {
+        return handleInvoicePayment(request, env, corsHeaders);
+      }
+
+      if (url.pathname === '/invoice/refund' && request.method === 'POST') {
+        return handleInvoiceRefund(request, env, corsHeaders);
+      }
+
+      if (url.pathname === '/invoice/void' && request.method === 'POST') {
+        return handleInvoiceVoid(request, env, corsHeaders);
+      }
+
+      if (url.pathname === '/invoice/token' && request.method === 'POST') {
+        return handleInvoiceTokenRegen(request, env, corsHeaders);
       }
 
       if (url.pathname.startsWith('/invoice/') && request.method === 'DELETE') {
@@ -1282,72 +1310,436 @@ async function resolveInvoiceAuth(request, env, corsHeaders) {
   return { clientId, kvKey, sub: payload.sub || '', email: payload.email || '' };
 }
 
+// ── Invoice store v2: { v:2, counter, invoices:[] } — money in integer cents.
+// The Worker is the source of truth: totals and status are recomputed on
+// every write; client-sent totals are ignored.
+
+const INV_CURRENCIES = ['USD', 'EUR', 'GBP', 'CAD', 'AUD'];
+
+function invStr(v, max) { return String(v == null ? '' : v).slice(0, max); }
+function invInt(v) { const n = Math.round(+v); return Number.isFinite(n) ? n : 0; }
+function invDate(v) { const m = String(v || '').match(/^\d{4}-\d{2}-\d{2}/); return m ? m[0] : ''; }
+
+function invRandToken() {
+  const b = new Uint8Array(24);
+  crypto.getRandomValues(b);
+  return Array.from(b, x => x.toString(16).padStart(2, '0')).join('');
+}
+
+function invEvent(inv, type, by, meta) {
+  inv.events = inv.events || [];
+  const ev = { t: type, ts: Date.now(), by: invStr(by, 80) };
+  if (meta) ev.meta = meta;
+  inv.events.push(ev);
+  if (inv.events.length > 100) inv.events = inv.events.slice(-100);
+}
+
+function invRecalc(inv) {
+  let subtotalC = 0;
+  inv.items = (inv.items || []).slice(0, 50).map((it, i) => {
+    const qty = Math.max(0, Number.isFinite(+it.qty) ? +it.qty : 1);
+    const unitC = Math.max(0, invInt(it.unitC));
+    const totalC = Math.round(qty * unitC);
+    subtotalC += totalC;
+    return { desc: invStr(it.desc, 200), desc2: invStr(it.desc2, 300), qty, unitC, totalC, order: i };
+  });
+  const discountC = Math.min(Math.max(0, invInt(inv.discountC)), subtotalC);
+  const taxRateBps = Math.min(Math.max(0, invInt(inv.taxRateBps)), 10000);
+  const taxC = Math.round((subtotalC - discountC) * taxRateBps / 10000);
+  const totalC = subtotalC - discountC + taxC;
+  let paidC = 0;
+  (inv.payments || []).forEach(p => {
+    paidC += Math.max(0, invInt(p.amountC));
+    (p.refunds || []).forEach(r => { paidC -= Math.max(0, invInt(r.amountC)); });
+  });
+  paidC = Math.max(0, paidC);
+  inv.subtotalC = subtotalC; inv.discountC = discountC; inv.taxRateBps = taxRateBps;
+  inv.taxC = taxC; inv.totalC = totalC; inv.paidC = paidC;
+  inv.remainingC = Math.max(0, totalC - paidC);
+  if (inv.status !== 'draft' && inv.status !== 'void') {
+    inv.status = (totalC > 0 && paidC >= totalC) ? 'paid' : (paidC > 0 ? 'partially_paid' : 'open');
+    if (inv.status === 'paid' && !inv.paidAt) inv.paidAt = Date.now();
+    if (inv.status !== 'paid') inv.paidAt = null;
+  }
+  return inv;
+}
+
+// v1 blob (plain array) → v2 store. Drops "(Sample)" and $0 test rows but the
+// counter still covers every historical number so none is ever reused.
+function invMigrateV1(list) {
+  let maxNum = 0;
+  list.forEach(o => {
+    const m = String(o.number || '').match(/(\d+)$/);
+    if (m) maxNum = Math.max(maxNum, parseInt(m[1], 10));
+  });
+  const kept = list.filter(o =>
+    String((o.billTo || {}).name || '').indexOf('(Sample)') === -1 && (+o.total || 0) > 0
+  );
+  const invoices = kept.map(o => {
+    const totalC = Math.round((+o.total || 0) * 100);
+    const status = o.status === 'sent' || o.status === 'overdue' ? 'open'
+                 : o.status === 'paid' ? 'paid' : 'draft';
+    const inv = {
+      id: invStr(o.id, 60), number: o.number || null, token: null,
+      status, currency: 'USD',
+      client: {
+        name: invStr((o.billTo || {}).name, 100),
+        company: invStr((o.billTo || {}).company, 100),
+        email: invStr((o.billTo || {}).email, 120),
+        address: '',
+      },
+      issueDate: invDate(o.issueDate), dueDate: invDate(o.dueDate),
+      terms: '', poNumber: '', memo: invStr(o.notes, 1000), notes: '', payUrl: '',
+      items: (Array.isArray(o.lines) ? o.lines : []).map((l, i) => ({
+        desc: l.description, desc2: '', qty: +l.qty || 1,
+        unitC: Math.round((+l.unitPrice || 0) * 100), order: i,
+      })),
+      discountC: Math.round((+o.discount || 0) * 100),
+      taxRateBps: Math.round((+o.taxRate || 0) * 100),
+      payments: status === 'paid' ? [{
+        pid: 'mig-1', amountC: totalC, currency: 'USD',
+        date: invDate(o.dueDate) || invDate(o.issueDate), method: 'other',
+        reference: '', receiptNo: o.number ? 'RCT-' + o.number + '-1' : null,
+        recordedBy: 'migration', refunds: [],
+      }] : [],
+      events: [{ t: 'created', ts: +o.createdAt || Date.now(), by: 'migration' }],
+      remindersEnabled: true, remindersSent: [],
+      createdBy: '', createdAt: +o.createdAt || Date.now(), updatedAt: +o.updatedAt || Date.now(),
+      finalizedAt: status !== 'draft' ? (+o.createdAt || Date.now()) : null,
+      sentAt: (o.status === 'sent' || o.status === 'overdue') ? (+o.updatedAt || null) : null,
+      viewedAt: null, paidAt: status === 'paid' ? (+o.updatedAt || Date.now()) : null, voidedAt: null,
+    };
+    return invRecalc(inv);
+  });
+  return { v: 2, counter: maxNum, invoices };
+}
+
+async function invLoadStore(env, kvKey) {
+  const raw = await env.TEAM_KV.get(kvKey);
+  if (!raw) return { store: { v: 2, counter: 0, invoices: [] }, migrated: false };
+  const data = JSON.parse(raw);
+  if (Array.isArray(data)) {
+    const store = invMigrateV1(data);
+    await env.TEAM_KV.put(kvKey.replace('invoices:', 'invoices_v1_backup:'), raw);
+    await env.TEAM_KV.put(kvKey, JSON.stringify(store));
+    return { store, migrated: true };
+  }
+  return { store: data, migrated: false };
+}
+
+async function invSaveStore(env, kvKey, store) {
+  store.invoices = store.invoices.slice(0, 500);
+  await env.TEAM_KV.put(kvKey, JSON.stringify(store));
+}
+
+function invActor(gate, auth) {
+  return (gate && gate.member && gate.member.name) || auth.email || auth.sub || 'unknown';
+}
+
+// Fields a client may set on a DRAFT. Finalized invoices only accept the
+// annotation subset below — the document itself is immutable.
+function invApplyDraftFields(inv, body) {
+  inv.client = {
+    name: invStr((body.client || {}).name, 100),
+    company: invStr((body.client || {}).company, 100),
+    email: invStr((body.client || {}).email, 120),
+    address: invStr((body.client || {}).address, 300),
+  };
+  inv.currency = INV_CURRENCIES.includes(body.currency) ? body.currency : 'USD';
+  inv.issueDate = invDate(body.issueDate);
+  inv.dueDate = invDate(body.dueDate);
+  inv.terms = invStr(body.terms, 60);
+  inv.poNumber = invStr(body.poNumber, 60);
+  inv.items = Array.isArray(body.items) ? body.items : [];
+  inv.discountC = invInt(body.discountC);
+  inv.taxRateBps = invInt(body.taxRateBps);
+}
+
+function invApplyAnnotations(inv, body) {
+  if ('memo' in body) inv.memo = invStr(body.memo, 1000);
+  if ('notes' in body) inv.notes = invStr(body.notes, 2000);
+  if ('payUrl' in body) {
+    const u = invStr(body.payUrl, 300);
+    inv.payUrl = /^https:\/\//.test(u) || u === '' ? u : inv.payUrl;
+  }
+  if ('dueDate' in body && inv.status !== 'paid') inv.dueDate = invDate(body.dueDate) || inv.dueDate;
+  if ('remindersEnabled' in body) inv.remindersEnabled = !!body.remindersEnabled;
+}
+
 async function handleInvoiceList(request, env, corsHeaders) {
   const auth = await resolveInvoiceAuth(request, env, corsHeaders);
   if (auth.err) return auth.err;
   if (!env.TEAM_KV) return json({ invoices: [] }, 200, corsHeaders);
-  const raw = await env.TEAM_KV.get(auth.kvKey);
-  const invoices = raw ? JSON.parse(raw) : [];
-  return json({ invoices }, 200, corsHeaders);
+  const { store } = await invLoadStore(env, auth.kvKey);
+  return json({ invoices: store.invoices }, 200, corsHeaders);
 }
 
 async function handleInvoiceSave(request, env, corsHeaders) {
   const auth = await resolveInvoiceAuth(request, env, corsHeaders);
   if (auth.err) return auth.err;
-  const igate = await requireRole(env, auth, 'member', corsHeaders);
-  if (igate.err) return igate.err;
+  const gate = await requireRole(env, auth, 'member', corsHeaders);
+  if (gate.err) return gate.err;
   if (!env.TEAM_KV) return json({ error: 'KV not enabled' }, 501, corsHeaders);
-  let inv;
-  try { inv = await request.json(); } catch (e) { return json({ error: 'Bad JSON' }, 400, corsHeaders); }
-  if (!inv || !inv.id) return json({ error: 'Missing invoice id' }, 400, corsHeaders);
-  // Sanitise
-  const safe = {
-    id:        String(inv.id).replace(/[^\w-]/g, '').slice(0, 60),
-    number:    String(inv.number || '').slice(0, 40),
-    billTo:    {
-      name:    String((inv.billTo || {}).name || '').slice(0, 100),
-      email:   String((inv.billTo || {}).email || '').slice(0, 120),
-      company: String((inv.billTo || {}).company || '').slice(0, 100),
-    },
-    lines:     (Array.isArray(inv.lines) ? inv.lines : []).slice(0, 50).map(l => ({
-      description: String(l.description || '').slice(0, 200),
-      qty:         Number.isFinite(+l.qty) ? +l.qty : 1,
-      unitPrice:   Number.isFinite(+l.unitPrice) ? +l.unitPrice : 0,
-      total:       Number.isFinite(+l.total) ? +l.total : 0,
-    })),
-    subtotal:  Number.isFinite(+inv.subtotal) ? +inv.subtotal : 0,
-    taxRate:   Number.isFinite(+inv.taxRate) ? +inv.taxRate : 0,
-    discount:  Number.isFinite(+inv.discount) ? +inv.discount : 0,
-    total:     Number.isFinite(+inv.total) ? +inv.total : 0,
-    status:    ['draft','sent','paid','overdue'].includes(inv.status) ? inv.status : 'draft',
-    issueDate: String(inv.issueDate || '').slice(0, 10),
-    dueDate:   String(inv.dueDate || '').slice(0, 10),
-    notes:     String(inv.notes || '').slice(0, 1000),
-    createdAt: Number.isFinite(+inv.createdAt) ? +inv.createdAt : Date.now(),
-    updatedAt: Date.now(),
+  let body;
+  try { body = await request.json(); } catch (e) { return json({ error: 'Bad JSON' }, 400, corsHeaders); }
+  if (!body || !body.id) return json({ error: 'Missing invoice id' }, 400, corsHeaders);
+
+  const { store } = await invLoadStore(env, auth.kvKey);
+  const id = invStr(body.id, 60).replace(/[^\w-]/g, '');
+  const actor = invActor(gate, auth);
+  let inv = store.invoices.find(x => x.id === id);
+
+  if (!inv) {
+    inv = {
+      id, number: null, token: null, status: 'draft', currency: 'USD',
+      client: {}, issueDate: '', dueDate: '', terms: '', poNumber: '',
+      memo: '', notes: '', payUrl: '', items: [], payments: [], events: [],
+      remindersEnabled: true, remindersSent: [],
+      createdBy: auth.sub, createdAt: Date.now(), updatedAt: Date.now(),
+      finalizedAt: null, sentAt: null, viewedAt: null, paidAt: null, voidedAt: null,
+      discountC: 0, taxRateBps: 0,
+    };
+    invEvent(inv, 'created', actor);
+    store.invoices.unshift(inv);
+  } else {
+    if (body.updatedAt && +body.updatedAt !== +inv.updatedAt) {
+      return json({ error: 'STALE', message: 'This invoice changed elsewhere. Reload and try again.' }, 409, corsHeaders);
+    }
+    invEvent(inv, 'edited', actor);
+  }
+
+  if (inv.status === 'draft') invApplyDraftFields(inv, body);
+  invApplyAnnotations(inv, body);
+  invRecalc(inv);
+  inv.updatedAt = Date.now();
+  await invSaveStore(env, auth.kvKey, store);
+  return json({ invoice: inv }, 200, corsHeaders);
+}
+
+async function handleInvoiceFinalize(request, env, corsHeaders) {
+  const auth = await resolveInvoiceAuth(request, env, corsHeaders);
+  if (auth.err) return auth.err;
+  const gate = await requireRole(env, auth, 'member', corsHeaders);
+  if (gate.err) return gate.err;
+  let body;
+  try { body = await request.json(); } catch (e) { return json({ error: 'Bad JSON' }, 400, corsHeaders); }
+  const { store } = await invLoadStore(env, auth.kvKey);
+  const inv = store.invoices.find(x => x.id === body.id);
+  if (!inv) return json({ error: 'Not found' }, 404, corsHeaders);
+  if (inv.status !== 'draft') return json({ invoice: inv }, 200, corsHeaders); // idempotent
+  invRecalc(inv);
+  if (inv.totalC <= 0) return json({ error: 'ZERO_TOTAL', message: 'Add at least one line item with an amount before finalizing.' }, 400, corsHeaders);
+  store.counter = (store.counter || 0) + 1;
+  inv.number = 'INV-' + String(store.counter).padStart(6, '0');
+  inv.token = invRandToken();
+  inv.status = 'open';
+  inv.finalizedAt = Date.now();
+  invEvent(inv, 'finalized', invActor(gate, auth), { number: inv.number });
+  invRecalc(inv);
+  inv.updatedAt = Date.now();
+  await env.TEAM_KV.put('invtok:' + inv.token, JSON.stringify({ kvKey: auth.kvKey, id: inv.id }));
+  await invSaveStore(env, auth.kvKey, store);
+  return json({ invoice: inv }, 200, corsHeaders);
+}
+
+async function handleInvoiceMarkSent(request, env, corsHeaders) {
+  const auth = await resolveInvoiceAuth(request, env, corsHeaders);
+  if (auth.err) return auth.err;
+  const gate = await requireRole(env, auth, 'member', corsHeaders);
+  if (gate.err) return gate.err;
+  let body;
+  try { body = await request.json(); } catch (e) { return json({ error: 'Bad JSON' }, 400, corsHeaders); }
+  const { store } = await invLoadStore(env, auth.kvKey);
+  const inv = store.invoices.find(x => x.id === body.id);
+  if (!inv) return json({ error: 'Not found' }, 404, corsHeaders);
+  if (inv.status === 'draft' || inv.status === 'void') return json({ error: 'Finalize the invoice first' }, 400, corsHeaders);
+  invEvent(inv, inv.sentAt ? 'resent' : 'sent', invActor(gate, auth), body.via ? { via: invStr(body.via, 30) } : null);
+  inv.sentAt = Date.now();
+  inv.updatedAt = Date.now();
+  await invSaveStore(env, auth.kvKey, store);
+  return json({ invoice: inv }, 200, corsHeaders);
+}
+
+async function handleInvoicePayment(request, env, corsHeaders) {
+  const auth = await resolveInvoiceAuth(request, env, corsHeaders);
+  if (auth.err) return auth.err;
+  const gate = await requireRole(env, auth, 'admin', corsHeaders);
+  if (gate.err) return gate.err;
+  let body;
+  try { body = await request.json(); } catch (e) { return json({ error: 'Bad JSON' }, 400, corsHeaders); }
+  const { store } = await invLoadStore(env, auth.kvKey);
+  const inv = store.invoices.find(x => x.id === body.id);
+  if (!inv) return json({ error: 'Not found' }, 404, corsHeaders);
+  if (inv.status === 'draft' || inv.status === 'void') {
+    return json({ error: 'Payments can only be recorded on finalized invoices' }, 400, corsHeaders);
+  }
+  const amountC = invInt(body.amountC);
+  if (amountC <= 0) return json({ error: 'Payment amount must be positive' }, 400, corsHeaders);
+  const seq = (inv.payments || []).length + 1;
+  const actor = invActor(gate, auth);
+  const pay = {
+    pid: 'p' + Date.now().toString(36) + seq,
+    amountC, currency: inv.currency,
+    date: invDate(body.date) || new Date().toISOString().slice(0, 10),
+    method: invStr(body.method, 40) || 'other',
+    reference: invStr(body.reference, 120),
+    receiptNo: 'RCT-' + (inv.number || inv.id) + '-' + seq,
+    recordedBy: actor, refunds: [],
   };
-  const raw = await env.TEAM_KV.get(auth.kvKey);
-  let list = raw ? JSON.parse(raw) : [];
-  const idx = list.findIndex(x => x.id === safe.id);
-  if (idx !== -1) list[idx] = safe; else list.unshift(safe);
-  list = list.slice(0, 500);
-  await env.TEAM_KV.put(auth.kvKey, JSON.stringify(list));
-  return json({ invoice: safe }, 200, corsHeaders);
+  inv.payments = inv.payments || [];
+  inv.payments.push(pay);
+  invEvent(inv, 'payment_recorded', actor, { amountC, method: pay.method, receiptNo: pay.receiptNo });
+  invRecalc(inv);
+  inv.updatedAt = Date.now();
+  await invSaveStore(env, auth.kvKey, store);
+  return json({ invoice: inv }, 200, corsHeaders);
+}
+
+async function handleInvoiceRefund(request, env, corsHeaders) {
+  const auth = await resolveInvoiceAuth(request, env, corsHeaders);
+  if (auth.err) return auth.err;
+  const gate = await requireRole(env, auth, 'admin', corsHeaders);
+  if (gate.err) return gate.err;
+  let body;
+  try { body = await request.json(); } catch (e) { return json({ error: 'Bad JSON' }, 400, corsHeaders); }
+  const { store } = await invLoadStore(env, auth.kvKey);
+  const inv = store.invoices.find(x => x.id === body.id);
+  if (!inv) return json({ error: 'Not found' }, 404, corsHeaders);
+  const pay = (inv.payments || []).find(p => p.pid === body.pid);
+  if (!pay) return json({ error: 'Payment not found' }, 404, corsHeaders);
+  const amountC = invInt(body.amountC);
+  const refunded = (pay.refunds || []).reduce((s, r) => s + r.amountC, 0);
+  if (amountC <= 0 || amountC > pay.amountC - refunded) {
+    return json({ error: 'Refund exceeds the remaining amount of this payment' }, 400, corsHeaders);
+  }
+  const actor = invActor(gate, auth);
+  pay.refunds = pay.refunds || [];
+  pay.refunds.push({ amountC, date: new Date().toISOString().slice(0, 10), reason: invStr(body.reason, 200), by: actor });
+  invEvent(inv, 'payment_refunded', actor, { amountC, pid: pay.pid });
+  invRecalc(inv);
+  inv.updatedAt = Date.now();
+  await invSaveStore(env, auth.kvKey, store);
+  return json({ invoice: inv }, 200, corsHeaders);
+}
+
+async function handleInvoiceVoid(request, env, corsHeaders) {
+  const auth = await resolveInvoiceAuth(request, env, corsHeaders);
+  if (auth.err) return auth.err;
+  const gate = await requireRole(env, auth, 'admin', corsHeaders);
+  if (gate.err) return gate.err;
+  let body;
+  try { body = await request.json(); } catch (e) { return json({ error: 'Bad JSON' }, 400, corsHeaders); }
+  const { store } = await invLoadStore(env, auth.kvKey);
+  const inv = store.invoices.find(x => x.id === body.id);
+  if (!inv) return json({ error: 'Not found' }, 404, corsHeaders);
+  if (inv.status === 'draft') return json({ error: 'Drafts are deleted, not voided' }, 400, corsHeaders);
+  if (inv.status === 'void') return json({ invoice: inv }, 200, corsHeaders);
+  inv.status = 'void';
+  inv.voidedAt = Date.now();
+  invEvent(inv, 'voided', invActor(gate, auth));
+  if (inv.token) await env.TEAM_KV.delete('invtok:' + inv.token);
+  inv.updatedAt = Date.now();
+  await invSaveStore(env, auth.kvKey, store);
+  return json({ invoice: inv }, 200, corsHeaders);
+}
+
+async function handleInvoiceTokenRegen(request, env, corsHeaders) {
+  const auth = await resolveInvoiceAuth(request, env, corsHeaders);
+  if (auth.err) return auth.err;
+  const gate = await requireRole(env, auth, 'admin', corsHeaders);
+  if (gate.err) return gate.err;
+  let body;
+  try { body = await request.json(); } catch (e) { return json({ error: 'Bad JSON' }, 400, corsHeaders); }
+  const { store } = await invLoadStore(env, auth.kvKey);
+  const inv = store.invoices.find(x => x.id === body.id);
+  if (!inv || !inv.token) return json({ error: 'Not found' }, 404, corsHeaders);
+  await env.TEAM_KV.delete('invtok:' + inv.token);
+  inv.token = invRandToken();
+  await env.TEAM_KV.put('invtok:' + inv.token, JSON.stringify({ kvKey: auth.kvKey, id: inv.id }));
+  invEvent(inv, 'link_regenerated', invActor(gate, auth));
+  inv.updatedAt = Date.now();
+  await invSaveStore(env, auth.kvKey, store);
+  return json({ invoice: inv }, 200, corsHeaders);
 }
 
 async function handleInvoiceDelete(request, env, corsHeaders) {
   const auth = await resolveInvoiceAuth(request, env, corsHeaders);
   if (auth.err) return auth.err;
-  const dgate = await requireRole(env, auth, 'member', corsHeaders);
-  if (dgate.err) return dgate.err;
+  const gate = await requireRole(env, auth, 'admin', corsHeaders);
+  if (gate.err) return gate.err;
   if (!env.TEAM_KV) return json({ ok: true }, 200, corsHeaders);
-  const id = request.url.split('/invoice/')[1] || '';
-  const safeId = id.replace(/[^\w-]/g, '');
-  const raw = await env.TEAM_KV.get(auth.kvKey);
-  let list = raw ? JSON.parse(raw) : [];
-  list = list.filter(x => x.id !== safeId);
-  await env.TEAM_KV.put(auth.kvKey, JSON.stringify(list));
+  const id = (request.url.split('/invoice/')[1] || '').replace(/[^\w-]/g, '');
+  const { store } = await invLoadStore(env, auth.kvKey);
+  const inv = store.invoices.find(x => x.id === id);
+  if (!inv) return json({ ok: true }, 200, corsHeaders);
+  if (inv.status !== 'draft') {
+    return json({ error: 'Only drafts can be deleted. Void the invoice instead.' }, 400, corsHeaders);
+  }
+  store.invoices = store.invoices.filter(x => x.id !== id);
+  await invSaveStore(env, auth.kvKey, store);
   return json({ ok: true }, 200, corsHeaders);
+}
+
+// ── Public invoice endpoint — no auth, unguessable 192-bit token. Returns a
+// sanitized projection only: no internal notes, no actor subs, no event log
+// beyond payment/sent milestones, no other invoices.
+async function handlePublicInvoice(url, env, corsHeaders) {
+  const pub = { 'Access-Control-Allow-Origin': '*' };
+  const token = (url.searchParams.get('t') || '').replace(/[^a-f0-9]/g, '');
+  if (token.length !== 48) return json({ error: 'NOT_FOUND' }, 404, pub);
+  const mapRaw = await env.TEAM_KV.get('invtok:' + token);
+  if (!mapRaw) return json({ error: 'NOT_FOUND' }, 404, pub);
+  const map = JSON.parse(mapRaw);
+  const raw = await env.TEAM_KV.get(map.kvKey);
+  if (!raw) return json({ error: 'NOT_FOUND' }, 404, pub);
+  const store = JSON.parse(raw);
+  const inv = (store.invoices || []).find(x => x.id === map.id);
+  if (!inv) return json({ error: 'NOT_FOUND' }, 404, pub);
+  if (inv.status === 'void') return json({ error: 'VOID', message: 'This invoice is no longer payable.' }, 410, pub);
+
+  // First view stamps viewedAt (single KV write, no per-hit writes after that)
+  if (!inv.viewedAt) {
+    inv.viewedAt = Date.now();
+    invEvent(inv, 'viewed', 'client');
+    await env.TEAM_KV.put(map.kvKey, JSON.stringify(store));
+  }
+
+  // Seller block from workspace settings (billing section, business profile fallback)
+  let seller = {};
+  try {
+    const clientId = map.kvKey.replace('invoices:', '');
+    const stRaw = await env.TEAM_KV.get('settings:' + clientId);
+    if (stRaw) {
+      const cfg = JSON.parse(stRaw);
+      const b = cfg.billing || {};
+      seller = {
+        name: b.legalName || (cfg.profile && cfg.profile.businessName) || '',
+        address1: b.address1 || '', address2: b.address2 || '',
+        city: b.city || '', region: b.region || '', postal: b.postal || '',
+        country: b.country || '', supportEmail: b.supportEmail || '', taxId: b.taxId || '',
+      };
+    }
+  } catch (e) {}
+
+  const milestones = (inv.events || [])
+    .filter(ev => ['sent', 'payment_recorded', 'payment_refunded'].includes(ev.t))
+    .map(ev => ({ t: ev.t, ts: ev.ts, amountC: ev.meta ? ev.meta.amountC : undefined }));
+
+  return json({
+    invoice: {
+      number: inv.number, status: inv.status, currency: inv.currency,
+      client: { name: inv.client.name, company: inv.client.company, email: inv.client.email, address: inv.client.address },
+      issueDate: inv.issueDate, dueDate: inv.dueDate, terms: inv.terms, memo: inv.memo,
+      poNumber: inv.poNumber, payUrl: inv.payUrl,
+      items: inv.items.map(it => ({ desc: it.desc, desc2: it.desc2, qty: it.qty, unitC: it.unitC, totalC: it.totalC })),
+      subtotalC: inv.subtotalC, discountC: inv.discountC, taxRateBps: inv.taxRateBps, taxC: inv.taxC,
+      totalC: inv.totalC, paidC: inv.paidC, remainingC: inv.remainingC,
+      paidAt: inv.paidAt, sentAt: inv.sentAt,
+      payments: (inv.payments || []).map(p => ({ amountC: p.amountC, date: p.date, method: p.method, receiptNo: p.receiptNo })),
+      milestones,
+    },
+    seller,
+  }, 200, pub);
 }
 
 // ─── /inbox/* ────────────────────────────────────────────────────────────────
@@ -1718,6 +2110,18 @@ function defaultSettings(clientId) {
       fromEmail: '',
       twilioFromNumber: ''
     },
+    billing: {
+      legalName: '',
+      address1: '',
+      address2: '',
+      city: '',
+      region: '',
+      postal: '',
+      country: '',
+      supportEmail: '',
+      taxId: '',
+      defaultCurrency: 'USD'
+    },
     channels: {
       sms: false,
       smsSegments: ['HOT', 'WARM']
@@ -1767,6 +2171,16 @@ function sanitizeSettings(incoming, existing) {
     if (typeof p.timezone === 'string')     cfg.profile.timezone = p.timezone.trim().slice(0, 60);
     if (typeof p.monthlyLeadGoal === 'number' && p.monthlyLeadGoal >= 0) {
       cfg.profile.monthlyLeadGoal = Math.floor(p.monthlyLeadGoal);
+    }
+  }
+
+  if (incoming.billing && typeof incoming.billing === 'object') {
+    cfg.billing = cfg.billing || {};
+    const b = incoming.billing;
+    ['legalName', 'address1', 'address2', 'city', 'region', 'postal', 'country', 'supportEmail', 'taxId']
+      .forEach(k => { if (typeof b[k] === 'string') cfg.billing[k] = b[k].trim().slice(0, 160); });
+    if (typeof b.defaultCurrency === 'string' && ['USD', 'EUR', 'GBP', 'CAD', 'AUD'].includes(b.defaultCurrency)) {
+      cfg.billing.defaultCurrency = b.defaultCurrency;
     }
   }
 

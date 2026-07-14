@@ -1370,6 +1370,128 @@
     .inv-dr-field input, .inv-dr-field textarea { padding: 7px 10px; background: var(--input-bg); border: 1px solid var(--input-border); border-radius: 4px; font-size: 12.5px; font-family: inherit; color: var(--text); outline: none; }
     .inv-dr-field input:focus, .inv-dr-field textarea:focus { border-color: var(--blue); }
     .inv-dr-field textarea { resize: vertical; min-height: 60px; }
+    /* ── Invoices v2 ── */
+    .inv-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 14px; flex-shrink: 0; }
+    .inv-head-title { font-size: 19px; font-weight: 700; color: var(--text); letter-spacing: -0.01em; }
+    .inv-head-sub { font-size: 12.5px; color: var(--text-m); margin-top: 2px; }
+    .inv-head-actions { display: flex; align-items: center; gap: 8px; }
+    .inv-head-actions .btn-mini { display: inline-flex; align-items: center; gap: 6px; }
+    .inv-head-actions .btn-mini i, .inv-head-actions .btn-mini svg { width: 13px; height: 13px; }
+    .inv-cards { margin-bottom: 14px; }
+    .inv-card-click { cursor: pointer; transition: border-color 0.12s; }
+    .inv-card-click:hover { border-color: var(--blue); }
+    .inv-card-click:focus-visible { outline: 2px solid var(--blue); outline-offset: 1px; }
+    .kg-red { background: var(--red-dim); color: var(--red); }
+    .inv-toolbar { display: flex; align-items: center; gap: 8px; padding: 10px 14px; border-bottom: 1px solid var(--border); flex-wrap: wrap; flex-shrink: 0; }
+    .inv-tb-search { display: flex; align-items: center; gap: 6px; background: var(--input-bg); border: 1px solid var(--input-border); border-radius: 4px; padding: 0 8px; flex: 1; min-width: 150px; max-width: 260px; }
+    .inv-tb-search i, .inv-tb-search svg { width: 12px; height: 12px; color: var(--text-m); flex-shrink: 0; }
+    .inv-tb-search input { border: none; background: transparent; outline: none; padding: 6px 0; font-size: 12px; font-family: inherit; color: var(--text); width: 100%; }
+    .inv-tb-select { padding: 6px 8px; background: var(--input-bg); border: 1px solid var(--input-border); border-radius: 4px; font-size: 11.5px; font-family: inherit; color: var(--text); outline: none; cursor: pointer; }
+    .inv-tb-select:focus { border-color: var(--blue); }
+    .inv-chip { padding: 5px 10px; border-radius: 20px; border: 1px solid var(--border); background: transparent; font-size: 11px; font-weight: 600; color: var(--text-s); cursor: pointer; font-family: inherit; }
+    .inv-chip:hover { border-color: var(--red); color: var(--red); }
+    .inv-table th { white-space: nowrap; }
+    .inv-row { cursor: pointer; }
+    .inv-row-sel td { background: var(--blue-dim); }
+    .inv-num { color: var(--blue); font-weight: 600; font-size: 12.5px; }
+    .inv-client-name { font-weight: 600; font-size: 12.5px; color: var(--text); max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .inv-client-email { font-size: 11px; color: var(--text-m); max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .inv-amt { font-weight: 600; font-variant-numeric: tabular-nums; }
+    .inv-date { font-size: 12px; color: var(--text-s); white-space: nowrap; }
+    .inv-date-red { color: var(--red); font-weight: 600; }
+    .inv-actions-cell { text-align: right; width: 36px; }
+    .inv-dots { background: transparent; border: none; color: var(--text-m); font-size: 15px; font-weight: 700; cursor: pointer; padding: 2px 8px; border-radius: 4px; letter-spacing: 1px; font-family: inherit; }
+    .inv-dots:hover { background: var(--hover); color: var(--text); }
+    .inv-badge { display: inline-block; padding: 2.5px 9px; border-radius: 4px; font-size: 11px; font-weight: 600; white-space: nowrap; }
+    .ivb-draft   { background: var(--amber-dim); color: var(--amber); border: 1px solid rgba(180,83,9,0.2); }
+    .ivb-open    { background: var(--blue-dim); color: var(--blue); border: 1px solid rgba(59,130,246,0.25); }
+    .ivb-overdue { background: var(--red-dim); color: var(--red); border: 1px solid rgba(220,38,38,0.25); }
+    .ivb-partial { background: var(--amber-dim); color: var(--amber); border: 1px solid rgba(180,83,9,0.25); }
+    .ivb-paid    { background: var(--green-dim); color: var(--green); border: 1px solid rgba(5,150,105,0.25); }
+    .ivb-void    { background: var(--hover); color: var(--text-m); border: 1px solid var(--border); }
+    .inv-table-foot { display: flex; align-items: center; justify-content: space-between; padding: 9px 14px; border-top: 1px solid var(--border); font-size: 11.5px; color: var(--text-m); flex-shrink: 0; min-height: 20px; }
+    .inv-pager { display: inline-flex; align-items: center; gap: 6px; }
+    .inv-page-btn { width: 24px; height: 24px; border: 1px solid var(--border); background: transparent; border-radius: 4px; color: var(--text-s); cursor: pointer; font-size: 13px; line-height: 1; }
+    .inv-page-btn:disabled { opacity: 0.35; cursor: default; }
+    .inv-page-num { min-width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--blue); border-radius: 4px; color: var(--blue); font-weight: 600; font-size: 11.5px; }
+    /* detail panel */
+    .inv-detail-card { padding: 16px 18px; }
+    .inv-p-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .inv-p-num { font-size: 15px; font-weight: 700; color: var(--text); }
+    .inv-p-close { background: transparent; border: none; color: var(--text-m); cursor: pointer; padding: 4px; border-radius: 4px; }
+    .inv-p-close:hover { background: var(--hover); color: var(--text); }
+    .inv-p-close i, .inv-p-close svg { width: 15px; height: 15px; }
+    .inv-p-amount { font-size: 24px; font-weight: 700; color: var(--text); margin-top: 8px; letter-spacing: -0.01em; }
+    .inv-p-due { font-size: 12px; color: var(--text-s); margin-top: 2px; line-height: 1.5; }
+    .inv-p-actions { display: flex; flex-direction: column; gap: 7px; margin-top: 14px; }
+    .inv-act-primary, .inv-act-ghost { display: flex; align-items: center; justify-content: center; gap: 7px; width: 100%; padding: 8px 12px; border-radius: 4px; font-size: 12.5px; font-weight: 600; cursor: pointer; font-family: inherit; }
+    .inv-act-primary { background: var(--blue); border: 1px solid var(--blue); color: #fff; }
+    .inv-act-primary:hover { filter: brightness(1.08); }
+    .inv-act-ghost { background: transparent; border: 1px solid var(--border); color: var(--text-s); }
+    .inv-act-ghost:hover { border-color: var(--blue); color: var(--blue); }
+    .inv-act-primary i, .inv-act-primary svg, .inv-act-ghost i, .inv-act-ghost svg { width: 13px; height: 13px; }
+    .inv-p-sec { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: var(--text-m); margin: 18px 0 6px; padding-bottom: 5px; border-bottom: 1px solid var(--border); }
+    .inv-p-krow { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; padding: 4px 0; font-size: 12px; }
+    .inv-p-krow > span:first-child { color: var(--text-m); }
+    .inv-p-krow > span:last-child { color: var(--text); font-weight: 500; text-align: right; }
+    .inv-p-item { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; padding: 5px 0; font-size: 12px; }
+    .inv-p-item-desc { color: var(--text-s); min-width: 0; }
+    .inv-p-item-qty { color: var(--text-m); font-size: 11px; }
+    .inv-p-item-amt { font-weight: 600; color: var(--text); white-space: nowrap; }
+    .inv-p-total { border-top: 1px solid var(--border); margin-top: 4px; padding-top: 8px; font-weight: 700; }
+    .inv-p-total > span:first-child { color: var(--text); font-weight: 700; }
+    .inv-tl { padding: 2px 0; }
+    .inv-tl-item { display: flex; gap: 10px; padding: 6px 0; align-items: flex-start; }
+    .inv-tl-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--blue); margin-top: 4px; flex-shrink: 0; }
+    .inv-tl-label { font-size: 12px; color: var(--text); font-weight: 500; line-height: 1.4; }
+    .inv-tl-ts { font-size: 11px; color: var(--text-m); margin-top: 1px; }
+    /* modal */
+    #inv-modal { position: fixed; inset: 0; z-index: 620; background: rgba(10,13,20,0.35); display: none; align-items: center; justify-content: center; padding: 20px; }
+    #inv-modal.open { display: flex; }
+    .inv-modal-box { background: var(--bg-card); border: 1px solid var(--card-border); border-radius: 6px; width: 400px; max-width: 100%; box-shadow: 0 12px 40px rgba(0,0,0,0.18); }
+    .inv-modal-title { font-size: 13.5px; font-weight: 700; color: var(--text); padding: 14px 18px 4px; }
+    .inv-modal-body { padding: 10px 18px 4px; display: flex; flex-direction: column; gap: 10px; }
+    .inv-modal-body select { padding: 7px 10px; background: var(--input-bg); border: 1px solid var(--input-border); border-radius: 4px; font-size: 12.5px; font-family: inherit; color: var(--text); outline: none; }
+    .inv-modal-foot { display: flex; align-items: center; justify-content: flex-end; gap: 8px; padding: 14px 18px; }
+    .inv-btn-danger { background: var(--red); border: 1px solid var(--red); color: #fff; }
+    /* drawer extras */
+    .inv-dr-field select { padding: 7px 10px; background: var(--input-bg); border: 1px solid var(--input-border); border-radius: 4px; font-size: 12.5px; font-family: inherit; color: var(--text); outline: none; cursor: pointer; }
+    .inv-col-h { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-m); }
+    .inv-lead-row { padding: 8px 12px; cursor: pointer; }
+    .inv-lead-row:hover { background: var(--hover); }
+    /* document view (print) */
+    .inv-print-bar { display: flex; align-items: center; justify-content: flex-end; gap: 8px; padding: 10px 16px; background: var(--bg-card); border-bottom: 1px solid var(--border); flex-shrink: 0; }
+    .inv-print-bar .btn-mini { display: inline-flex; align-items: center; gap: 6px; }
+    .ivd { background: #fff; color: #111827; max-width: 700px; margin: 0 auto; padding: 52px 56px; border-radius: 4px; box-shadow: 0 2px 14px rgba(0,0,0,0.08); font-size: 13px; line-height: 1.5; }
+    .ivd-top { display: flex; justify-content: space-between; align-items: flex-start; }
+    .ivd-h1 { font-size: 26px; font-weight: 700; letter-spacing: -0.01em; margin-bottom: 14px; }
+    .ivd-draft { font-size: 11px; font-weight: 700; color: #b45309; border: 1px solid #b45309; padding: 2px 8px; border-radius: 4px; vertical-align: middle; letter-spacing: 1px; }
+    .ivd-brand { font-size: 15px; font-weight: 800; color: #2563eb; letter-spacing: -0.01em; }
+    .ivd-meta td { font-size: 12px; padding: 1px 0; }
+    .ivd-meta td:first-child { color: #6b7280; padding-right: 18px; }
+    .ivd-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin: 30px 0 8px; font-size: 12px; color: #374151; }
+    .ivd-col-h { font-weight: 700; color: #111827; margin-bottom: 3px; }
+    .ivd-amount { font-size: 19px; font-weight: 700; margin: 26px 0 4px; }
+    .ivd-pay a { color: #2563eb; font-size: 12.5px; }
+    .ivd-memo { font-size: 12px; color: #4b5563; margin-top: 10px; white-space: pre-wrap; }
+    .ivd-items { width: 100%; border-collapse: collapse; margin-top: 30px; font-size: 12.5px; }
+    .ivd-items th { text-align: left; font-size: 11px; color: #6b7280; font-weight: 600; border-bottom: 1.5px solid #111827; padding: 6px 8px 6px 0; }
+    .ivd-items th:nth-child(n+2), .ivd-items td:nth-child(n+2) { text-align: right; white-space: nowrap; }
+    .ivd-items td { padding: 8px 8px 8px 0; border-bottom: 1px solid #e5e7eb; vertical-align: top; break-inside: avoid; }
+    .ivd-desc2 { font-size: 11px; color: #6b7280; margin-top: 2px; }
+    .ivd-totals { margin-left: auto; width: 260px; margin-top: 14px; font-size: 12.5px; }
+    .ivd-totals > div { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid #f3f4f6; }
+    .ivd-due { font-weight: 700; border-bottom: none !important; padding-top: 7px !important; }
+    .ivd-foot { margin-top: 44px; padding-top: 12px; border-top: 1px solid #e5e7eb; font-size: 11px; color: #6b7280; }
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0; }
+    @media (max-width: 900px) {
+      .inv-split { grid-template-columns: 1fr; }
+      .inv-detail-card { display: none; }
+      .inv-detail-card.inv-mobile-open { display: flex; position: fixed; inset: var(--hdr) 0 0 0; z-index: 210; border-radius: 0; overflow-y: auto; }
+      .inv-cards { grid-template-columns: 1fr 1fr; }
+      .inv-table th:nth-child(5), .inv-table td:nth-child(5), .inv-table th:nth-child(7), .inv-table td:nth-child(7) { display: none; }
+      .ivd { padding: 28px 20px; }
+    }
     .inv-biz-block { padding: 9px 12px; background: var(--hover); border-radius: 4px; font-size: 11.5px; color: var(--text-m); line-height: 1.5; }
     .inv-biz-block strong { color: var(--text-s); font-weight: 600; }
     /* Line items */
@@ -2741,103 +2863,173 @@
   <!-- INVOICES -->
   <div class="page" id="page-invoices">
 
-    <div class="stats-grid sg-3 mb20">
-      <div class="card stat-card"><div class="stat-top"><div class="stat-label"><i data-lucide="dollar-sign" class="kpi-glyph kg-green"></i>Total Invoiced</div></div><div class="stat-val" id="inv-kpi-total">—</div></div>
-      <div class="card stat-card"><div class="stat-top"><div class="stat-label"><i data-lucide="clock" class="kpi-glyph kg-amber"></i>Outstanding</div></div><div class="stat-val" id="inv-kpi-outstanding">—</div></div>
-      <div class="card stat-card"><div class="stat-top"><div class="stat-label"><i data-lucide="file" class="kpi-glyph kg-blue"></i>Drafts</div></div><div class="stat-val" id="inv-kpi-drafts">—</div></div>
+    <div class="inv-head">
+      <div>
+        <div class="inv-head-title">Invoices</div>
+        <div class="inv-head-sub">Create, send, and track invoices for your clients.</div>
+      </div>
+      <div class="inv-head-actions">
+        <button class="btn-mini btn-mini-ghost" onclick="invExportCsv()"><i data-lucide="download"></i>Export</button>
+        <button class="cmd-primary" onclick="openNewInvoice()"><i data-lucide="plus"></i>New Invoice</button>
+      </div>
+    </div>
+
+    <div class="stats-grid sg-4 inv-cards">
+      <div class="card stat-card inv-card-click" onclick="invCardFilter('open')" role="button" tabindex="0" aria-label="Filter to open invoices">
+        <div class="stat-top"><div class="stat-label"><i data-lucide="dollar-sign" class="kpi-glyph kg-blue"></i>Outstanding</div></div>
+        <div class="stat-val" id="inv-kpi-outstanding">—</div>
+        <div class="stat-hint" id="inv-kpi-outstanding-sub"></div>
+      </div>
+      <div class="card stat-card inv-card-click" onclick="invCardFilter('overdue')" role="button" tabindex="0" aria-label="Filter to overdue invoices">
+        <div class="stat-top"><div class="stat-label"><i data-lucide="clock" class="kpi-glyph kg-red"></i>Overdue</div></div>
+        <div class="stat-val" id="inv-kpi-overdue">—</div>
+        <div class="stat-hint" id="inv-kpi-overdue-sub"></div>
+      </div>
+      <div class="card stat-card inv-card-click" onclick="invCardFilter('paid')" role="button" tabindex="0" aria-label="Filter to paid invoices">
+        <div class="stat-top"><div class="stat-label"><i data-lucide="check-circle" class="kpi-glyph kg-green"></i>Paid this period</div></div>
+        <div class="stat-val" id="inv-kpi-paid">—</div>
+        <div class="stat-hint" id="inv-kpi-paid-sub"></div>
+      </div>
+      <div class="card stat-card inv-card-click" onclick="invCardFilter('draft')" role="button" tabindex="0" aria-label="Filter to draft invoices">
+        <div class="stat-top"><div class="stat-label"><i data-lucide="file" class="kpi-glyph kg-amber"></i>Drafts</div></div>
+        <div class="stat-val" id="inv-kpi-drafts">—</div>
+        <div class="stat-hint" id="inv-kpi-drafts-sub"></div>
+      </div>
     </div>
 
     <div class="inv-split">
 
       <!-- List -->
       <div class="card inv-list-card">
-        <div class="sec-head">
-          <div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0;">
-            <input id="inv-search" type="text" placeholder="Search invoices…" oninput="invFilterList()" style="padding:5px 10px;background:var(--input-bg);border:1px solid var(--input-border);border-radius:4px;font-size:11.5px;font-family:inherit;color:var(--text);outline:none;width:160px;" />
-            <select id="inv-filter" onchange="invFilterList()" style="padding:5px 8px;background:var(--input-bg);border:1px solid var(--input-border);border-radius:4px;font-size:11.5px;font-family:inherit;color:var(--text);outline:none;cursor:pointer;">
-              <option value="all">All</option>
-              <option value="draft">Drafts</option>
-              <option value="sent">Sent</option>
-              <option value="paid">Paid</option>
-              <option value="overdue">Overdue</option>
-            </select>
+        <div class="inv-toolbar">
+          <div class="inv-tb-search"><i data-lucide="search"></i>
+            <input id="inv-search" type="text" placeholder="Search invoices, clients, emails…" oninput="invFilterChange()" aria-label="Search invoices" />
           </div>
-          <button class="cmd-primary" onclick="openNewInvoice()"><i data-lucide="plus"></i>New Invoice</button>
+          <select id="inv-f-status" class="inv-tb-select" onchange="invFilterChange()" aria-label="Filter by status">
+            <option value="all">All statuses</option>
+            <option value="draft">Draft</option>
+            <option value="open">Open</option>
+            <option value="overdue">Overdue</option>
+            <option value="partially_paid">Partially paid</option>
+            <option value="paid">Paid</option>
+            <option value="void">Void</option>
+          </select>
+          <select id="inv-f-client" class="inv-tb-select" onchange="invFilterChange()" aria-label="Filter by client">
+            <option value="all">All clients</option>
+          </select>
+          <select id="inv-f-due" class="inv-tb-select" onchange="invFilterChange()" aria-label="Filter by due date">
+            <option value="all">Any due date</option>
+            <option value="next7">Due in 7 days</option>
+            <option value="month">Due this month</option>
+            <option value="past">Past due</option>
+          </select>
+          <select id="inv-f-sort" class="inv-tb-select" onchange="invFilterChange()" aria-label="Sort invoices">
+            <option value="newest">Newest</option>
+            <option value="oldest">Oldest</option>
+            <option value="duesoon">Due soon</option>
+            <option value="overdue">Most overdue</option>
+            <option value="amtdesc">Highest amount</option>
+            <option value="amtasc">Lowest amount</option>
+            <option value="updated">Recently updated</option>
+          </select>
+          <span class="sec-link" onclick="invClearFilters()">Clear</span>
+          <button class="inv-chip" onclick="invOverdueOnly()">Overdue only</button>
         </div>
         <div class="table-wrap">
-          <table class="skel-table">
-            <thead><tr><th>#</th><th>Client</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead>
-            <tbody id="inv-tbody"><tr><td colspan="5" style="text-align:center;padding:32px 16px;color:var(--text-m);font-size:12.5px;">Loading…</td></tr></tbody>
+          <table class="skel-table inv-table">
+            <thead><tr>
+              <th scope="col">Invoice</th><th scope="col">Client</th><th scope="col">Amount</th><th scope="col">Status</th>
+              <th scope="col">Issued</th><th scope="col">Due date</th><th scope="col">Last activity</th>
+              <th scope="col"><span class="sr-only">Actions</span></th>
+            </tr></thead>
+            <tbody id="inv-tbody"><tr><td colspan="8" style="text-align:center;padding:32px 16px;color:var(--text-m);font-size:12.5px;">Loading…</td></tr></tbody>
           </table>
         </div>
+        <div class="inv-table-foot" id="inv-table-foot"></div>
       </div>
 
-      <!-- Detail -->
+      <!-- Detail panel -->
       <div class="card inv-detail-card" id="inv-detail-panel">
         <div class="empty-state" style="padding:60px 20px;">
           <i data-lucide="file-text"></i>
           <div class="empty-state-title">Select an invoice</div>
-          <div class="empty-state-sub">Click any invoice to preview details here.</div>
+          <div class="empty-state-sub">View details, payment status, activity, and available actions.</div>
         </div>
       </div>
 
     </div>
   </div>
 
+  <!-- Invoice row actions + modal -->
+  <div class="card-ctx-menu" id="inv-row-menu"></div>
+  <div id="inv-modal" onclick="if(event.target===this)invModalClose()"></div>
+
   <!-- Invoice drawer (fixed) -->
   <div id="inv-drawer-overlay" onclick="closeInvoiceDrawer()"></div>
   <div id="inv-drawer">
     <div class="inv-dr-head">
       <span id="inv-dr-title">New Invoice</span>
-      <button class="inv-dr-close" onclick="closeInvoiceDrawer()"><i data-lucide="x"></i></button>
+      <button class="inv-dr-close" onclick="closeInvoiceDrawer()" aria-label="Close"><i data-lucide="x"></i></button>
     </div>
     <div class="inv-dr-body">
 
-      <!-- Your business -->
       <div class="inv-dr-section">
         <div class="inv-dr-section-label">Your Business</div>
         <div class="inv-biz-block"><strong id="inv-biz-name">—</strong><br><span id="inv-biz-email"></span></div>
       </div>
 
-      <!-- Bill To -->
-      <div class="inv-dr-section">
+      <div class="inv-dr-section" style="position:relative;">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
           <div class="inv-dr-section-label" style="margin-bottom:0;">Bill To</div>
           <button class="btn-mini btn-mini-ghost" style="font-size:11px;padding:4px 10px;" onclick="invPickLead()"><i data-lucide="search"></i>Pick lead</button>
         </div>
         <div class="inv-dr-row">
-          <div class="inv-dr-field"><label>Name</label><input id="inv-dr-bill-name" type="text" placeholder="Client name" /></div>
-          <div class="inv-dr-field"><label>Email</label><input id="inv-dr-bill-email" type="email" placeholder="email@example.com" /></div>
+          <div class="inv-dr-field"><label for="inv-dr-bill-name">Name</label><input id="inv-dr-bill-name" type="text" placeholder="Client name" /></div>
+          <div class="inv-dr-field"><label for="inv-dr-bill-email">Email</label><input id="inv-dr-bill-email" type="email" placeholder="email@example.com" /></div>
         </div>
-        <div class="inv-dr-field"><label>Company (optional)</label><input id="inv-dr-bill-company" type="text" placeholder="Company name" /></div>
+        <div class="inv-dr-row">
+          <div class="inv-dr-field"><label for="inv-dr-bill-company">Company (optional)</label><input id="inv-dr-bill-company" type="text" placeholder="Company name" /></div>
+          <div class="inv-dr-field"><label for="inv-dr-bill-address">Address (optional)</label><input id="inv-dr-bill-address" type="text" placeholder="Street, city, state" /></div>
+        </div>
       </div>
 
-      <!-- Invoice info -->
       <div class="inv-dr-section">
         <div class="inv-dr-section-label">Invoice Details</div>
+        <div class="inv-biz-block" style="font-size:11.5px;">Invoice number is assigned automatically when you finalize.</div>
         <div class="inv-dr-row">
-          <div class="inv-dr-field"><label>Invoice #</label><input id="inv-dr-num" type="text" placeholder="INV-001" /></div>
-          <div class="inv-dr-field"><label>Issue Date</label><input id="inv-dr-issue" type="date" /></div>
+          <div class="inv-dr-field"><label for="inv-dr-issue">Issue Date</label><input id="inv-dr-issue" type="date" /></div>
+          <div class="inv-dr-field"><label for="inv-dr-due">Due Date</label><input id="inv-dr-due" type="date" /></div>
         </div>
-        <div class="inv-dr-field"><label>Due Date</label><input id="inv-dr-due" type="date" /></div>
+        <div class="inv-dr-row">
+          <div class="inv-dr-field"><label for="inv-dr-terms">Payment Terms</label>
+            <select id="inv-dr-terms" onchange="invTermsChange()">
+              <option>Due on receipt</option><option>Net 7</option><option>Net 15</option><option>Net 30</option><option>Net 60</option>
+            </select>
+          </div>
+          <div class="inv-dr-field"><label for="inv-dr-currency">Currency</label>
+            <select id="inv-dr-currency" onchange="invRenderLines();invDrTotals()">
+              <option>USD</option><option>EUR</option><option>GBP</option><option>CAD</option><option>AUD</option>
+            </select>
+          </div>
+        </div>
+        <div class="inv-dr-field"><label for="inv-dr-po">PO Number (optional)</label><input id="inv-dr-po" type="text" placeholder="Purchase order reference" /></div>
       </div>
 
-      <!-- Line items -->
       <div class="inv-dr-section">
         <div style="display:grid;grid-template-columns:1fr 52px 84px 72px 24px;gap:6px;padding-bottom:6px;border-bottom:1px solid var(--border);margin-bottom:8px;">
-          <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-m);">Description</span>
-          <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-m);text-align:center;">Qty</span>
-          <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-m);text-align:right;">Price</span>
-          <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-m);text-align:right;">Total</span>
+          <span class="inv-col-h">Description</span>
+          <span class="inv-col-h" style="text-align:center;">Qty</span>
+          <span class="inv-col-h" style="text-align:right;">Price</span>
+          <span class="inv-col-h" style="text-align:right;">Total</span>
           <span></span>
         </div>
-        <div id="inv-lines-wrap"></div>
+        <div id="inv-dr-lines"></div>
         <button class="inv-add-line" onclick="invoiceAddLine()"><i data-lucide="plus"></i>Add line</button>
         <div class="inv-totals-block">
           <div class="inv-total-row"><span>Subtotal</span><span id="inv-dr-subtotal">$0.00</span></div>
           <div class="inv-dr-row" style="gap:10px;margin-top:6px;">
-            <div class="inv-dr-field"><label>Tax %</label><input id="inv-dr-tax" type="number" min="0" max="100" step="0.1" placeholder="0" oninput="invoiceCalcTotals()" /></div>
-            <div class="inv-dr-field"><label>Discount $</label><input id="inv-dr-discount" type="number" min="0" step="0.01" placeholder="0.00" oninput="invoiceCalcTotals()" /></div>
+            <div class="inv-dr-field"><label for="inv-dr-tax">Tax %</label><input id="inv-dr-tax" type="number" min="0" max="100" step="0.1" placeholder="0" oninput="invDrTotals()" /></div>
+            <div class="inv-dr-field"><label for="inv-dr-discount">Discount</label><input id="inv-dr-discount" type="number" min="0" step="0.01" placeholder="0.00" oninput="invDrTotals()" /></div>
           </div>
           <div class="inv-total-row"><span>Tax</span><span id="inv-dr-tax-amt">—</span></div>
           <div class="inv-total-row"><span>Discount</span><span id="inv-dr-disc-amt">—</span></div>
@@ -2845,16 +3037,16 @@
         </div>
       </div>
 
-      <!-- Notes -->
       <div class="inv-dr-section">
-        <div class="inv-dr-field"><label>Notes (optional)</label><textarea id="inv-dr-notes" placeholder="Payment terms, bank details, or anything else…"></textarea></div>
+        <div class="inv-dr-section-label">Payment</div>
+        <div class="inv-dr-field"><label for="inv-dr-payurl">Payment link (optional)</label><input id="inv-dr-payurl" type="url" placeholder="https:// — Stripe or PayPal link you created" /></div>
+        <div class="inv-dr-field"><label for="inv-dr-memo">Memo (shown to client)</label><textarea id="inv-dr-memo" placeholder="A short note that appears on the invoice…"></textarea></div>
       </div>
 
     </div>
     <div class="inv-dr-foot">
-      <button class="btn-mini btn-mini-ghost" onclick="invPrintCurrent()"><i data-lucide="printer"></i>Print PDF</button>
-      <button class="btn-mini btn-mini-primary" id="inv-save-btn" onclick="invoiceSave('draft')">Save Draft</button>
-      <button class="btn-mini btn-mini-primary" onclick="invoiceSave('sent')" style="background:var(--green);">Mark Sent</button>
+      <button class="btn-mini btn-mini-ghost" id="inv-dr-save" onclick="invoiceSaveDraft(false)">Save Draft</button>
+      <button class="btn-mini btn-mini-primary" id="inv-dr-finalize" onclick="invoiceSaveDraft(true)">Finalize &amp; Save</button>
     </div>
   </div>
 
@@ -3242,6 +3434,30 @@
     <div class="pivot-pane" id="st-billing">
     <div class="settings-grid-v2">
       <div class="card">
+        <div class="sec-head"><div class="sec-title">Business &amp; Invoice Details</div><span class="save-status" id="ss-billing-status">Saved</span></div>
+        <div class="p20" style="display:flex;flex-direction:column;gap:10px;">
+          <div style="font-size:11.5px;color:var(--text-m);line-height:1.5;">Shown as the seller on every invoice, receipt, and the client payment page. Empty fields are simply omitted.</div>
+          <div class="field"><label>Legal business name</label><input type="text" id="s-inv-legal" placeholder="Flowaify LLC" maxlength="160" /></div>
+          <div class="field"><label>Address line 1</label><input type="text" id="s-inv-addr1" placeholder="Street address" maxlength="160" /></div>
+          <div class="field"><label>Address line 2</label><input type="text" id="s-inv-addr2" placeholder="Suite, unit (optional)" maxlength="160" /></div>
+          <div style="display:grid;grid-template-columns:2fr 1fr 1fr;gap:8px;">
+            <div class="field"><label>City</label><input type="text" id="s-inv-city" maxlength="80" /></div>
+            <div class="field"><label>State</label><input type="text" id="s-inv-region" maxlength="60" /></div>
+            <div class="field"><label>ZIP</label><input type="text" id="s-inv-postal" maxlength="20" /></div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+            <div class="field"><label>Country</label><input type="text" id="s-inv-country" placeholder="United States" maxlength="60" /></div>
+            <div class="field"><label>Default currency</label><select id="s-inv-currency"><option>USD</option><option>EUR</option><option>GBP</option><option>CAD</option><option>AUD</option></select></div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+            <div class="field"><label>Billing / support email</label><input type="email" id="s-inv-supportEmail" placeholder="billing@yourbusiness.com" maxlength="160" /></div>
+            <div class="field"><label>Tax ID (optional)</label><input type="text" id="s-inv-taxId" placeholder="EIN / VAT" maxlength="60" /></div>
+          </div>
+          <button class="btn-mini btn-mini-primary" style="align-self:flex-start;" onclick="saveBillingSettings()">Save Business Details</button>
+        </div>
+      </div>
+
+      <div class="card">
         <div class="sec-head"><div class="sec-title">Current Plan</div></div>
         <div class="p20">
           <div class="st-plan">
@@ -3460,9 +3676,9 @@
 
 <script src="crm.js?v=34"></script>
 <script src="teams.js?v=9"></script>
-<script src="settings.js?v=3"></script>
+<script src="settings.js?v=4"></script>
 <script src="analytics.js?v=2"></script>
-<script src="invoice.js?v=3"></script>
+<script src="invoice.js?v=4"></script>
 <script src="inbox.js?v=2"></script>
 <script src="flowy.js?v=10"></script>
 <script src="reports.js?v=1"></script>

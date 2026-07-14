@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Invoice — Flowaify</title>
+<style>
+  :root { --ink:#111827; --mut:#6b7280; --soft:#9ca3af; --line:#e5e7eb; --blue:#2563eb; --green:#059669; --red:#dc2626; --bg:#f5f6f8; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:14px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; -webkit-font-smoothing:antialiased; }
+  .wrap { max-width:1060px; margin:0 auto; padding:34px 20px 60px; }
+  .brand { display:flex; align-items:center; gap:8px; margin-bottom:26px; }
+  .brand-mark { width:26px; height:26px; border-radius:7px; background:var(--blue); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:15px; }
+  .brand-name { font-weight:700; font-size:16px; letter-spacing:-0.01em; }
+  .grid { display:grid; grid-template-columns: 360px 1fr; gap:22px; align-items:start; }
+  .card { background:#fff; border:1px solid var(--line); border-radius:8px; }
+  /* status card */
+  .status { padding:30px 28px; text-align:center; }
+  .status-icon { width:46px; height:46px; border-radius:50%; margin:0 auto 12px; display:flex; align-items:center; justify-content:center; }
+  .status-icon.due { background:#eff6ff; color:var(--blue); }
+  .status-icon.paid { background:#ecfdf5; color:var(--green); }
+  .status-icon.overdue { background:#fef2f2; color:var(--red); }
+  .status-icon svg { width:22px; height:22px; }
+  .status-label { font-size:13px; color:var(--mut); font-weight:500; }
+  .status-amount { font-size:30px; font-weight:700; letter-spacing:-0.02em; margin:4px 0 2px; }
+  .status-due { font-size:12.5px; color:var(--mut); }
+  .status-due strong.red { color:var(--red); }
+  .kv { margin-top:20px; border-top:1px solid var(--line); padding-top:14px; text-align:left; }
+  .kv > div { display:flex; justify-content:space-between; gap:12px; font-size:12.5px; padding:3px 0; }
+  .kv > div > span:first-child { color:var(--mut); }
+  .btns { margin-top:18px; display:flex; flex-direction:column; gap:8px; }
+  .btn { display:flex; align-items:center; justify-content:center; gap:7px; width:100%; padding:10px 14px; border-radius:6px; font-size:13.5px; font-weight:600; cursor:pointer; text-decoration:none; font-family:inherit; }
+  .btn-primary { background:var(--blue); color:#fff; border:1px solid var(--blue); }
+  .btn-primary:hover { filter:brightness(1.07); }
+  .btn-ghost { background:#fff; color:var(--ink); border:1px solid var(--line); }
+  .btn-ghost:hover { border-color:var(--soft); }
+  .powered { text-align:center; font-size:11.5px; color:var(--soft); margin-top:16px; }
+  .powered a { color:var(--soft); }
+  /* document */
+  .doc { padding:40px 44px; }
+  .doc-h1 { font-size:24px; font-weight:700; letter-spacing:-0.01em; margin:0 0 12px; }
+  .meta td { font-size:12.5px; padding:1px 0; }
+  .meta td:first-child { color:var(--mut); padding-right:20px; }
+  .cols { display:grid; grid-template-columns:1fr 1fr; gap:28px; margin:26px 0 4px; font-size:12.5px; color:#374151; }
+  .col-h { font-weight:700; color:var(--ink); margin-bottom:3px; }
+  .amount-line { font-size:18px; font-weight:700; margin:24px 0 2px; }
+  .memo { font-size:12.5px; color:#4b5563; margin-top:8px; white-space:pre-wrap; }
+  table.items { width:100%; border-collapse:collapse; margin-top:26px; font-size:13px; }
+  .items th { text-align:left; font-size:11px; color:var(--mut); font-weight:600; border-bottom:1.5px solid var(--ink); padding:6px 8px 6px 0; }
+  .items th:nth-child(n+2), .items td:nth-child(n+2) { text-align:right; white-space:nowrap; }
+  .items td { padding:9px 8px 9px 0; border-bottom:1px solid var(--line); vertical-align:top; }
+  .desc2 { font-size:11.5px; color:var(--mut); margin-top:2px; }
+  .totals { margin-left:auto; width:260px; margin-top:12px; font-size:13px; }
+  .totals > div { display:flex; justify-content:space-between; padding:4px 0; border-bottom:1px solid #f3f4f6; }
+  .totals .grand { font-weight:700; border-bottom:none; padding-top:7px; }
+  .payhist { margin-top:28px; }
+  .payhist-h { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.6px; color:var(--mut); border-bottom:1px solid var(--line); padding-bottom:6px; margin-bottom:4px; }
+  .payhist > div:not(.payhist-h) { display:flex; justify-content:space-between; font-size:12.5px; padding:5px 0; color:#374151; }
+  .foot { margin-top:38px; padding-top:12px; border-top:1px solid var(--line); font-size:11.5px; color:var(--mut); }
+  /* states */
+  .state { max-width:440px; margin:80px auto; text-align:center; padding:44px 32px; }
+  .state h1 { font-size:17px; margin:12px 0 6px; }
+  .state p { font-size:13px; color:var(--mut); margin:0; }
+  .spin { width:26px; height:26px; border:3px solid var(--line); border-top-color:var(--blue); border-radius:50%; margin:0 auto; animation:sp 0.8s linear infinite; }
+  @keyframes sp { to { transform:rotate(360deg); } }
+  @media (max-width:860px) { .grid { grid-template-columns:1fr; } .doc { padding:28px 20px; } }
+  @media print {
+    body { background:#fff; }
+    .brand, .status-col, .powered, .no-print { display:none !important; }
+    .grid { display:block; }
+    .card { border:none; }
+    .doc { padding:0; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap" id="app">
+  <div class="card state" id="loading"><div class="spin"></div><h1>Loading invoice…</h1></div>
+</div>
+<script>
+(function() {
+  var WORKER = 'https://flowaify-crm-proxy.black-glitter-c4cd.workers.dev';
+  var app = document.getElementById('app');
+
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+  function money(c, cur) {
+    try { return new Intl.NumberFormat(undefined, { style:'currency', currency: cur || 'USD' }).format((c || 0) / 100); }
+    catch (e) { return '$' + ((c || 0) / 100).toFixed(2); }
+  }
+  function fdate(iso) {
+    if (!iso) return '—';
+    var d = new Date(iso + 'T00:00:00');
+    return isNaN(d) ? '—' : d.toLocaleDateString(undefined, { month:'long', day:'numeric', year:'numeric' });
+  }
+  function state(title, text, icon) {
+    app.innerHTML = '<div class="card state">' + (icon || '') + '<h1>' + esc(title) + '</h1><p>' + esc(text) + '</p></div>';
+  }
+
+  var token = new URLSearchParams(location.search).get('i') || '';
+  if (!/^[a-f0-9]{48}$/.test(token)) {
+    state('Invoice not found', 'This link is incomplete or invalid. Contact the sender for a new link.');
+    return;
+  }
+
+  fetch(WORKER + '/pub/invoice?t=' + token)
+    .then(function(r) { return r.json().then(function(d) { return { s: r.status, d: d }; }); })
+    .then(function(res) {
+      if (res.s === 410) { state('Invoice no longer payable', 'This invoice was cancelled by the sender. Contact them if you believe this is a mistake.'); return; }
+      if (res.s !== 200 || !res.d.invoice) { state('Invoice not found', 'This link may have expired or been replaced. Contact the sender for a new link.'); return; }
+      render(res.d.invoice, res.d.seller || {});
+    })
+    .catch(function() { state('Connection problem', 'We could not load this invoice. Check your connection and refresh the page.'); });
+
+  function render(inv, seller) {
+    document.title = (inv.number || 'Invoice') + ' — ' + (seller.name || 'Flowaify');
+    var today = new Date().toISOString().slice(0, 10);
+    var isPaid = inv.status === 'paid';
+    var isPartial = inv.status === 'partially_paid';
+    var isOverdue = !isPaid && inv.dueDate && inv.dueDate < today;
+
+    var iconCheck = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
+    var iconDoc = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>';
+    var iconClock = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>';
+
+    var statusIcon = isPaid ? '<div class="status-icon paid">' + iconCheck + '</div>'
+      : isOverdue ? '<div class="status-icon overdue">' + iconClock + '</div>'
+      : '<div class="status-icon due">' + iconDoc + '</div>';
+    var statusLabel = isPaid ? 'Invoice paid' : isPartial ? 'Partially paid — balance due' : 'Amount due';
+    var statusAmt = isPaid ? money(inv.totalC, inv.currency) : money(inv.remainingC, inv.currency);
+    var dueLine = isPaid
+      ? 'Paid ' + (inv.paidAt ? new Date(inv.paidAt).toLocaleDateString(undefined, { month:'long', day:'numeric', year:'numeric' }) : '')
+      : 'Due ' + fdate(inv.dueDate) + (isOverdue ? ' — <strong class="red">past due</strong>' : '');
+
+    var btns = '';
+    if (!isPaid && inv.payUrl) btns += '<a class="btn btn-primary" href="' + esc(inv.payUrl) + '" rel="noopener">Pay invoice</a>';
+    btns += '<button class="btn btn-ghost" onclick="window.print()">Download invoice</button>';
+
+    var sellerLines = [seller.name, seller.address1, seller.address2,
+      [seller.city, seller.region, seller.postal].filter(Boolean).join(', '),
+      seller.country, seller.supportEmail, seller.taxId ? 'Tax ID: ' + seller.taxId : '']
+      .filter(Boolean).map(esc);
+    var c = inv.client || {};
+    var billLines = [c.name, c.company, c.address, c.email].filter(Boolean).map(esc);
+
+    var rows = (inv.items || []).map(function(it) {
+      return '<tr><td>' + esc(it.desc) + (it.desc2 ? '<div class="desc2">' + esc(it.desc2) + '</div>' : '') + '</td>' +
+        '<td>' + it.qty + '</td><td>' + money(it.unitC, inv.currency) + '</td><td>' + money(it.totalC, inv.currency) + '</td></tr>';
+    }).join('');
+
+    var totals = '<div><span>Subtotal</span><span>' + money(inv.subtotalC, inv.currency) + '</span></div>' +
+      (inv.discountC ? '<div><span>Discount</span><span>−' + money(inv.discountC, inv.currency) + '</span></div>' : '') +
+      (inv.taxC ? '<div><span>Tax (' + (inv.taxRateBps / 100) + '%)</span><span>' + money(inv.taxC, inv.currency) + '</span></div>' : '') +
+      '<div><span>Total</span><span>' + money(inv.totalC, inv.currency) + '</span></div>' +
+      (inv.paidC ? '<div><span>Amount paid</span><span>−' + money(inv.paidC, inv.currency) + '</span></div>' : '') +
+      '<div class="grand"><span>Amount due</span><span>' + money(inv.remainingC, inv.currency) + ' ' + esc(inv.currency || 'USD') + '</span></div>';
+
+    var pays = (inv.payments || []).map(function(p) {
+      return '<div><span>' + fdate(p.date) + ' · ' + esc(p.method) + (p.receiptNo ? ' · ' + esc(p.receiptNo) : '') + '</span><span>' + money(p.amountC, inv.currency) + '</span></div>';
+    }).join('');
+
+    var amountLine = isPaid
+      ? money(inv.totalC, inv.currency) + ' ' + esc(inv.currency || 'USD') + ' paid'
+      : money(inv.remainingC, inv.currency) + ' ' + esc(inv.currency || 'USD') + ' due ' + fdate(inv.dueDate);
+
+    app.innerHTML =
+      '<div class="brand"><div class="brand-mark">F</div><div class="brand-name">' + esc(seller.name || 'Flowaify') + '</div></div>' +
+      '<div class="grid">' +
+        '<div class="status-col">' +
+          '<div class="card status">' + statusIcon +
+            '<div class="status-label">' + statusLabel + '</div>' +
+            '<div class="status-amount">' + statusAmt + '</div>' +
+            '<div class="status-due">' + dueLine + '</div>' +
+            '<div class="kv">' +
+              '<div><span>Invoice number</span><span>' + esc(inv.number || '—') + '</span></div>' +
+              '<div><span>Date of issue</span><span>' + fdate(inv.issueDate) + '</span></div>' +
+              (inv.terms ? '<div><span>Terms</span><span>' + esc(inv.terms) + '</span></div>' : '') +
+              (isPaid && inv.payments && inv.payments.length ? '<div><span>Payment method</span><span>' + esc(inv.payments[inv.payments.length - 1].method) + '</span></div>' : '') +
+            '</div>' +
+            '<div class="btns no-print">' + btns + '</div>' +
+          '</div>' +
+          '<div class="powered">Powered by <a href="https://flowaify.app" rel="noopener">Flowaify</a></div>' +
+        '</div>' +
+        '<div class="card doc">' +
+          '<h1 class="doc-h1">Invoice</h1>' +
+          '<table class="meta">' +
+            '<tr><td>Invoice number</td><td>' + esc(inv.number || '—') + '</td></tr>' +
+            '<tr><td>Date of issue</td><td>' + fdate(inv.issueDate) + '</td></tr>' +
+            '<tr><td>Date due</td><td>' + fdate(inv.dueDate) + '</td></tr>' +
+            (inv.poNumber ? '<tr><td>PO number</td><td>' + esc(inv.poNumber) + '</td></tr>' : '') +
+          '</table>' +
+          '<div class="cols">' +
+            '<div><div class="col-h">' + (sellerLines[0] || 'Seller') + '</div>' + sellerLines.slice(1).map(function(l){return '<div>'+l+'</div>';}).join('') + '</div>' +
+            '<div><div class="col-h">Bill to</div>' + billLines.map(function(l){return '<div>'+l+'</div>';}).join('') + '</div>' +
+          '</div>' +
+          '<div class="amount-line">' + amountLine + '</div>' +
+          (!isPaid && inv.payUrl ? '<div class="no-print" style="font-size:12.5px;margin-top:2px;"><a href="' + esc(inv.payUrl) + '" rel="noopener" style="color:var(--blue);">Pay online</a></div>' : '') +
+          (inv.memo ? '<div class="memo">' + esc(inv.memo) + '</div>' : '') +
+          '<table class="items"><thead><tr><th>Description</th><th>Qty</th><th>Unit price</th><th>Amount</th></tr></thead><tbody>' + rows + '</tbody></table>' +
+          '<div class="totals">' + totals + '</div>' +
+          (pays ? '<div class="payhist"><div class="payhist-h">Payment history</div>' + pays + '</div>' : '') +
+          '<div class="foot">' + (inv.terms ? esc(inv.terms) + ' · ' : '') +
+            (seller.supportEmail ? 'Questions? Contact <a href="mailto:' + esc(seller.supportEmail) + '" style="color:var(--mut);">' + esc(seller.supportEmail) + '</a>' : '') +
+          '</div>' +
+        '</div>' +
+      '</div>';
+  }
+})();
+</script>
+</body>
+</html>
