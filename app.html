@@ -538,7 +538,7 @@
     .card-handle:hover { background: var(--hover); opacity: 1 !important; }
     .card-handle span { width: 11px; height: 1.5px; background: var(--text-m); border-radius: 1px; display: block; }
     .card:hover > .card-handle { opacity: 0.45; }
-    body.ov-customize #ov-kpi-grid > .card, body.ov-customize #ov-mid-grid > .card, body.ov-customize #ov-bot-side > .card, body.ov-customize #ov-bot-main > .card { outline: 1px dashed rgba(59,130,246,.35); outline-offset: -1px; }
+    body.ov-customize #ov-kpi-grid > .card, body.ov-customize #ov-mid-grid > .card, body.ov-customize #ov-bot-side > .card, body.ov-customize #ov-bot-main > .card, body.ov-customize #an-grid > .card { outline: 1px dashed rgba(59,130,246,.35); outline-offset: -1px; }
     body.ov-customize .ov-zone-empty { min-height: 72px; outline: 1.5px dashed var(--border); outline-offset: -2px; border-radius: 4px; position: relative; }
     body.ov-customize .ov-zone-empty::after { content: 'Drop widgets here'; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 500; color: var(--text-m); pointer-events: none; }
     body.ov-customize .card-handle { opacity: 0.7 !important; cursor: grab; }
@@ -951,8 +951,24 @@
     /* Automations KPI strip */
     #page-automations .stats-grid { flex-shrink: 0; }
     /* Pages that need internal scroll (too many sections) */
-    #page-analytics { overflow-y: auto; }
-    #page-analytics > * { flex-shrink: 0; }
+    /* Analytics — fixed one-viewport layout, widgets in a fluid grid */
+    #page-analytics { overflow: hidden; }
+    #page-analytics .stats-grid { flex-shrink: 0; }
+    #an-grid { flex: 1; min-height: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); grid-auto-rows: minmax(0, 1fr); gap: 12px; }
+    #an-grid > .card { display: flex; flex-direction: column; min-width: 0; min-height: 0; overflow: hidden; position: relative; }
+    #an-grid > .card > .sec-head { flex-shrink: 0; }
+    #an-grid .brand-stats { flex-shrink: 0; }
+    #an-grid .chart-wrap { flex: 1 1 0; min-height: 0; height: auto; padding: 8px 16px 12px; position: relative; }
+    #an-grid .an-fill { flex: 1; min-height: 0; overflow-y: auto; padding: 10px 16px; }
+    body.ov-customize #an-grid { outline: 1.5px dashed transparent; }
+    body.ov-customize #an-grid.an-zone-empty { outline-color: var(--border); outline-offset: -2px; border-radius: 4px; }
+    #ov-catalog.an-mode #ovc-ov-only { display: none; }
+    @media (max-width: 900px) {
+      #page-analytics { overflow-y: auto; }
+      #an-grid { display: flex; flex-direction: column; flex: none; }
+      #an-grid > .card { min-height: 280px; }
+      #an-grid .chart-wrap { min-height: 190px; }
+    }
     #page-settings .pivot-bar { flex-shrink: 0; }
     /* Activity page — operational history & review */
     #page-activity { overflow-y: auto; }
@@ -2652,7 +2668,8 @@
   <!-- ANALYTICS -->
   <div class="page" id="page-analytics">
 
-    <div style="display:flex;align-items:center;justify-content:flex-end;margin-bottom:12px;">
+    <div style="display:flex;align-items:center;justify-content:flex-end;gap:8px;margin-bottom:12px;flex-shrink:0;">
+      <button class="btn-mini btn-mini-ghost" style="display:inline-flex;align-items:center;gap:6px;" onclick="if(window.anCustToggle)anCustToggle()"><i data-lucide="layout-grid" style="width:13px;height:13px;"></i>Customize layout</button>
       <button class="btn-mini btn-mini-ghost" style="display:inline-flex;align-items:center;gap:6px;" onclick="if(window.openReportEditor)openReportEditor()"><i data-lucide="bar-chart-2" style="width:13px;height:13px;"></i>Generate report</button>
     </div>
 
@@ -2665,26 +2682,60 @@
       <div class="card stat-card"><div class="stat-top"><div class="stat-label"><i data-lucide="pie-chart" class="kpi-glyph kg-purple"></i>Lead Sources</div></div><div class="stat-val" id="val-an-sources">—</div></div>
     </div>
 
-    <div class="card mb20">
-      <div class="sec-head"><div class="sec-title">Conversion Funnel</div><div style="display:flex;align-items:center;gap:8px;"><button class="exq-btn" onclick="flowyExplain('my conversion funnel')" title="Ask Flowy to explain"><i data-lucide="sparkles"></i></button><div class="sec-sub range-label">Last 30 days</div></div></div>
-      <div id="funnel" style="padding:14px 18px;"></div>
-    </div>
-
-    <div class="analytics-charts mb20">
-      <div class="card card-brand"><div class="sec-head"><div class="sec-title">Leads Over Time</div><div class="sec-sub range-label">Last 30 days</div></div>
+    <div id="an-grid">
+      <div class="card card-brand" id="an-w-leads">
+        <div class="card-handle" onclick="cardCtxOpen(event,'an-w-leads')" title="Card options"><span></span><span></span><span></span></div>
+        <div class="sec-head"><div class="sec-title">Leads Over Time</div><div class="sec-sub range-label">Last 30 days</div></div>
         <div class="brand-stats">
           <div><span class="bp-val" id="bp-leads">—</span><span class="bp-label">Leads</span></div>
           <div><span class="bp-val" id="bp-booked">—</span><span class="bp-label">Booked</span></div>
           <div><span class="bp-val" id="bp-conv">—</span><span class="bp-label">Conv. Rate</span></div>
         </div>
-        <div class="chart-wrap" style="padding:10px 18px 16px;height:160px;"><canvas id="an-leads"></canvas><div class="chart-empty"><i data-lucide="trending-up"></i><div class="chart-empty-title">No leads in this period</div><div class="chart-empty-text">Widen the date range to see lead volume over time.</div></div></div></div>
-      <div class="card"><div class="sec-head"><div class="sec-title">Response Time Trend</div><span class="state-pill awaiting" id="pill-resp-an"><span class="sp-dot"></span>No data yet</span></div><div class="chart-wrap" style="padding:18px;"><canvas id="an-resp"></canvas><div class="chart-empty"><i data-lucide="activity"></i><div class="chart-empty-title">No data yet</div><div class="chart-empty-text">Fills in once automations start responding to leads.</div></div></div></div>
-      <div class="card"><div class="sec-head"><div class="sec-title">Source Performance</div></div><div id="an-srclist"><div class="empty-state" style="padding:50px 20px;"><i data-lucide="pie-chart"></i><div class="empty-state-title">No source data in this period</div><div class="empty-state-sub">Widen the date range to compare lead sources.</div></div></div></div>
-      <div class="card"><div class="sec-head"><div class="sec-title">Status Breakdown</div><button class="exq-btn" onclick="flowyExplain('my lead status breakdown')" title="Ask Flowy to explain"><i data-lucide="sparkles"></i></button></div><div class="chart-wrap" style="padding:18px;"><canvas id="an-status"></canvas><div class="chart-empty"><i data-lucide="bar-chart-2"></i><div class="chart-empty-title">No status data in this period</div><div class="chart-empty-text">Lead statuses (HOT, WARM, BOOKED) will chart here as Flowaify categorizes leads.</div></div></div></div>
-      <div class="card"><div class="sec-head"><div class="sec-title">Booked Calls Over Time</div><span class="state-pill awaiting" id="pill-booked"><span class="sp-dot"></span>No data yet</span></div><div class="chart-wrap" style="padding:18px;"><canvas id="an-booked-chart"></canvas><div class="chart-empty"><i data-lucide="calendar-check"></i><div class="chart-empty-title">No data yet</div><div class="chart-empty-text">Charts once your automations start converting leads to booked calls.</div></div></div></div>
-      <div class="card"><div class="sec-head"><div class="sec-title">New Leads by Day of Week</div></div><div class="chart-wrap" style="padding:18px;"><canvas id="an-dow"></canvas><div class="chart-empty"><i data-lucide="calendar-days"></i><div class="chart-empty-title">No leads in this period</div><div class="chart-empty-text">See which days bring in the most leads — useful for scheduling ads and staffing.</div></div></div></div>
+        <div class="chart-wrap"><canvas id="an-leads"></canvas><div class="chart-empty"><i data-lucide="trending-up"></i><div class="chart-empty-title">No leads in this period</div><div class="chart-empty-text">Widen the date range to see lead volume over time.</div></div></div>
+      </div>
+
+      <div class="card" id="an-w-funnel">
+        <div class="card-handle" onclick="cardCtxOpen(event,'an-w-funnel')" title="Card options"><span></span><span></span><span></span></div>
+        <div class="sec-head"><div class="sec-title">Conversion Funnel</div><div style="display:flex;align-items:center;gap:8px;"><button class="exq-btn" onclick="flowyExplain('my conversion funnel')" title="Ask Flowy to explain"><i data-lucide="sparkles"></i></button><div class="sec-sub range-label">Last 30 days</div></div></div>
+        <div id="funnel" class="an-fill"></div>
+      </div>
+
+      <div class="card" id="an-w-src">
+        <div class="card-handle" onclick="cardCtxOpen(event,'an-w-src')" title="Card options"><span></span><span></span><span></span></div>
+        <div class="sec-head"><div class="sec-title">Source Performance</div></div>
+        <div id="an-srclist" class="an-fill"><div class="empty-state" style="padding:50px 20px;"><i data-lucide="pie-chart"></i><div class="empty-state-title">No source data in this period</div><div class="empty-state-sub">Widen the date range to compare lead sources.</div></div></div>
+      </div>
+
+      <div class="card" id="an-w-status">
+        <div class="card-handle" onclick="cardCtxOpen(event,'an-w-status')" title="Card options"><span></span><span></span><span></span></div>
+        <div class="sec-head"><div class="sec-title">Status Breakdown</div><button class="exq-btn" onclick="flowyExplain('my lead status breakdown')" title="Ask Flowy to explain"><i data-lucide="sparkles"></i></button></div>
+        <div class="chart-wrap"><canvas id="an-status"></canvas><div class="chart-empty"><i data-lucide="bar-chart-2"></i><div class="chart-empty-title">No status data in this period</div><div class="chart-empty-text">Lead statuses (HOT, WARM, BOOKED) will chart here as Flowaify categorizes leads.</div></div></div>
+      </div>
+
+      <div class="card" id="an-w-booked">
+        <div class="card-handle" onclick="cardCtxOpen(event,'an-w-booked')" title="Card options"><span></span><span></span><span></span></div>
+        <div class="sec-head"><div class="sec-title">Booked Calls Over Time</div><span class="state-pill awaiting" id="pill-booked"><span class="sp-dot"></span>No data yet</span></div>
+        <div class="chart-wrap"><canvas id="an-booked-chart"></canvas><div class="chart-empty"><i data-lucide="calendar-check"></i><div class="chart-empty-title">No data yet</div><div class="chart-empty-text">Charts once your automations start converting leads to booked calls.</div></div></div>
+      </div>
+
+      <div class="card" id="an-w-dow">
+        <div class="card-handle" onclick="cardCtxOpen(event,'an-w-dow')" title="Card options"><span></span><span></span><span></span></div>
+        <div class="sec-head"><div class="sec-title">New Leads by Day of Week</div></div>
+        <div class="chart-wrap"><canvas id="an-dow"></canvas><div class="chart-empty"><i data-lucide="calendar-days"></i><div class="chart-empty-title">No leads in this period</div><div class="chart-empty-text">See which days bring in the most leads — useful for scheduling ads and staffing.</div></div></div>
+      </div>
+
+      <div class="card" id="an-w-resp" style="display:none;">
+        <div class="card-handle" onclick="cardCtxOpen(event,'an-w-resp')" title="Card options"><span></span><span></span><span></span></div>
+        <div class="sec-head"><div class="sec-title">Response Time Trend</div><span class="state-pill awaiting" id="pill-resp-an"><span class="sp-dot"></span>No data yet</span></div>
+        <div class="chart-wrap"><canvas id="an-resp"></canvas><div class="chart-empty"><i data-lucide="activity"></i><div class="chart-empty-title">No data yet</div><div class="chart-empty-text">Fills in once automations start responding to leads.</div></div></div>
+      </div>
+
+      <div class="card" id="an-w-stage" style="display:none;">
+        <div class="card-handle" onclick="cardCtxOpen(event,'an-w-stage')" title="Card options"><span></span><span></span><span></span></div>
+        <div class="sec-head"><div class="sec-title">Pipeline Value by Stage</div><div style="display:flex;align-items:center;gap:8px;"><button class="exq-btn" onclick="flowyExplain('my pipeline by stage')" title="Ask Flowy to explain"><i data-lucide="sparkles"></i></button><div class="sec-sub">All time</div></div></div>
+        <div id="stage-list" class="an-fill"><div class="empty-state" style="padding:36px 20px;"><i data-lucide="bar-chart-2"></i><div class="empty-state-title">No deals yet</div><div class="empty-state-sub">Pipeline value by stage will appear once deals exist in your CRM.</div></div></div>
+      </div>
     </div>
-    <div class="card"><div class="sec-head"><div class="sec-title">Pipeline Value by Stage</div><div style="display:flex;align-items:center;gap:8px;"><button class="exq-btn" onclick="flowyExplain('my pipeline by stage')" title="Ask Flowy to explain"><i data-lucide="sparkles"></i></button><div class="sec-sub">All time</div></div></div><div id="stage-list" style="padding:14px 16px;min-height:140px;"><div class="empty-state" style="padding:36px 20px;"><i data-lucide="bar-chart-2"></i><div class="empty-state-title">No deals yet</div><div class="empty-state-sub">Pipeline value by stage will appear once deals exist in your CRM.</div></div></div></div>
   </div>
 
   <!-- INVOICES -->
@@ -3366,10 +3417,12 @@
 <div id="ov-catalog">
   <div class="ovc-head">Customize Layout<div class="ovc-x" onclick="ovCustCancel()"><i data-lucide="x"></i></div></div>
   <div class="ovc-scroll">
-    <div class="ovc-sec-title">Templates</div>
-    <div class="ovc-tpl-grid" id="ovc-tpl-grid"></div>
-    <div class="ovc-sec-title">My Layouts</div>
-    <div id="ovc-mylayouts"></div>
+    <div id="ovc-ov-only">
+      <div class="ovc-sec-title">Templates</div>
+      <div class="ovc-tpl-grid" id="ovc-tpl-grid"></div>
+      <div class="ovc-sec-title">My Layouts</div>
+      <div id="ovc-mylayouts"></div>
+    </div>
     <div class="ovc-sec-title">Widgets</div>
     <div class="ovc-sub">Drag a widget onto the dashboard, or click to add it to its home spot.</div>
     <div class="ovc-list" id="ovc-list"></div>
@@ -3408,7 +3461,7 @@
 <script src="crm.js?v=34"></script>
 <script src="teams.js?v=9"></script>
 <script src="settings.js?v=3"></script>
-<script src="analytics.js?v=1"></script>
+<script src="analytics.js?v=2"></script>
 <script src="invoice.js?v=3"></script>
 <script src="inbox.js?v=2"></script>
 <script src="flowy.js?v=10"></script>
@@ -4195,10 +4248,11 @@ function ovSetDirty(b) {
 }
 
 function ovCustOpen() {
+  window.__custPage = 'ov';
   _ovCustSnapshot = ovLayoutState();
   document.body.classList.add('ov-customize');
   const p = document.getElementById('ov-catalog');
-  if (p) p.classList.add('open');
+  if (p) { p.classList.add('open'); p.classList.remove('an-mode'); }
   _ovSorts.forEach(function(s) { s.option('disabled', false); });
   ovSetDirty(false);
   cardCtxClose();
@@ -4222,9 +4276,17 @@ function ovCustClose(save) {
   ovSyncZones();
 }
 
-function ovCustSave() { ovCustClose(true); }
+/* Save/Cancel are shared with the Analytics customize engine (analytics.js);
+   __custPage says which page owns the open catalog. */
+function ovCustSave() {
+  if (window.__custPage === 'an' && window.anCustClose) { anCustClose(true); return; }
+  ovCustClose(true);
+}
 window.ovCustSave = ovCustSave;
-function ovCustCancel() { ovCustClose(false); }
+function ovCustCancel() {
+  if (window.__custPage === 'an' && window.anCustClose) { anCustClose(false); return; }
+  ovCustClose(false);
+}
 window.ovCustCancel = ovCustCancel;
 function ovCustToggle() {
   if (document.body.classList.contains('ov-customize')) ovCustClose(true);
@@ -4431,12 +4493,19 @@ function cardCtxClose() {
   _ctxTarget = null;
 }
 
-function cardCtxHide() { if (_ctxTarget) ovWidgetHide(_ctxTarget); }
+function cardCtxHide() {
+  if (!_ctxTarget) return;
+  if (_ctxTarget.indexOf('an-w-') === 0) { if (window.anWidgetHide) anWidgetHide(_ctxTarget); return; }
+  ovWidgetHide(_ctxTarget);
+}
 window.cardCtxHide = cardCtxHide;
 
 function cardCtxCustomize() {
+  const isAn = _ctxTarget && _ctxTarget.indexOf('an-w-') === 0;
   cardCtxClose();
-  if (!document.body.classList.contains('ov-customize')) ovCustOpen();
+  if (document.body.classList.contains('ov-customize')) return;
+  if (isAn) { if (window.anCustOpen) anCustOpen(); return; }
+  ovCustOpen();
 }
 window.cardCtxCustomize = cardCtxCustomize;
 

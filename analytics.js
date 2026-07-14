@@ -460,3 +460,224 @@ window.analyticsInit = function analyticsInit() {
     refreshData(true);
   }
 };
+
+/* ══════════════════════════════════════════════════════════════════════════
+   ANALYTICS CUSTOMIZE-LAYOUT ENGINE — mirrors the Overview system with its
+   own widget registry and persistence. Shares the #ov-catalog panel, the
+   card context menu, the ov-customize body class, and the ovc-dirty dot
+   (dispatch in app.html routes by the an-w- id prefix / window.__custPage).
+   Analytics widgets are charts only — no Overview KPI stats here.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+var AN_WIDGETS = {
+  'an-w-leads':  { label: 'Leads Over Time',        icon: 'trending-up' },
+  'an-w-funnel': { label: 'Conversion Funnel',      icon: 'filter' },
+  'an-w-src':    { label: 'Source Performance',     icon: 'pie-chart' },
+  'an-w-status': { label: 'Status Breakdown',       icon: 'bar-chart-2' },
+  'an-w-booked': { label: 'Booked Calls Over Time', icon: 'calendar-check' },
+  'an-w-dow':    { label: 'Leads by Day of Week',   icon: 'calendar-days' },
+  'an-w-resp':   { label: 'Response Time Trend',    icon: 'activity',    defaultHidden: true },
+  'an-w-stage':  { label: 'Pipeline by Stage',      icon: 'layers',      defaultHidden: true }
+};
+
+function anLayoutKey() { return 'flw_an_layout_' + (window.__userSub || 'anon'); }
+
+function anGridEl() { return document.getElementById('an-grid'); }
+
+function anLayoutState() {
+  var grid = anGridEl();
+  var order = grid ? Array.prototype.filter.call(grid.children, function(el) {
+    return el.id && AN_WIDGETS[el.id] && el.style.display !== 'none';
+  }).map(function(el) { return el.id; }) : [];
+  var hidden = Object.keys(AN_WIDGETS).filter(function(id) {
+    var el = document.getElementById(id);
+    return el && el.style.display === 'none';
+  });
+  return { order: order, hidden: hidden };
+}
+
+function anLayoutSave() {
+  try { localStorage.setItem(anLayoutKey(), JSON.stringify(anLayoutState())); } catch (e) {}
+}
+
+function anLayoutApply(state) {
+  var grid = anGridEl();
+  if (!grid || !state) return;
+  var listed = {};
+  (state.order || []).forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) { grid.appendChild(el); listed[id] = true; }
+  });
+  var hidden = Array.isArray(state.hidden) ? state.hidden : [];
+  Object.keys(AN_WIDGETS).forEach(function(id) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    if (listed[id]) el.style.display = '';
+    else if (hidden.indexOf(id) !== -1) el.style.display = 'none';
+  });
+  anSyncGrid();
+}
+
+function anLayoutLoadSaved() {
+  try {
+    var saved = JSON.parse(localStorage.getItem(anLayoutKey()) || 'null');
+    if (saved && (saved.order || saved.hidden)) { anLayoutApply(saved); return; }
+  } catch (e) {}
+  /* default: registry order, defaultHidden widgets off */
+  anLayoutApply({
+    order: Object.keys(AN_WIDGETS).filter(function(id) { return !AN_WIDGETS[id].defaultHidden; }),
+    hidden: Object.keys(AN_WIDGETS).filter(function(id) { return AN_WIDGETS[id].defaultHidden; })
+  });
+}
+
+/* dashed drop target when the grid is emptied during customize */
+function anSyncGrid() {
+  var grid = anGridEl();
+  if (!grid) return;
+  var cust = document.body.classList.contains('ov-customize') && window.__custPage === 'an';
+  var anyVisible = Array.prototype.some.call(grid.children, function(el) { return el.style.display !== 'none'; });
+  grid.classList.toggle('an-zone-empty', cust && !anyVisible);
+}
+
+var _anSort = null;
+function initAnSortable() {
+  if (typeof Sortable === 'undefined') return;
+  var grid = anGridEl();
+  if (!grid || _anSort) return;
+  Object.keys(AN_WIDGETS).forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.setAttribute('data-wgroup', 'an');
+  });
+  _anSort = Sortable.create(grid, {
+    animation: 160,
+    disabled: true,
+    group: { name: 'an', pull: true, put: function(to, from, dragEl) {
+      return (dragEl.getAttribute('data-wgroup') || '') === 'an';
+    } },
+    ghostClass: 'sortable-ghost',
+    dragClass: 'sortable-drag',
+    onAdd: function(evt) { anHandleDrop(evt); },
+    onEnd: function() { anAfterChange(); }
+  });
+}
+
+/* catalog tile dropped onto the grid → swap the clone for the real widget */
+function anHandleDrop(evt) {
+  var wid = evt.item.getAttribute('data-widget');
+  if (wid) {
+    var real = document.getElementById(wid);
+    if (real) { real.style.display = ''; evt.item.replaceWith(real); }
+    else evt.item.remove();
+  }
+  anChartsResize();
+  anAfterChange();
+}
+
+function anAfterChange() {
+  anSyncGrid();
+  var inAnCust = document.body.classList.contains('ov-customize') && window.__custPage === 'an';
+  if (inAnCust) {
+    if (window.ovSetDirty) ovSetDirty(true);
+    anCatalogRender();
+  } else {
+    anLayoutSave();
+  }
+}
+
+/* nudge Chart.js to re-measure after cards are shown/moved in the fixed grid */
+function anChartsResize() {
+  try { window.dispatchEvent(new Event('resize')); } catch (e) {}
+}
+
+/* ── Customize mode (shares the Overview catalog panel) ── */
+var _anCustSnapshot = null;
+
+function anCustOpen() {
+  window.__custPage = 'an';
+  _anCustSnapshot = anLayoutState();
+  document.body.classList.add('ov-customize');
+  var p = document.getElementById('ov-catalog');
+  if (p) { p.classList.add('open'); p.classList.add('an-mode'); }
+  if (window._ovSorts) _ovSorts.forEach(function(s) { s.option('disabled', false); });
+  if (_anSort) _anSort.option('disabled', false);
+  if (window.ovSetDirty) ovSetDirty(false);
+  if (window.cardCtxClose) cardCtxClose();
+  anCatalogRender();
+  anSyncGrid();
+}
+window.anCustOpen = anCustOpen;
+
+function anCustClose(save) {
+  if (save) { anLayoutSave(); if (typeof showToast === 'function') showToast('Layout saved.'); }
+  else if (_anCustSnapshot) { anLayoutApply(_anCustSnapshot); }
+  _anCustSnapshot = null;
+  window.__custPage = null;
+  document.body.classList.remove('ov-customize');
+  var p = document.getElementById('ov-catalog');
+  if (p) { p.classList.remove('open'); p.classList.remove('an-mode'); }
+  if (window._ovSorts) _ovSorts.forEach(function(s) { s.option('disabled', true); });
+  if (_anSort) _anSort.option('disabled', true);
+  if (window.ovSetDirty) ovSetDirty(false);
+  anSyncGrid();
+  anChartsResize();
+}
+window.anCustClose = anCustClose;
+
+function anCustToggle() {
+  var inAnCust = document.body.classList.contains('ov-customize') && window.__custPage === 'an';
+  if (inAnCust) anCustClose(true);
+  else anCustOpen();
+}
+window.anCustToggle = anCustToggle;
+
+/* ── Catalog (renders into the shared #ovc-list) ── */
+function anCatalogRender() {
+  var list = document.getElementById('ovc-list');
+  if (!list) return;
+  var hidden = Object.keys(AN_WIDGETS).filter(function(id) {
+    var el = document.getElementById(id);
+    return el && el.style.display === 'none';
+  });
+  if (!hidden.length) {
+    list.innerHTML = '<div class="ovc-empty"><i data-lucide="layout-grid"></i>' +
+      '<div>All widgets are on this page.</div>' +
+      '<div class="ovc-empty-sub">Hide a card with its handle menu and it will appear here.</div></div>';
+  } else {
+    list.innerHTML = hidden.map(function(id) {
+      var w = AN_WIDGETS[id];
+      return '<div class="ovc-tile" data-widget="' + id + '" data-wgroup="an" onclick="anWidgetShow(\'' + id + '\')">' +
+        '<i data-lucide="' + w.icon + '"></i>' +
+        '<div class="ovc-tile-label">' + w.label + '</div>' +
+        '<span class="ovc-add">+ Add</span>' +
+      '</div>';
+    }).join('');
+  }
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+function anWidgetShow(id) {
+  var el = document.getElementById(id);
+  var grid = anGridEl();
+  if (!el || !grid) return;
+  grid.appendChild(el); /* re-added widgets always land at the end */
+  el.style.display = '';
+  anChartsResize();
+  anAfterChange();
+}
+window.anWidgetShow = anWidgetShow;
+
+function anWidgetHide(id) {
+  if (window.cardCtxClose) cardCtxClose();
+  var el = document.getElementById(id);
+  if (el) el.style.display = 'none';
+  anAfterChange();
+  if (typeof showToast === 'function') {
+    showToast((AN_WIDGETS[id] ? AN_WIDGETS[id].label : 'Widget') + ' hidden — re-add it in Customize layout.');
+  }
+}
+window.anWidgetHide = anWidgetHide;
+
+/* boot: apply saved layout now, re-apply once __userSub lands, wire sortable */
+anLayoutLoadSaved();
+setTimeout(anLayoutLoadSaved, 1200);
+setTimeout(initAnSortable, 450);
