@@ -1381,7 +1381,17 @@
     .inv-card-click { cursor: pointer; transition: border-color 0.12s; }
     .inv-card-click:hover { border-color: var(--blue); }
     .inv-card-click:focus-visible { outline: 2px solid var(--blue); outline-offset: 1px; }
-    .kg-red { background: var(--red-dim); color: var(--red); }
+    .inv-kpi-row { display: flex; align-items: center; gap: 12px; }
+    .inv-kpi-ic { width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .inv-kpi-ic i, .inv-kpi-ic svg { width: 17px; height: 17px; }
+    .ik-blue  { background: var(--blue-dim);  color: var(--blue); }
+    .ik-red   { background: var(--red-dim);   color: var(--red); }
+    .ik-green { background: var(--green-dim); color: var(--green); }
+    .ik-amber { background: var(--amber-dim); color: var(--amber); }
+    .inv-kpi-body { min-width: 0; }
+    .inv-kpi-label { font-size: 11.5px; font-weight: 600; color: var(--text-m); }
+    .inv-kpi-body .stat-val { margin-top: 1px; }
+    .inv-kpi-body .stat-hint { margin-top: 1px; }
     .inv-toolbar { display: flex; align-items: center; gap: 8px; padding: 10px 14px; border-bottom: 1px solid var(--border); flex-wrap: wrap; flex-shrink: 0; }
     .inv-tb-search { display: flex; align-items: center; gap: 6px; background: var(--input-bg); border: 1px solid var(--input-border); border-radius: 4px; padding: 0 8px; flex: 1; min-width: 150px; max-width: 260px; }
     .inv-tb-search i, .inv-tb-search svg { width: 12px; height: 12px; color: var(--text-m); flex-shrink: 0; }
@@ -2876,24 +2886,44 @@
 
     <div class="stats-grid sg-4 inv-cards">
       <div class="card stat-card inv-card-click" onclick="invCardFilter('open')" role="button" tabindex="0" aria-label="Filter to open invoices">
-        <div class="stat-top"><div class="stat-label"><i data-lucide="dollar-sign" class="kpi-glyph kg-blue"></i>Outstanding</div></div>
-        <div class="stat-val" id="inv-kpi-outstanding">—</div>
-        <div class="stat-hint" id="inv-kpi-outstanding-sub"></div>
+        <div class="inv-kpi-row">
+          <div class="inv-kpi-ic ik-blue"><i data-lucide="dollar-sign"></i></div>
+          <div class="inv-kpi-body">
+            <div class="inv-kpi-label">Outstanding</div>
+            <div class="stat-val" id="inv-kpi-outstanding">—</div>
+            <div class="stat-hint" id="inv-kpi-outstanding-sub"></div>
+          </div>
+        </div>
       </div>
       <div class="card stat-card inv-card-click" onclick="invCardFilter('overdue')" role="button" tabindex="0" aria-label="Filter to overdue invoices">
-        <div class="stat-top"><div class="stat-label"><i data-lucide="clock" class="kpi-glyph kg-red"></i>Overdue</div></div>
-        <div class="stat-val" id="inv-kpi-overdue">—</div>
-        <div class="stat-hint" id="inv-kpi-overdue-sub"></div>
+        <div class="inv-kpi-row">
+          <div class="inv-kpi-ic ik-red"><i data-lucide="clock"></i></div>
+          <div class="inv-kpi-body">
+            <div class="inv-kpi-label">Overdue</div>
+            <div class="stat-val" id="inv-kpi-overdue">—</div>
+            <div class="stat-hint" id="inv-kpi-overdue-sub"></div>
+          </div>
+        </div>
       </div>
       <div class="card stat-card inv-card-click" onclick="invCardFilter('paid')" role="button" tabindex="0" aria-label="Filter to paid invoices">
-        <div class="stat-top"><div class="stat-label"><i data-lucide="check-circle" class="kpi-glyph kg-green"></i>Paid this period</div></div>
-        <div class="stat-val" id="inv-kpi-paid">—</div>
-        <div class="stat-hint" id="inv-kpi-paid-sub"></div>
+        <div class="inv-kpi-row">
+          <div class="inv-kpi-ic ik-green"><i data-lucide="check-circle"></i></div>
+          <div class="inv-kpi-body">
+            <div class="inv-kpi-label">Paid this period</div>
+            <div class="stat-val" id="inv-kpi-paid">—</div>
+            <div class="stat-hint" id="inv-kpi-paid-sub"></div>
+          </div>
+        </div>
       </div>
       <div class="card stat-card inv-card-click" onclick="invCardFilter('draft')" role="button" tabindex="0" aria-label="Filter to draft invoices">
-        <div class="stat-top"><div class="stat-label"><i data-lucide="file" class="kpi-glyph kg-amber"></i>Drafts</div></div>
-        <div class="stat-val" id="inv-kpi-drafts">—</div>
-        <div class="stat-hint" id="inv-kpi-drafts-sub"></div>
+        <div class="inv-kpi-row">
+          <div class="inv-kpi-ic ik-amber"><i data-lucide="file"></i></div>
+          <div class="inv-kpi-body">
+            <div class="inv-kpi-label">Drafts</div>
+            <div class="stat-val" id="inv-kpi-drafts">—</div>
+            <div class="stat-hint" id="inv-kpi-drafts-sub"></div>
+          </div>
+        </div>
       </div>
     </div>
 
