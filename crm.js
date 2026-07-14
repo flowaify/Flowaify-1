@@ -2404,14 +2404,9 @@ function renderActivitySections(data, days) {
     emptySub: 'New leads, touches, and booked calls will appear here as they happen.',
   });
 
-  // Automations "Recent Activity" — automation touches only
-  renderActivityFeed(events, 'auto-activity', {
-    limit: 6,
-    filter: function(ev) { return ev.type === 'touch' || ev.type === 'ai_reply'; },
-    emptyIcon: 'scroll-text',
-    emptyTitle: 'No automation activity yet',
-    emptySub: 'AI replies, follow-ups, and sequence events will appear here once your flows go live.',
-  });
+  // Automations "Recent Activity" — owned by settings.js renderAutoActivity
+  // (shaped-contact event stream). Delegate so the two writers never fight.
+  if (window.renderAutoActivity) renderAutoActivity(data.contacts || []);
 
 }
 

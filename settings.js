@@ -435,3 +435,390 @@ async function signOutAll() {
   try { await client.logout({ logoutParams: { returnTo: 'https://flowaify.app/portal.html' } }); } catch (e) {}
 }
 window.signOutAll = signOutAll;
+
+// ══════════════════════════════════════════════════════════════════════════════
+// AUTOMATIONS PAGE MODULE — KV-backed toggles + live activity feed
+// Lives here (not app.html) so every /settings fetch keeps its Authorization
+// header inside a .js file (WAF constraint). Loaded before the inline script,
+// so boot()'s restoreAutoToggles() call resolves to these definitions.
+// ══════════════════════════════════════════════════════════════════════════════
+
+var AUTO_TOGGLE_IDS = [
+  'tog-sms', 'tog-email', 'tog-autoreply',
+  'tog-escalation', 'tog-pause-hours', 'tog-behavioral'
+];
+
+function autoTogglesKey() { return 'flw_autos_' + (window.__userSub || 'anon'); }
+function autoPrepauseKey() { return 'flw_autos_prepause_' + (window.__userSub || 'anon'); }
+
+function autoCanEdit() {
+  return !window.__myRole || window.__myRole === 'admin' || window.__myRole === 'owner';
+}
+
+/* Cadence arrays on resume: prefer the client's configured cadence from the
+   last loaded KV config, fall back to defaults. The toggle is a circuit
+   breaker, not a cadence editor. */
+function autoEmailCadence() {
+  var fc = window._autoLastCfg && window._autoLastCfg.followupCadence;
+  return (fc && Array.isArray(fc.email) && fc.email.length) ? fc.email : [3, 7];
+}
+function autoSmsCadence() {
+  var fc = window._autoLastCfg && window._autoLastCfg.followupCadence;
+  return (fc && Array.isArray(fc.sms) && fc.sms.length) ? fc.sms : [0, 5, 7];
+}
+
+/* All six controls map to real KV config fields — no toggle is a no-op.
+   INVERSION: autoreply UI ON = AI sends freely = ai.requireApproval FALSE.
+   Must stay consistent with applyAutoTogglesToUI(). */
+var AUTO_CFG_MAP = {
+  'sms':         function(on) { return { followupCadence: { sms:   on ? autoSmsCadence()   : null } }; },
+  'email':       function(on) { return { followupCadence: { email: on ? autoEmailCadence() : null } }; },
+  'autoreply':   function(on) { return { ai: { requireApproval: !on } }; },
+  'escalation':  function(on) { return { ai: { escalation: on } }; },
+  'pause-hours': function(on) { return { ai: { pauseOutsideHours: on } }; },
+  'behavioral':  function(on) { return { behavioralSignal: on }; }
+};
+
+var AUTO_LABELS = {
+  'sms': 'SMS Follow-up Sequence', 'email': 'Email Follow-up Sequence',
+  'autoreply': 'AI Auto-Reply', 'escalation': 'Deep-Score Escalation',
+  'pause-hours': 'Pause Outside Business Hours', 'behavioral': 'Behavioral Signal Tracking'
+};
+
+function updateAutoActiveCount() {
+  var active = AUTO_TOGGLE_IDS.filter(function(id) {
+    var el = document.getElementById(id);
+    return el && el.classList.contains('on');
+  }).length;
+  var valEl = document.getElementById('val-auto-active');
+  if (valEl) valEl.textContent = active;
+  var dot = document.getElementById('auto-live-dot');
+  if (dot) dot.classList.toggle('active', active > 0);
+  var master = document.getElementById('auto-master-btn');
+  if (master) master.textContent = active > 0 ? 'Pause all' : 'Resume all';
+}
+
+/* Fast optimistic render at boot from localStorage. automationsInit()
+   overrides with KV truth when the page is actually opened. */
+function restoreAutoToggles() {
+  var saved = {};
+  try { saved = JSON.parse(localStorage.getItem(autoTogglesKey()) || '{}'); } catch (e) {}
+  AUTO_TOGGLE_IDS.forEach(function(id) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    var key = id.replace('tog-', '');
+    if (key in saved) el.classList.toggle('on', !!saved[key]);
+  });
+  updateAutoActiveCount();
+}
+
+function autoSaveLocalState() {
+  var state = {};
+  AUTO_TOGGLE_IDS.forEach(function(id) {
+    var t = document.getElementById(id);
+    if (t) state[id.replace('tog-', '')] = t.classList.contains('on');
+  });
+  try { localStorage.setItem(autoTogglesKey(), JSON.stringify(state)); } catch (e) {}
+}
+
+function autoLogActivity(text) {
+  if (window.twFetch) { try { twFetch('POST', '/team/activity', { text: text }); } catch (e) {} }
+}
+
+function toggleAuto(el, name) {
+  if (!autoCanEdit()) {
+    if (typeof showToast === 'function') showToast('Only admins can change automations.');
+    return;
+  }
+  el.classList.toggle('on');
+  var isOn = el.classList.contains('on');
+  updateAutoActiveCount();
+  autoSaveLocalState();
+
+  if (AUTO_CFG_MAP[name] && window.pushSettings) {
+    pushSettings(AUTO_CFG_MAP[name](isOn), 'auto-save-status');
+  }
+
+  var label = AUTO_LABELS[name] || name;
+  if (typeof showToast === 'function') showToast((isOn ? 'Resumed: ' : 'Paused: ') + label);
+  autoLogActivity((isOn ? 'resumed' : 'paused') + ' the “' + label + '” automation');
+}
+
+/* Pause All / Resume All — the emergency brake. Pausing snapshots current
+   states + cadences so Resume restores exactly what was running before. */
+async function autoMasterToggle() {
+  if (!autoCanEdit()) {
+    if (typeof showToast === 'function') showToast('Only admins can change automations.');
+    return;
+  }
+  var anyOn = AUTO_TOGGLE_IDS.some(function(id) {
+    var el = document.getElementById(id);
+    return el && el.classList.contains('on');
+  });
+
+  function setT(id, val) {
+    var el = document.getElementById(id);
+    if (el) el.classList.toggle('on', !!val);
+  }
+
+  if (anyOn) {
+    var snap = { toggles: {}, emailCadence: autoEmailCadence(), smsCadence: autoSmsCadence() };
+    AUTO_TOGGLE_IDS.forEach(function(id) {
+      var el = document.getElementById(id);
+      snap.toggles[id.replace('tog-', '')] = !!(el && el.classList.contains('on'));
+    });
+    try { localStorage.setItem(autoPrepauseKey(), JSON.stringify(snap)); } catch (e) {}
+
+    AUTO_TOGGLE_IDS.forEach(function(id) { setT(id, false); });
+    updateAutoActiveCount();
+    autoSaveLocalState();
+    if (window.pushSettings) {
+      pushSettings({
+        followupCadence: { sms: null, email: null },
+        ai: { requireApproval: true, escalation: false, pauseOutsideHours: false },
+        behavioralSignal: false
+      }, 'auto-save-status');
+    }
+    if (typeof showToast === 'function') showToast('All automations paused');
+    autoLogActivity('paused all automations');
+  } else {
+    var snap2 = null;
+    try { snap2 = JSON.parse(localStorage.getItem(autoPrepauseKey()) || 'null'); } catch (e) {}
+    var t = (snap2 && snap2.toggles) || { sms: true, email: true, autoreply: true };
+    var email = t.email ? ((snap2 && snap2.emailCadence) || [3, 7]) : null;
+    var sms   = t.sms   ? ((snap2 && snap2.smsCadence)   || [0, 5, 7]) : null;
+
+    Object.keys(t).forEach(function(k) { setT('tog-' + k, t[k]); });
+    updateAutoActiveCount();
+    autoSaveLocalState();
+    if (window.pushSettings) {
+      pushSettings({
+        followupCadence: { sms: sms, email: email },
+        ai: {
+          requireApproval: !t.autoreply,
+          escalation: !!t.escalation,
+          pauseOutsideHours: !!t['pause-hours']
+        },
+        behavioralSignal: !!t.behavioral
+      }, 'auto-save-status');
+    }
+    if (typeof showToast === 'function') showToast('Automations resumed');
+    autoLogActivity('resumed automations');
+  }
+}
+
+/* KV truth → toggle UI. Must mirror AUTO_CFG_MAP inversions exactly:
+   requireApproval=false → autoreply toggle ON. */
+function applyAutoTogglesToUI(cfg) {
+  if (!cfg) return;
+  window._autoLastCfg = cfg;
+
+  function setToggle(id, val) {
+    var el = document.getElementById(id);
+    if (el) el.classList.toggle('on', !!val);
+  }
+
+  var fc = cfg.followupCadence || {};
+  setToggle('tog-email', Array.isArray(fc.email) && fc.email.length > 0);
+  setToggle('tog-sms',   Array.isArray(fc.sms)   && fc.sms.length > 0);
+  setToggle('tog-autoreply', !(cfg.ai && cfg.ai.requireApproval));
+  setToggle('tog-escalation', !!(cfg.ai && cfg.ai.escalation));
+  setToggle('tog-pause-hours', !!(cfg.ai && cfg.ai.pauseOutsideHours));
+  setToggle('tog-behavioral', !!cfg.behavioralSignal);
+
+  var smsNote = document.getElementById('auto-sms-note');
+  if (smsNote) smsNote.style.display = (cfg.channels && cfg.channels.sms) ? 'none' : 'flex';
+
+  var emailCadEl = document.getElementById('auto-email-cadence');
+  if (emailCadEl) emailCadEl.textContent = (Array.isArray(fc.email) && fc.email.length) ? 'Days ' + fc.email.join(', ') : 'Not configured';
+  var smsCadEl = document.getElementById('auto-sms-cadence');
+  if (smsCadEl) smsCadEl.textContent = (Array.isArray(fc.sms) && fc.sms.length) ? 'Days ' + fc.sms.join(', ') : 'Not configured';
+  var threshEl = document.getElementById('auto-esc-threshold');
+  if (threshEl) threshEl.textContent = ((cfg.ai && cfg.ai.escalationThreshold != null) ? cfg.ai.escalationThreshold : 60) + '/100';
+
+  autoSaveLocalState();
+  updateAutoActiveCount();
+}
+
+/* Visual lock for members/viewers — Worker enforces admin on writes;
+   this just makes that visible instead of a silent flip-and-fail. */
+function autoApplyRoleLock() {
+  var locked = !autoCanEdit();
+  AUTO_TOGGLE_IDS.forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.classList.toggle('locked', locked);
+  });
+  var master = document.getElementById('auto-master-btn');
+  if (master) master.style.display = locked ? 'none' : '';
+}
+
+/* Called by showPage('automations'). KV config is the authoritative
+   toggle-state source; localStorage state (applied at boot) is the fallback. */
+async function automationsInit() {
+  autoApplyRoleLock();
+
+  stFetch('GET', '/settings').then(function(r) {
+    if (r.status === 200 && r.data && r.data.config) applyAutoTogglesToUI(r.data.config);
+  }).catch(function() {});
+
+  if (window.__crmData && window.__crmData.contacts) {
+    renderAutoActivity(window.__crmData.contacts);
+  } else {
+    var feed = document.getElementById('auto-activity');
+    if (feed) feed.innerHTML = autoActivitySkeleton();
+    var waitAttempts = 0;
+    var waitForData = setInterval(function() {
+      waitAttempts++;
+      if (window.__crmData) {
+        clearInterval(waitForData);
+        renderAutoActivity(window.__crmData.contacts || []);
+      } else if (waitAttempts >= 20) {
+        clearInterval(waitForData);
+        var f = document.getElementById('auto-activity');
+        if (f) { f.innerHTML = autoEmptyState(); if (typeof lucide !== 'undefined') lucide.createIcons(); }
+      }
+    }, 400);
+  }
+
+  if (window._autoHeartbeatInterval) clearInterval(window._autoHeartbeatInterval);
+  window._autoHeartbeatInterval = setInterval(function() {
+    if (window.__crmData) renderAutoActivity(window.__crmData.contacts || []);
+  }, 90000);
+}
+
+function autoActivitySkeleton() {
+  var rows = '';
+  for (var i = 0; i < 4; i++) {
+    rows += '<div class="auto-activity-item" style="animation-delay:' + (i * 0.08) + 's">' +
+      '<div class="skel skel-icon"></div>' +
+      '<div style="flex:1;display:flex;flex-direction:column;gap:6px;padding-top:2px;">' +
+        '<div class="skel skel-line" style="width:58%;"></div>' +
+        '<div class="skel skel-line" style="width:36%;"></div>' +
+      '</div>' +
+    '</div>';
+  }
+  return rows;
+}
+
+/* Feed built from SHAPED contacts (Worker shapeContact): status, lastTouch,
+   lastTouchAt, score, createdAt, name — not raw Zoho flow_* field names. */
+function renderAutoActivity(contacts) {
+  var feed = document.getElementById('auto-activity');
+  if (!feed) return;
+
+  if (!contacts || contacts.length === 0) {
+    feed.innerHTML = autoEmptyState();
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+    return;
+  }
+
+  var active = contacts.filter(function(c) {
+    return c.lastTouchAt || c.status || c.score != null;
+  });
+
+  active.sort(function(a, b) {
+    var ta = a.lastTouchAt ? new Date(a.lastTouchAt).getTime() : (a.createdAt ? new Date(a.createdAt).getTime() : 0);
+    var tb = b.lastTouchAt ? new Date(b.lastTouchAt).getTime() : (b.createdAt ? new Date(b.createdAt).getTime() : 0);
+    return tb - ta;
+  });
+
+  var items = active.slice(0, 15);
+  if (items.length === 0) {
+    feed.innerHTML = autoEmptyState();
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+    return;
+  }
+
+  var html = '<div class="auto-activity-list">';
+  for (var i = 0; i < items.length; i++) html += buildAutoActivityItem(items[i], i);
+  html += '</div>';
+  feed.innerHTML = html;
+
+  var syncEl = document.getElementById('auto-sync-ts');
+  if (syncEl) syncEl.textContent = 'Synced just now';
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+function buildAutoActivityItem(contact, index) {
+  var esc = window.escDash || function(s) {
+    return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  };
+  var name = esc(contact.name || 'Unknown Lead');
+  var score = contact.score != null ? contact.score : null;
+  var state = String(contact.status || '').toUpperCase();
+  var touchType = String(contact.lastTouch || '').toUpperCase();
+  var touchAt = contact.lastTouchAt ? new Date(contact.lastTouchAt) : null;
+  var createdAt = contact.createdAt ? new Date(contact.createdAt) : null;
+  var ts = touchAt || createdAt;
+
+  var icon, label, color;
+
+  if (state === 'ENGAGED') {
+    icon = 'message-circle'; color = 'var(--green)';
+    label = name + ' replied — marked Engaged';
+  } else if (state.indexOf('BOOK') !== -1) {
+    icon = 'calendar-check'; color = 'var(--green)';
+    label = name + ' booked a call';
+  } else if (touchType.indexOf('SMS') !== -1) {
+    icon = 'message-square'; color = 'var(--blue)';
+    label = 'SMS follow-up sent to ' + name;
+  } else if (touchType.indexOf('FOLLOWUP') !== -1 || touchType.indexOf('EMAIL') !== -1) {
+    icon = 'mail'; color = 'var(--blue)';
+    label = 'Email follow-up sent to ' + name;
+  } else if (state === 'HOT' && score != null) {
+    icon = 'flame'; color = 'var(--red)';
+    label = 'HOT lead scored ' + score + '/100 — ' + name;
+  } else if (state === 'WARM' && score != null) {
+    icon = 'thermometer'; color = 'var(--amber)';
+    label = 'WARM lead scored ' + score + '/100 — ' + name;
+  } else if (state === 'COLD' && score != null) {
+    icon = 'snowflake'; color = 'var(--blue-soft)';
+    label = 'COLD lead scored ' + score + '/100 — ' + name;
+  } else if (touchType.indexOf('REPLY') !== -1) {
+    icon = 'sparkles'; color = 'var(--purple)';
+    label = 'AI replied to ' + name;
+  } else if (state === 'DEAD') {
+    icon = 'x-circle'; color = 'var(--text-m)';
+    label = name + ' — sequence exhausted, marked inactive';
+  } else {
+    icon = 'user-check'; color = 'var(--text-m)';
+    label = 'Lead received — ' + name + (score != null ? ' (Score: ' + score + ')' : '');
+  }
+
+  var timeStr = (ts && !isNaN(ts.getTime()) && typeof relTime === 'function') ? relTime(ts.getTime()) : '';
+
+  return '<div class="auto-activity-item" style="--i:' + index + '">' +
+    '<div class="auto-activity-icon" style="color:' + color + '">' +
+      '<i data-lucide="' + icon + '"></i>' +
+    '</div>' +
+    '<div class="auto-activity-body">' +
+      '<div class="auto-activity-label">' + label + '</div>' +
+      (timeStr ? '<div class="auto-activity-ts">' + timeStr + '</div>' : '') +
+    '</div>' +
+  '</div>';
+}
+
+function autoEmptyState() {
+  var anyOn = AUTO_TOGGLE_IDS.some(function(id) {
+    var el = document.getElementById(id);
+    return el && el.classList.contains('on');
+  });
+  if (anyOn) {
+    return '<div class="empty-state" style="padding:40px 20px;">' +
+      '<div class="auto-standby-icon"><i data-lucide="activity"></i></div>' +
+      '<div class="empty-state-title">Engine standing by</div>' +
+      '<div class="empty-state-sub">Automations are active. Events will appear here as leads move through the pipeline.</div>' +
+    '</div>';
+  }
+  return '<div class="empty-state" style="padding:40px 20px;">' +
+    '<i data-lucide="pause-circle"></i>' +
+    '<div class="empty-state-title">All automations paused</div>' +
+    '<div class="empty-state-sub">Resume an automation above to start processing leads.</div>' +
+  '</div>';
+}
+
+window.restoreAutoToggles = restoreAutoToggles;
+window.toggleAuto = toggleAuto;
+window.autoMasterToggle = autoMasterToggle;
+window.automationsInit = automationsInit;
+window.renderAutoActivity = renderAutoActivity;
