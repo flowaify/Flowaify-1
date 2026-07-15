@@ -740,7 +740,10 @@
       body.printing-report #rpt-pv-nav { display: none !important; }
       body.printing-report .rpt-pv-body { display: block !important; }
       body.printing-report #rpt-pv-scroll { overflow: visible !important; padding: 0 !important; }
-      body.printing-report .rpd { box-shadow: none !important; max-width: none !important; }
+      body.printing-report .rpd { box-shadow: none !important; max-width: none !important; padding: 24px 8px !important; }
+      body.printing-report .rpd-cover { break-after: page; }
+      body.printing-report .rpd-sec { break-inside: avoid-page; }
+      body.printing-report .rpd-sec h2 { break-after: avoid-page; }
       body.printing-report .rp-kpi-grid { grid-template-columns: repeat(4,1fr) !important; }
     }
     /* Print — invoices */
@@ -1561,45 +1564,61 @@
     .rf-review > div { display: flex; justify-content: space-between; gap: 12px; padding: 7px 0; border-bottom: 1px solid var(--border); font-size: 12.5px; }
     .rf-review > div > span:first-child { color: var(--text-m); }
     .rf-review > div > span:last-child { color: var(--text); font-weight: 600; text-align: right; }
-    /* report document */
-    .rpd { background: #fff; color: #1f2937; max-width: 760px; margin: 0 auto; padding: 56px 64px; border-radius: 4px; box-shadow: 0 2px 14px rgba(0,0,0,0.08); font-size: 13.5px; line-height: 1.6; }
-    .rpd-brand { font-size: 13px; font-weight: 800; color: #2563eb; letter-spacing: -0.01em; margin-bottom: 34px; }
-    .rpd-cover h1 { font-size: 27px; font-weight: 700; color: #0f172a; margin: 0 0 6px; letter-spacing: -0.015em; }
-    .rpd-cover-for { font-size: 16px; color: #334155; font-weight: 600; margin-bottom: 10px; }
-    .rpd-cover-meta { font-size: 12.5px; color: #64748b; margin-top: 2px; }
-    .rpd-cover-note { font-size: 12.5px; color: #475569; margin-top: 14px; padding: 10px 14px; border-left: 3px solid #bfdbfe; background: #f8fafc; white-space: pre-wrap; }
-    .rpd-conf { font-size: 11px; color: #94a3b8; margin-top: 14px; }
-    .rpd-sec { margin-top: 38px; break-inside: avoid-page; }
-    .rpd-sec h2 { font-size: 15px; font-weight: 700; color: #0f172a; margin: 0 0 10px; padding-bottom: 6px; border-bottom: 1.5px solid #0f172a; letter-spacing: -0.01em; }
+    /* report document — consulting-grade, restrained */
+    .rpd { background: #fff; color: #1f2937; max-width: 780px; margin: 0 auto; padding: 64px 72px 48px; border-radius: 4px; box-shadow: 0 2px 14px rgba(0,0,0,0.08); font-size: 13.5px; line-height: 1.65; }
+    .rpd-brand-row { display: flex; align-items: center; gap: 8px; margin-bottom: 56px; }
+    .rpd-brand-mark { width: 22px; height: 22px; border-radius: 6px; background: #2563eb; color: #fff; display: inline-flex; align-items: center; justify-content: center; font-weight: 800; font-size: 12px; }
+    .rpd-brand-word { font-size: 13px; font-weight: 700; color: #0f172a; letter-spacing: -0.01em; }
+    .rpd-cover { padding-bottom: 40px; border-bottom: 2px solid #0f172a; }
+    .rpd-cover-kicker { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.6px; color: #2563eb; margin-bottom: 10px; }
+    .rpd-cover h1 { font-size: 32px; font-weight: 700; color: #0f172a; margin: 0 0 8px; letter-spacing: -0.02em; line-height: 1.15; }
+    .rpd-cover-for { font-size: 15px; color: #475569; margin-bottom: 28px; }
+    .rpd-cover-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 32px; margin-top: 26px; }
+    .rpd-cover-grid > div { border-top: 1px solid #e2e8f0; padding-top: 8px; }
+    .rpd-cover-grid span { display: block; font-size: 10.5px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; color: #94a3b8; margin-bottom: 2px; }
+    .rpd-cover-grid strong { font-size: 13px; color: #0f172a; font-weight: 600; }
+    .rpd-cover-note { font-size: 13px; color: #475569; margin-top: 24px; padding: 12px 16px; border-left: 3px solid #2563eb; background: #f8fafc; white-space: pre-wrap; line-height: 1.6; }
+    .rpd-conf { font-size: 10.5px; color: #94a3b8; margin-top: 20px; letter-spacing: 0.02em; }
+    .rpd-sec { margin-top: 44px; }
+    .rpd-sec h2 { display: flex; align-items: baseline; gap: 12px; font-size: 16px; font-weight: 700; color: #0f172a; margin: 0 0 14px; padding-bottom: 8px; border-bottom: 1px solid #cbd5e1; letter-spacing: -0.01em; break-after: avoid; }
+    .rpd-secno { font-size: 11px; font-weight: 700; color: #2563eb; letter-spacing: 1px; }
+    .rpd-lead { font-size: 14.5px; color: #334155; line-height: 1.75; margin: 0; }
     .rpd-body { font-size: 13px; color: #334155; }
-    .rpd-ai-note { font-size: 10.5px; color: #94a3b8; margin-top: 8px; }
-    .rpd-note { font-size: 11.5px; color: #64748b; margin-top: 10px; line-height: 1.55; }
-    .rpd-kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-    .rpd-kpi { border: 1px solid #e2e8f0; border-radius: 6px; padding: 12px 14px; }
-    .rpd-kpi-v { font-size: 19px; font-weight: 700; color: #0f172a; display: flex; align-items: baseline; gap: 7px; flex-wrap: wrap; }
+    .rpd-ai-note { font-size: 10.5px; color: #94a3b8; margin-top: 10px; }
+    .rpd-note { font-size: 11.5px; color: #64748b; margin-top: 12px; line-height: 1.55; }
+    .rpd-kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px 28px; }
+    .rpd-kpi { border-top: 2px solid #0f172a; padding-top: 10px; }
+    .rpd-kpi-v { font-size: 23px; font-weight: 700; color: #0f172a; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
     .rpd-kpi-l { font-size: 11px; color: #64748b; margin-top: 3px; }
+    .rpd-kpi-d { margin-top: 5px; }
     .rpd-delta { font-size: 10.5px; font-weight: 700; }
     .rpd-delta.up { color: #059669; }
     .rpd-delta.down { color: #dc2626; }
     .rpd-delta-na { font-size: 10.5px; color: #94a3b8; font-weight: 500; }
-    .rpd-vchart { display: flex; align-items: flex-end; gap: 2px; height: 80px; margin-top: 14px; padding-bottom: 4px; border-bottom: 1px solid #e2e8f0; }
+    .rpd-vchart-wrap { display: flex; gap: 8px; margin-top: 16px; align-items: stretch; }
+    .rpd-vaxis { font-size: 10px; color: #94a3b8; font-variant-numeric: tabular-nums; align-self: flex-start; padding-top: 0; min-width: 18px; text-align: right; }
+    .rpd-vchart { display: flex; align-items: flex-end; gap: 2px; height: 96px; flex: 1; border-bottom: 1.5px solid #0f172a; border-left: 1px solid #e2e8f0; padding-left: 4px; }
     .rpd-vbar-w { flex: 1; display: flex; align-items: flex-end; justify-content: center; height: 100%; }
-    .rpd-vbar { width: 100%; max-width: 22px; background: #3b82f6; border-radius: 2px 2px 0 0; min-height: 1px; }
-    .rpd-vchart-lbl { font-size: 10.5px; color: #94a3b8; margin-top: 5px; display: flex; justify-content: space-between; }
-    .rpd-src-row { display: flex; align-items: center; gap: 12px; padding: 5px 0; font-size: 12.5px; }
-    .rpd-src-name { width: 130px; flex-shrink: 0; color: #334155; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .rpd-src-bar { flex: 1; height: 9px; background: #f1f5f9; border-radius: 4px; overflow: hidden; }
-    .rpd-src-bar span { display: block; height: 100%; background: #3b82f6; border-radius: 4px; }
-    .rpd-src-n { width: 78px; text-align: right; color: #64748b; font-size: 11.5px; flex-shrink: 0; }
-    .rpd-table { width: 100%; border-collapse: collapse; font-size: 12.5px; margin-top: 6px; }
-    .rpd-table th { text-align: left; font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.4px; color: #64748b; font-weight: 600; border-bottom: 1.5px solid #0f172a; padding: 6px 10px 6px 0; }
-    .rpd-table td { padding: 7px 10px 7px 0; border-bottom: 1px solid #e2e8f0; color: #334155; vertical-align: top; }
+    .rpd-vbar { width: 100%; max-width: 20px; background: #1d4ed8; border-radius: 1.5px 1.5px 0 0; min-height: 1px; }
+    .rpd-vchart-lbl { font-size: 10.5px; color: #94a3b8; margin-top: 6px; display: flex; justify-content: space-between; padding-left: 26px; }
+    .rpd-src-row { display: flex; align-items: center; gap: 14px; padding: 7px 0; font-size: 12.5px; border-bottom: 1px solid #f1f5f9; }
+    .rpd-src-row:last-child { border-bottom: none; }
+    .rpd-src-name { width: 150px; flex-shrink: 0; color: #334155; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .rpd-src-bar { flex: 1; height: 8px; background: #f1f5f9; border-radius: 4px; overflow: hidden; }
+    .rpd-src-bar span { display: block; height: 100%; background: #1d4ed8; border-radius: 4px; }
+    .rpd-src-n { width: 90px; text-align: right; color: #0f172a; font-size: 12px; font-weight: 600; flex-shrink: 0; font-variant-numeric: tabular-nums; }
+    .rpd-src-n em { font-style: normal; color: #94a3b8; font-weight: 500; margin-left: 7px; }
+    .rpd-table { width: 100%; border-collapse: collapse; font-size: 12.5px; margin-top: 8px; }
+    .rpd-table th { text-align: left; font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.6px; color: #64748b; font-weight: 600; border-bottom: 1.5px solid #0f172a; padding: 7px 12px 7px 0; }
+    .rpd-table td { padding: 8px 12px 8px 0; border-bottom: 1px solid #e8edf3; color: #334155; vertical-align: top; }
+    .rpd-table th.rpd-num, .rpd-table td.rpd-num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
     .rpd-table tr { break-inside: avoid; }
-    .rpd-appendix td:first-child { color: #64748b; width: 180px; }
-    .rpd-recs { margin: 4px 0 0; padding-left: 20px; }
-    .rpd-recs li { font-size: 13px; color: #334155; padding: 4px 0; }
-    .rpd-footer { display: flex; justify-content: space-between; margin-top: 48px; padding-top: 12px; border-top: 1px solid #e2e8f0; font-size: 11px; color: #94a3b8; }
-    .rpd-footer-brand { font-weight: 700; color: #2563eb; }
+    .rpd-appendix td:first-child { color: #64748b; width: 190px; }
+    .rpd-rec { display: flex; gap: 14px; padding: 11px 0; border-bottom: 1px solid #f1f5f9; font-size: 13px; color: #334155; line-height: 1.6; }
+    .rpd-rec:last-of-type { border-bottom: none; }
+    .rpd-rec-n { width: 22px; height: 22px; border-radius: 50%; background: #eff6ff; color: #2563eb; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+    .rpd-footer { display: flex; justify-content: space-between; margin-top: 56px; padding-top: 14px; border-top: 1px solid #e2e8f0; font-size: 10.5px; color: #94a3b8; }
+    .rpd-footer-brand { font-weight: 600; color: #64748b; }
     @media (max-width: 900px) {
       #page-reports { overflow-y: auto; }
       #rpt-pv-nav { display: none; }
@@ -3345,9 +3364,14 @@
 
   <!-- Report row actions + stepped New Report flow -->
   <div class="card-ctx-menu" id="rpt-row-menu"></div>
-  <div id="rpt-flow" onclick="if(event.target===this)rptFlowClose()">
+  <div id="rpt-flow">
     <div class="rf-box" role="dialog" aria-modal="true" aria-label="New report">
-      <div class="rf-head">New Report<button class="inv-p-close" onclick="rptFlowClose()" aria-label="Close"><i data-lucide="x"></i></button></div>
+      <div class="rf-head">New Report
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span class="sec-link" id="rf-reset" style="font-size:11px;" onclick="rptFlowReset()">Start over</span>
+          <button class="inv-p-close" onclick="rptFlowClose()" aria-label="Close and keep draft" title="Close — your progress is kept"><i data-lucide="x"></i></button>
+        </div>
+      </div>
       <div id="rpt-flow-body"></div>
     </div>
   </div>
@@ -3867,7 +3891,7 @@
 <script src="invoice.js?v=5"></script>
 <script src="inbox.js?v=2"></script>
 <script src="flowy.js?v=10"></script>
-<script src="reports.js?v=2"></script>
+<script src="reports.js?v=3"></script>
 <script>
 const AUTH0_DOMAIN    = 'auth.flowaify.app';
 const AUTH0_CLIENT_ID = 'tx74Owqn3jVeSaVuxfFHsKloqbPqfAmN';

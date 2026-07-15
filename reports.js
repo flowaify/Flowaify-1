@@ -758,46 +758,54 @@ function rptRenderDoc(full) {
   if (!snap) return '<div class="empty-state" style="padding:60px;"><div class="empty-state-title">No snapshot available</div></div>';
   var c = snap.current, p = snap.previous;
   var cfg = full.config || {};
-  var has = function(s) { return (full.sections || []).indexOf(s) !== -1; };
+  var has = function(sec) { return (full.sections || []).indexOf(sec) !== -1; };
   var exec = full.detailLevel === 'executive';
   var detailed = full.detailLevel === 'detailed';
+  var secN = 0;
+  function secHead(title) {
+    secN++;
+    return '<h2><span class="rpd-secno">' + String(secN).padStart(2, '0') + '</span>' + title + '</h2>';
+  }
   var h = '<div class="rpd">';
 
-  // cover
+  // ── cover ──
   h += '<div class="rpd-cover" id="rpd-sec-cover">' +
-    '<div class="rpd-brand">Flowaify</div>' +
+    '<div class="rpd-brand-row"><span class="rpd-brand-mark">F</span><span class="rpd-brand-word">Flowaify</span></div>' +
+    '<div class="rpd-cover-kicker">Performance Report</div>' +
     '<h1>' + rptEsc(full.name) + '</h1>' +
-    (cfg.preparedFor ? '<div class="rpd-cover-for">' + rptEsc(cfg.preparedFor) + '</div>' : '') +
-    '<div class="rpd-cover-meta">' + rptFmtRange(full.rangeStart, full.rangeEnd) +
-      (p ? ' &nbsp;·&nbsp; compared with ' + rptFmtRange(p.rangeStart, p.rangeEnd) : '') + '</div>' +
-    '<div class="rpd-cover-meta">Generated ' + rptFmtTs(full.generatedAt) +
-      (cfg.preparedBy ? ' &nbsp;·&nbsp; Prepared by ' + rptEsc(cfg.preparedBy) : '') + '</div>' +
+    (cfg.preparedFor ? '<div class="rpd-cover-for">Prepared for ' + rptEsc(cfg.preparedFor) + '</div>' : '') +
+    '<div class="rpd-cover-grid">' +
+      '<div><span>Reporting period</span><strong>' + rptFmtRange(full.rangeStart, full.rangeEnd) + '</strong></div>' +
+      (p ? '<div><span>Compared with</span><strong>' + rptFmtRange(p.rangeStart, p.rangeEnd) + '</strong></div>' : '') +
+      '<div><span>Generated</span><strong>' + rptFmtTs(full.generatedAt) + '</strong></div>' +
+      (cfg.preparedBy ? '<div><span>Prepared by</span><strong>' + rptEsc(cfg.preparedBy) + '</strong></div>' : '') +
+    '</div>' +
     (cfg.note ? '<div class="rpd-cover-note">' + rptEsc(cfg.note) + '</div>' : '') +
-    (cfg.confidential ? '<div class="rpd-conf">Confidential — prepared for internal business use.</div>' : '') +
+    (cfg.confidential ? '<div class="rpd-conf">Confidential — prepared for the recipient\'s internal business use only.</div>' : '') +
   '</div>';
 
-  // executive summary
+  // ── executive summary ──
   if (has('summary') && full.summary) {
-    h += '<div class="rpd-sec" id="rpd-sec-summary"><h2>Executive Summary</h2>' +
-      '<p class="rpd-body">' + rptEsc(full.summary) + '</p>' +
+    h += '<div class="rpd-sec" id="rpd-sec-summary">' + secHead('Executive Summary') +
+      '<p class="rpd-lead">' + rptEsc(full.summary) + '</p>' +
       (full.narrativeSource === 'ai' ? '<div class="rpd-ai-note">Summary written by Flowy AI from the saved report data.</div>' : '') +
     '</div>';
   }
 
   function delta(cur, prev) {
     if (!p || prev == null || cur == null) return '';
-    if (prev === 0) return '<span class="rpd-delta-na">prev. 0</span>';
+    if (prev === 0) return '<span class="rpd-delta-na">previous period: 0</span>';
     var pct = Math.round(((cur - prev) / prev) * 100);
-    return '<span class="rpd-delta ' + (pct >= 0 ? 'up' : 'down') + '">' + (pct >= 0 ? '+' : '') + pct + '% vs ' + prev + '</span>';
+    return '<span class="rpd-delta ' + (pct >= 0 ? 'up' : 'down') + '">' + (pct >= 0 ? '▲ +' : '▼ ') + pct + '% vs ' + prev + '</span>';
   }
 
-  // KPIs
+  // ── KPIs ──
   if (has('kpis')) {
-    h += '<div class="rpd-sec" id="rpd-sec-kpis"><h2>Key Performance Indicators</h2><div class="rpd-kpis">';
-    h += '<div class="rpd-kpi"><div class="rpd-kpi-v">' + c.newLeads + delta(c.newLeads, p && p.newLeads) + '</div><div class="rpd-kpi-l">New leads</div></div>';
-    h += '<div class="rpd-kpi"><div class="rpd-kpi-v">' + c.qualified + delta(c.qualified, p && p.qualified) + '</div><div class="rpd-kpi-l">Qualified leads</div></div>';
-    h += '<div class="rpd-kpi"><div class="rpd-kpi-v">' + (c.respMedianS != null ? rptFmtDur(c.respMedianS) : '—') + '</div><div class="rpd-kpi-l">Median response time</div></div>';
-    h += '<div class="rpd-kpi"><div class="rpd-kpi-v">' + c.booked + delta(c.booked, p && p.booked) + '</div><div class="rpd-kpi-l">Booked / engaged</div></div>';
+    h += '<div class="rpd-sec" id="rpd-sec-kpis">' + secHead('Key Performance Indicators') + '<div class="rpd-kpis">';
+    h += '<div class="rpd-kpi"><div class="rpd-kpi-v">' + c.newLeads + '</div><div class="rpd-kpi-l">New leads</div>' + (delta(c.newLeads, p && p.newLeads) ? '<div class="rpd-kpi-d">' + delta(c.newLeads, p && p.newLeads) + '</div>' : '') + '</div>';
+    h += '<div class="rpd-kpi"><div class="rpd-kpi-v">' + c.qualified + '</div><div class="rpd-kpi-l">Qualified leads</div>' + (delta(c.qualified, p && p.qualified) ? '<div class="rpd-kpi-d">' + delta(c.qualified, p && p.qualified) + '</div>' : '') + '</div>';
+    h += '<div class="rpd-kpi"><div class="rpd-kpi-v">' + (c.respMedianS != null ? rptFmtDur(c.respMedianS) : '—') + '</div><div class="rpd-kpi-l">Median response time</div>' + (p && p.respMedianS != null && c.respMedianS != null ? '<div class="rpd-kpi-d"><span class="rpd-delta-na">prev. ' + rptFmtDur(p.respMedianS) + '</span></div>' : '') + '</div>';
+    h += '<div class="rpd-kpi"><div class="rpd-kpi-v">' + c.booked + '</div><div class="rpd-kpi-l">Booked / engaged</div>' + (delta(c.booked, p && p.booked) ? '<div class="rpd-kpi-d">' + delta(c.booked, p && p.booked) + '</div>' : '') + '</div>';
     h += '<div class="rpd-kpi"><div class="rpd-kpi-v">' + c.touched + '</div><div class="rpd-kpi-l">Leads contacted</div></div>';
     h += '<div class="rpd-kpi"><div class="rpd-kpi-v">' + rptMoney(c.dealValue) + '</div><div class="rpd-kpi-l">New deal value</div></div>';
     h += '</div>';
@@ -805,42 +813,41 @@ function rptRenderDoc(full) {
     h += '</div>';
   }
 
-  // lead volume — CSS column chart, print-safe
+  // ── lead volume ──
   if (has('volume') && c.volume && c.volume.length) {
     var max = Math.max.apply(null, c.volume.map(function(v) { return v.n; }).concat([1]));
     var bars = c.volume.map(function(v) {
-      var hpx = Math.round((v.n / max) * 72);
+      var hpx = Math.round((v.n / max) * 88);
       return '<div class="rpd-vbar-w" title="' + v.d + ': ' + v.n + '"><div class="rpd-vbar" style="height:' + Math.max(hpx, v.n ? 3 : 1) + 'px;"></div></div>';
     }).join('');
-    var lbl = c.volume.length > 14
-      ? rptFmtDate(c.volume[0].d) + ' — ' + rptFmtDate(c.volume[c.volume.length - 1].d)
-      : '';
-    h += '<div class="rpd-sec" id="rpd-sec-volume"><h2>Lead Volume</h2>' +
-      '<div class="rpd-body">' + c.newLeads + ' new lead' + (c.newLeads === 1 ? '' : 's') + ' over ' + c.volume.length + ' days.</div>' +
-      '<div class="rpd-vchart" role="img" aria-label="Daily new leads bar chart">' + bars + '</div>' +
-      (lbl ? '<div class="rpd-vchart-lbl">' + lbl + '</div>' : '') + '</div>';
+    h += '<div class="rpd-sec" id="rpd-sec-volume">' + secHead('Lead Volume') +
+      '<div class="rpd-body">' + c.newLeads + ' new lead' + (c.newLeads === 1 ? '' : 's') + ' were received across ' + c.volume.length + ' days. Peak day: ' +
+        (function() { var pk = c.volume.reduce(function(a, b) { return b.n > a.n ? b : a; }); return rptFmtDate(pk.d) + ' (' + pk.n + ')'; })() + '.</div>' +
+      '<div class="rpd-vchart-wrap"><div class="rpd-vaxis">' + max + '</div>' +
+      '<div class="rpd-vchart" role="img" aria-label="Daily new leads bar chart">' + bars + '</div></div>' +
+      '<div class="rpd-vchart-lbl"><span>' + rptFmtDate(c.volume[0].d) + '</span><span>' + rptFmtDate(c.volume[c.volume.length - 1].d) + '</span></div></div>';
   }
 
-  // sources — horizontal bars
+  // ── sources ──
   if (has('sources') && c.sources && c.sources.length) {
     var smax = c.sources[0].count || 1;
-    h += '<div class="rpd-sec" id="rpd-sec-sources"><h2>Lead Sources</h2>' + c.sources.slice(0, 8).map(function(s) {
-      var pct = c.newLeads ? Math.round(s.count / c.newLeads * 100) : 0;
-      return '<div class="rpd-src-row"><span class="rpd-src-name">' + rptEsc(s.name) + '</span>' +
-        '<span class="rpd-src-bar"><span style="width:' + Math.round(s.count / smax * 100) + '%;"></span></span>' +
-        '<span class="rpd-src-n">' + s.count + ' · ' + pct + '%</span></div>';
+    h += '<div class="rpd-sec" id="rpd-sec-sources">' + secHead('Lead Sources') + c.sources.slice(0, 8).map(function(src) {
+      var pct = c.newLeads ? Math.round(src.count / c.newLeads * 100) : 0;
+      return '<div class="rpd-src-row"><span class="rpd-src-name">' + rptEsc(src.name) + '</span>' +
+        '<span class="rpd-src-bar"><span style="width:' + Math.round(src.count / smax * 100) + '%;"></span></span>' +
+        '<span class="rpd-src-n">' + src.count + '<em>' + pct + '%</em></span></div>';
     }).join('') + '</div>';
   }
 
-  // response
+  // ── response ──
   if (has('response')) {
-    h += '<div class="rpd-sec" id="rpd-sec-response"><h2>Response Performance</h2>';
+    h += '<div class="rpd-sec" id="rpd-sec-response">' + secHead('Response Performance');
     if (c.respSample > 0) {
-      h += '<table class="rpd-table"><thead><tr><th>Metric</th><th>Value</th></tr></thead><tbody>' +
-        '<tr><td>Median first response</td><td>' + rptFmtDur(c.respMedianS) + '</td></tr>' +
-        '<tr><td>Average first response</td><td>' + rptFmtDur(c.respAvgS) + '</td></tr>' +
-        '<tr><td>Responded within 5 minutes</td><td>' + c.respUnder5mPct + '%</td></tr>' +
-        '<tr><td>Leads with a first response</td><td>' + c.respSample + ' of ' + c.newLeads + '</td></tr>' +
+      h += '<table class="rpd-table"><thead><tr><th>Metric</th><th class="rpd-num">Value</th></tr></thead><tbody>' +
+        '<tr><td>Median first response</td><td class="rpd-num">' + rptFmtDur(c.respMedianS) + '</td></tr>' +
+        '<tr><td>Average first response</td><td class="rpd-num">' + rptFmtDur(c.respAvgS) + '</td></tr>' +
+        '<tr><td>Responded within 5 minutes</td><td class="rpd-num">' + c.respUnder5mPct + '%</td></tr>' +
+        '<tr><td>Leads with a first response</td><td class="rpd-num">' + c.respSample + ' of ' + c.newLeads + '</td></tr>' +
         '</tbody></table>' +
         (detailed ? '<div class="rpd-note">Median is reported alongside average because a few unusually delayed responses can distort the average.</div>' : '');
     } else {
@@ -849,64 +856,66 @@ function rptRenderDoc(full) {
     h += '</div>';
   }
 
-  // qualification / status
+  // ── qualification ──
   if (has('status') && !exec) {
     var stKeys = Object.keys(c.statuses || {});
     if (stKeys.length) {
-      h += '<div class="rpd-sec" id="rpd-sec-status"><h2>Lead Qualification</h2>' +
-        '<table class="rpd-table"><thead><tr><th>Classification</th><th>Leads</th><th>Share</th></tr></thead><tbody>' +
+      h += '<div class="rpd-sec" id="rpd-sec-status">' + secHead('Lead Qualification') +
+        '<table class="rpd-table"><thead><tr><th>Classification</th><th class="rpd-num">Leads</th><th class="rpd-num">Share</th></tr></thead><tbody>' +
         stKeys.sort(function(a, b) { return c.statuses[b] - c.statuses[a]; }).map(function(k) {
           var pct = c.newLeads ? Math.round(c.statuses[k] / c.newLeads * 100) : 0;
-          return '<tr><td>' + rptEsc(k) + '</td><td>' + c.statuses[k] + '</td><td>' + pct + '%</td></tr>';
+          return '<tr><td>' + rptEsc(k) + '</td><td class="rpd-num">' + c.statuses[k] + '</td><td class="rpd-num">' + pct + '%</td></tr>';
         }).join('') + '</tbody></table></div>';
     }
   }
 
-  // pipeline
+  // ── pipeline ──
   if (has('pipeline') && c.stages && c.stages.length) {
-    h += '<div class="rpd-sec" id="rpd-sec-pipeline"><h2>Pipeline</h2>' +
-      '<table class="rpd-table"><thead><tr><th>Stage</th><th>Deals</th><th>Value</th></tr></thead><tbody>' +
-      c.stages.map(function(s) {
-        return '<tr><td>' + rptEsc(s.stage) + '</td><td>' + s.count + '</td><td>' + rptMoney(s.value) + '</td></tr>';
+    h += '<div class="rpd-sec" id="rpd-sec-pipeline">' + secHead('Pipeline') +
+      '<table class="rpd-table"><thead><tr><th>Stage</th><th class="rpd-num">Deals</th><th class="rpd-num">Value</th></tr></thead><tbody>' +
+      c.stages.map(function(sg) {
+        return '<tr><td>' + rptEsc(sg.stage) + '</td><td class="rpd-num">' + sg.count + '</td><td class="rpd-num">' + rptMoney(sg.value) + '</td></tr>';
       }).join('') + '</tbody></table>' +
-      '<div class="rpd-body" style="margin-top:8px;">' + c.dealsCreated + ' deal' + (c.dealsCreated === 1 ? '' : 's') + ' created in this period' +
+      '<div class="rpd-body" style="margin-top:10px;">' + c.dealsCreated + ' deal' + (c.dealsCreated === 1 ? '' : 's') + ' created in this period' +
       (c.won ? ', ' + c.won + ' marked won' : '') + '.</div></div>';
   }
 
-  // follow-ups
+  // ── follow-ups ──
   if (has('followups')) {
     var untouched = Math.max(0, c.newLeads - c.touched);
-    h += '<div class="rpd-sec" id="rpd-sec-followups"><h2>Follow-Up Activity</h2>' +
-      '<table class="rpd-table"><thead><tr><th>Metric</th><th>Value</th></tr></thead><tbody>' +
-      '<tr><td>Leads contacted at least once</td><td>' + c.touched + '</td></tr>' +
-      '<tr><td>Leads not yet contacted</td><td>' + untouched + '</td></tr>' +
-      '<tr><td>Booked or engaged</td><td>' + c.booked + '</td></tr>' +
+    h += '<div class="rpd-sec" id="rpd-sec-followups">' + secHead('Follow-Up Activity') +
+      '<table class="rpd-table"><thead><tr><th>Metric</th><th class="rpd-num">Value</th></tr></thead><tbody>' +
+      '<tr><td>Leads contacted at least once</td><td class="rpd-num">' + c.touched + '</td></tr>' +
+      '<tr><td>Leads not yet contacted</td><td class="rpd-num">' + untouched + '</td></tr>' +
+      '<tr><td>Booked or engaged</td><td class="rpd-num">' + c.booked + '</td></tr>' +
       '</tbody></table></div>';
   }
 
-  // financial
+  // ── financial ──
   if (has('financial') && snap.financial) {
     var f = snap.financial;
     function m(cents) { return '$' + (cents / 100).toLocaleString(undefined, { minimumFractionDigits: 2 }); }
-    h += '<div class="rpd-sec" id="rpd-sec-financial"><h2>Financial Activity</h2>' +
-      '<table class="rpd-table"><thead><tr><th>Metric</th><th>Value</th></tr></thead><tbody>' +
-      '<tr><td>Invoiced this period</td><td>' + m(f.invoicedC) + ' (' + f.invoicedN + ' invoice' + (f.invoicedN === 1 ? '' : 's') + ')</td></tr>' +
-      '<tr><td>Collected this period</td><td>' + m(f.collectedC) + '</td></tr>' +
-      '<tr><td>Outstanding balance</td><td>' + m(f.outstandingC) + '</td></tr>' +
-      '<tr><td>Of which overdue</td><td>' + m(f.overdueC) + '</td></tr>' +
+    h += '<div class="rpd-sec" id="rpd-sec-financial">' + secHead('Financial Activity') +
+      '<table class="rpd-table"><thead><tr><th>Metric</th><th class="rpd-num">Value</th></tr></thead><tbody>' +
+      '<tr><td>Invoiced this period</td><td class="rpd-num">' + m(f.invoicedC) + ' (' + f.invoicedN + ' invoice' + (f.invoicedN === 1 ? '' : 's') + ')</td></tr>' +
+      '<tr><td>Collected this period</td><td class="rpd-num">' + m(f.collectedC) + '</td></tr>' +
+      '<tr><td>Outstanding balance</td><td class="rpd-num">' + m(f.outstandingC) + '</td></tr>' +
+      '<tr><td>Of which overdue</td><td class="rpd-num">' + m(f.overdueC) + '</td></tr>' +
       '</tbody></table></div>';
   }
 
-  // recommendations
+  // ── recommendations ──
   if (has('recommendations') && (full.recommendations || []).length) {
-    h += '<div class="rpd-sec" id="rpd-sec-recommendations"><h2>Recommendations</h2>' +
-      '<ol class="rpd-recs">' + full.recommendations.map(function(r) { return '<li>' + rptEsc(r) + '</li>'; }).join('') + '</ol>' +
+    h += '<div class="rpd-sec" id="rpd-sec-recommendations">' + secHead('Recommendations') +
+      full.recommendations.map(function(r, i) {
+        return '<div class="rpd-rec"><span class="rpd-rec-n">' + (i + 1) + '</span><span>' + rptEsc(r) + '</span></div>';
+      }).join('') +
       '<div class="rpd-ai-note">Recommendations are analysis based on the report data — not measured facts or guaranteed outcomes.</div></div>';
   }
 
-  // appendix
+  // ── appendix ──
   if (has('appendix')) {
-    h += '<div class="rpd-sec" id="rpd-sec-appendix"><h2>Appendix</h2>' +
+    h += '<div class="rpd-sec" id="rpd-sec-appendix">' + secHead('Appendix') +
       '<table class="rpd-table rpd-appendix"><tbody>' +
       '<tr><td>Reporting period</td><td>' + full.rangeStart + ' to ' + full.rangeEnd + ' (inclusive)</td></tr>' +
       (p ? '<tr><td>Comparison period</td><td>' + p.rangeStart + ' to ' + p.rangeEnd + '</td></tr>' : '') +
@@ -919,7 +928,7 @@ function rptRenderDoc(full) {
     '</div>';
   }
 
-  h += '<div class="rpd-footer"><span>' + (cfg.confidential ? 'Confidential · ' : '') + rptFmtDate(full.rangeEnd) + '</span><span class="rpd-footer-brand">Flowaify</span></div>';
+  h += '<div class="rpd-footer"><span>' + rptEsc(full.name) + (cfg.confidential ? ' · Confidential' : '') + '</span><span class="rpd-footer-brand">Flowaify · ' + rptFmtDate(full.rangeEnd) + '</span></div>';
   h += '</div>';
   return h;
 }
@@ -945,6 +954,14 @@ function openReportEditor(prefill) {
   if (!rptCanEdit()) { showToast('Only members can generate reports.'); return; }
   var today = new Date();
   function iso(d) { return d.toISOString().slice(0, 10); }
+  if (!prefill && _rptFlowDraft) {
+    _rptFlow = _rptFlowDraft;
+    _rptFlowDraft = null;
+    rptFlowRender();
+    var hostR = document.getElementById('rpt-flow');
+    if (hostR) hostR.classList.add('open');
+    return;
+  }
   _rptFlow = prefill && prefill.type ? {
     step: 1, type: prefill.type, rangeKey: 'custom',
     rangeStart: prefill.rangeStart, rangeEnd: prefill.rangeEnd,
@@ -967,12 +984,38 @@ function openReportEditor(prefill) {
 }
 window.openReportEditor = openReportEditor;
 
+var _rptFlowDraft = null;
+
+function rptFlowHarvest() {
+  if (!_rptFlow) return;
+  ['rangeStart', 'rangeEnd'].forEach(function(k) {
+    var el = document.getElementById('rf-' + k);
+    if (el && el.value) _rptFlow[k] = el.value;
+  });
+  ['name', 'preparedFor', 'preparedBy', 'note'].forEach(function(k) {
+    var el = document.getElementById('rf-' + k);
+    if (el) _rptFlow[k] = el.value;
+  });
+}
+
+/* Closing keeps the draft — reopening New Report resumes where you left off. */
 function rptFlowClose() {
+  rptFlowHarvest();
+  if (_rptFlow) _rptFlowDraft = _rptFlow;
   var host = document.getElementById('rpt-flow');
   if (host) host.classList.remove('open');
   _rptFlow = null;
+  if (_rptFlowDraft && typeof showToast === 'function') showToast('Draft kept — reopen New Report to continue.');
 }
 window.rptFlowClose = rptFlowClose;
+
+function rptFlowReset() {
+  _rptFlowDraft = null;
+  _rptFlow = null;
+  openReportEditor();
+  if (typeof showToast === 'function') showToast('Started a fresh report.');
+}
+window.rptFlowReset = rptFlowReset;
 
 function rptFlowSet(k, v) {
   if (!_rptFlow) return;
@@ -1021,15 +1064,7 @@ window.rptFlowToggleSection = rptFlowToggleSection;
 
 function rptFlowStep(dir) {
   if (!_rptFlow) return;
-  // capture free-text fields before re-render
-  ['rangeStart', 'rangeEnd'].forEach(function(k) {
-    var el = document.getElementById('rf-' + k);
-    if (el && el.value) _rptFlow[k] = el.value;
-  });
-  ['name', 'preparedFor', 'preparedBy', 'note'].forEach(function(k) {
-    var el = document.getElementById('rf-' + k);
-    if (el) _rptFlow[k] = el.value;
-  });
+  rptFlowHarvest();
   var next = _rptFlow.step + dir;
   if (next === 3 && _rptFlow.rangeEnd < _rptFlow.rangeStart) { showToast('End date must be after the start date.'); return; }
   if (next === 4 && !_rptFlow.sections.length) { showToast('Select at least one section.'); return; }
@@ -1127,7 +1162,9 @@ async function rptFlowGenerate() {
     confidential: f.confidential, includeAI: f.includeAI,
   });
   if (res.status === 200 && res.data && res.data.report) {
-    rptFlowClose();
+    _rptFlow = null; _rptFlowDraft = null;
+    var hostG = document.getElementById('rpt-flow');
+    if (hostG) hostG.classList.remove('open');
     rptMergeIdx(res.data.report);
     _rptSel = res.data.report.id;
     rptRenderAll();
