@@ -998,7 +998,7 @@ function renderAutoActivity(contacts) {
     var tb = b.lastTouchAt ? new Date(b.lastTouchAt).getTime() : (b.createdAt ? new Date(b.createdAt).getTime() : 0);
     return tb - ta;
   });
-  var items = active.slice(0, 15);
+  var items = active.slice(0, 6);
   if (!items.length) {
     feed.innerHTML = '<div class="empty-state" style="padding:36px 20px;"><i data-lucide="list-x"></i>' +
       '<div class="empty-state-title">No runs for this rule yet</div>' +
