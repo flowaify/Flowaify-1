@@ -373,7 +373,7 @@ async function teamsSendMsg() {
     if (nm && m.sub && text.indexOf('@' + nm) !== -1) mentions.push(m.sub);
   });
 
-  var r = await twFetch('POST', '/team/messages/send', {
+  var r = await twFetch('POST', '/team/post', {
     channelId: _teamsCurrentChannel.id, content: text, type: 'text', mentions: mentions
   });
   if (!r || r.status !== 200) {
@@ -423,7 +423,7 @@ function twTypingPing() {
   var now = Date.now();
   if (now - _twTypingLastPing < 4000) return;
   _twTypingLastPing = now;
-  twFetch('POST', '/team/typing', { channelId: _teamsCurrentChannel.id });
+  twFetch('POST', '/team/pulse', { channelId: _teamsCurrentChannel.id });
 }
 window.twTypingPing = twTypingPing;
 
@@ -698,7 +698,7 @@ async function teamsShareLead(contactId) {
   var lead = contacts.find(function(c) { return c.id === contactId; });
   if (!lead) return;
   var payload = { id: lead.id, name: lead.name, email: lead.email, status: lead.status, source: lead.source };
-  var r = await twFetch('POST', '/team/messages/send', {
+  var r = await twFetch('POST', '/team/post', {
     channelId: _teamsCurrentChannel.id,
     content: 'Shared lead: ' + lead.name,
     type: 'lead',
@@ -750,7 +750,7 @@ async function teamsShareInvoice(inv) {
     status: inv.status || 'draft',
     dueDate: inv.dueDate || ''
   };
-  var r = await twFetch('POST', '/team/messages/send', {
+  var r = await twFetch('POST', '/team/post', {
     channelId: _teamsCurrentChannel.id,
     content: 'Shared invoice ' + (inv.number || '') + ' for ' + payload.clientName,
     type: 'invoice',
@@ -782,7 +782,7 @@ async function teamsShareReport(rpt) {
     date: rpt.dateStr || new Date(rpt.createdAt).toLocaleDateString(),
     reportFor: rpt.reportFor || ''
   };
-  var r = await twFetch('POST', '/team/messages/send', {
+  var r = await twFetch('POST', '/team/post', {
     channelId: _teamsCurrentChannel.id,
     content: 'Shared report: ' + payload.title + (payload.reportFor ? ' for ' + payload.reportFor : ''),
     type: 'report',
