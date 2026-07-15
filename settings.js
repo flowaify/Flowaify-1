@@ -1098,3 +1098,509 @@ async function automationsInit() {
   }, 90000);
 }
 window.automationsInit = automationsInit;
+
+// ══════════════════════════════════════════════════════════════════════════════
+// CUSTOM RULES (Phase A) — builder, list integration, test-now, run log merge.
+// Rules live in Worker KV (rules:{CLIENTID}); everything starts in Test mode.
+// ══════════════════════════════════════════════════════════════════════════════
+
+var _customRules = [];
+var _ruleRuns = [];
+var _ruleFlow = null;
+var _ruleFlowDraft = null;
+
+var RULE_TRIGGER_META = {
+  new_lead: { label: 'New lead created', sentence: 'a new lead arrives' },
+  score:    { label: 'Score threshold',  sentence: 'a lead scores {n}+' },
+  stale:    { label: 'Stale lead',       sentence: 'a lead has no touch for {n} days' },
+};
+
+function ruleSentence(r) {
+  var t = RULE_TRIGGER_META[r.trigger.type] || RULE_TRIGGER_META.new_lead;
+  var when = t.sentence.replace('{n}', r.trigger.threshold || r.trigger.days || '');
+  var conds = (r.conditions || []).map(function(c) {
+    if (c.field === 'score') return 'score ' + (c.op === 'gte' ? '≥ ' : '≤ ') + c.value;
+    return c.field + ' ' + (c.op === 'is' ? 'is ' : 'contains ') + '“' + c.value + '”';
+  });
+  var acts = (r.actions || []).map(function(a) {
+    if (a.type === 'email') return a.ai && a.ai.enabled ? 'send a Flowy-drafted email' : 'send an email';
+    if (a.type === 'status') return 'set status to ' + a.value;
+    return 'notify the team';
+  });
+  return 'When ' + when + (conds.length ? ' and ' + conds.join(' and ') : '') + ', ' +
+    (acts.join(', then ') || 'do nothing') + '.';
+}
+
+function rulePill(mode) {
+  var m = { test: ['Test', 'ar-test'], live: ['Live', 'ar-live'], paused: ['Paused', 'ar-paused'] }[mode] || ['Test', 'ar-test'];
+  return '<span class="ar-pill ' + m[1] + '"><span class="ar-dot"></span>' + m[0] + '</span>';
+}
+
+async function rulesRefresh() {
+  var r = await stFetch('GET', '/rules/list');
+  if (r.status === 200 && r.data && r.data.rules) { _customRules = r.data.rules; renderAutoRules(); }
+  var rr = await stFetch('GET', '/rules/runs');
+  if (rr.status === 200 && rr.data && rr.data.runs) {
+    _ruleRuns = rr.data.runs;
+    if (window.__crmData) renderAutoActivity(window.__crmData.contacts || []);
+  }
+}
+
+/* custom rules render beneath the system rules */
+function renderCustomRules() {
+  if (!_customRules.length) return '';
+  var q = ((document.getElementById('auto-rule-search') || {}).value || '').toLowerCase();
+  var fs = (document.getElementById('auto-rule-fstatus') || {}).value || 'all';
+  var rows = _customRules.filter(function(r) {
+    if (fs === 'live' && r.mode !== 'live') return false;
+    if (fs === 'paused' && r.mode !== 'paused') return false;
+    if (fs === 'setup') return false;
+    if (q && (r.name + ' ' + ruleSentence(r)).toLowerCase().indexOf(q) === -1) return false;
+    return true;
+  });
+  if (!rows.length) return '';
+  return '<div class="auto-rules-divider">Custom rules</div>' + rows.map(function(r) {
+    var stats = r.stats || {};
+    var meta = '<strong>Tested:</strong> ' + (stats.tested || 0) + ' match' + ((stats.tested || 0) === 1 ? '' : 'es');
+    if (stats.lastRunAt) meta += '<span><strong>Last run:</strong> ' + autoEsc(autoFmtWhen(stats.lastRunAt) || '—') + '</span>';
+    meta += '<span><strong>Cap:</strong> ' + ((r.guards || {}).dailyCap || 25) + '/day</span>';
+    return '<div class="auto-rule' + (_autoSelRule === 'rule:' + r.id ? ' sel' : '') + '" onclick="autoSelectRule(\'rule:' + r.id + '\')" role="button" tabindex="0">' +
+      '<div class="auto-ctrl-icon-wrap kg-blue"><i data-lucide="git-branch"></i></div>' +
+      '<div class="auto-rule-body">' +
+        '<div class="auto-rule-top"><span class="auto-rule-name">' + autoEsc(r.name) + '</span>' + rulePill(r.mode) + '</div>' +
+        '<div class="auto-rule-desc">' + autoEsc(ruleSentence(r)) + '</div>' +
+        '<div class="auto-rule-meta">' + meta + '</div>' +
+      '</div>' +
+      '<div class="auto-rule-side">' +
+        '<button class="auto-rule-kebab" onclick="event.stopPropagation();customRuleMenu(event,\'' + r.id + '\')" aria-label="Rule actions">⋮</button>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function customRuleById(id) { return _customRules.find(function(r) { return r.id === id; }); }
+
+function customRuleMenu(e, id) {
+  var menu = document.getElementById('auto-rule-menu');
+  var r = customRuleById(id);
+  if (!menu || !r) return;
+  var admin = autoCanEdit();
+  var items = ['<div class="card-ctx-item" onclick="autoSelectRule(\'rule:' + id + '\')"><i data-lucide="eye"></i>View details</div>'];
+  if (admin) {
+    items.push('<div class="card-ctx-item" onclick="ruleTestNow(\'' + id + '\')"><i data-lucide="flask-conical"></i>Run test now</div>');
+    items.push('<div class="card-ctx-item" onclick="ruleBuilderOpen(\'' + id + '\')"><i data-lucide="pencil"></i>Edit rule</div>');
+    if (r.mode !== 'paused') items.push('<div class="card-ctx-item" onclick="ruleSetMode(\'' + id + '\',\'paused\')"><i data-lucide="pause"></i>Pause rule</div>');
+    else items.push('<div class="card-ctx-item" onclick="ruleSetMode(\'' + id + '\',\'test\')"><i data-lucide="flask-conical"></i>Set to Test</div>');
+    items.push('<div class="card-ctx-item ctx-danger" onclick="ruleDelete(\'' + id + '\')"><i data-lucide="trash-2"></i>Delete rule</div>');
+  }
+  menu.innerHTML = items.join('');
+  var rect = e.currentTarget.getBoundingClientRect();
+  menu.style.top = Math.min(rect.bottom + 4, window.innerHeight - items.length * 34 - 16) + 'px';
+  menu.style.left = Math.max(8, rect.right - 180) + 'px';
+  menu.classList.add('open');
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+window.customRuleMenu = customRuleMenu;
+
+/* detail panel branch for custom rules */
+function renderCustomRuleDetail(id) {
+  var host = document.getElementById('auto-rule-detail');
+  var r = customRuleById(id);
+  if (!host || !r) return;
+  var admin = autoCanEdit();
+  var stats = r.stats || {};
+  var details = [
+    ['Trigger', (RULE_TRIGGER_META[r.trigger.type] || {}).label + (r.trigger.threshold ? ' (' + r.trigger.threshold + '+)' : '') + (r.trigger.days ? ' (' + r.trigger.days + ' days)' : '')],
+    (r.conditions || []).length ? ['Conditions', r.conditions.length + ' filter' + (r.conditions.length === 1 ? '' : 's')] : null,
+    ['Actions', (r.actions || []).map(function(a) { return a.type === 'email' ? 'Email' : a.type === 'status' ? 'Status → ' + a.value : 'Notify'; }).join(' · ')],
+    ['Guards', 'Once per lead · ' + ((r.guards || {}).dailyCap || 25) + '/day'],
+    ['Mode', r.mode === 'test' ? 'Test — logs matches, never sends' : r.mode === 'live' ? 'Live' : 'Paused'],
+    ['Test matches', String(stats.tested || 0)],
+    stats.lastRunAt ? ['Last run', autoFmtWhen(stats.lastRunAt) || '—'] : null,
+    ['Created by', autoEsc(r.createdByName || '—')],
+  ].filter(Boolean).map(function(row) {
+    return '<div class="ard-krow"><span>' + row[0] + '</span><span>' + row[1] + '</span></div>';
+  }).join('');
+
+  var next, btns = [];
+  function btn(label, fn, primary) {
+    return '<button class="btn-mini ' + (primary ? 'btn-mini-primary' : 'btn-mini-ghost') + '" onclick="' + fn + '">' + label + '</button>';
+  }
+  if (r.mode === 'test') {
+    next = 'Run a test to see exactly which leads this rule would act on. Live execution arrives with the engine update.';
+    if (admin) btns.push(btn('Run test now', "ruleTestNow('" + r.id + "')", true));
+    if (admin) btns.push(btn('Edit rule', "ruleBuilderOpen('" + r.id + "')"));
+  } else if (r.mode === 'paused') {
+    next = 'This rule is paused and will not run. Set it back to Test to keep validating it.';
+    if (admin) btns.push(btn('Set to Test', "ruleSetMode('" + r.id + "','test')", true));
+    if (admin) btns.push(btn('Edit rule', "ruleBuilderOpen('" + r.id + "')"));
+  } else {
+    next = 'This rule is live and executes on the engine schedule.';
+    if (admin) btns.push(btn('Run test now', "ruleTestNow('" + r.id + "')", true));
+    if (admin) btns.push(btn('Pause rule', "ruleSetMode('" + r.id + "','paused')"));
+  }
+  if (admin) btns.push(btn('Delete', "ruleDelete('" + r.id + "')"));
+
+  host.innerHTML =
+    '<div style="display:flex;align-items:center;gap:9px;padding-top:2px;">' +
+      '<div class="auto-ctrl-icon-wrap kg-blue" style="width:28px;height:28px;border-radius:7px;"><i data-lucide="git-branch" style="width:13px;height:13px;"></i></div>' +
+      '<div style="min-width:0;"><div style="font-size:13px;font-weight:700;color:var(--text);">' + autoEsc(r.name) + '</div></div>' +
+      '<span style="margin-left:auto;">' + rulePill(r.mode) + '</span>' +
+    '</div>' +
+    '<div class="auto-rule-desc" style="margin-top:8px;">' + autoEsc(ruleSentence(r)) + '</div>' +
+    '<div style="margin-top:10px;border-top:1px solid var(--border);padding-top:6px;">' + details + '</div>' +
+    '<div class="ard-next"><strong>Recommended next action:</strong> ' + next + '</div>' +
+    '<div class="ard-actions">' + btns.join('') + '</div>';
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+// ── actions ──
+
+async function ruleSetMode(id, mode) {
+  var r = await stFetch('POST', '/rules/mode', { id: id, mode: mode });
+  if (r.status === 200 && r.data.rules) {
+    _customRules = r.data.rules;
+    renderAutoRules(); renderAutoRuleDetail();
+    if (typeof showToast === 'function') showToast(mode === 'paused' ? 'Rule paused.' : 'Rule set to Test mode.');
+  } else if (typeof showToast === 'function') showToast('Could not update the rule.');
+}
+window.ruleSetMode = ruleSetMode;
+
+function ruleDelete(id) {
+  var r = customRuleById(id);
+  if (!r) return;
+  var doIt = async function() {
+    var res = await stFetch('DELETE', '/rules/' + id);
+    if (res.status === 200) {
+      _customRules = res.data.rules || [];
+      if (_autoSelRule === 'rule:' + id) _autoSelRule = null;
+      renderAutoRules(); renderAutoRuleDetail();
+      if (typeof showToast === 'function') showToast('Rule deleted.');
+    } else if (typeof showToast === 'function') showToast('Could not delete.');
+  };
+  if (typeof window.invConfirm === 'function') {
+    invConfirm('Delete "' + r.name + '"?', 'The rule and its configuration are removed permanently. Run history is kept.', 'Delete rule', true, doIt);
+  } else doIt();
+}
+window.ruleDelete = ruleDelete;
+
+async function ruleTestNow(id) {
+  var r = customRuleById(id);
+  if (!r) return;
+  if (typeof showToast === 'function') showToast('Testing rule against live CRM data…');
+  var res = await stFetch('POST', '/rules/test-now', { id: id });
+  if (res.status !== 200 || !res.data) {
+    if (typeof showToast === 'function') showToast((res.data && res.data.error) || 'Test failed — try again.');
+    return;
+  }
+  if (res.data.rule) {
+    var i = _customRules.findIndex(function(x) { return x.id === id; });
+    if (i !== -1) _customRules[i] = res.data.rule;
+  }
+  rulesRefresh();
+  var rows = (res.data.sample || []).map(function(c) {
+    return '<div class="rlf-test-row"><span>' + autoEsc(c.name) + '</span><span>' +
+      (c.score != null ? 'score ' + c.score + ' · ' : '') + autoEsc(c.source || '') + '</span></div>';
+  }).join('');
+  var bodyHtml = res.data.matched
+    ? '<div style="font-size:12.5px;color:var(--text-s);margin-bottom:8px;">This rule would act on <strong style="color:var(--text);">' + res.data.matched + ' lead' + (res.data.matched === 1 ? '' : 's') + '</strong> right now:</div>' + rows +
+      (res.data.skipped ? '<div style="font-size:11px;color:var(--text-m);margin-top:8px;">' + res.data.skipped + ' additional match' + (res.data.skipped === 1 ? '' : 'es') + ' skipped by guards.</div>' : '')
+    : '<div style="font-size:12.5px;color:var(--text-s);">No leads match this rule right now. The test is logged — adjust the trigger or conditions and test again.</div>';
+  bodyHtml += '<div style="font-size:11px;color:var(--text-m);margin-top:10px;">Test only — no emails were sent and no records were changed.</div>';
+  if (typeof window.invModal === 'function') {
+    invModal('Test results — ' + autoEsc(r.name), bodyHtml, 'Done', async function() { return true; });
+  } else if (typeof showToast === 'function') {
+    showToast('Matched ' + res.data.matched + ' lead(s) — see Recent Runs.');
+  }
+}
+window.ruleTestNow = ruleTestNow;
+
+// ── builder (stepped, draft-preserving) ──
+
+function ruleBuilderOpen(editId) {
+  if (!autoCanEdit()) { if (typeof showToast === 'function') showToast('Only admins can create rules.'); return; }
+  var editing = editId ? customRuleById(editId) : null;
+  if (editing) {
+    _ruleFlow = JSON.parse(JSON.stringify({
+      step: 1, id: editing.id, name: editing.name, trigger: editing.trigger,
+      conditions: editing.conditions || [], actions: editing.actions || [],
+      dailyCap: (editing.guards || {}).dailyCap || 25,
+    }));
+  } else if (_ruleFlowDraft) {
+    _ruleFlow = _ruleFlowDraft; _ruleFlowDraft = null;
+  } else {
+    _ruleFlow = { step: 1, id: null, name: '', trigger: { type: 'new_lead' }, conditions: [], actions: [], dailyCap: 25 };
+  }
+  var t = document.getElementById('rule-flow-title');
+  if (t) t.textContent = _ruleFlow.id ? 'Edit Rule' : 'New Rule';
+  ruleFlowRender();
+  var host = document.getElementById('rule-flow');
+  if (host) host.classList.add('open');
+}
+window.ruleBuilderOpen = ruleBuilderOpen;
+
+function ruleBuilderClose() {
+  ruleFlowHarvest();
+  if (_ruleFlow && !_ruleFlow.id) _ruleFlowDraft = _ruleFlow;
+  _ruleFlow = null;
+  var host = document.getElementById('rule-flow');
+  if (host) host.classList.remove('open');
+}
+window.ruleBuilderClose = ruleBuilderClose;
+
+function ruleFlowHarvest() {
+  if (!_ruleFlow) return;
+  var f = _ruleFlow;
+  function v(id) { var el = document.getElementById(id); return el ? el.value : null; }
+  if (v('rlf-threshold') != null) f.trigger.threshold = Math.round(+v('rlf-threshold')) || 75;
+  if (v('rlf-days') != null) f.trigger.days = Math.round(+v('rlf-days')) || 5;
+  // conditions
+  var rows = document.querySelectorAll ? document.querySelectorAll('.rlf-cond-row') : [];
+  if (rows.length || document.getElementById('rlf-conds')) {
+    var conds = [];
+    Array.prototype.forEach.call(rows, function(row) {
+      var sel = row.querySelectorAll('select, input');
+      if (sel.length >= 3 && sel[2].value !== '') conds.push({ field: sel[0].value, op: sel[1].value, value: sel[2].value });
+    });
+    if (document.getElementById('rlf-conds')) f.conditions = conds;
+  }
+  // actions
+  if (document.getElementById('rlf-act-email')) {
+    var actions = [];
+    if ((document.getElementById('rlf-act-email') || {}).checked) {
+      actions.push({ type: 'email', subject: v('rlf-em-subject') || '', body: v('rlf-em-body') || '',
+        ai: { enabled: !!(document.getElementById('rlf-em-ai') || {}).checked, prompt: v('rlf-em-prompt') || '' } });
+    }
+    if ((document.getElementById('rlf-act-status') || {}).checked) {
+      actions.push({ type: 'status', value: v('rlf-st-value') || 'HOT' });
+    }
+    if ((document.getElementById('rlf-act-notify') || {}).checked) {
+      actions.push({ type: 'notify', channel: v('rlf-nt-channel') || 'general', message: v('rlf-nt-message') || '', task: !!(document.getElementById('rlf-nt-task') || {}).checked });
+    }
+    f.actions = actions;
+  }
+  if (v('rlf-name') != null) f.name = v('rlf-name');
+  if (v('rlf-cap') != null) f.dailyCap = Math.round(+v('rlf-cap')) || 25;
+}
+
+function ruleFlowSet(k, v2) { if (_ruleFlow) { ruleFlowHarvest(); _ruleFlow[k] = v2; ruleFlowRender(); } }
+window.ruleFlowSet = ruleFlowSet;
+
+function ruleFlowTrigger(type) {
+  if (!_ruleFlow) return;
+  _ruleFlow.trigger = { type: type };
+  if (type === 'score') _ruleFlow.trigger.threshold = 75;
+  if (type === 'stale') _ruleFlow.trigger.days = 5;
+  ruleFlowRender();
+}
+window.ruleFlowTrigger = ruleFlowTrigger;
+
+function ruleFlowAddCond() {
+  ruleFlowHarvest();
+  _ruleFlow.conditions.push({ field: 'source', op: 'contains', value: '' });
+  ruleFlowRender();
+}
+window.ruleFlowAddCond = ruleFlowAddCond;
+
+function ruleFlowDelCond(i) {
+  ruleFlowHarvest();
+  _ruleFlow.conditions.splice(i, 1);
+  ruleFlowRender();
+}
+window.ruleFlowDelCond = ruleFlowDelCond;
+
+function ruleFlowStep(dir) {
+  if (!_ruleFlow) return;
+  ruleFlowHarvest();
+  var next = _ruleFlow.step + dir;
+  if (next === 4) {
+    var hasAction = (_ruleFlow.actions || []).some(function(a) {
+      return a.type !== 'email' || true;
+    });
+    if (!(_ruleFlow.actions || []).length) { if (typeof showToast === 'function') showToast('Enable at least one action.'); return; }
+    var em = _ruleFlow.actions.find(function(a) { return a.type === 'email'; });
+    if (em && !em.ai.enabled && !em.body) { if (typeof showToast === 'function') showToast('Write the email body or enable Flowy drafting.'); return; }
+  }
+  _ruleFlow.step = Math.max(1, Math.min(4, next));
+  ruleFlowRender();
+}
+window.ruleFlowStep = ruleFlowStep;
+
+function ruleFlowInsertMerge(field, targetId) {
+  var el = document.getElementById(targetId);
+  if (!el) return;
+  el.value += '{{' + field + '}}';
+  el.focus();
+}
+window.ruleFlowInsertMerge = ruleFlowInsertMerge;
+
+function ruleFlowRender() {
+  var host = document.getElementById('rule-flow-body');
+  if (!host || !_ruleFlow) return;
+  var f = _ruleFlow;
+  var steps = '<div class="rf-steps">' + ['Trigger', 'Conditions', 'Actions', 'Review'].map(function(l, i) {
+    var n = i + 1;
+    return '<div class="rf-step' + (n === f.step ? ' cur' : n < f.step ? ' done' : '') + '"><span>' + n + '</span>' + l + '</div>';
+  }).join('') + '</div>';
+  var body = '';
+
+  if (f.step === 1) {
+    var cards = [
+      { t: 'new_lead', icon: 'user-plus', name: 'New lead created', desc: 'Fires once for each new lead after intake.' },
+      { t: 'score', icon: 'gauge', name: 'Score threshold', desc: 'Fires when a lead\'s score reaches your threshold.' },
+      { t: 'stale', icon: 'hourglass', name: 'Stale lead', desc: 'Fires when a lead has had no follow-up for N days.' },
+    ];
+    body = '<div class="rf-cards">' + cards.map(function(c) {
+      return '<div class="rf-card' + (f.trigger.type === c.t ? ' sel' : '') + '" onclick="ruleFlowTrigger(\'' + c.t + '\')" role="button" tabindex="0">' +
+        '<i data-lucide="' + c.icon + '"></i><div><div class="rf-card-name">' + c.name + '</div><div class="rf-card-desc">' + c.desc + '</div></div></div>';
+    }).join('') + '</div>';
+    if (f.trigger.type === 'score') {
+      body += '<div class="inv-dr-field" style="margin-top:12px;max-width:200px;"><label>Score threshold (1–100)</label><input id="rlf-threshold" type="number" min="1" max="100" value="' + (f.trigger.threshold || 75) + '" /></div>';
+    }
+    if (f.trigger.type === 'stale') {
+      body += '<div class="inv-dr-field" style="margin-top:12px;max-width:200px;"><label>Days without a touch</label><input id="rlf-days" type="number" min="1" max="90" value="' + (f.trigger.days || 5) + '" /></div>';
+    }
+  } else if (f.step === 2) {
+    body = '<div class="rf-label">Only act when… (optional)</div><div id="rlf-conds">' +
+      (f.conditions || []).map(function(c, i) {
+        return '<div class="rlf-cond-row">' +
+          '<select><option value="source"' + (c.field === 'source' ? ' selected' : '') + '>Source</option><option value="status"' + (c.field === 'status' ? ' selected' : '') + '>Status</option><option value="score"' + (c.field === 'score' ? ' selected' : '') + '>Score</option></select>' +
+          '<select><option value="contains"' + (c.op === 'contains' ? ' selected' : '') + '>contains</option><option value="is"' + (c.op === 'is' ? ' selected' : '') + '>is</option><option value="gte"' + (c.op === 'gte' ? ' selected' : '') + '>≥</option><option value="lte"' + (c.op === 'lte' ? ' selected' : '') + '>≤</option></select>' +
+          '<input type="text" placeholder="Value" value="' + autoEsc(c.value) + '" />' +
+          '<button class="inv-line-x" onclick="ruleFlowDelCond(' + i + ')" aria-label="Remove condition">×</button>' +
+        '</div>';
+      }).join('') + '</div>' +
+      ((f.conditions || []).length < 3 ? '<button class="btn-mini btn-mini-ghost" onclick="ruleFlowAddCond()" style="margin-top:4px;">+ Add condition</button>' : '') +
+      '<div class="rpd-note" style="margin-top:12px;">No conditions means the rule applies to every lead the trigger matches.</div>';
+  } else if (f.step === 3) {
+    var em = (f.actions || []).find(function(a) { return a.type === 'email'; });
+    var st = (f.actions || []).find(function(a) { return a.type === 'status'; });
+    var nt = (f.actions || []).find(function(a) { return a.type === 'notify'; });
+    body =
+      '<div class="rlf-act' + (em ? ' on' : '') + '"><label class="rlf-act-head"><input type="checkbox" id="rlf-act-email" ' + (em ? 'checked' : '') + ' onchange="ruleFlowStep(0)" />Send email from your connected Gmail</label>' +
+        (em ? '<div class="rlf-act-body">' +
+          '<div class="inv-dr-field"><label>Subject</label><input id="rlf-em-subject" type="text" maxlength="160" placeholder="Quick follow-up, {{firstName}}" value="' + autoEsc(em.subject || '') + '" /></div>' +
+          '<div class="inv-dr-field"><label>Body</label><textarea id="rlf-em-body" maxlength="4000" placeholder="Hi {{firstName}}, …">' + autoEsc(em.body || '') + '</textarea></div>' +
+          '<div class="rlf-chips">' + ['name', 'firstName', 'source', 'score'].map(function(m) {
+            return '<button class="rlf-chip" onclick="ruleFlowInsertMerge(\'' + m + '\',\'rlf-em-body\')">{{' + m + '}}</button>';
+          }).join('') + '</div>' +
+          '<label class="rf-check"><input type="checkbox" id="rlf-em-ai" ' + (em.ai && em.ai.enabled ? 'checked' : '') + ' onchange="ruleFlowStep(0)" /><span>Let Flowy draft each email from the lead\'s data</span></label>' +
+          (em.ai && em.ai.enabled ? '<div class="inv-dr-field"><label>Drafting instructions for Flowy</label><textarea id="rlf-em-prompt" maxlength="600" placeholder="Friendly, two short paragraphs, mention their inquiry source…">' + autoEsc(em.ai.prompt || '') + '</textarea></div>' : '') +
+        '</div>' : '') +
+      '</div>' +
+      '<div class="rlf-act' + (st ? ' on' : '') + '"><label class="rlf-act-head"><input type="checkbox" id="rlf-act-status" ' + (st ? 'checked' : '') + ' onchange="ruleFlowStep(0)" />Set lead status</label>' +
+        (st ? '<div class="rlf-act-body"><div class="inv-dr-field" style="max-width:200px;"><label>New status</label><select id="rlf-st-value">' +
+          ['HOT', 'WARM', 'COLD', 'BOOKED'].map(function(v) { return '<option' + (st.value === v ? ' selected' : '') + '>' + v + '</option>'; }).join('') +
+        '</select></div></div>' : '') +
+      '</div>' +
+      '<div class="rlf-act' + (nt ? ' on' : '') + '"><label class="rlf-act-head"><input type="checkbox" id="rlf-act-notify" ' + (nt ? 'checked' : '') + ' onchange="ruleFlowStep(0)" />Notify the team</label>' +
+        (nt ? '<div class="rlf-act-body">' +
+          '<div class="inv-dr-row">' +
+            '<div class="inv-dr-field"><label>Channel</label><input id="rlf-nt-channel" type="text" maxlength="40" value="' + autoEsc(nt.channel || 'general') + '" /></div>' +
+            '<div class="inv-dr-field"><label>Message</label><input id="rlf-nt-message" type="text" maxlength="400" placeholder="Hot lead: {{name}} ({{score}})" value="' + autoEsc(nt.message || '') + '" /></div>' +
+          '</div>' +
+          '<label class="rf-check"><input type="checkbox" id="rlf-nt-task" ' + (nt.task ? 'checked' : '') + ' /><span>Also create a team task</span></label>' +
+        '</div>' : '') +
+      '</div>';
+  } else {
+    body = '<div class="rf-label">Review</div>' +
+      '<div class="rlf-sentence">' + autoEsc(ruleSentence({ trigger: f.trigger, conditions: f.conditions, actions: f.actions })) + '</div>' +
+      '<div class="inv-dr-field" style="margin-top:12px;"><label>Rule name</label><input id="rlf-name" type="text" maxlength="80" placeholder="e.g. Hot lead alert" value="' + autoEsc(f.name || '') + '" /></div>' +
+      '<div class="inv-dr-field" style="margin-top:10px;max-width:220px;"><label>Daily action cap</label><input id="rlf-cap" type="number" min="1" max="200" value="' + (f.dailyCap || 25) + '" /></div>' +
+      '<div class="ard-next" style="margin-top:12px;"><strong>Safety:</strong> the rule saves in Test mode — it logs exactly which leads it would act on, and never fires twice on the same lead. Live execution arrives with the engine update.</div>';
+  }
+
+  var foot = '<div class="rf-foot">' +
+    (f.step > 1 ? '<button class="btn-mini btn-mini-ghost" onclick="ruleFlowStep(-1)">Back</button>' : '<span></span>') +
+    (f.step < 4
+      ? '<button class="btn-mini btn-mini-primary" onclick="ruleFlowStep(1)">Continue</button>'
+      : '<button class="btn-mini btn-mini-primary" id="rlf-save" onclick="ruleFlowSave()">' + (f.id ? 'Save Changes' : 'Save Rule (Test mode)') + '</button>') +
+  '</div>';
+
+  host.innerHTML = steps + '<div class="rf-body">' + body + '</div>' + foot;
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+async function ruleFlowSave() {
+  ruleFlowHarvest();
+  var f = _ruleFlow;
+  if (!f) return;
+  if (!(f.actions || []).length) { if (typeof showToast === 'function') showToast('Enable at least one action.'); return; }
+  var btn = document.getElementById('rlf-save');
+  if (btn) btn.disabled = true;
+  var res = await stFetch('POST', '/rules/save', {
+    id: f.id || undefined, name: f.name, trigger: f.trigger,
+    conditions: f.conditions, actions: f.actions, guards: { dailyCap: f.dailyCap },
+  });
+  if (btn) btn.disabled = false;
+  if (res.status === 200 && res.data.rules) {
+    _customRules = res.data.rules;
+    _ruleFlow = null; _ruleFlowDraft = null;
+    var host = document.getElementById('rule-flow');
+    if (host) host.classList.remove('open');
+    _autoSelRule = 'rule:' + res.data.rule.id;
+    renderAutoRules(); renderAutoRuleDetail();
+    if (typeof showToast === 'function') showToast('Rule saved in Test mode — run a test to see what it matches.');
+  } else {
+    if (typeof showToast === 'function') showToast((res.data && res.data.error) || 'Could not save the rule.');
+  }
+}
+window.ruleFlowSave = ruleFlowSave;
+
+// ── integration hooks ──
+
+/* extend the system-rule renderers to include custom rules */
+var _renderAutoRulesSystem = renderAutoRules;
+renderAutoRules = function() {
+  _renderAutoRulesSystem();
+  var host = document.getElementById('auto-rules-list');
+  if (host) host.innerHTML += renderCustomRules();
+  var createBtn = document.getElementById('auto-create-rule');
+  if (createBtn) createBtn.style.display = autoCanEdit() ? '' : 'none';
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+};
+
+var _renderAutoRuleDetailSystem = renderAutoRuleDetail;
+renderAutoRuleDetail = function() {
+  if (_autoSelRule && String(_autoSelRule).indexOf('rule:') === 0) {
+    renderCustomRuleDetail(String(_autoSelRule).slice(5));
+    return;
+  }
+  _renderAutoRuleDetailSystem();
+};
+
+/* merge rule-run log entries into the Recent Runs feed */
+var _renderAutoActivityBase = renderAutoActivity;
+renderAutoActivity = function(contacts) {
+  _renderAutoActivityBase(contacts);
+  if (!_ruleRuns.length) return;
+  var feed = document.getElementById('auto-activity');
+  if (!feed) return;
+  var list = feed.querySelector ? feed.querySelector('.auto-activity-list') : null;
+  var runItems = _ruleRuns.slice(0, 3).map(function(e, i) {
+    var icon = e.result === 'would_fire' ? 'flask-conical' : e.result === 'no_matches' ? 'search-x' : 'play';
+    var label = e.result === 'would_fire'
+      ? 'Would fire: ' + autoEsc(e.action) + ' → ' + autoEsc(e.contactName || '')
+      : e.result === 'no_matches' ? 'Test run — no matching leads' : autoEsc(e.result);
+    return '<div class="auto-activity-item" style="--i:' + i + '">' +
+      '<div class="auto-activity-icon" style="color:var(--blue)"><i data-lucide="' + icon + '"></i></div>' +
+      '<div class="auto-activity-body">' +
+        '<div class="auto-activity-label">' + label + '</div>' +
+        '<div class="auto-activity-ts">' + (typeof relTime === 'function' ? relTime(e.ts) : '') +
+          ' <span class="auto-run-rule">· ' + autoEsc(e.ruleName) + '</span> <span class="ar-pill ar-test" style="font-size:8.5px;padding:0.5px 6px;">Test</span></div>' +
+      '</div></div>';
+  }).join('');
+  if (list) list.innerHTML = runItems + list.innerHTML;
+  else if (runItems) feed.innerHTML = '<div class="auto-activity-list">' + runItems + '</div>';
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+};
+window.renderAutoActivity = renderAutoActivity;
+
+/* load rules + runs when the page opens */
+var _automationsInitBase = automationsInit;
+automationsInit = function() {
+  var r = _automationsInitBase();
+  rulesRefresh();
+  return r;
+};
+window.automationsInit = automationsInit;

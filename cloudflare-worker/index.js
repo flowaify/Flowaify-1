@@ -174,6 +174,30 @@ export default {
         return handleInvoiceDelete(request, env, corsHeaders);
       }
 
+      if (url.pathname === '/rules/list' && request.method === 'GET') {
+        return handleRulesList(request, env, corsHeaders);
+      }
+
+      if (url.pathname === '/rules/runs' && request.method === 'GET') {
+        return handleRulesRuns(request, env, corsHeaders);
+      }
+
+      if (url.pathname === '/rules/save' && request.method === 'POST') {
+        return handleRulesSave(request, env, corsHeaders);
+      }
+
+      if (url.pathname === '/rules/mode' && request.method === 'POST') {
+        return handleRulesMode(request, env, corsHeaders);
+      }
+
+      if (url.pathname === '/rules/test-now' && request.method === 'POST') {
+        return handleRulesTestNow(request, env, corsHeaders);
+      }
+
+      if (url.pathname.startsWith('/rules/') && request.method === 'DELETE') {
+        return handleRulesDelete(request, env, corsHeaders);
+      }
+
       if (url.pathname === '/report/generate' && request.method === 'POST') {
         return handleReportGenerate(request, env, corsHeaders);
       }
@@ -1765,6 +1789,285 @@ async function handlePublicInvoice(url, env, corsHeaders) {
     },
     seller,
   }, 200, pub);
+}
+
+// ─── /rules/* — custom automation rule engine v1 (Phase A: store + test-now) ──
+// Rules are stored per workspace; the evaluation core is pure and shared by
+// Run-test-now (synchronous, dry) and the Phase-B cron executor. Test mode
+// never sends, never mutates CRM data, never burns the dedupe ledger.
+
+const RULE_TRIGGERS = ['new_lead', 'score', 'stale'];
+const RULE_STATUS_VALUES = ['HOT', 'WARM', 'COLD', 'BOOKED'];
+const RULE_MAX = 20;
+
+function rulesKey(clientId) { return 'rules:' + clientId.toUpperCase().replace(/[^A-Z0-9]/g, '_'); }
+function ruleRunsKey(clientId) { return 'ruleruns:' + clientId.toUpperCase().replace(/[^A-Z0-9]/g, '_'); }
+function ruleStateKey(clientId) { return 'rulestate:' + clientId.toUpperCase().replace(/[^A-Z0-9]/g, '_'); }
+
+async function rulesLoad(env, clientId) {
+  const raw = await env.TEAM_KV.get(rulesKey(clientId));
+  return raw ? JSON.parse(raw) : { v: 1, rules: [] };
+}
+async function rulesSave(env, clientId, doc) {
+  await env.TEAM_KV.put(rulesKey(clientId), JSON.stringify(doc));
+  // index of workspaces with rules — Phase-B cron enumerates this
+  try {
+    const raw = await env.TEAM_KV.get('rules_index');
+    const idx = raw ? JSON.parse(raw) : [];
+    if (doc.rules.length && idx.indexOf(clientId) === -1) { idx.push(clientId); await env.TEAM_KV.put('rules_index', JSON.stringify(idx)); }
+    if (!doc.rules.length && idx.indexOf(clientId) !== -1) { await env.TEAM_KV.put('rules_index', JSON.stringify(idx.filter(c => c !== clientId))); }
+  } catch (e) {}
+}
+
+async function ruleRunsAppend(env, clientId, entries) {
+  if (!entries.length) return;
+  const raw = await env.TEAM_KV.get(ruleRunsKey(clientId));
+  let log = raw ? JSON.parse(raw) : [];
+  log = entries.concat(log).slice(0, 200);
+  await env.TEAM_KV.put(ruleRunsKey(clientId), JSON.stringify(log));
+}
+
+function ruleStr(v, max) { return String(v == null ? '' : v).slice(0, max); }
+
+/* deep sanitation — the Worker never trusts a rule definition from the client */
+function ruleSanitize(body, existing) {
+  const trig = body.trigger || {};
+  const trigger = { type: RULE_TRIGGERS.includes(trig.type) ? trig.type : 'new_lead' };
+  if (trigger.type === 'score') trigger.threshold = Math.min(100, Math.max(1, Math.round(+trig.threshold) || 75));
+  if (trigger.type === 'stale') trigger.days = Math.min(90, Math.max(1, Math.round(+trig.days) || 5));
+
+  const conditions = (Array.isArray(body.conditions) ? body.conditions : []).slice(0, 3).map(c => {
+    const field = ['source', 'status', 'score'].includes(c.field) ? c.field : 'source';
+    let op = ['is', 'contains', 'gte', 'lte'].includes(c.op) ? c.op : 'contains';
+    if (field === 'score' && op !== 'gte' && op !== 'lte') op = 'gte';
+    if (field !== 'score' && (op === 'gte' || op === 'lte')) op = 'contains';
+    return { field, op, value: field === 'score' ? Math.min(100, Math.max(0, Math.round(+c.value) || 0)) : ruleStr(c.value, 80) };
+  }).filter(c => c.value !== '' && c.value != null);
+
+  const actions = [];
+  (Array.isArray(body.actions) ? body.actions : []).slice(0, 3).forEach(a => {
+    if (a.type === 'email' && !actions.some(x => x.type === 'email')) {
+      actions.push({
+        type: 'email',
+        subject: ruleStr(a.subject, 160),
+        body: ruleStr(a.body, 4000),
+        ai: { enabled: !!(a.ai && a.ai.enabled), prompt: ruleStr(a.ai && a.ai.prompt, 600) },
+      });
+    } else if (a.type === 'status' && !actions.some(x => x.type === 'status')) {
+      const v = String(a.value || '').toUpperCase();
+      if (RULE_STATUS_VALUES.includes(v)) actions.push({ type: 'status', value: v });
+    } else if (a.type === 'notify' && !actions.some(x => x.type === 'notify')) {
+      actions.push({
+        type: 'notify',
+        channel: ruleStr(a.channel, 40) || 'general',
+        message: ruleStr(a.message, 400),
+        task: !!a.task,
+      });
+    }
+  });
+
+  return {
+    id: existing ? existing.id : 'rule' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5),
+    name: ruleStr(body.name, 80) || 'Untitled rule',
+    mode: existing ? existing.mode : 'test',
+    trigger, conditions, actions,
+    guards: {
+      oncePerLead: true,
+      dailyCap: Math.min(200, Math.max(1, Math.round(+(body.guards && body.guards.dailyCap)) || 25)),
+    },
+    createdBy: existing ? existing.createdBy : '',
+    createdByName: existing ? existing.createdByName : '',
+    createdAt: existing ? existing.createdAt : Date.now(),
+    updatedAt: Date.now(),
+    stats: existing ? existing.stats : { fired: 0, tested: 0, lastRunAt: null },
+  };
+}
+
+/* shape a raw Zoho contact for evaluation */
+function ruleShapeContact(c) {
+  return {
+    id: c.id,
+    name: c.Full_Name || '—',
+    email: c.Email || null,
+    source: String(c.Flow_Source || c.flow_source || c.Lead_Source || '').trim(),
+    score: c.Flow_Urgency_Score != null ? +c.Flow_Urgency_Score : null,
+    status: String(c.flow_state || c.Flow_Urgency_Level || '').toUpperCase(),
+    createdAt: c.Created_Time ? new Date(c.Created_Time).getTime() : 0,
+    lastTouchAt: c.flow_last_touch_at ? new Date(c.flow_last_touch_at).getTime() : null,
+  };
+}
+
+/* pure evaluation core — shared by test-now (Phase A) and the cron (Phase B) */
+function ruleEvaluate(rule, contacts, state, now) {
+  now = now || Date.now();
+  const fired = (state && state.firedLeads && state.firedLeads[rule.id]) || {};
+  const dailyKey = new Date(now).toISOString().slice(0, 10);
+  const daily = (state && state.dailyCounts && state.dailyCounts[rule.id]) || {};
+  let dailyUsed = daily.date === dailyKey ? (daily.count || 0) : 0;
+  const cursor = (state && state.cursor) || 0;
+
+  const matches = [];
+  const skipped = [];
+  for (const c of contacts) {
+    if (!c.id) continue;
+    // trigger
+    if (rule.trigger.type === 'new_lead') {
+      if (!(c.createdAt > cursor)) continue;
+    } else if (rule.trigger.type === 'score') {
+      if (!(c.score != null && c.score >= rule.trigger.threshold)) continue;
+    } else if (rule.trigger.type === 'stale') {
+      const last = c.lastTouchAt || c.createdAt;
+      if (!last || (now - last) < rule.trigger.days * 86400000) continue;
+      if (c.status === 'DEAD' || c.status.indexOf('BOOK') !== -1 || c.status === 'ENGAGED') continue;
+    }
+    // conditions
+    let ok = true;
+    for (const cond of rule.conditions || []) {
+      if (cond.field === 'score') {
+        if (c.score == null) { ok = false; break; }
+        if (cond.op === 'gte' && !(c.score >= cond.value)) { ok = false; break; }
+        if (cond.op === 'lte' && !(c.score <= cond.value)) { ok = false; break; }
+      } else {
+        const hay = String(cond.field === 'source' ? c.source : c.status).toUpperCase();
+        const needle = String(cond.value).toUpperCase();
+        if (cond.op === 'is' && hay !== needle) { ok = false; break; }
+        if (cond.op === 'contains' && hay.indexOf(needle) === -1) { ok = false; break; }
+      }
+    }
+    if (!ok) continue;
+    // guards
+    if (rule.guards.oncePerLead && fired[c.id]) { skipped.push({ contact: c, reason: 'already_fired' }); continue; }
+    if (dailyUsed >= rule.guards.dailyCap) { skipped.push({ contact: c, reason: 'daily_cap' }); continue; }
+    dailyUsed++;
+    matches.push(c);
+  }
+  return { matches, skipped, dailyUsed };
+}
+
+function ruleActionSummary(rule) {
+  return (rule.actions || []).map(a =>
+    a.type === 'email' ? 'send email' : a.type === 'status' ? 'set status ' + a.value : 'notify team'
+  ).join(', ') || 'no actions';
+}
+
+// ── routes ──
+
+async function handleRulesList(request, env, corsHeaders) {
+  const auth = await resolveReportAuth(request, env, corsHeaders);
+  if (auth.err) return auth.err;
+  const doc = await rulesLoad(env, auth.clientId);
+  return json({ rules: doc.rules }, 200, corsHeaders);
+}
+
+async function handleRulesRuns(request, env, corsHeaders) {
+  const auth = await resolveReportAuth(request, env, corsHeaders);
+  if (auth.err) return auth.err;
+  const raw = await env.TEAM_KV.get(ruleRunsKey(auth.clientId));
+  return json({ runs: raw ? JSON.parse(raw).slice(0, 60) : [] }, 200, corsHeaders);
+}
+
+async function handleRulesSave(request, env, corsHeaders) {
+  const auth = await resolveReportAuth(request, env, corsHeaders);
+  if (auth.err) return auth.err;
+  const gate = await requireRole(env, auth, 'admin', corsHeaders);
+  if (gate.err) return gate.err;
+  let body;
+  try { body = await request.json(); } catch (e) { return json({ error: 'Bad JSON' }, 400, corsHeaders); }
+  const doc = await rulesLoad(env, auth.clientId);
+  const existing = body.id ? doc.rules.find(r => r.id === body.id) : null;
+  if (!existing && doc.rules.length >= RULE_MAX) {
+    return json({ error: 'Rule limit reached (' + RULE_MAX + '). Delete a rule first.' }, 400, corsHeaders);
+  }
+  const rule = ruleSanitize(body, existing);
+  if (!rule.actions.length) return json({ error: 'Add at least one action.' }, 400, corsHeaders);
+  if (!existing) {
+    rule.createdBy = auth.sub;
+    rule.createdByName = (gate.member && gate.member.name) || auth.email || auth.sub;
+  }
+  const i = doc.rules.findIndex(r => r.id === rule.id);
+  if (i !== -1) doc.rules[i] = rule; else doc.rules.unshift(rule);
+  await rulesSave(env, auth.clientId, doc);
+  return json({ rule, rules: doc.rules }, 200, corsHeaders);
+}
+
+async function handleRulesMode(request, env, corsHeaders) {
+  const auth = await resolveReportAuth(request, env, corsHeaders);
+  if (auth.err) return auth.err;
+  const gate = await requireRole(env, auth, 'admin', corsHeaders);
+  if (gate.err) return gate.err;
+  let body;
+  try { body = await request.json(); } catch (e) { return json({ error: 'Bad JSON' }, 400, corsHeaders); }
+  const doc = await rulesLoad(env, auth.clientId);
+  const rule = doc.rules.find(r => r.id === body.id);
+  if (!rule) return json({ error: 'Not found' }, 404, corsHeaders);
+  if (['test', 'live', 'paused'].includes(body.mode)) rule.mode = body.mode;
+  rule.updatedAt = Date.now();
+  await rulesSave(env, auth.clientId, doc);
+  return json({ rule, rules: doc.rules }, 200, corsHeaders);
+}
+
+async function handleRulesDelete(request, env, corsHeaders) {
+  const auth = await resolveReportAuth(request, env, corsHeaders);
+  if (auth.err) return auth.err;
+  const gate = await requireRole(env, auth, 'admin', corsHeaders);
+  if (gate.err) return gate.err;
+  const id = (request.url.split('/rules/')[1] || '').replace(/[^\w-]/g, '');
+  const doc = await rulesLoad(env, auth.clientId);
+  doc.rules = doc.rules.filter(r => r.id !== id);
+  await rulesSave(env, auth.clientId, doc);
+  return json({ ok: true, rules: doc.rules }, 200, corsHeaders);
+}
+
+/* Run test now — synchronous dry evaluation against live CRM data.
+   Logs would-fire entries; never sends, never mutates, never burns guards. */
+async function handleRulesTestNow(request, env, corsHeaders) {
+  const auth = await resolveReportAuth(request, env, corsHeaders);
+  if (auth.err) return auth.err;
+  const gate = await requireRole(env, auth, 'admin', corsHeaders);
+  if (gate.err) return gate.err;
+  let body;
+  try { body = await request.json(); } catch (e) { return json({ error: 'Bad JSON' }, 400, corsHeaders); }
+  const doc = await rulesLoad(env, auth.clientId);
+  const rule = doc.rules.find(r => r.id === body.id);
+  if (!rule) return json({ error: 'Not found' }, 404, corsHeaders);
+
+  const key = auth.clientId.toUpperCase().replace(/[^A-Z0-9]/g, '_');
+  const refreshToken = env['REFRESH_TOKEN_' + key];
+  if (!refreshToken) return json({ error: 'CRM connection is not configured.' }, 500, corsHeaders);
+  const datacenter = env['DATACENTER_' + key] || 'https://www.zohoapis.com';
+  let contacts;
+  try {
+    const zohoToken = await getZohoToken(auth.clientId, refreshToken, datacenter, env);
+    contacts = (await rptFetchContacts(datacenter, zohoToken, '1970-01-01', 'UTC')).map(ruleShapeContact);
+  } catch (e) {
+    return json({ error: 'Could not fetch CRM data for the test.' }, 502, corsHeaders);
+  }
+
+  const stateRaw = await env.TEAM_KV.get(ruleStateKey(auth.clientId));
+  const state = stateRaw ? JSON.parse(stateRaw) : {};
+  const result = ruleEvaluate(rule, contacts, state, Date.now());
+  const now = Date.now();
+  const actionTxt = ruleActionSummary(rule);
+  const entries = result.matches.slice(0, 10).map(c => ({
+    ts: now, ruleId: rule.id, ruleName: rule.name, mode: 'test',
+    contactId: c.id, contactName: c.name, action: actionTxt,
+    result: 'would_fire',
+  }));
+  if (!entries.length) {
+    entries.push({ ts: now, ruleId: rule.id, ruleName: rule.name, mode: 'test', contactName: null, action: actionTxt, result: 'no_matches' });
+  }
+  await ruleRunsAppend(env, auth.clientId, entries);
+  rule.stats = rule.stats || {};
+  rule.stats.tested = (rule.stats.tested || 0) + result.matches.length;
+  rule.stats.lastRunAt = now;
+  await rulesSave(env, auth.clientId, doc);
+
+  return json({
+    matched: result.matches.length,
+    sample: result.matches.slice(0, 10).map(c => ({ name: c.name, email: c.email, score: c.score, source: c.source })),
+    skipped: result.skipped.length,
+    rule,
+  }, 200, corsHeaders);
 }
 
 // ─── /report/* — workspace report store v1 ───────────────────────────────────

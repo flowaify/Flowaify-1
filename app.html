@@ -1093,6 +1093,25 @@
     .ard-actions { display: flex; gap: 7px; margin-top: 10px; flex-wrap: wrap; }
     .auto-runs-chip { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 20px; background: var(--blue-dim); color: var(--blue); font-size: 10.5px; font-weight: 600; cursor: pointer; }
     .auto-run-rule { font-size: 10.5px; color: var(--text-m); }
+    .ar-test { background: var(--blue-dim); color: var(--blue); }
+    .auto-rules-divider { display: flex; align-items: center; gap: 10px; padding: 10px 14px 4px; font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: var(--text-m); }
+    .auto-rules-divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+    #rule-flow { position: fixed; inset: 0; z-index: 620; background: rgba(10,13,20,0.4); display: none; align-items: center; justify-content: center; padding: 20px; }
+    #rule-flow.open { display: flex; }
+    .rlf-cond-row { display: grid; grid-template-columns: 1fr 92px 1fr 26px; gap: 6px; margin-bottom: 7px; align-items: center; }
+    .rlf-cond-row select, .rlf-cond-row input { padding: 6px 8px; background: var(--input-bg); border: 1px solid var(--input-border); border-radius: 4px; font-size: 12px; font-family: inherit; color: var(--text); outline: none; }
+    .rlf-act { border: 1px solid var(--border); border-radius: 6px; margin-bottom: 8px; overflow: hidden; }
+    .rlf-act-head { display: flex; align-items: center; gap: 9px; padding: 10px 12px; cursor: pointer; font-size: 12.5px; font-weight: 600; color: var(--text); }
+    .rlf-act-head input { accent-color: var(--blue); }
+    .rlf-act.on { border-color: var(--blue); }
+    .rlf-act-body { padding: 0 12px 12px; display: flex; flex-direction: column; gap: 8px; }
+    .rlf-chips { display: flex; gap: 5px; flex-wrap: wrap; }
+    .rlf-chip { padding: 2px 8px; border-radius: 4px; border: 1px solid var(--border); background: transparent; font-size: 10.5px; font-family: inherit; color: var(--text-s); cursor: pointer; }
+    .rlf-chip:hover { border-color: var(--blue); color: var(--blue); }
+    .rlf-sentence { padding: 11px 14px; background: var(--blue-dim); border-radius: 6px; font-size: 12.5px; color: var(--text); line-height: 1.6; }
+    .rlf-test-row { display: flex; justify-content: space-between; gap: 10px; padding: 6px 0; font-size: 12px; border-bottom: 1px solid var(--border); }
+    .rlf-test-row:last-child { border-bottom: none; }
+    .rlf-test-row span:last-child { color: var(--text-m); }
     @media (max-width: 1100px) {
       .auto-g2 { grid-template-columns: 1fr; }
       #page-automations { overflow-y: auto; }
@@ -2929,6 +2948,7 @@
           <div style="display:flex;align-items:center;gap:10px;flex-shrink:0;">
             <span class="save-status" id="auto-save-status">Saved</span>
             <button class="btn-mini btn-mini-ghost" id="auto-master-btn" onclick="autoMasterToggle()">Pause all</button>
+            <button class="btn-mini btn-mini-primary" id="auto-create-rule" style="display:none;" onclick="ruleBuilderOpen()"><i data-lucide="plus" style="width:12px;height:12px;"></i>Create Rule</button>
           </div>
         </div>
         <div class="auto-cmdbar">
@@ -2983,6 +3003,14 @@
     </div>
   </div>
   <div class="card-ctx-menu" id="auto-rule-menu"></div>
+  <div id="rule-flow">
+    <div class="rf-box" role="dialog" aria-modal="true" aria-label="Automation rule builder">
+      <div class="rf-head"><span id="rule-flow-title">New Rule</span>
+        <button class="inv-p-close" onclick="ruleBuilderClose()" aria-label="Close and keep draft" title="Close — your progress is kept"><i data-lucide="x"></i></button>
+      </div>
+      <div id="rule-flow-body"></div>
+    </div>
+  </div>
 
   <!-- ANALYTICS -->
   <div class="page" id="page-analytics">
@@ -3942,7 +3970,7 @@
 
 <script src="crm.js?v=34"></script>
 <script src="teams.js?v=9"></script>
-<script src="settings.js?v=6"></script>
+<script src="settings.js?v=7"></script>
 <script src="analytics.js?v=2"></script>
 <script src="invoice.js?v=5"></script>
 <script src="inbox.js?v=2"></script>
