@@ -174,6 +174,30 @@ export default {
         return handleInvoiceDelete(request, env, corsHeaders);
       }
 
+      if (url.pathname === '/report/generate' && request.method === 'POST') {
+        return handleReportGenerate(request, env, corsHeaders);
+      }
+
+      if (url.pathname === '/report/list' && request.method === 'GET') {
+        return handleReportList(request, env, corsHeaders);
+      }
+
+      if (url.pathname === '/report/get' && request.method === 'GET') {
+        return handleReportGet(request, env, corsHeaders, url);
+      }
+
+      if (url.pathname === '/report/update' && request.method === 'POST') {
+        return handleReportUpdate(request, env, corsHeaders);
+      }
+
+      if (url.pathname === '/report/migrate' && request.method === 'POST') {
+        return handleReportMigrate(request, env, corsHeaders);
+      }
+
+      if (url.pathname.startsWith('/report/') && request.method === 'DELETE') {
+        return handleReportDelete(request, env, corsHeaders);
+      }
+
       if (url.pathname === '/inbox/status')        return handleInboxStatus(request, env, corsHeaders);
       if (url.pathname === '/inbox/auth')           return handleInboxAuth(request, env, corsHeaders);
       if (url.pathname === '/inbox/callback')       return handleInboxCallback(url, env);
@@ -1741,6 +1765,529 @@ async function handlePublicInvoice(url, env, corsHeaders) {
     },
     seller,
   }, 200, pub);
+}
+
+// ─── /report/* — workspace report store v1 ───────────────────────────────────
+// Reports are structured SNAPSHOTS computed server-side at generation time.
+// The snapshot never changes after Ready; web/PDF/CSV all render from it.
+
+const RPT_TYPES = ['full', 'executive', 'leads', 'pipeline', 'custom'];
+const RPT_SECTIONS = ['summary', 'kpis', 'volume', 'sources', 'response', 'status', 'pipeline', 'followups', 'financial', 'recommendations', 'appendix'];
+const RPT_DETAIL = ['executive', 'standard', 'detailed'];
+const RPT_METRIC_VERSION = 1;
+const RPT_MAX = 100;
+
+function rptIdxKey(clientId) { return 'rptidx:' + clientId.toUpperCase().replace(/[^A-Z0-9]/g, '_'); }
+function rptRecKey(clientId, id) { return 'rpt:' + clientId.toUpperCase().replace(/[^A-Z0-9]/g, '_') + ':' + id; }
+
+async function resolveReportAuth(request, env, corsHeaders) {
+  const authHeader = request.headers.get('Authorization') || '';
+  if (!authHeader.startsWith('Bearer ')) return { err: json({ error: 'Missing token' }, 401, corsHeaders) };
+  let payload;
+  try { payload = await verifyJWT(authHeader.slice(7).trim(), AUTH0_DOMAIN, AUTH0_CLIENT_ID, AUTH0_TENANT); }
+  catch (e) { return { err: json({ error: e.message }, 401, corsHeaders) }; }
+  let clientId = payload['https://flowaify.app/clientId'];
+  if (!clientId && payload.sub) {
+    clientId = env['CLIENT_' + payload.sub.replace(/[^A-Z0-9]/gi, '_').toUpperCase()];
+  }
+  if (!clientId) return { err: json({ error: 'No clientId in token' }, 403, corsHeaders) };
+  return { clientId, sub: payload.sub || '', email: payload.email || '' };
+}
+
+async function rptLoadIndex(env, clientId) {
+  const raw = await env.TEAM_KV.get(rptIdxKey(clientId));
+  return raw ? JSON.parse(raw) : { v: 1, reports: [] };
+}
+async function rptSaveIndex(env, clientId, idx) {
+  await env.TEAM_KV.put(rptIdxKey(clientId), JSON.stringify(idx));
+}
+
+function rptEvent(rec, t, by, meta) {
+  rec.events = rec.events || [];
+  const ev = { t, ts: Date.now(), by: String(by || '').slice(0, 80) };
+  if (meta) ev.meta = meta;
+  rec.events.push(ev);
+  if (rec.events.length > 50) rec.events = rec.events.slice(-50);
+}
+
+/* index entry = light projection of the record for list rendering */
+function rptIndexEntry(rec) {
+  return {
+    id: rec.id, name: rec.name, type: rec.type, status: rec.status,
+    cfgHash: rec.cfgHash || null,
+    rangeStart: rec.rangeStart, rangeEnd: rec.rangeEnd,
+    comparisonType: rec.comparisonType || 'none',
+    detailLevel: rec.detailLevel, sections: rec.sections,
+    generatedBy: rec.generatedBy, generatedByName: rec.generatedByName,
+    createdAt: rec.createdAt, generatedAt: rec.generatedAt || null,
+    lastViewedAt: rec.lastViewedAt || null, archivedAt: rec.archivedAt || null,
+    errorMsg: rec.errorMsg || null, legacy: !!rec.legacyHtml,
+    keyMetrics: rec.snapshot ? rec.snapshot.keyMetrics : null,
+  };
+}
+
+async function rptPutRecord(env, clientId, rec) {
+  await env.TEAM_KV.put(rptRecKey(clientId, rec.id), JSON.stringify(rec));
+  const idx = await rptLoadIndex(env, clientId);
+  const i = idx.reports.findIndex(r => r.id === rec.id);
+  const entry = rptIndexEntry(rec);
+  if (i !== -1) idx.reports[i] = entry; else idx.reports.unshift(entry);
+  // retention: beyond RPT_MAX active reports, auto-archive the oldest
+  const active = idx.reports.filter(r => !r.archivedAt);
+  if (active.length > RPT_MAX) {
+    const oldest = active.slice().sort((a, b) => a.createdAt - b.createdAt)[0];
+    if (oldest && oldest.id !== rec.id) {
+      oldest.archivedAt = Date.now();
+      const oRaw = await env.TEAM_KV.get(rptRecKey(clientId, oldest.id));
+      if (oRaw) {
+        const oRec = JSON.parse(oRaw);
+        oRec.archivedAt = oldest.archivedAt;
+        rptEvent(oRec, 'archived', 'system (retention)');
+        await env.TEAM_KV.put(rptRecKey(clientId, oldest.id), JSON.stringify(oRec));
+      }
+    }
+  }
+  await rptSaveIndex(env, clientId, idx);
+}
+
+// ── date helpers: calendar-date comparison in the workspace timezone ──
+function rptTzDate(isoTs, tz) {
+  try {
+    return new Intl.DateTimeFormat('en-CA', { timeZone: tz, year: 'numeric', month: '2-digit', day: '2-digit' })
+      .format(new Date(isoTs));
+  } catch (e) { return String(isoTs).slice(0, 10); }
+}
+function rptValidDate(v) { return /^\d{4}-\d{2}-\d{2}$/.test(String(v || '')); }
+function rptDayDiff(a, b) { return Math.round((new Date(b + 'T00:00:00Z') - new Date(a + 'T00:00:00Z')) / 86400000); }
+function rptShiftDate(d, days) {
+  const t = new Date(d + 'T00:00:00Z'); t.setUTCDate(t.getUTCDate() + days);
+  return t.toISOString().slice(0, 10);
+}
+
+function rptMedian(arr) {
+  if (!arr.length) return null;
+  const s = arr.slice().sort((a, b) => a - b);
+  const m = Math.floor(s.length / 2);
+  return s.length % 2 ? s[m] : Math.round((s[m - 1] + s[m]) / 2);
+}
+
+/* Core metric engine — pure function over raw Zoho records. All numbers the
+   report will ever show are computed here, once. */
+function rptComputeSnapshot(rawContacts, rawDeals, invStore, cfg, tz) {
+  function inRange(iso, start, end) {
+    if (!iso) return false;
+    const d = rptTzDate(iso, tz);
+    return d >= start && d <= end;
+  }
+  function metricsFor(start, end) {
+    const cs = rawContacts.filter(c => inRange(c.Created_Time, start, end));
+    const ds = rawDeals.filter(d => inRange(d.Created_Time, start, end));
+    const respSecs = cs
+      .filter(c => c.Created_Time && c.flow_last_touch_at)
+      .map(c => (new Date(c.flow_last_touch_at) - new Date(c.Created_Time)) / 1000)
+      .filter(v => v >= 0 && v < 86400 * 14);
+    const lvl = c => String(c.Flow_Urgency_Level || c.flow_state || '').toUpperCase();
+    const st = c => String(c.flow_state || c.Flow_Urgency_Level || '').toUpperCase();
+    const qualified = cs.filter(c => ['HOT', 'WARM'].includes(lvl(c))).length;
+    const booked = cs.filter(c => st(c).includes('BOOK') || st(c) === 'ENGAGED').length;
+    const touched = cs.filter(c => c.flow_last_touch_at).length;
+
+    const volume = {};
+    cs.forEach(c => { const d = rptTzDate(c.Created_Time, tz); volume[d] = (volume[d] || 0) + 1; });
+    const days = [];
+    for (let d = start; d <= end && days.length < 370; d = rptShiftDate(d, 1)) days.push({ d, n: volume[d] || 0 });
+
+    const sources = {};
+    cs.forEach(c => {
+      const s = String(c.Flow_Source || c.flow_source || c.Lead_Source || 'Other').trim() || 'Other';
+      sources[s] = (sources[s] || 0) + 1;
+    });
+
+    const statuses = {};
+    cs.forEach(c => { const v = st(c) || 'NEW'; statuses[v] = (statuses[v] || 0) + 1; });
+
+    const stages = {};
+    ds.forEach(d => {
+      const sname = String(d.Stage || 'Unknown');
+      stages[sname] = stages[sname] || { count: 0, value: 0 };
+      stages[sname].count++;
+      stages[sname].value += (+d.Amount || 0);
+    });
+    const won = ds.filter(d => String(d.Stage || '').toUpperCase().includes('WON')).length;
+
+    return {
+      newLeads: cs.length, qualified, booked, touched,
+      respMedianS: rptMedian(respSecs),
+      respAvgS: respSecs.length ? Math.round(respSecs.reduce((a, b) => a + b, 0) / respSecs.length) : null,
+      respUnder5mPct: respSecs.length ? Math.round(respSecs.filter(v => v <= 300).length / respSecs.length * 100) : null,
+      respSample: respSecs.length,
+      volume: days,
+      sources: Object.keys(sources).sort((a, b) => sources[b] - sources[a]).map(k => ({ name: k, count: sources[k] })),
+      statuses,
+      stages: Object.keys(stages).sort((a, b) => stages[b].value - stages[a].value)
+        .map(k => ({ stage: k, count: stages[k].count, value: Math.round(stages[k].value) })),
+      dealsCreated: ds.length,
+      dealValue: Math.round(ds.reduce((a, d) => a + (+d.Amount || 0), 0)),
+      won,
+    };
+  }
+
+  const cur = metricsFor(cfg.rangeStart, cfg.rangeEnd);
+  let prev = null;
+  if (cfg.comparisonType === 'previous') {
+    const span = rptDayDiff(cfg.rangeStart, cfg.rangeEnd) + 1;
+    const prevEnd = rptShiftDate(cfg.rangeStart, -1);
+    const prevStart = rptShiftDate(prevEnd, -(span - 1));
+    prev = metricsFor(prevStart, prevEnd);
+    prev.rangeStart = prevStart; prev.rangeEnd = prevEnd;
+  }
+
+  let financial = null;
+  if (cfg.sections.includes('financial') && invStore && Array.isArray(invStore.invoices)) {
+    const inRangeTs = ts => ts && rptTzDate(new Date(ts).toISOString(), tz) >= cfg.rangeStart && rptTzDate(new Date(ts).toISOString(), tz) <= cfg.rangeEnd;
+    let invoicedC = 0, invoicedN = 0, collectedC = 0, outstandingC = 0, overdueC = 0;
+    const today = rptTzDate(new Date().toISOString(), tz);
+    invStore.invoices.forEach(inv => {
+      if (inv.status === 'draft' || inv.status === 'void') return;
+      if (inRangeTs(inv.finalizedAt)) { invoicedC += inv.totalC || 0; invoicedN++; }
+      (inv.payments || []).forEach(p => {
+        if (p.date >= cfg.rangeStart && p.date <= cfg.rangeEnd) collectedC += p.amountC || 0;
+        (p.refunds || []).forEach(r => { if (r.date >= cfg.rangeStart && r.date <= cfg.rangeEnd) collectedC -= r.amountC || 0; });
+      });
+      if (inv.status === 'open' || inv.status === 'partially_paid') {
+        outstandingC += inv.remainingC || 0;
+        if (inv.dueDate && inv.dueDate < today) overdueC += inv.remainingC || 0;
+      }
+    });
+    financial = { invoicedC, invoicedN, collectedC: Math.max(0, collectedC), outstandingC, overdueC };
+  }
+
+  const lowSample = cur.newLeads < 5;
+  return {
+    metricVersion: RPT_METRIC_VERSION,
+    keyMetrics: {
+      newLeads: cur.newLeads, respMedianS: cur.respMedianS,
+      qualified: cur.qualified, booked: cur.booked,
+    },
+    current: cur, previous: prev, financial, lowSample,
+    computedAt: Date.now(),
+  };
+}
+
+// ── Flowy AI narrative — grounded in the snapshot, generated exactly once ──
+function rptFallbackNarrative(snap, cfg) {
+  const c = snap.current, p = snap.previous;
+  const parts = [];
+  parts.push('Between ' + cfg.rangeStart + ' and ' + cfg.rangeEnd + ', the business received ' + c.newLeads + ' new lead' + (c.newLeads === 1 ? '' : 's') +
+    (p ? ' compared with ' + p.newLeads + ' in the prior period' : '') + '.');
+  if (c.qualified) parts.push(c.qualified + ' lead' + (c.qualified === 1 ? ' was' : 's were') + ' qualified as high or medium priority.');
+  if (c.respMedianS != null) {
+    const m = Math.floor(c.respMedianS / 60), sec = Math.round(c.respMedianS % 60);
+    parts.push('Median first response time was ' + (m ? m + 'm ' : '') + sec + 's across ' + c.respSample + ' responded lead' + (c.respSample === 1 ? '' : 's') + '.');
+  }
+  if (c.booked) parts.push(c.booked + ' lead' + (c.booked === 1 ? '' : 's') + ' reached booked or engaged status.');
+  if (c.sources.length) parts.push('The strongest lead source was ' + c.sources[0].name + ' with ' + c.sources[0].count + ' lead' + (c.sources[0].count === 1 ? '' : 's') + '.');
+  const recs = [];
+  if (c.newLeads > 0 && c.touched < c.newLeads) recs.push('Follow up with the ' + (c.newLeads - c.touched) + ' leads that have not yet received a first touch.');
+  if (c.sources.length > 1) recs.push('Review whether spend and effort match the performance gap between ' + c.sources[0].name + ' and lower-volume sources.');
+  if (c.qualified > c.booked) recs.push('Prioritize converting the ' + (c.qualified - c.booked) + ' qualified leads that have not yet booked.');
+  if (!recs.length) recs.push('Keep the current intake configuration and re-evaluate after the next reporting period.');
+  return { summary: parts.join(' '), recommendations: recs.slice(0, 4), source: 'rules' };
+}
+
+async function rptNarrative(env, snap, cfg) {
+  const fallback = rptFallbackNarrative(snap, cfg);
+  if (!cfg.includeAI || !env.AI) return fallback;
+  try {
+    const facts = {
+      period: cfg.rangeStart + ' to ' + cfg.rangeEnd,
+      newLeads: snap.current.newLeads, qualified: snap.current.qualified,
+      booked: snap.current.booked, touched: snap.current.touched,
+      medianResponseSeconds: snap.current.respMedianS,
+      topSources: snap.current.sources.slice(0, 4),
+      dealValue: snap.current.dealValue, wonDeals: snap.current.won,
+      previousPeriod: snap.previous ? {
+        newLeads: snap.previous.newLeads, qualified: snap.previous.qualified,
+        booked: snap.previous.booked, medianResponseSeconds: snap.previous.respMedianS,
+      } : null,
+      lowSample: snap.lowSample,
+    };
+    const res = await env.AI.run('@cf/meta/llama-3.1-8b-instruct', {
+      messages: [
+        { role: 'system', content: 'You write executive summaries for small-business lead-generation reports. Use ONLY the numbers provided in the JSON. Never invent statistics, percentages, or causes. Plain professional prose, no markdown, no headers. Respond with strict JSON: {"summary":"3-5 sentences","recommendations":["max 4 short practical actions grounded in the data"]}' },
+        { role: 'user', content: JSON.stringify(facts) },
+      ],
+      max_tokens: 500,
+    });
+    const txt = (res && (res.response || res.result || '')) + '';
+    const m = txt.match(/\{[\s\S]*\}/);
+    if (!m) return fallback;
+    const out = JSON.parse(m[0]);
+    if (!out.summary || typeof out.summary !== 'string') return fallback;
+    // ground check: every number in the output must exist among the input numbers
+    const allowed = new Set((JSON.stringify(facts).match(/\d+/g) || []));
+    const used = (out.summary + ' ' + (out.recommendations || []).join(' ')).match(/\d+/g) || [];
+    for (const n of used) {
+      if (!allowed.has(n) && +n > 12) return fallback; // small numbers (list positions etc.) tolerated
+    }
+    return {
+      summary: out.summary.slice(0, 1600),
+      recommendations: (Array.isArray(out.recommendations) ? out.recommendations : [])
+        .map(r => String(r).slice(0, 240)).slice(0, 4),
+      source: 'ai',
+    };
+  } catch (e) {
+    return fallback;
+  }
+}
+
+// paginated contact fetch for report ranges (bounded, early-stops once past range)
+async function rptFetchContacts(datacenter, token, earliestDate, tz) {
+  let all = [];
+  for (let page = 1; page <= 5; page++) {
+    const url = `${datacenter}/crm/v2/Contacts?fields=${encodeURIComponent(CONTACT_FIELDS)}&per_page=100&page=${page}&sort_by=Created_Time&sort_order=desc`;
+    const resp = await fetch(url, { headers: { Authorization: `Zoho-oauthtoken ${token}` } });
+    if (resp.status === 401) throw new Error('ZOHO_UNAUTHORIZED');
+    if (resp.status === 204) break;
+    if (!resp.ok) throw new Error('Contacts fetch failed: ' + resp.status);
+    const data = await resp.json();
+    const batch = data.data || [];
+    all = all.concat(batch);
+    if (batch.length < 100) break;
+    const last = batch[batch.length - 1];
+    if (last && last.Created_Time && rptTzDate(last.Created_Time, tz) < earliestDate) break;
+  }
+  return all;
+}
+
+function rptSanitizeConfig(body) {
+  const type = RPT_TYPES.includes(body.type) ? body.type : 'full';
+  let sections = Array.isArray(body.sections) ? body.sections.filter(s => RPT_SECTIONS.includes(s)) : [];
+  if (!sections.length) sections = ['summary', 'kpis', 'volume', 'sources', 'response', 'status', 'pipeline', 'recommendations', 'appendix'];
+  return {
+    type, sections,
+    name: String(body.name || '').slice(0, 120),
+    rangeStart: body.rangeStart, rangeEnd: body.rangeEnd,
+    comparisonType: body.comparisonType === 'previous' ? 'previous' : 'none',
+    detailLevel: RPT_DETAIL.includes(body.detailLevel) ? body.detailLevel : 'standard',
+    preparedFor: String(body.preparedFor || '').slice(0, 120),
+    preparedBy: String(body.preparedBy || '').slice(0, 120),
+    note: String(body.note || '').slice(0, 600),
+    confidential: !!body.confidential,
+    includeAI: body.includeAI !== false,
+  };
+}
+
+async function handleReportGenerate(request, env, corsHeaders) {
+  const auth = await resolveReportAuth(request, env, corsHeaders);
+  if (auth.err) return auth.err;
+  const gate = await requireRole(env, auth, 'member', corsHeaders);
+  if (gate.err) return gate.err;
+  if (!env.TEAM_KV) return json({ error: 'KV not enabled' }, 501, corsHeaders);
+  let body;
+  try { body = await request.json(); } catch (e) { return json({ error: 'Bad JSON' }, 400, corsHeaders); }
+  const cfg = rptSanitizeConfig(body || {});
+  if (!rptValidDate(cfg.rangeStart) || !rptValidDate(cfg.rangeEnd) || cfg.rangeEnd < cfg.rangeStart) {
+    return json({ error: 'Invalid date range' }, 400, corsHeaders);
+  }
+  if (rptDayDiff(cfg.rangeStart, cfg.rangeEnd) > 366) {
+    return json({ error: 'Date range too large (max 1 year)' }, 400, corsHeaders);
+  }
+  const actor = (gate.member && gate.member.name) || auth.email || auth.sub;
+
+  // duplicate-click guard: identical config generated in the last 2 minutes
+  const cfgHash = JSON.stringify([cfg.type, cfg.rangeStart, cfg.rangeEnd, cfg.comparisonType, cfg.sections, cfg.detailLevel]);
+  const idx = await rptLoadIndex(env, auth.clientId);
+  const dupe = idx.reports.find(r => r.cfgHash === cfgHash && r.status === 'ready' && Date.now() - r.createdAt < 120000);
+  if (dupe) {
+    const dRaw = await env.TEAM_KV.get(rptRecKey(auth.clientId, dupe.id));
+    if (dRaw) return json({ report: JSON.parse(dRaw), duplicate: true }, 200, corsHeaders);
+  }
+
+  // workspace timezone
+  let tz = 'America/New_York';
+  try {
+    const stRaw = await env.TEAM_KV.get('settings:' + auth.clientId.toUpperCase().replace(/[^A-Z0-9]/g, '_'));
+    if (stRaw) { const c = JSON.parse(stRaw); tz = (c.profile && c.profile.timezone) || tz; }
+  } catch (e) {}
+
+  const typeNames = { full: 'Full Performance Report', executive: 'Executive Summary', leads: 'Lead Performance Report', pipeline: 'Pipeline Report', custom: 'Custom Report' };
+  const rec = {
+    id: 'rpt' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+    name: cfg.name || typeNames[cfg.type],
+    type: cfg.type, status: 'generating',
+    rangeStart: cfg.rangeStart, rangeEnd: cfg.rangeEnd, timezone: tz,
+    comparisonType: cfg.comparisonType, detailLevel: cfg.detailLevel,
+    sections: cfg.sections, config: cfg, cfgHash,
+    generatedBy: auth.sub, generatedByName: actor,
+    createdAt: Date.now(), generatedAt: null, lastViewedAt: null,
+    archivedAt: null, errorMsg: null, events: [],
+  };
+  rptEvent(rec, 'created', actor);
+
+  try {
+    // fetch CRM data (same credentials machinery as /data)
+    const key = auth.clientId.toUpperCase().replace(/[^A-Z0-9]/g, '_');
+    const refreshToken = env['REFRESH_TOKEN_' + key];
+    if (!refreshToken) throw new Error('CRM connection is not configured for this workspace.');
+    const datacenter = env['DATACENTER_' + key] || 'https://www.zohoapis.com';
+    const zohoToken = await getZohoToken(auth.clientId, refreshToken, datacenter, env);
+    const earliest = cfg.comparisonType === 'previous'
+      ? rptShiftDate(cfg.rangeStart, -(rptDayDiff(cfg.rangeStart, cfg.rangeEnd) + 1)) : cfg.rangeStart;
+    const [contacts, deals] = await Promise.all([
+      rptFetchContacts(datacenter, zohoToken, earliest, tz),
+      fetchDeals(datacenter, zohoToken),
+    ]);
+
+    let invStore = null;
+    if (cfg.sections.includes('financial')) {
+      const invRaw = await env.TEAM_KV.get('invoices:' + key);
+      if (invRaw) { const d = JSON.parse(invRaw); invStore = Array.isArray(d) ? { invoices: [] } : d; }
+    }
+
+    rec.snapshot = rptComputeSnapshot(contacts, deals, invStore, cfg, tz);
+    const narrative = await rptNarrative(env, rec.snapshot, cfg);
+    rec.summary = narrative.summary;
+    rec.recommendations = narrative.recommendations;
+    rec.narrativeSource = narrative.source;
+    rec.status = 'ready';
+    rec.generatedAt = Date.now();
+    rptEvent(rec, 'generated', actor);
+  } catch (e) {
+    rec.status = 'failed';
+    rec.errorMsg = e.message === 'ZOHO_UNAUTHORIZED'
+      ? 'The CRM connection needs to be re-authorized.'
+      : 'Report data could not be gathered. Try again in a moment.';
+    rptEvent(rec, 'failed', 'system');
+    console.error('report generation failed:', e.message);
+  }
+
+  await rptPutRecord(env, auth.clientId, rec);
+  return json({ report: rec }, rec.status === 'ready' ? 200 : 502, corsHeaders);
+}
+
+async function handleReportList(request, env, corsHeaders) {
+  const auth = await resolveReportAuth(request, env, corsHeaders);
+  if (auth.err) return auth.err;
+  if (!env.TEAM_KV) return json({ reports: [] }, 200, corsHeaders);
+  const idx = await rptLoadIndex(env, auth.clientId);
+  return json({ reports: idx.reports }, 200, corsHeaders);
+}
+
+async function handleReportGet(request, env, corsHeaders, url) {
+  const auth = await resolveReportAuth(request, env, corsHeaders);
+  if (auth.err) return auth.err;
+  const id = (url.searchParams.get('id') || '').replace(/[^\w-]/g, '');
+  const raw = await env.TEAM_KV.get(rptRecKey(auth.clientId, id));
+  if (!raw) return json({ error: 'Not found' }, 404, corsHeaders);
+  const rec = JSON.parse(raw);
+  // viewed stamp (throttled to hourly writes)
+  if (!rec.lastViewedAt || Date.now() - rec.lastViewedAt > 3600000) {
+    rec.lastViewedAt = Date.now();
+    const gate = await requireRole(env, auth, null, corsHeaders);
+    rptEvent(rec, 'viewed', (gate.member && gate.member.name) || auth.email || auth.sub);
+    await rptPutRecord(env, auth.clientId, rec);
+  }
+  return json({ report: rec }, 200, corsHeaders);
+}
+
+async function handleReportUpdate(request, env, corsHeaders) {
+  const auth = await resolveReportAuth(request, env, corsHeaders);
+  if (auth.err) return auth.err;
+  const gate = await requireRole(env, auth, 'member', corsHeaders);
+  if (gate.err) return gate.err;
+  let body;
+  try { body = await request.json(); } catch (e) { return json({ error: 'Bad JSON' }, 400, corsHeaders); }
+  const id = String(body.id || '').replace(/[^\w-]/g, '');
+  const raw = await env.TEAM_KV.get(rptRecKey(auth.clientId, id));
+  if (!raw) return json({ error: 'Not found' }, 404, corsHeaders);
+  const rec = JSON.parse(raw);
+  const actor = (gate.member && gate.member.name) || auth.email || auth.sub;
+  const action = String(body.action || '');
+  if (action === 'rename') {
+    const name = String(body.name || '').trim().slice(0, 120);
+    if (!name) return json({ error: 'Name required' }, 400, corsHeaders);
+    rec.name = name;
+    rptEvent(rec, 'renamed', actor);
+  } else if (action === 'archive') {
+    rec.archivedAt = Date.now();
+    rptEvent(rec, 'archived', actor);
+  } else if (action === 'restore') {
+    rec.archivedAt = null;
+    rptEvent(rec, 'restored', actor);
+  } else if (action === 'downloaded') {
+    rptEvent(rec, 'downloaded', actor, body.format ? { format: String(body.format).slice(0, 10) } : null);
+  } else {
+    return json({ error: 'Unknown action' }, 400, corsHeaders);
+  }
+  await rptPutRecord(env, auth.clientId, rec);
+  return json({ report: rec }, 200, corsHeaders);
+}
+
+async function handleReportDelete(request, env, corsHeaders) {
+  const auth = await resolveReportAuth(request, env, corsHeaders);
+  if (auth.err) return auth.err;
+  const id = (request.url.split('/report/')[1] || '').replace(/[^\w-]/g, '');
+  const raw = await env.TEAM_KV.get(rptRecKey(auth.clientId, id));
+  // failed records are member-deletable noise; real reports need admin
+  const minRole = raw && JSON.parse(raw).status === 'failed' ? 'member' : 'admin';
+  const gate = await requireRole(env, auth, minRole, corsHeaders);
+  if (gate.err) return gate.err;
+  if (raw) {
+    const rec = JSON.parse(raw);
+    if (rec.token) await env.TEAM_KV.delete('rpttok:' + rec.token);
+  }
+  await env.TEAM_KV.delete(rptRecKey(auth.clientId, id));
+  const idx = await rptLoadIndex(env, auth.clientId);
+  idx.reports = idx.reports.filter(r => r.id !== id);
+  await rptSaveIndex(env, auth.clientId, idx);
+  return json({ ok: true }, 200, corsHeaders);
+}
+
+// one-time migration of legacy browser-local reports (frozen HTML, sanitized)
+function rptStripHtml(html) {
+  return String(html || '')
+    .replace(/<script[\s\S]*?<\/script>/gi, '')
+    .replace(/\son\w+\s*=\s*"[^"]*"/gi, '')
+    .replace(/\son\w+\s*=\s*'[^']*'/gi, '')
+    .replace(/javascript:/gi, '')
+    .slice(0, 400000);
+}
+
+async function handleReportMigrate(request, env, corsHeaders) {
+  const auth = await resolveReportAuth(request, env, corsHeaders);
+  if (auth.err) return auth.err;
+  const gate = await requireRole(env, auth, 'member', corsHeaders);
+  if (gate.err) return gate.err;
+  let body;
+  try { body = await request.json(); } catch (e) { return json({ error: 'Bad JSON' }, 400, corsHeaders); }
+  const legacy = (Array.isArray(body.reports) ? body.reports : []).slice(0, 50);
+  const actor = (gate.member && gate.member.name) || auth.email || auth.sub;
+  const idx = await rptLoadIndex(env, auth.clientId);
+  let migrated = 0;
+  for (const old of legacy) {
+    const id = ('leg' + String(old.id || Date.now())).replace(/[^\w-]/g, '').slice(0, 60);
+    if (idx.reports.some(r => r.id === id)) continue;
+    const days = Math.min(Math.max(1, +old.days || 30), 366);
+    const created = +old.createdAt || Date.now();
+    const end = rptTzDate(new Date(created).toISOString(), 'UTC');
+    const rec = {
+      id, name: String(old.title || 'Legacy Report').slice(0, 120),
+      type: RPT_TYPES.includes(old.type) ? old.type : 'full',
+      status: 'ready',
+      rangeStart: rptShiftDate(end, -days), rangeEnd: end, timezone: 'UTC',
+      comparisonType: 'none', detailLevel: 'standard',
+      sections: [], config: null, generatedBy: auth.sub, generatedByName: actor,
+      createdAt: created, generatedAt: created, lastViewedAt: null, archivedAt: null,
+      errorMsg: null, events: [{ t: 'created', ts: created, by: 'migration' }],
+      legacyHtml: rptStripHtml(old.html),
+      snapshot: null, summary: null, recommendations: null,
+    };
+    await rptPutRecord(env, auth.clientId, rec);
+    migrated++;
+  }
+  const idx2 = await rptLoadIndex(env, auth.clientId);
+  return json({ migrated, reports: idx2.reports }, 200, corsHeaders);
 }
 
 // ─── /inbox/* ────────────────────────────────────────────────────────────────

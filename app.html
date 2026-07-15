@@ -737,6 +737,10 @@
       body.printing-report > *:not(#rpt-print-view) { display: none !important; }
       body.printing-report #rpt-print-view { position: static !important; transform: none !important; box-shadow: none !important; background: #fff !important; }
       body.printing-report #rpt-print-view .ipv-bar { display: none !important; }
+      body.printing-report #rpt-pv-nav { display: none !important; }
+      body.printing-report .rpt-pv-body { display: block !important; }
+      body.printing-report #rpt-pv-scroll { overflow: visible !important; padding: 0 !important; }
+      body.printing-report .rpd { box-shadow: none !important; max-width: none !important; }
       body.printing-report .rp-kpi-grid { grid-template-columns: repeat(4,1fr) !important; }
     }
     /* Print — invoices */
@@ -1494,6 +1498,116 @@
     .ivd-due { font-weight: 700; border-bottom: none !important; padding-top: 7px !important; }
     .ivd-foot { margin-top: 44px; padding-top: 12px; border-top: 1px solid #e5e7eb; font-size: 11px; color: #6b7280; }
     .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0; }
+    /* ── Reports v2 ── */
+    .ik-purple { background: var(--purple-dim); color: var(--purple); }
+    #page-reports { overflow: hidden; }
+    .rpt-name-cell { display: flex; align-items: center; gap: 10px; min-width: 0; }
+    .rpt-doc-ic { width: 30px; height: 30px; border-radius: 7px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .rpt-doc-ic i, .rpt-doc-ic svg { width: 14px; height: 14px; }
+    .rtc-blue   { background: var(--blue-dim);   color: var(--blue); }
+    .rtc-purple { background: var(--purple-dim); color: var(--purple); }
+    .rtc-green  { background: var(--green-dim);  color: var(--green); }
+    .rtc-teal   { background: rgba(20,184,166,0.1); color: #14b8a6; }
+    .rtc-gray   { background: var(--hover);      color: var(--text-s); }
+    .rpt-type-chip { display: inline-block; padding: 2.5px 9px; border-radius: 4px; font-size: 11px; font-weight: 600; white-space: nowrap; }
+    .rpt-badge { display: inline-flex; align-items: center; gap: 5px; padding: 2.5px 9px; border-radius: 4px; font-size: 11px; font-weight: 600; white-space: nowrap; }
+    .rpt-badge-dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+    .rsb-ready  { background: var(--green-dim); color: var(--green); border: 1px solid rgba(5,150,105,0.25); }
+    .rsb-gen    { background: var(--blue-dim); color: var(--blue); border: 1px solid rgba(59,130,246,0.25); }
+    .rsb-failed { background: var(--red-dim); color: var(--red); border: 1px solid rgba(220,38,38,0.25); }
+    .rsb-arch   { background: var(--hover); color: var(--text-m); border: 1px solid var(--border); }
+    .rpt-owner { display: flex; align-items: center; gap: 7px; font-size: 12px; color: var(--text-s); white-space: nowrap; }
+    .rpt-owner .avatar { width: 20px; height: 20px; font-size: 8.5px; }
+    .rpt-km-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .rpt-km-cell { border: 1px solid var(--border); border-radius: 5px; padding: 9px 11px; }
+    .rpt-km-val { font-size: 16px; font-weight: 700; color: var(--text); display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; }
+    .rpt-km-label { font-size: 10.5px; color: var(--text-m); margin-top: 2px; }
+    .rpt-delta { font-size: 10px; font-weight: 700; padding: 1px 5px; border-radius: 3px; }
+    .rpt-delta.up { background: var(--green-dim); color: var(--green); }
+    .rpt-delta.down { background: var(--red-dim); color: var(--red); }
+    .rpt-sec-row { display: flex; align-items: center; gap: 7px; padding: 3.5px 0; font-size: 12px; color: var(--text-s); }
+    .rpt-error-box { display: flex; gap: 10px; padding: 10px 12px; background: var(--red-dim); border: 1px solid rgba(220,38,38,0.25); border-radius: 5px; font-size: 12px; color: var(--text); margin-top: 12px; line-height: 1.5; }
+    .rpt-error-box i, .rpt-error-box svg { width: 15px; height: 15px; color: var(--red); flex-shrink: 0; margin-top: 1px; }
+    .rpt-sum-preview { font-size: 12px; color: var(--text-s); line-height: 1.6; }
+    /* stepped flow */
+    #rpt-flow { position: fixed; inset: 0; z-index: 620; background: rgba(10,13,20,0.4); display: none; align-items: center; justify-content: center; padding: 20px; }
+    #rpt-flow.open { display: flex; }
+    .rf-box { background: var(--bg-card); border: 1px solid var(--card-border); border-radius: 8px; width: 560px; max-width: 100%; max-height: calc(100vh - 60px); display: flex; flex-direction: column; box-shadow: 0 16px 48px rgba(0,0,0,0.22); overflow: hidden; }
+    .rf-head { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px 10px; font-size: 14px; font-weight: 700; color: var(--text); }
+    #rpt-flow-body { display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
+    .rf-steps { display: flex; gap: 2px; padding: 0 18px 12px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+    .rf-step { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; color: var(--text-m); padding: 4px 8px; border-radius: 4px; }
+    .rf-step span { width: 16px; height: 16px; border-radius: 50%; border: 1px solid var(--border); display: inline-flex; align-items: center; justify-content: center; font-size: 9.5px; }
+    .rf-step.cur { color: var(--blue); }
+    .rf-step.cur span { background: var(--blue); border-color: var(--blue); color: #fff; }
+    .rf-step.done { color: var(--green); }
+    .rf-step.done span { border-color: var(--green); color: var(--green); }
+    .rf-body { padding: 16px 18px; overflow-y: auto; min-height: 240px; }
+    .rf-foot { display: flex; align-items: center; justify-content: space-between; padding: 12px 18px; border-top: 1px solid var(--border); flex-shrink: 0; }
+    .rf-cards { display: flex; flex-direction: column; gap: 8px; }
+    .rf-card { display: flex; gap: 12px; align-items: flex-start; padding: 11px 13px; border: 1px solid var(--border); border-radius: 6px; cursor: pointer; transition: border-color 0.12s; }
+    .rf-card:hover { border-color: var(--blue); }
+    .rf-card.sel { border-color: var(--blue); background: var(--blue-dim); }
+    .rf-card i, .rf-card svg { width: 16px; height: 16px; color: var(--blue); flex-shrink: 0; margin-top: 2px; }
+    .rf-card-name { font-size: 13px; font-weight: 700; color: var(--text); }
+    .rf-card-desc { font-size: 11.5px; color: var(--text-m); margin-top: 2px; line-height: 1.45; }
+    .rf-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-m); margin-bottom: 8px; }
+    .rf-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+    .rf-chip { padding: 6px 11px; border-radius: 20px; border: 1px solid var(--border); background: transparent; font-size: 11.5px; font-weight: 600; color: var(--text-s); cursor: pointer; font-family: inherit; }
+    .rf-chip:hover { border-color: var(--blue); color: var(--blue); }
+    .rf-chip.sel { border-color: var(--blue); background: var(--blue-dim); color: var(--blue); }
+    .rf-check { display: flex; align-items: center; gap: 9px; padding: 6px 0; font-size: 12.5px; color: var(--text-s); cursor: pointer; }
+    .rf-check input { accent-color: var(--blue); }
+    .rf-review > div { display: flex; justify-content: space-between; gap: 12px; padding: 7px 0; border-bottom: 1px solid var(--border); font-size: 12.5px; }
+    .rf-review > div > span:first-child { color: var(--text-m); }
+    .rf-review > div > span:last-child { color: var(--text); font-weight: 600; text-align: right; }
+    /* report document */
+    .rpd { background: #fff; color: #1f2937; max-width: 760px; margin: 0 auto; padding: 56px 64px; border-radius: 4px; box-shadow: 0 2px 14px rgba(0,0,0,0.08); font-size: 13.5px; line-height: 1.6; }
+    .rpd-brand { font-size: 13px; font-weight: 800; color: #2563eb; letter-spacing: -0.01em; margin-bottom: 34px; }
+    .rpd-cover h1 { font-size: 27px; font-weight: 700; color: #0f172a; margin: 0 0 6px; letter-spacing: -0.015em; }
+    .rpd-cover-for { font-size: 16px; color: #334155; font-weight: 600; margin-bottom: 10px; }
+    .rpd-cover-meta { font-size: 12.5px; color: #64748b; margin-top: 2px; }
+    .rpd-cover-note { font-size: 12.5px; color: #475569; margin-top: 14px; padding: 10px 14px; border-left: 3px solid #bfdbfe; background: #f8fafc; white-space: pre-wrap; }
+    .rpd-conf { font-size: 11px; color: #94a3b8; margin-top: 14px; }
+    .rpd-sec { margin-top: 38px; break-inside: avoid-page; }
+    .rpd-sec h2 { font-size: 15px; font-weight: 700; color: #0f172a; margin: 0 0 10px; padding-bottom: 6px; border-bottom: 1.5px solid #0f172a; letter-spacing: -0.01em; }
+    .rpd-body { font-size: 13px; color: #334155; }
+    .rpd-ai-note { font-size: 10.5px; color: #94a3b8; margin-top: 8px; }
+    .rpd-note { font-size: 11.5px; color: #64748b; margin-top: 10px; line-height: 1.55; }
+    .rpd-kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    .rpd-kpi { border: 1px solid #e2e8f0; border-radius: 6px; padding: 12px 14px; }
+    .rpd-kpi-v { font-size: 19px; font-weight: 700; color: #0f172a; display: flex; align-items: baseline; gap: 7px; flex-wrap: wrap; }
+    .rpd-kpi-l { font-size: 11px; color: #64748b; margin-top: 3px; }
+    .rpd-delta { font-size: 10.5px; font-weight: 700; }
+    .rpd-delta.up { color: #059669; }
+    .rpd-delta.down { color: #dc2626; }
+    .rpd-delta-na { font-size: 10.5px; color: #94a3b8; font-weight: 500; }
+    .rpd-vchart { display: flex; align-items: flex-end; gap: 2px; height: 80px; margin-top: 14px; padding-bottom: 4px; border-bottom: 1px solid #e2e8f0; }
+    .rpd-vbar-w { flex: 1; display: flex; align-items: flex-end; justify-content: center; height: 100%; }
+    .rpd-vbar { width: 100%; max-width: 22px; background: #3b82f6; border-radius: 2px 2px 0 0; min-height: 1px; }
+    .rpd-vchart-lbl { font-size: 10.5px; color: #94a3b8; margin-top: 5px; display: flex; justify-content: space-between; }
+    .rpd-src-row { display: flex; align-items: center; gap: 12px; padding: 5px 0; font-size: 12.5px; }
+    .rpd-src-name { width: 130px; flex-shrink: 0; color: #334155; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .rpd-src-bar { flex: 1; height: 9px; background: #f1f5f9; border-radius: 4px; overflow: hidden; }
+    .rpd-src-bar span { display: block; height: 100%; background: #3b82f6; border-radius: 4px; }
+    .rpd-src-n { width: 78px; text-align: right; color: #64748b; font-size: 11.5px; flex-shrink: 0; }
+    .rpd-table { width: 100%; border-collapse: collapse; font-size: 12.5px; margin-top: 6px; }
+    .rpd-table th { text-align: left; font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.4px; color: #64748b; font-weight: 600; border-bottom: 1.5px solid #0f172a; padding: 6px 10px 6px 0; }
+    .rpd-table td { padding: 7px 10px 7px 0; border-bottom: 1px solid #e2e8f0; color: #334155; vertical-align: top; }
+    .rpd-table tr { break-inside: avoid; }
+    .rpd-appendix td:first-child { color: #64748b; width: 180px; }
+    .rpd-recs { margin: 4px 0 0; padding-left: 20px; }
+    .rpd-recs li { font-size: 13px; color: #334155; padding: 4px 0; }
+    .rpd-footer { display: flex; justify-content: space-between; margin-top: 48px; padding-top: 12px; border-top: 1px solid #e2e8f0; font-size: 11px; color: #94a3b8; }
+    .rpd-footer-brand { font-weight: 700; color: #2563eb; }
+    @media (max-width: 900px) {
+      #page-reports { overflow-y: auto; }
+      #rpt-pv-nav { display: none; }
+      #rpt-pv-scroll { padding: 16px 10px; }
+      .rpd { padding: 26px 20px; }
+      .rpd-kpis { grid-template-columns: 1fr 1fr; }
+      .rf-box { max-height: calc(100vh - 24px); }
+    }
     @media (max-width: 900px) {
       .inv-split { grid-template-columns: 1fr; }
       .inv-detail-card { display: none; }
@@ -1540,7 +1654,12 @@
     /* Report print view */
     #rpt-print-view { position: fixed; inset: 0; z-index: 650; background: #f5f6f7; display: flex; flex-direction: column; transform: translateY(100%); transition: transform 0.22s var(--ease); }
     #rpt-print-view.open { transform: translateY(0); }
-    #rpt-pv-scroll { flex: 1; overflow-y: auto; padding: 48px; }
+    .rpt-pv-body { flex: 1; min-height: 0; display: flex; }
+    #rpt-pv-nav { width: 190px; flex-shrink: 0; border-right: 1px solid var(--border); background: var(--bg-card); padding: 16px 10px; overflow-y: auto; }
+    .rpt-nav-h { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: var(--text-m); padding: 0 8px 8px; }
+    .rpt-nav-item { padding: 7px 10px; border-radius: 4px; font-size: 12.5px; color: var(--text-s); cursor: pointer; }
+    .rpt-nav-item:hover { background: var(--hover); color: var(--text); }
+    #rpt-pv-scroll { flex: 1; overflow-y: auto; padding: 40px 48px; }
     #rpt-pv-content { max-width: 780px; margin: 0 auto; background: #fff; padding: 48px; box-shadow: 0 2px 24px rgba(0,0,0,0.08); border-radius: 4px; font-family: 'Segoe UI', Inter, -apple-system, sans-serif; }
     @media (max-width: 900px) {
       .inv-split { grid-template-columns: 1fr; }
@@ -1713,14 +1832,7 @@
     .inv-overlay.open { display: flex; }
     .inv-modal { width: 100%; max-width: 440px; background: var(--bg-card); border-radius: 6px; border: 1px solid var(--card-border); box-shadow: 0 8px 32px rgba(0,0,0,0.18); overflow: hidden; animation: pmenu-in var(--dur) var(--ease); }
 
-    /* ── Report Editor Drawer ── */
-    #report-editor-drawer {
-      position: fixed; top: var(--hdr); right: 0; bottom: 0; width: 380px; z-index: 200;
-      background: var(--bg-card); border-left: 1px solid var(--card-border);
-      display: flex; flex-direction: column;
-      transform: translateX(100%); transition: transform var(--dur) var(--ease);
-    }
-    #report-editor-drawer.open { transform: translateX(0); }
+    /* ── (legacy report drawer removed — replaced by the stepped #rpt-flow) ── */
     .re-head { display: flex; align-items: center; padding: 13px 16px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
     .re-head-title { font-size: 14px; font-weight: 700; color: var(--text); }
     .re-head-close { margin-left: auto; width: 28px; height: 28px; background: transparent; border: none; border-radius: 4px; color: var(--text-m); cursor: pointer; display: flex; align-items: center; justify-content: center; }
@@ -3086,15 +3198,18 @@
     <div></div>
   </div>
 
-  <!-- Report print view -->
+  <!-- Report viewer (also the print surface) -->
   <div id="rpt-print-view">
     <div class="ipv-bar">
-      <span style="font-size:13px;font-weight:600;color:#111827;flex:1;">Report</span>
-      <button class="rpo-print" onclick="reportsPrintNow()"><i data-lucide="printer"></i>Print / Save PDF</button>
+      <span id="rpt-pv-title" style="font-size:13px;font-weight:600;color:var(--text);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">Report</span>
+      <button class="rpo-print" onclick="reportsPrintNow()"><i data-lucide="printer"></i>Download PDF</button>
       <button class="rpo-close" onclick="reportsClosePrint()">Close</button>
     </div>
-    <div id="rpt-pv-scroll">
-      <div id="rpt-pv-content"></div>
+    <div class="rpt-pv-body">
+      <div id="rpt-pv-nav"></div>
+      <div id="rpt-pv-scroll">
+        <div id="rpt-pv-content"></div>
+      </div>
     </div>
   </div>
 
@@ -3114,39 +3229,126 @@
   <!-- REPORTS PAGE -->
   <div class="page" id="page-reports">
 
-    <div class="stats-grid sg-3 mb20">
-      <div class="card stat-card"><div class="stat-top"><div class="stat-label"><i data-lucide="file-bar-chart" class="kpi-glyph kg-blue"></i>Total Reports</div></div><div class="stat-val" id="rpt-kpi-total">0</div></div>
-      <div class="card stat-card"><div class="stat-top"><div class="stat-label"><i data-lucide="calendar" class="kpi-glyph kg-green"></i>Last Generated</div></div><div class="stat-val" id="rpt-kpi-last">—</div></div>
-      <div class="card stat-card"><div class="stat-top"><div class="stat-label"><i data-lucide="bar-chart-2" class="kpi-glyph kg-amber"></i>Top Type</div></div><div class="stat-val" id="rpt-kpi-type">—</div></div>
+    <div class="inv-head">
+      <div>
+        <div class="inv-head-title">Reports</div>
+        <div class="inv-head-sub">Generate, review, and export performance reports for any date range.</div>
+      </div>
+      <div class="inv-head-actions">
+        <button class="cmd-primary" onclick="openReportEditor()"><i data-lucide="plus"></i>New Report</button>
+      </div>
     </div>
 
-    <div class="rpt-split">
+    <div class="stats-grid sg-4 inv-cards">
+      <div class="card stat-card">
+        <div class="inv-kpi-row">
+          <div class="inv-kpi-ic ik-blue"><i data-lucide="file-bar-chart"></i></div>
+          <div class="inv-kpi-body">
+            <div class="inv-kpi-label">Reports generated</div>
+            <div class="stat-val" id="rpt-kpi-generated">—</div>
+            <div class="stat-hint" id="rpt-kpi-generated-sub"></div>
+          </div>
+        </div>
+      </div>
+      <div class="card stat-card">
+        <div class="inv-kpi-row">
+          <div class="inv-kpi-ic ik-purple"><i data-lucide="clock"></i></div>
+          <div class="inv-kpi-body">
+            <div class="inv-kpi-label">Latest report</div>
+            <div class="stat-val" id="rpt-kpi-latest">—</div>
+            <div class="stat-hint" id="rpt-kpi-latest-sub"></div>
+          </div>
+        </div>
+      </div>
+      <div class="card stat-card inv-card-click" onclick="rptCardFilter('failed')" role="button" tabindex="0" aria-label="Filter to failed reports">
+        <div class="inv-kpi-row">
+          <div class="inv-kpi-ic ik-amber"><i data-lucide="alert-triangle"></i></div>
+          <div class="inv-kpi-body">
+            <div class="inv-kpi-label">Report issues</div>
+            <div class="stat-val" id="rpt-kpi-issues">—</div>
+            <div class="stat-hint" id="rpt-kpi-issues-sub"></div>
+          </div>
+        </div>
+      </div>
+      <div class="card stat-card">
+        <div class="inv-kpi-row">
+          <div class="inv-kpi-ic ik-green"><i data-lucide="database"></i></div>
+          <div class="inv-kpi-body">
+            <div class="inv-kpi-label">Reports stored</div>
+            <div class="stat-val" id="rpt-kpi-stored">—</div>
+            <div class="stat-hint" id="rpt-kpi-stored-sub"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="inv-split">
 
       <!-- List -->
-      <div class="card rpt-list-card">
-        <div class="sec-head">
-          <div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0;">
-            <input id="rpt-search" type="text" placeholder="Search reports…" oninput="rptFilterList()" style="padding:5px 10px;background:var(--input-bg);border:1px solid var(--input-border);border-radius:4px;font-size:11.5px;font-family:inherit;color:var(--text);outline:none;width:160px;" />
+      <div class="card inv-list-card">
+        <div class="inv-toolbar">
+          <div class="inv-tb-search"><i data-lucide="search"></i>
+            <input id="rpt-search" type="text" placeholder="Search reports…" oninput="rptFilterChange()" aria-label="Search reports" />
           </div>
-          <button class="cmd-primary" onclick="openReportEditor()"><i data-lucide="plus"></i>New Report</button>
+          <select id="rpt-f-type" class="inv-tb-select" onchange="rptFilterChange()" aria-label="Filter by type">
+            <option value="all">All types</option>
+            <option value="full">Full Report</option>
+            <option value="executive">Executive</option>
+            <option value="leads">Leads</option>
+            <option value="pipeline">Pipeline</option>
+            <option value="custom">Custom</option>
+          </select>
+          <select id="rpt-f-status" class="inv-tb-select" onchange="rptFilterChange()" aria-label="Filter by status">
+            <option value="all">All statuses</option>
+            <option value="ready">Ready</option>
+            <option value="generating">Generating</option>
+            <option value="failed">Failed</option>
+            <option value="archived">Archived</option>
+          </select>
+          <select id="rpt-f-owner" class="inv-tb-select" onchange="rptFilterChange()" aria-label="Filter by owner">
+            <option value="all">All owners</option>
+          </select>
+          <select id="rpt-f-sort" class="inv-tb-select" onchange="rptFilterChange()" aria-label="Sort reports">
+            <option value="newest">Newest</option>
+            <option value="oldest">Oldest</option>
+            <option value="nameaz">Name A–Z</option>
+            <option value="nameza">Name Z–A</option>
+            <option value="range">Date range</option>
+            <option value="viewed">Recently viewed</option>
+          </select>
+          <span class="sec-link" onclick="rptClearFilters()">Clear</span>
         </div>
         <div class="table-wrap">
-          <table class="skel-table">
-            <thead><tr><th>Report</th><th>Type</th><th>Range</th><th>Date</th></tr></thead>
-            <tbody id="rpt-tbody"><tr><td colspan="4" style="text-align:center;padding:32px 16px;color:var(--text-m);font-size:12.5px;">No reports yet</td></tr></tbody>
+          <table class="skel-table inv-table">
+            <thead><tr>
+              <th scope="col">Report</th><th scope="col">Type</th><th scope="col">Date range</th><th scope="col">Generated</th>
+              <th scope="col">Owner</th><th scope="col">Status</th><th scope="col">Format</th>
+              <th scope="col"><span class="sr-only">Actions</span></th>
+            </tr></thead>
+            <tbody id="rpt-tbody"><tr><td colspan="8" style="text-align:center;padding:32px 16px;color:var(--text-m);font-size:12.5px;">Loading…</td></tr></tbody>
           </table>
         </div>
+        <div class="inv-table-foot" id="rpt-table-foot"></div>
       </div>
 
       <!-- Detail -->
-      <div class="card rpt-detail-card" id="rpt-detail-panel">
+      <div class="card inv-detail-card" id="rpt-detail-panel">
         <div class="empty-state" style="padding:60px 20px;">
-          <i data-lucide="bar-chart-2"></i>
+          <i data-lucide="file-bar-chart"></i>
           <div class="empty-state-title">Select a report</div>
-          <div class="empty-state-sub">Choose a report from the list to preview it here.</div>
+          <div class="empty-state-sub">Preview its contents, date range, status, and available actions.</div>
         </div>
       </div>
 
+    </div>
+  </div>
+
+  <!-- Report row actions + stepped New Report flow -->
+  <div class="card-ctx-menu" id="rpt-row-menu"></div>
+  <div id="rpt-flow" onclick="if(event.target===this)rptFlowClose()">
+    <div class="rf-box" role="dialog" aria-modal="true" aria-label="New report">
+      <div class="rf-head">New Report<button class="inv-p-close" onclick="rptFlowClose()" aria-label="Close"><i data-lucide="x"></i></button></div>
+      <div id="rpt-flow-body"></div>
     </div>
   </div>
 
@@ -3558,52 +3760,6 @@
 
 <div id="report-view"></div>
 
-<!-- Report Editor Drawer -->
-<div id="report-editor-drawer">
-  <div class="re-head">
-    <div class="re-head-title">Report Editor</div>
-    <button class="re-head-close" onclick="closeReportEditor()"><i data-lucide="x"></i></button>
-  </div>
-  <div class="re-body">
-    <div>
-      <div class="re-section-label">Report Type</div>
-      <div class="re-type-grid">
-        <div class="re-type-card sel" data-type="full" onclick="reTypeSelect('full')">Full Report</div>
-        <div class="re-type-card" data-type="leads" onclick="reTypeSelect('leads')">Lead Summary</div>
-        <div class="re-type-card" data-type="pipeline" onclick="reTypeSelect('pipeline')">Pipeline</div>
-        <div class="re-type-card" data-type="automations" onclick="reTypeSelect('automations')">Automations</div>
-      </div>
-    </div>
-    <div>
-      <div class="re-section-label">Date Range</div>
-      <div class="re-range-row">
-        <button class="re-range-btn" onclick="reRangeSelect(7,this)">7 days</button>
-        <button class="re-range-btn active" onclick="reRangeSelect(30,this)">30 days</button>
-        <button class="re-range-btn" onclick="reRangeSelect(60,this)">60 days</button>
-        <button class="re-range-btn" onclick="reRangeSelect(90,this)">90 days</button>
-      </div>
-    </div>
-    <div>
-      <div class="re-section-label">Include Sections</div>
-      <div class="re-chk-row"><input type="checkbox" class="re-chk" data-sec="kpis" checked onchange="reSectionToggle('kpis',this.checked)"><div class="re-chk-info"><div class="re-chk-label">Key Metrics</div><div class="re-chk-sub">Leads, booked calls, pipeline, conversion rate</div></div></div>
-      <div class="re-chk-row"><input type="checkbox" class="re-chk" data-sec="insights" checked onchange="reSectionToggle('insights',this.checked)"><div class="re-chk-info"><div class="re-chk-label">Insights</div><div class="re-chk-sub">Auto-generated performance observations</div></div></div>
-      <div class="re-chk-row"><input type="checkbox" class="re-chk" data-sec="sources" checked onchange="reSectionToggle('sources',this.checked)"><div class="re-chk-info"><div class="re-chk-label">Lead Sources</div><div class="re-chk-sub">Breakdown by where leads came from</div></div></div>
-      <div class="re-chk-row"><input type="checkbox" class="re-chk" data-sec="funnel" checked onchange="reSectionToggle('funnel',this.checked)"><div class="re-chk-info"><div class="re-chk-label">Conversion Funnel</div><div class="re-chk-sub">Leads → Qualified → Booked → Won</div></div></div>
-      <div class="re-chk-row"><input type="checkbox" class="re-chk" data-sec="topleads" checked onchange="reSectionToggle('topleads',this.checked)"><div class="re-chk-info"><div class="re-chk-label">Top Leads</div><div class="re-chk-sub">Top 10 leads ranked by engagement score</div></div></div>
-      <div class="re-chk-row"><input type="checkbox" class="re-chk" data-sec="stages" checked onchange="reSectionToggle('stages',this.checked)"><div class="re-chk-info"><div class="re-chk-label">Pipeline by Stage</div><div class="re-chk-sub">Deal value grouped by pipeline stage</div></div></div>
-    </div>
-    <div>
-      <div class="re-section-label">Details</div>
-      <div style="display:flex;flex-direction:column;gap:10px;">
-        <div class="re-field"><label>Report for</label><input type="text" id="re-report-for" placeholder="Business or client name" /></div>
-        <div class="re-field"><label>Signed by</label><input type="text" id="re-signed-by" placeholder="Your name" /></div>
-      </div>
-    </div>
-    <div id="re-hint" class="re-hint">6 sections selected · Last 30 days</div>
-    <button class="re-generate" onclick="generateReportEditor()">Generate Report</button>
-  </div>
-</div>
-
 <!-- Report Preview Overlay -->
 <div id="report-preview-overlay">
   <div class="rpo-bar">
@@ -3711,7 +3867,7 @@
 <script src="invoice.js?v=5"></script>
 <script src="inbox.js?v=2"></script>
 <script src="flowy.js?v=10"></script>
-<script src="reports.js?v=1"></script>
+<script src="reports.js?v=2"></script>
 <script>
 const AUTH0_DOMAIN    = 'auth.flowaify.app';
 const AUTH0_CLIENT_ID = 'tx74Owqn3jVeSaVuxfFHsKloqbPqfAmN';
