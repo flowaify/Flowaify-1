@@ -376,6 +376,21 @@ async function teamsSendMsg() {
   var r = await twFetch('POST', '/team/messages/send', {
     channelId: _teamsCurrentChannel.id, content: text, type: 'text', mentions: mentions
   });
+  if (!r || r.status !== 200) {
+    /* diagnostic: surface exactly why the send failed instead of dropping it */
+    var why = 'stage=' + (r ? 'http ' + r.status : 'no-response');
+    if (r && r.data && (r.data.error || r.data.message)) why += ' · ' + (r.data.error || '') + ' ' + (r.data.message || '');
+    var tokenNote = 'token: unavailable';
+    try {
+      var cl = await window.__auth0Client.getIdTokenClaims();
+      if (cl && cl.exp) {
+        var mins = Math.round((cl.exp * 1000 - Date.now()) / 60000);
+        tokenNote = 'token exp in ' + mins + ' min';
+      } else if (!cl) tokenNote = 'token: none returned';
+    } catch (e) { tokenNote = 'token error: ' + (e.error || e.message || 'unknown'); }
+    if (typeof showToast === 'function') showToast('SEND FAILED — ' + why + ' · ' + tokenNote + ' · build ' + (window.FLW_BUILD || '?'));
+    return;
+  }
   if (r && r.status === 200 && r.data && r.data.message) {
     var real = r.data.message;
     var tempRow = document.querySelector('.teams-msg-row[data-mid="' + tempId + '"]');
