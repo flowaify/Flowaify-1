@@ -116,6 +116,20 @@
     ::-webkit-scrollbar { width: 4px; height: 4px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: var(--blue-border); border-radius: 99px; }
+    /* ── Dropdowns — one consistent professional style everywhere ── */
+    select {
+      -webkit-appearance: none; -moz-appearance: none; appearance: none;
+      background-color: var(--input-bg); border: 1px solid var(--input-border); border-radius: 5px;
+      color: var(--text); font-family: inherit; font-size: 12px; line-height: 1.4; font-weight: 500;
+      padding: 6px 28px 6px 10px; cursor: pointer; outline: none;
+      background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 9px center; background-size: 12px;
+      transition: border-color 0.12s, box-shadow 0.12s;
+    }
+    select:hover { border-color: var(--blue-border); }
+    select:focus { border-color: var(--blue); box-shadow: 0 0 0 3px var(--blue-dim); }
+    select:disabled { opacity: 0.55; cursor: default; }
+    select option { background: var(--bg-card); color: var(--text); }
 
     /* ───────── SUITE HEADER ───────── */
     .suite-bar {
@@ -1040,7 +1054,7 @@
     /* Automations page — natural heights, page-level scroll only as safety net */
     #page-automations { overflow-y: auto; }
     #auto-activity { overflow: visible; }
-    .auto-strip { display: flex; align-items: stretch; padding: 14px 6px; margin-bottom: 14px; flex-shrink: 0; }
+    .auto-strip { display: flex; align-items: stretch; padding: 10px 6px; margin-bottom: 12px; flex-shrink: 0; }
     .auto-strip-cell { flex: 1; display: flex; align-items: center; gap: 12px; padding: 2px 18px; min-width: 0; }
     .auto-strip-cell > i, .auto-strip-cell > svg { width: 16px; height: 16px; color: var(--text-m); flex-shrink: 0; }
     .auto-strip-div { width: 1px; background: var(--border); margin: 2px 0; }
@@ -1074,7 +1088,9 @@
     .auto-rule-kebab { width: 24px; height: 24px; border: none; background: transparent; color: var(--text-m); border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 700; opacity: 0; transition: opacity 0.12s; line-height: 1; }
     .auto-rule:hover .auto-rule-kebab, .auto-rule.sel .auto-rule-kebab { opacity: 1; }
     .auto-rule-kebab:hover { background: var(--hover); color: var(--text); }
-    .auto-right { display: flex; flex-direction: column; gap: 14px; }
+    .auto-right { display: flex; flex-direction: column; gap: 12px; }
+    .auto-right .sec-head { padding: 11px 16px 7px; }
+    #page-automations .inv-head { margin-bottom: 10px; }
     .auto-health-card, .auto-detail-card { flex-shrink: 0; }
     .auto-runs-card { display: flex; flex-direction: column; }
     #auto-health { padding: 4px 16px 10px; }
@@ -1088,9 +1104,9 @@
     .ard-krow { display: flex; justify-content: space-between; gap: 12px; padding: 3px 0; font-size: 11.5px; }
     .ard-krow > span:first-child { color: var(--text-m); flex-shrink: 0; }
     .ard-krow > span:last-child { color: var(--text); font-weight: 500; text-align: right; }
-    .ard-next { margin-top: 10px; padding: 9px 12px; background: var(--blue-dim); border-radius: 5px; font-size: 12px; color: var(--text-s); line-height: 1.5; }
+    .ard-next { margin-top: 8px; padding: 7px 11px; background: var(--blue-dim); border-radius: 5px; font-size: 11.5px; color: var(--text-s); line-height: 1.45; }
     .ard-next strong { color: var(--text); }
-    .ard-actions { display: flex; gap: 7px; margin-top: 10px; flex-wrap: wrap; }
+    .ard-actions { display: flex; gap: 7px; margin-top: 8px; flex-wrap: wrap; }
     .auto-runs-chip { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 20px; background: var(--blue-dim); color: var(--blue); font-size: 10.5px; font-weight: 600; cursor: pointer; }
     .auto-run-rule { font-size: 10.5px; color: var(--text-m); }
 
@@ -1465,8 +1481,6 @@
     .inv-tb-search { display: flex; align-items: center; gap: 6px; background: var(--input-bg); border: 1px solid var(--input-border); border-radius: 4px; padding: 0 8px; flex: 1; min-width: 150px; max-width: 260px; }
     .inv-tb-search i, .inv-tb-search svg { width: 12px; height: 12px; color: var(--text-m); flex-shrink: 0; }
     .inv-tb-search input { border: none; background: transparent; outline: none; padding: 6px 0; font-size: 12px; font-family: inherit; color: var(--text); width: 100%; }
-    .inv-tb-select { padding: 6px 8px; background: var(--input-bg); border: 1px solid var(--input-border); border-radius: 4px; font-size: 11.5px; font-family: inherit; color: var(--text); outline: none; cursor: pointer; }
-    .inv-tb-select:focus { border-color: var(--blue); }
     .inv-chip { padding: 5px 10px; border-radius: 20px; border: 1px solid var(--border); background: transparent; font-size: 11px; font-weight: 600; color: var(--text-s); cursor: pointer; font-family: inherit; }
     .inv-chip:hover { border-color: var(--red); color: var(--red); }
     .inv-table th { white-space: nowrap; }
@@ -3945,7 +3959,7 @@
 
 <script src="crm.js?v=34"></script>
 <script src="teams.js?v=9"></script>
-<script src="settings.js?v=8"></script>
+<script src="settings.js?v=9"></script>
 <script src="analytics.js?v=2"></script>
 <script src="invoice.js?v=5"></script>
 <script src="inbox.js?v=2"></script>
