@@ -37,7 +37,7 @@ async function teamsInit() {
       });
     }
   } catch (e) {}
-  _teamsPollingId = setInterval(teamsPoll, 8000);
+  _teamsPollingId = setInterval(teamsPoll, 4000);
 }
 window.teamsInit = teamsInit;
 
@@ -432,8 +432,16 @@ function twRenderTyping(names) {
   if (nearBottom) teamsScrollBottom();
 }
 
+var _twPollTick = 0;
+
 async function teamsPoll() {
   if (!_teamsCurrentChannel) return;
+  /* adaptive cadence: 4s while the Team page is open (snappy typing bubble +
+     messages), every 3rd tick (12s) in the background for nav badges only */
+  _twPollTick++;
+  var pageEl = document.getElementById('page-team');
+  var onTeam = pageEl && pageEl.classList.contains('active');
+  if (!onTeam && _twPollTick % 3 !== 0) return;
   var url = '/team/messages?channel=' + encodeURIComponent(_teamsCurrentChannel.id) + '&after=' + _teamsLastMsgTs;
   var r = await twFetch('GET', url);
   if (r && r.status === 200) {
