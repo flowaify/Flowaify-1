@@ -394,6 +394,44 @@ window.teamsAutoResize = teamsAutoResize;
 
 // ── Polling ───────────────────────────────────────────────────────────────────
 
+/* ── Typing indicator (iMessage-style) ─────────────────────────────────────── */
+var _twTypingLastPing = 0;
+
+function twTypingPing() {
+  if (!_teamsCurrentChannel) return;
+  var now = Date.now();
+  if (now - _twTypingLastPing < 4000) return;
+  _twTypingLastPing = now;
+  twFetch('POST', '/team/typing', { channelId: _teamsCurrentChannel.id });
+}
+window.twTypingPing = twTypingPing;
+
+function twRenderTyping(names) {
+  var container = document.getElementById('teams-messages');
+  if (!container) return;
+  var row = document.getElementById('tw-typing-row');
+  if (!names || !names.length) {
+    if (row) row.remove();
+    return;
+  }
+  var label = names.length === 1 ? names[0] + ' is typing'
+    : names.length === 2 ? names[0] + ' and ' + names[1] + ' are typing'
+    : 'Several people are typing';
+  var html = '<div class="tw-typing-name">' + escDash(label) + '</div>' +
+    '<div class="tw-typing-bubble"><span class="tw-typing-dot"></span><span class="tw-typing-dot"></span><span class="tw-typing-dot"></span></div>';
+  var nearBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 120;
+  if (!row) {
+    row = document.createElement('div');
+    row.id = 'tw-typing-row';
+    row.className = 'tw-typing-row';
+    container.appendChild(row);
+  } else if (row !== container.lastElementChild) {
+    container.appendChild(row); // keep the bubble below the newest message
+  }
+  row.innerHTML = html;
+  if (nearBottom) teamsScrollBottom();
+}
+
 async function teamsPoll() {
   if (!_teamsCurrentChannel) return;
   var url = '/team/messages?channel=' + encodeURIComponent(_teamsCurrentChannel.id) + '&after=' + _teamsLastMsgTs;
@@ -407,6 +445,7 @@ async function teamsPoll() {
       _teamsLastMsgTs = newMsgs[newMsgs.length - 1].ts;
       teamsScrollBottom();
     }
+    twRenderTyping((r.data && r.data.typing) || []);
   }
   // Refresh channel badges + presence + sidebar nav badge
   var cr = await twFetch('GET', '/team/channels');

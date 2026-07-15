@@ -1285,6 +1285,14 @@
     .teams-compose-inner { display: flex; align-items: flex-end; gap: 8px; background: var(--input-bg); border: 1px solid var(--input-border); border-radius: 6px; padding: 8px 10px; }
     .teams-input-ta { flex: 1; background: transparent; border: none; outline: none; font-family: inherit; font-size: 13.5px; color: var(--text); resize: none; line-height: 1.45; max-height: 120px; overflow-y: auto; }
     .teams-input-ta::placeholder { color: var(--text-m); }
+    .tw-typing-row { padding: 2px 16px 10px; }
+    .tw-typing-name { font-size: 10.5px; color: var(--text-m); margin: 0 0 3px 4px; }
+    .tw-typing-bubble { display: inline-flex; align-items: center; gap: 4px; background: var(--hover); border: 1px solid var(--border); border-radius: 16px; padding: 10px 13px; }
+    .tw-typing-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--text-m); animation: twTypeBounce 1.3s ease-in-out infinite; }
+    .tw-typing-dot:nth-child(2) { animation-delay: 0.16s; }
+    .tw-typing-dot:nth-child(3) { animation-delay: 0.32s; }
+    @keyframes twTypeBounce { 0%, 60%, 100% { transform: none; opacity: 0.45; } 30% { transform: translateY(-3px); opacity: 1; } }
+    @media (prefers-reduced-motion: reduce) { .tw-typing-dot { animation: none; opacity: 0.7; } }
     .teams-compose-actions { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
     .teams-compose-btn { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; background: transparent; border: none; border-radius: 4px; color: var(--text-m); cursor: pointer; }
     .teams-compose-btn:hover { background: var(--hover); color: var(--text); }
@@ -2690,7 +2698,7 @@
               </div>
               <div class="teams-compose">
                 <div class="teams-compose-inner">
-                  <textarea id="teams-input" class="teams-input-ta" placeholder="Message General…" rows="1" onkeydown="teamsKeyDown(event)" oninput="teamsAutoResize(this)"></textarea>
+                  <textarea id="teams-input" class="teams-input-ta" placeholder="Message General…" rows="1" onkeydown="teamsKeyDown(event)" oninput="teamsAutoResize(this);if(this.value&&window.twTypingPing)twTypingPing()"></textarea>
                 </div>
                 <div class="tw-compose-bar" style="position:relative;">
                   <div class="tw-mention-menu" id="tw-mention-menu"></div>
@@ -3965,7 +3973,7 @@
 <div id="toast"><div class="toast-icon"><i data-lucide="check"></i></div><div id="toast-msg" style="font-size:12.5px;font-weight:600;color:var(--text-s);line-height:1.45;"></div></div>
 
 <script src="crm.js?v=34"></script>
-<script src="teams.js?v=9"></script>
+<script src="teams.js?v=10"></script>
 <script src="settings.js?v=9"></script>
 <script src="analytics.js?v=2"></script>
 <script src="invoice.js?v=6"></script>
@@ -3979,7 +3987,7 @@ const AUTH0_CLIENT_ID = 'tx74Owqn3jVeSaVuxfFHsKloqbPqfAmN';
 /* ── Update check: version.json is bumped on every deploy; when a newer
    build is live, a quiet banner offers a refresh (ends the hard-refresh
    guessing game for clients). ── */
-const FLW_BUILD = 202607151;
+const FLW_BUILD = 202607152;
 async function flwVersionCheck() {
   try {
     const r = await fetch('version.json?t=' + Date.now(), { cache: 'no-store' });

@@ -98,6 +98,10 @@ export default {
         return handleTeamSend(request, env, corsHeaders);
       }
 
+      if (url.pathname === '/team/typing' && request.method === 'POST') {
+        return handleTeamTyping(request, env, corsHeaders);
+      }
+
       if (url.pathname === '/team/react' && request.method === 'POST') {
         return handleTeamReact(request, env, corsHeaders);
       }
@@ -932,7 +936,41 @@ async function handleTeamMessages(request, env, corsHeaders) {
     myReactions: Object.keys(m.userReactions || {}).filter(k => (m.userReactions[k] || []).includes(sub))
   }));
 
-  return json({ messages: msgs }, 200, corsHeaders);
+  // Who is typing right now (heartbeats within the last 8s, excluding the requester)
+  let typing = [];
+  try {
+    const tRaw = await env.TEAM_KV.get(pfx + ':ch:' + channelId + ':typing');
+    if (tRaw) {
+      const tMap = JSON.parse(tRaw);
+      const cutoff = Date.now() - 8000;
+      typing = Object.keys(tMap)
+        .filter(k => k !== sub && tMap[k].ts > cutoff)
+        .map(k => tMap[k].name)
+        .slice(0, 3);
+    }
+  } catch (e) {}
+
+  return json({ messages: msgs, typing }, 200, corsHeaders);
+}
+
+// ─── /team/typing (POST) — lightweight typing heartbeat, TTL-pruned ──────────
+
+async function handleTeamTyping(request, env, corsHeaders) {
+  const auth = await resolveTeamsAuth(request, env, corsHeaders);
+  if (auth.err) return auth.err;
+  const { pfx, sub, name } = auth;
+  let body;
+  try { body = await request.json(); } catch (e) { return json({ error: 'Invalid JSON' }, 400, corsHeaders); }
+  const channelId = String(body.channelId || '').replace(/[^\w_-]/g, '');
+  if (!channelId) return json({ error: 'channelId required' }, 400, corsHeaders);
+  const key = pfx + ':ch:' + channelId + ':typing';
+  let tMap = {};
+  try { const raw = await env.TEAM_KV.get(key); if (raw) tMap = JSON.parse(raw); } catch (e) {}
+  const now = Date.now();
+  tMap[sub] = { name: name || 'Someone', ts: now };
+  Object.keys(tMap).forEach(k => { if (now - tMap[k].ts > 15000) delete tMap[k]; });
+  await env.TEAM_KV.put(key, JSON.stringify(tMap), { expirationTtl: 60 });
+  return json({ ok: true }, 200, corsHeaders);
 }
 
 // ─── /team/messages/send (POST) ───────────────────────────────────────────────
