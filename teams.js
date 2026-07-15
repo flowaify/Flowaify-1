@@ -387,7 +387,7 @@ async function teamsSendMsg() {
 window.teamsSendMsg = teamsSendMsg;
 
 function teamsKeyDown(e) {
-  if (event && event.key !== "Enter") twTypingPing();
+  if (e && e.key !== "Enter") twTypingPing();
   if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); teamsSendMsg(); }
 }
 window.teamsKeyDown = teamsKeyDown;
