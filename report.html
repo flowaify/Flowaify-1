@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Report — Flowaify</title>
+<style>
+  :root { --text:#1f2937; --text-s:#475569; --text-m:#64748b; --border:#e5e7eb; --blue:#2563eb; --bg-card:#ffffff; --hover:#f1f5f9; --red:#dc2626; --green:#059669; --amber:#b45309; --blue-dim:#eff6ff; --green-dim:#ecfdf5; --red-dim:#fef2f2; --input-bg:#fff; --input-border:#e5e7eb; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:#f5f6f8; font:14px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; color:#1f2937; -webkit-font-smoothing:antialiased; }
+  .bar { position:sticky; top:0; z-index:5; display:flex; align-items:center; gap:10px; padding:10px 18px; background:#fff; border-bottom:1px solid #e5e7eb; }
+  .bar-title { font-size:13px; font-weight:600; color:#0f172a; flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .bar-brand { display:flex; align-items:center; gap:7px; font-weight:700; font-size:13px; color:#0f172a; }
+  .bar-mark { width:20px; height:20px; border-radius:6px; background:#2563eb; color:#fff; display:inline-flex; align-items:center; justify-content:center; font-weight:800; font-size:11px; }
+  .btn { padding:7px 16px; border-radius:5px; font-size:12.5px; font-weight:600; cursor:pointer; font-family:inherit; border:1px solid #e5e7eb; background:#fff; color:#374151; }
+  .btn-primary { background:#2563eb; border-color:#2563eb; color:#fff; }
+  .wrap { padding:34px 16px 60px; }
+  .state { max-width:440px; margin:80px auto; text-align:center; background:#fff; border:1px solid #e5e7eb; border-radius:8px; padding:44px 32px; }
+  .state h1 { font-size:17px; margin:12px 0 6px; }
+  .state p { font-size:13px; color:#64748b; margin:0; }
+  .spin { width:26px; height:26px; border:3px solid #e5e7eb; border-top-color:#2563eb; border-radius:50%; margin:0 auto; animation:sp 0.8s linear infinite; }
+  @keyframes sp { to { transform:rotate(360deg); } }
+    /* report document — consulting-grade, restrained */
+    .rpd { background: #fff; color: #1f2937; max-width: 780px; margin: 0 auto; padding: 64px 72px 48px; border-radius: 4px; box-shadow: 0 2px 14px rgba(0,0,0,0.08); font-size: 13.5px; line-height: 1.65; }
+    .rpd-brand-row { display: flex; align-items: center; gap: 8px; margin-bottom: 56px; }
+    .rpd-brand-mark { width: 22px; height: 22px; border-radius: 6px; background: #2563eb; color: #fff; display: inline-flex; align-items: center; justify-content: center; font-weight: 800; font-size: 12px; }
+    .rpd-brand-word { font-size: 13px; font-weight: 700; color: #0f172a; letter-spacing: -0.01em; }
+    .rpd-cover { padding-bottom: 40px; border-bottom: 2px solid #0f172a; }
+    .rpd-cover-kicker { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.6px; color: #2563eb; margin-bottom: 10px; }
+    .rpd-cover h1 { font-size: 32px; font-weight: 700; color: #0f172a; margin: 0 0 8px; letter-spacing: -0.02em; line-height: 1.15; }
+    .rpd-cover-for { font-size: 15px; color: #475569; margin-bottom: 28px; }
+    .rpd-cover-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 32px; margin-top: 26px; }
+    .rpd-cover-grid > div { border-top: 1px solid #e2e8f0; padding-top: 8px; }
+    .rpd-cover-grid span { display: block; font-size: 10.5px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; color: #94a3b8; margin-bottom: 2px; }
+    .rpd-cover-grid strong { font-size: 13px; color: #0f172a; font-weight: 600; }
+    .rpd-cover-note { font-size: 13px; color: #475569; margin-top: 24px; padding: 12px 16px; border-left: 3px solid #2563eb; background: #f8fafc; white-space: pre-wrap; line-height: 1.6; }
+    .rpd-conf { font-size: 10.5px; color: #94a3b8; margin-top: 20px; letter-spacing: 0.02em; }
+    .rpd-sec { margin-top: 44px; }
+    .rpd-sec h2 { display: flex; align-items: baseline; gap: 12px; font-size: 16px; font-weight: 700; color: #0f172a; margin: 0 0 14px; padding-bottom: 8px; border-bottom: 1px solid #cbd5e1; letter-spacing: -0.01em; break-after: avoid; }
+    .rpd-secno { font-size: 11px; font-weight: 700; color: #2563eb; letter-spacing: 1px; }
+    .rpd-lead { font-size: 14.5px; color: #334155; line-height: 1.75; margin: 0; }
+    .rpd-body { font-size: 13px; color: #334155; }
+    .rpd-ai-note { font-size: 10.5px; color: #94a3b8; margin-top: 10px; }
+    .rpd-note { font-size: 11.5px; color: #64748b; margin-top: 12px; line-height: 1.55; }
+    .rpd-kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px 28px; }
+    .rpd-kpi { border-top: 2px solid #0f172a; padding-top: 10px; }
+    .rpd-kpi-v { font-size: 23px; font-weight: 700; color: #0f172a; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+    .rpd-kpi-l { font-size: 11px; color: #64748b; margin-top: 3px; }
+    .rpd-kpi-d { margin-top: 5px; }
+    .rpd-delta { font-size: 10.5px; font-weight: 700; }
+    .rpd-delta.up { color: #059669; }
+    .rpd-delta.down { color: #dc2626; }
+    .rpd-delta-na { font-size: 10.5px; color: #94a3b8; font-weight: 500; }
+    .rpd-vchart-wrap { display: flex; gap: 8px; margin-top: 16px; align-items: stretch; }
+    .rpd-vaxis { font-size: 10px; color: #94a3b8; font-variant-numeric: tabular-nums; align-self: flex-start; padding-top: 0; min-width: 18px; text-align: right; }
+    .rpd-vchart { display: flex; align-items: flex-end; gap: 2px; height: 96px; flex: 1; border-bottom: 1.5px solid #0f172a; border-left: 1px solid #e2e8f0; padding-left: 4px; }
+    .rpd-vbar-w { flex: 1; display: flex; align-items: flex-end; justify-content: center; height: 100%; }
+    .rpd-vbar { width: 100%; max-width: 20px; background: #1d4ed8; border-radius: 1.5px 1.5px 0 0; min-height: 1px; }
+    .rpd-vchart-lbl { font-size: 10.5px; color: #94a3b8; margin-top: 6px; display: flex; justify-content: space-between; padding-left: 26px; }
+    .rpd-src-row { display: flex; align-items: center; gap: 14px; padding: 7px 0; font-size: 12.5px; border-bottom: 1px solid #f1f5f9; }
+    .rpd-src-row:last-child { border-bottom: none; }
+    .rpd-src-name { width: 150px; flex-shrink: 0; color: #334155; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .rpd-src-bar { flex: 1; height: 8px; background: #f1f5f9; border-radius: 4px; overflow: hidden; }
+    .rpd-src-bar span { display: block; height: 100%; background: #1d4ed8; border-radius: 4px; }
+    .rpd-src-n { width: 90px; text-align: right; color: #0f172a; font-size: 12px; font-weight: 600; flex-shrink: 0; font-variant-numeric: tabular-nums; }
+    .rpd-src-n em { font-style: normal; color: #94a3b8; font-weight: 500; margin-left: 7px; }
+    .rpd-table { width: 100%; border-collapse: collapse; font-size: 12.5px; margin-top: 8px; }
+    .rpd-table th { text-align: left; font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.6px; color: #64748b; font-weight: 600; border-bottom: 1.5px solid #0f172a; padding: 7px 12px 7px 0; }
+    .rpd-table td { padding: 8px 12px 8px 0; border-bottom: 1px solid #e8edf3; color: #334155; vertical-align: top; }
+    .rpd-table th.rpd-num, .rpd-table td.rpd-num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .rpd-table tr { break-inside: avoid; }
+    .rpd-appendix td:first-child { color: #64748b; width: 190px; }
+    .rpd-rec { display: flex; gap: 14px; padding: 11px 0; border-bottom: 1px solid #f1f5f9; font-size: 13px; color: #334155; line-height: 1.6; }
+    .rpd-rec:last-of-type { border-bottom: none; }
+    .rpd-rec-n { width: 22px; height: 22px; border-radius: 50%; background: #eff6ff; color: #2563eb; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+    .rpd-footer { display: flex; justify-content: space-between; margin-top: 56px; padding-top: 14px; border-top: 1px solid #e2e8f0; font-size: 10.5px; color: #94a3b8; }
+    .rpd-footer-brand { font-weight: 600; color: #64748b; }
+  @media (max-width: 700px) { .rpd { padding: 26px 20px; } .rpd-kpis { grid-template-columns: 1fr 1fr; } }
+  @media print {
+    body { background:#fff; }
+    .bar { display:none; }
+    .wrap { padding:0; }
+    .rpd { box-shadow:none; max-width:none; padding:24px 8px; }
+    .rpd-cover { break-after: page; }
+    .rpd-sec { break-inside: avoid-page; }
+    .rpd-sec h2 { break-after: avoid-page; }
+  }
+</style>
+</head>
+<body>
+<div class="bar">
+  <span class="bar-brand"><span class="bar-mark">F</span>Flowaify</span>
+  <span class="bar-title" id="bar-title">Report</span>
+  <button class="btn btn-primary" onclick="window.print()">Download PDF</button>
+</div>
+<div class="wrap" id="app">
+  <div class="state"><div class="spin"></div><h1>Loading report…</h1></div>
+</div>
+<script src="reports.js?v=4"></script>
+<script>
+(function() {
+  var WORKER = 'https://flowaify-crm-proxy.black-glitter-c4cd.workers.dev';
+  var app = document.getElementById('app');
+  function state(title, text) {
+    app.innerHTML = '<div class="state"><h1>' + title + '</h1><p>' + text + '</p></div>';
+  }
+  var token = new URLSearchParams(location.search).get('r') || '';
+  if (!/^[a-f0-9]{48}$/.test(token)) {
+    state('Report not found', 'This link is incomplete or invalid. Ask the sender for a new link.');
+    return;
+  }
+  fetch(WORKER + '/pub/report?t=' + token)
+    .then(function(r) { return r.json().then(function(d) { return { s: r.status, d: d }; }); })
+    .then(function(res) {
+      if (res.s !== 200 || !res.d.report) {
+        state('Report not found', 'This link may have expired or been revoked. Ask the sender for a new link.');
+        return;
+      }
+      var full = res.d.report;
+      document.title = (full.name || 'Report') + ' — Flowaify';
+      var bt = document.getElementById('bar-title');
+      if (bt) bt.textContent = full.name || 'Report';
+      app.innerHTML = rptRenderDoc(full);
+    })
+    .catch(function() { state('Connection problem', 'We could not load this report. Check your connection and refresh.'); });
+})();
+</script>
+</body>
+</html>

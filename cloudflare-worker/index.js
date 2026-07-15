@@ -27,6 +27,10 @@ const tokenCache = {}; // { [clientId]: { accessToken, expiresAt } }
 // ─── Entry point ─────────────────────────────────────────────────────────────
 
 export default {
+  async scheduled(event, env, ctx) {
+    ctx.waitUntil(runNightlyBackups(env));
+  },
+
   async fetch(request, env, ctx) {
     const origin = request.headers.get('Origin') || '';
     const isLocalDev = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin);
@@ -168,6 +172,26 @@ export default {
 
       if (url.pathname === '/invoice/token' && request.method === 'POST') {
         return handleInvoiceTokenRegen(request, env, corsHeaders);
+      }
+
+      if (url.pathname === '/invoice/email' && request.method === 'POST') {
+        return handleInvoiceEmail(request, env, corsHeaders);
+      }
+
+      if (url.pathname === '/pub/report' && request.method === 'GET') {
+        return handlePublicReport(url, env);
+      }
+
+      if (url.pathname === '/report/token' && request.method === 'POST') {
+        return handleReportToken(request, env, corsHeaders);
+      }
+
+      if (url.pathname === '/report/email' && request.method === 'POST') {
+        return handleReportEmail(request, env, corsHeaders);
+      }
+
+      if (url.pathname === '/admin/errors' && request.method === 'GET') {
+        return handleAdminErrors(request, env, corsHeaders);
       }
 
       if (url.pathname.startsWith('/invoice/') && request.method === 'DELETE') {
@@ -312,14 +336,13 @@ async function handleData(request, env, corsHeaders) {
     return json({ error: 'No clientId in token' }, 403, corsHeaders);
   }
 
-  // 4. Resolve per-client Zoho credentials from env vars
-  const key = clientId.toUpperCase().replace(/[^A-Z0-9]/g, '_');
-  const refreshToken = env[`REFRESH_TOKEN_${key}`];
-  if (!refreshToken) {
-    console.error(`Missing env var: REFRESH_TOKEN_${key}`);
+  // 4. Resolve per-client Zoho credentials (KV tenant record first, env fallback)
+  const creds = await resolveZohoCreds(env, clientId);
+  if (!creds) {
+    await logErr(env, clientId, 'data.creds', 'No Zoho credentials configured');
     return json({ error: `No Zoho credentials for client: ${clientId}` }, 500, corsHeaders);
   }
-  const datacenter = env[`DATACENTER_${key}`] || 'https://www.zohoapis.com';
+  const { refreshToken, datacenter } = creds;
 
   // 5. Get Zoho access token (cached 55 min)
   let zohoToken;
@@ -391,12 +414,11 @@ async function handleUpdate(request, env, corsHeaders) {
     return json({ error: 'FORBIDDEN', message: 'Viewers cannot edit leads.' }, 403, corsHeaders);
   }
 
-  const key = clientId.toUpperCase().replace(/[^A-Z0-9]/g, '_');
-  const refreshToken = env[`REFRESH_TOKEN_${key}`];
-  if (!refreshToken) {
+  const creds = await resolveZohoCreds(env, clientId);
+  if (!creds) {
     return json({ error: `No Zoho credentials for client: ${clientId}` }, 500, corsHeaders);
   }
-  const datacenter = env[`DATACENTER_${key}`] || 'https://www.zohoapis.com';
+  const { refreshToken, datacenter } = creds;
 
   let zohoToken;
   try {
@@ -1728,6 +1750,170 @@ async function handleInvoiceDelete(request, env, corsHeaders) {
   return json({ ok: true }, 200, corsHeaders);
 }
 
+// ── /invoice/email — send the invoice from the requester's connected Gmail ──
+async function handleInvoiceEmail(request, env, corsHeaders) {
+  const auth = await resolveInvoiceAuth(request, env, corsHeaders);
+  if (auth.err) return auth.err;
+  const gate = await requireRole(env, auth, 'member', corsHeaders);
+  if (gate.err) return gate.err;
+  let body;
+  try { body = await request.json(); } catch (e) { return json({ error: 'Bad JSON' }, 400, corsHeaders); }
+  const { store } = await invLoadStore(env, auth.kvKey);
+  const inv = store.invoices.find(x => x.id === body.id);
+  if (!inv) return json({ error: 'Not found' }, 404, corsHeaders);
+  if (inv.status === 'draft' || inv.status === 'void' || !inv.token) {
+    return json({ error: 'Finalize the invoice before sending it.' }, 400, corsHeaders);
+  }
+  const to = String(body.to || (inv.client && inv.client.email) || '').trim();
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(to)) return json({ error: 'A valid recipient email is required.' }, 400, corsHeaders);
+
+  // seller name from settings
+  let bizName = 'Your service provider';
+  try {
+    const stRaw = await env.TEAM_KV.get('settings:' + auth.clientId.toUpperCase().replace(/[^A-Z0-9]/g, '_'));
+    if (stRaw) {
+      const c = JSON.parse(stRaw);
+      bizName = (c.billing && c.billing.legalName) || (c.profile && c.profile.businessName) || bizName;
+    }
+  } catch (e) {}
+
+  function esc(v) { return String(v == null ? '' : v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+  function money(c) {
+    try { return new Intl.NumberFormat('en-US', { style: 'currency', currency: inv.currency || 'USD' }).format((c || 0) / 100); }
+    catch (e) { return '$' + ((c || 0) / 100).toFixed(2); }
+  }
+  const url = 'https://flowaify.app/invoice.html?i=' + inv.token;
+  const note = String(body.message || '').slice(0, 800);
+  const rows =
+    '<div style="font-size:13.5px;color:#334155;line-height:1.6;margin-bottom:14px;">' +
+      (note ? esc(note) : 'Please find your invoice below. You can view the full document and pay online at any time.') + '</div>' +
+    emailRow('Invoice', esc(inv.number)) +
+    emailRow('Amount due', money(inv.remainingC)) +
+    (inv.dueDate ? emailRow('Due date', esc(inv.dueDate)) : '');
+  const html = emailShell('Invoice ' + esc(inv.number) + ' from ' + esc(bizName), rows, 'View & Pay Invoice', url,
+    'Sent via Flowaify on behalf of ' + esc(bizName));
+
+  const sent = await gmailSendRaw(env, auth.sub, to, 'Invoice ' + inv.number + ' from ' + bizName, html);
+  if (!sent.ok) {
+    if (sent.error === 'GMAIL_NOT_CONNECTED') {
+      return json({ error: 'GMAIL_NOT_CONNECTED', message: 'Connect Gmail on the Inbox page to send invoices by email.' }, 409, corsHeaders);
+    }
+    await logErr(env, auth.clientId, 'invoice.email', sent.error);
+    return json({ error: 'Email could not be sent. Try again shortly.' }, 502, corsHeaders);
+  }
+  invEvent(inv, inv.sentAt ? 'resent' : 'sent', invActor(gate, auth), { via: 'email', to });
+  inv.sentAt = Date.now();
+  inv.updatedAt = Date.now();
+  await invSaveStore(env, auth.kvKey, store);
+  return json({ invoice: inv }, 200, corsHeaders);
+}
+
+// ── /report/token — create or revoke a secure external report link ──
+async function handleReportToken(request, env, corsHeaders) {
+  const auth = await resolveReportAuth(request, env, corsHeaders);
+  if (auth.err) return auth.err;
+  const gate = await requireRole(env, auth, 'member', corsHeaders);
+  if (gate.err) return gate.err;
+  let body;
+  try { body = await request.json(); } catch (e) { return json({ error: 'Bad JSON' }, 400, corsHeaders); }
+  const id = String(body.id || '').replace(/[^\w-]/g, '');
+  const raw = await env.TEAM_KV.get(rptRecKey(auth.clientId, id));
+  if (!raw) return json({ error: 'Not found' }, 404, corsHeaders);
+  const rec = JSON.parse(raw);
+  const actor = (gate.member && gate.member.name) || auth.email || auth.sub;
+  if (body.revoke) {
+    if (rec.token) await env.TEAM_KV.delete('rpttok:' + rec.token);
+    rec.token = null;
+    rptEvent(rec, 'share_revoked', actor);
+  } else {
+    if (rec.status !== 'ready' && !rec.archivedAt) return json({ error: 'Only completed reports can be shared.' }, 400, corsHeaders);
+    if (rec.legacyHtml) return json({ error: 'Migrated legacy reports cannot be shared externally.' }, 400, corsHeaders);
+    if (!rec.token) {
+      rec.token = invRandToken();
+      await env.TEAM_KV.put('rpttok:' + rec.token, JSON.stringify({ clientId: auth.clientId, id: rec.id }));
+      rptEvent(rec, 'shared', actor);
+    }
+  }
+  await rptPutRecord(env, auth.clientId, rec);
+  return json({ report: rec }, 200, corsHeaders);
+}
+
+// ── GET /pub/report?t= — sanitized public projection of a shared report ──
+async function handlePublicReport(url, env) {
+  const pub = { 'Access-Control-Allow-Origin': '*' };
+  const token = (url.searchParams.get('t') || '').replace(/[^a-f0-9]/g, '');
+  if (token.length !== 48) return json({ error: 'NOT_FOUND' }, 404, pub);
+  const mapRaw = await env.TEAM_KV.get('rpttok:' + token);
+  if (!mapRaw) return json({ error: 'NOT_FOUND' }, 404, pub);
+  const map = JSON.parse(mapRaw);
+  const raw = await env.TEAM_KV.get(rptRecKey(map.clientId, map.id));
+  if (!raw) return json({ error: 'NOT_FOUND' }, 404, pub);
+  const rec = JSON.parse(raw);
+  if (rec.token !== token) return json({ error: 'NOT_FOUND' }, 404, pub);
+  const cfg = rec.config || {};
+  return json({
+    report: {
+      id: rec.id, name: rec.name, type: rec.type, detailLevel: rec.detailLevel,
+      rangeStart: rec.rangeStart, rangeEnd: rec.rangeEnd, timezone: rec.timezone,
+      comparisonType: rec.comparisonType, sections: rec.sections,
+      generatedAt: rec.generatedAt, snapshot: rec.snapshot,
+      summary: rec.summary, recommendations: rec.recommendations, narrativeSource: rec.narrativeSource,
+      config: { preparedFor: cfg.preparedFor || '', preparedBy: cfg.preparedBy || '', note: cfg.note || '', confidential: !!cfg.confidential },
+    },
+  }, 200, pub);
+}
+
+// ── /report/email — key results + secure link from the requester's Gmail ──
+async function handleReportEmail(request, env, corsHeaders) {
+  const auth = await resolveReportAuth(request, env, corsHeaders);
+  if (auth.err) return auth.err;
+  const gate = await requireRole(env, auth, 'member', corsHeaders);
+  if (gate.err) return gate.err;
+  let body;
+  try { body = await request.json(); } catch (e) { return json({ error: 'Bad JSON' }, 400, corsHeaders); }
+  const id = String(body.id || '').replace(/[^\w-]/g, '');
+  const to = String(body.to || '').trim();
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(to)) return json({ error: 'A valid recipient email is required.' }, 400, corsHeaders);
+  const raw = await env.TEAM_KV.get(rptRecKey(auth.clientId, id));
+  if (!raw) return json({ error: 'Not found' }, 404, corsHeaders);
+  const rec = JSON.parse(raw);
+  if (rec.status !== 'ready' || rec.legacyHtml) return json({ error: 'Only completed reports can be emailed.' }, 400, corsHeaders);
+  const actor = (gate.member && gate.member.name) || auth.email || auth.sub;
+  if (!rec.token) {
+    rec.token = invRandToken();
+    await env.TEAM_KV.put('rpttok:' + rec.token, JSON.stringify({ clientId: auth.clientId, id: rec.id }));
+    rptEvent(rec, 'shared', actor);
+  }
+  function esc(v) { return String(v == null ? '' : v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+  function dur(secs) {
+    if (secs == null) return '—';
+    if (secs < 60) return Math.round(secs) + 's';
+    return Math.floor(secs / 60) + 'm ' + Math.round(secs % 60) + 's';
+  }
+  const km = (rec.snapshot && rec.snapshot.keyMetrics) || {};
+  const note = String(body.message || '').slice(0, 800);
+  const rows =
+    '<div style="font-size:13.5px;color:#334155;line-height:1.6;margin-bottom:14px;">' +
+      (note ? esc(note) : 'Here is the latest performance report.') + '</div>' +
+    emailRow('Reporting period', esc(rec.rangeStart) + ' to ' + esc(rec.rangeEnd)) +
+    emailRow('New leads', String(km.newLeads != null ? km.newLeads : '—')) +
+    emailRow('Median response', dur(km.respMedianS)) +
+    emailRow('Booked / engaged', String(km.booked != null ? km.booked : '—'));
+  const url = 'https://flowaify.app/report.html?r=' + rec.token;
+  const html = emailShell(esc(rec.name), rows, 'View Report', url, 'Sent via Flowaify');
+  const sent = await gmailSendRaw(env, auth.sub, to, rec.name, html);
+  if (!sent.ok) {
+    if (sent.error === 'GMAIL_NOT_CONNECTED') {
+      return json({ error: 'GMAIL_NOT_CONNECTED', message: 'Connect Gmail on the Inbox page to email reports.' }, 409, corsHeaders);
+    }
+    await logErr(env, auth.clientId, 'report.email', sent.error);
+    return json({ error: 'Email could not be sent. Try again shortly.' }, 502, corsHeaders);
+  }
+  rptEvent(rec, 'emailed', actor, { to });
+  await rptPutRecord(env, auth.clientId, rec);
+  return json({ report: rec }, 200, corsHeaders);
+}
+
 // ── Public invoice endpoint — no auth, unguessable 192-bit token. Returns a
 // sanitized projection only: no internal notes, no actor subs, no event log
 // beyond payment/sent milestones, no other invoices.
@@ -1789,6 +1975,85 @@ async function handlePublicInvoice(url, env, corsHeaders) {
     },
     seller,
   }, 200, pub);
+}
+
+// ─── Shared: Zoho creds (KV-first), error log, Gmail raw sender ──────────────
+
+/* KV-first credential resolution — write tenant:{CLIENTID}:zoho once per
+   client (wrangler kv key put) and onboarding needs zero deploys. Env vars
+   remain as fallback for existing clients. */
+async function resolveZohoCreds(env, clientId) {
+  const key = clientId.toUpperCase().replace(/[^A-Z0-9]/g, '_');
+  try {
+    const raw = env.TEAM_KV ? await env.TEAM_KV.get('tenant:' + key + ':zoho') : null;
+    if (raw) {
+      const c = JSON.parse(raw);
+      if (c.refreshToken) return { refreshToken: c.refreshToken, datacenter: c.datacenter || 'https://www.zohoapis.com' };
+    }
+  } catch (e) {}
+  const rt = env['REFRESH_TOKEN_' + key];
+  return rt ? { refreshToken: rt, datacenter: env['DATACENTER_' + key] || 'https://www.zohoapis.com' } : null;
+}
+
+/* per-workspace error ring buffer — checked via GET /admin/errors (owner) */
+async function logErr(env, clientId, where, msg) {
+  try {
+    if (!env.TEAM_KV) return;
+    const key = 'errs:' + String(clientId || 'SYSTEM').toUpperCase().replace(/[^A-Z0-9]/g, '_');
+    const raw = await env.TEAM_KV.get(key);
+    let log = raw ? JSON.parse(raw) : [];
+    log.unshift({ ts: Date.now(), where: String(where).slice(0, 60), msg: String(msg).slice(0, 300) });
+    await env.TEAM_KV.put(key, JSON.stringify(log.slice(0, 50)));
+  } catch (e) {}
+}
+
+async function handleAdminErrors(request, env, corsHeaders) {
+  const auth = await resolveReportAuth(request, env, corsHeaders);
+  if (auth.err) return auth.err;
+  const gate = await requireRole(env, auth, 'owner', corsHeaders);
+  if (gate.err) return gate.err;
+  const raw = await env.TEAM_KV.get('errs:' + auth.clientId.toUpperCase().replace(/[^A-Z0-9]/g, '_'));
+  return json({ errors: raw ? JSON.parse(raw) : [] }, 200, corsHeaders);
+}
+
+/* HTML email through the requesting user's connected Gmail */
+function mimeB64(str) {
+  const bytes = new TextEncoder().encode(str);
+  let bin = '';
+  bytes.forEach(b => { bin += String.fromCharCode(b); });
+  return btoa(bin);
+}
+
+async function gmailSendRaw(env, sub, to, subject, html) {
+  const provider = await env.TEAM_KV.get(`inbox:${sub}:provider`);
+  if (provider !== 'gmail') return { ok: false, error: 'GMAIL_NOT_CONNECTED' };
+  const token = await getGmailAccessToken(sub, env);
+  if (!token) return { ok: false, error: 'GMAIL_NOT_CONNECTED' };
+  const subj = '=?UTF-8?B?' + mimeB64(subject) + '?=';
+  const raw = `To: ${to}\r\nSubject: ${subj}\r\nMIME-Version: 1.0\r\nContent-Type: text/html; charset=UTF-8\r\n\r\n` + html;
+  const encoded = mimeB64(raw).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  const resp = await gmailFetch('POST', '/messages/send', token, { raw: encoded });
+  const result = await resp.json();
+  return result.id ? { ok: true, id: result.id }
+    : { ok: false, error: (result.error && result.error.message) || 'SEND_FAILED' };
+}
+
+/* restrained transactional email shell — white, minimal, token-free */
+function emailShell(title, bodyRows, buttonLabel, buttonUrl, footer) {
+  return '<!DOCTYPE html><html><body style="margin:0;padding:0;background:#f5f6f8;font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;">' +
+    '<div style="max-width:520px;margin:0 auto;padding:32px 16px;">' +
+    '<div style="background:#ffffff;border:1px solid #e5e7eb;border-radius:8px;padding:32px;">' +
+    '<div style="font-size:17px;font-weight:700;color:#0f172a;margin-bottom:14px;">' + title + '</div>' +
+    bodyRows +
+    (buttonUrl ? '<div style="margin-top:22px;"><a href="' + buttonUrl + '" style="display:inline-block;background:#2563eb;color:#ffffff;text-decoration:none;font-size:14px;font-weight:600;padding:11px 22px;border-radius:6px;">' + buttonLabel + '</a></div>' : '') +
+    '</div>' +
+    '<div style="font-size:11px;color:#94a3b8;text-align:center;margin-top:14px;">' + footer + '</div>' +
+    '</div></body></html>';
+}
+
+function emailRow(label, value) {
+  return '<div style="display:flex;justify-content:space-between;font-size:13px;padding:6px 0;border-bottom:1px solid #f1f5f9;">' +
+    '<span style="color:#64748b;padding-right:14px;">' + label + '</span><span style="color:#0f172a;font-weight:600;">' + value + '</span></div>';
 }
 
 // ─── /rules/* — custom automation rule engine v1 (Phase A: store + test-now) ──
@@ -2031,10 +2296,9 @@ async function handleRulesTestNow(request, env, corsHeaders) {
   const rule = doc.rules.find(r => r.id === body.id);
   if (!rule) return json({ error: 'Not found' }, 404, corsHeaders);
 
-  const key = auth.clientId.toUpperCase().replace(/[^A-Z0-9]/g, '_');
-  const refreshToken = env['REFRESH_TOKEN_' + key];
-  if (!refreshToken) return json({ error: 'CRM connection is not configured.' }, 500, corsHeaders);
-  const datacenter = env['DATACENTER_' + key] || 'https://www.zohoapis.com';
+  const creds = await resolveZohoCreds(env, auth.clientId);
+  if (!creds) return json({ error: 'CRM connection is not configured.' }, 500, corsHeaders);
+  const { refreshToken, datacenter } = creds;
   let contacts;
   try {
     const zohoToken = await getZohoToken(auth.clientId, refreshToken, datacenter, env);
@@ -2124,7 +2388,7 @@ function rptIndexEntry(rec) {
     generatedBy: rec.generatedBy, generatedByName: rec.generatedByName,
     createdAt: rec.createdAt, generatedAt: rec.generatedAt || null,
     lastViewedAt: rec.lastViewedAt || null, archivedAt: rec.archivedAt || null,
-    errorMsg: rec.errorMsg || null, legacy: !!rec.legacyHtml,
+    errorMsg: rec.errorMsg || null, legacy: !!rec.legacyHtml, hasToken: !!rec.token,
     keyMetrics: rec.snapshot ? rec.snapshot.keyMetrics : null,
   };
 }
@@ -2430,10 +2694,9 @@ async function handleReportGenerate(request, env, corsHeaders) {
 
   try {
     // fetch CRM data (same credentials machinery as /data)
-    const key = auth.clientId.toUpperCase().replace(/[^A-Z0-9]/g, '_');
-    const refreshToken = env['REFRESH_TOKEN_' + key];
-    if (!refreshToken) throw new Error('CRM connection is not configured for this workspace.');
-    const datacenter = env['DATACENTER_' + key] || 'https://www.zohoapis.com';
+    const creds = await resolveZohoCreds(env, auth.clientId);
+    if (!creds) throw new Error('CRM connection is not configured for this workspace.');
+    const { refreshToken, datacenter } = creds;
     const zohoToken = await getZohoToken(auth.clientId, refreshToken, datacenter, env);
     const earliest = cfg.comparisonType === 'previous'
       ? rptShiftDate(cfg.rangeStart, -(rptDayDiff(cfg.rangeStart, cfg.rangeEnd) + 1)) : cfg.rangeStart;
@@ -2444,7 +2707,7 @@ async function handleReportGenerate(request, env, corsHeaders) {
 
     let invStore = null;
     if (cfg.sections.includes('financial')) {
-      const invRaw = await env.TEAM_KV.get('invoices:' + key);
+      const invRaw = await env.TEAM_KV.get('invoices:' + auth.clientId.toUpperCase().replace(/[^A-Z0-9]/g, '_'));
       if (invRaw) { const d = JSON.parse(invRaw); invStore = Array.isArray(d) ? { invoices: [] } : d; }
     }
 
@@ -2463,6 +2726,7 @@ async function handleReportGenerate(request, env, corsHeaders) {
       : 'Report data could not be gathered. Try again in a moment.';
     rptEvent(rec, 'failed', 'system');
     console.error('report generation failed:', e.message);
+    await logErr(env, auth.clientId, 'report.generate', e.message);
   }
 
   await rptPutRecord(env, auth.clientId, rec);
@@ -3568,4 +3832,36 @@ async function handleChannelDelete(request, env, corsHeaders) {
   await env.TEAM_KV.delete(auth.pfx + ':ch:' + id + ':msgs');
   await appendTeamActivity(env, auth.pfx, auth.sub, auth.name, 'deleted channel #' + ch.name);
   return json({ ok: true, channels }, 200, corsHeaders);
+}
+
+// ─── Nightly KV backups (cron) — critical config + financial data ────────────
+// Copies settings/invoices/report-index/rules/team-roster keys to bak:{date}:*
+// with a 14-day TTL. Bounded write budget; report bodies and chat logs are
+// excluded deliberately.
+async function runNightlyBackups(env) {
+  if (!env.TEAM_KV) return;
+  const day = new Date().toISOString().slice(0, 10);
+  const prefixes = ['settings:', 'invoices:', 'rptidx:', 'rules:', 'team:'];
+  let writes = 0;
+  try {
+    for (const prefix of prefixes) {
+      let cursor;
+      do {
+        const page = await env.TEAM_KV.list({ prefix, cursor, limit: 100 });
+        for (const k of page.keys) {
+          // team: back up only the roster doc itself, not channels/messages
+          if (prefix === 'team:' && k.name.split(':').length > 2) continue;
+          if (writes >= 80) return;
+          const val = await env.TEAM_KV.get(k.name);
+          if (val != null) {
+            await env.TEAM_KV.put('bak:' + day + ':' + k.name, val, { expirationTtl: 1209600 });
+            writes++;
+          }
+        }
+        cursor = page.list_complete ? null : page.cursor;
+      } while (cursor);
+    }
+  } catch (e) {
+    await logErr(env, 'SYSTEM', 'backup', e.message);
+  }
 }

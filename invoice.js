@@ -406,6 +406,7 @@ function invRowMenu(e, id) {
     if (member) it('copy', 'Duplicate', 'invDuplicate(\'' + id + '\')');
     if (admin) it('trash-2', 'Delete draft', 'invDeleteDraft(\'' + id + '\')', true);
   } else if (st === 'open' || st === 'overdue' || st === 'partially_paid') {
+    if (member) it('send', inv.sentAt ? 'Resend invoice' : 'Send invoice', 'invSendDialog(\'' + id + '\')');
     it('link', 'Copy payment link', 'invCopyLink(\'' + id + '\')');
     it('external-link', 'Open client page', 'invOpenPublic(\'' + id + '\')');
     it('download', 'Download invoice', 'invDoPrint(\'' + id + '\')');
@@ -414,6 +415,7 @@ function invRowMenu(e, id) {
     if (admin) it('rotate-ccw', 'Regenerate link', 'invRegenLink(\'' + id + '\')');
     if (admin) it('ban', 'Void invoice', 'invVoidDialog(\'' + id + '\')', true);
   } else if (st === 'paid') {
+    it('receipt', 'Download receipt', 'invReceiptPrint(\'' + id + '\')');
     it('external-link', 'Open client page', 'invOpenPublic(\'' + id + '\')');
     it('download', 'Download invoice', 'invDoPrint(\'' + id + '\')');
     if (admin) it('undo-2', 'Record refund', 'invRefundDialog(\'' + id + '\')');
@@ -487,12 +489,14 @@ function invRenderPanel() {
     actions += ghost('file-search', 'Preview', 'invDoPrint(\'' + inv.id + '\', true)');
     if (member) actions += ghost('check-circle', 'Finalize & Assign Number', 'invFinalize(\'' + inv.id + '\')');
   } else if (st === 'open' || st === 'overdue' || st === 'partially_paid') {
-    actions += primary('link', 'Copy Payment Link', 'invCopyLink(\'' + inv.id + '\')');
+    if (member) actions += primary('send', (inv.sentAt ? 'Resend Invoice' : 'Send Invoice'), 'invSendDialog(\'' + inv.id + '\')');
+    actions += ghost('link', 'Copy Payment Link', 'invCopyLink(\'' + inv.id + '\')');
     actions += ghost('external-link', 'View Client Page', 'invOpenPublic(\'' + inv.id + '\')');
     actions += ghost('download', 'Download Invoice', 'invDoPrint(\'' + inv.id + '\')');
     if (admin) actions += ghost('banknote', 'Record Payment', 'invPaymentDialog(\'' + inv.id + '\')');
   } else if (st === 'paid') {
-    actions += primary('download', 'Download Invoice', 'invDoPrint(\'' + inv.id + '\')');
+    actions += primary('download', 'Download Receipt', 'invReceiptPrint(\'' + inv.id + '\')');
+    actions += ghost('download', 'Download Invoice', 'invDoPrint(\'' + inv.id + '\')');
     actions += ghost('external-link', 'View Client Page', 'invOpenPublic(\'' + inv.id + '\')');
     if (admin) actions += ghost('undo-2', 'Record Refund', 'invRefundDialog(\'' + inv.id + '\')');
   } else if (st === 'void') {
@@ -504,6 +508,18 @@ function invRenderPanel() {
       (it.qty !== 1 ? ' <span class="inv-p-item-qty">× ' + it.qty + '</span>' : '') + '</span>' +
       '<span class="inv-p-item-amt">' + invFmtC(it.totalC, inv.currency) + '</span></div>';
   }).join('') || '<div class="inv-p-item"><span class="inv-p-item-desc" style="color:var(--text-m);">No line items</span></div>';
+
+  var paymentsHtml = '';
+  if ((inv.payments || []).length) {
+    paymentsHtml = '<div class="inv-p-sec">Payments (' + inv.payments.length + ')</div>' +
+      inv.payments.map(function(pm) {
+        var refunded = (pm.refunds || []).reduce(function(a, rf) { return a + rf.amountC; }, 0);
+        return '<div class="inv-p-item"><span class="inv-p-item-desc">' + invFmtDate(pm.date) + ' · ' + invEsc(pm.method) +
+          (refunded ? ' <span style="color:var(--red);font-size:10.5px;">−' + invFmtC(refunded, inv.currency) + ' refunded</span>' : '') + '</span>' +
+          '<span class="inv-p-item-amt">' + invFmtC(pm.amountC, inv.currency) +
+          ' <span class="sec-link" style="font-size:10.5px;margin-left:6px;" onclick="invReceiptPrint(\'' + inv.id + '\',\'' + pm.pid + '\')">Receipt</span></span></div>';
+      }).join('');
+  }
 
   var evs = (inv.events || []).slice(-8).reverse();
   var timeline = evs.map(function(ev) {
@@ -543,6 +559,7 @@ function invRenderPanel() {
     '<div class="inv-p-sec">Summary</div>' + summary +
     '<div class="inv-p-sec">Items (' + (inv.items || []).length + ')</div>' + itemsHtml +
     '<div class="inv-p-krow inv-p-total"><span>Total</span><span>' + invFmtC(inv.totalC, inv.currency) + '</span></div>' +
+    paymentsHtml +
     '<div class="inv-p-sec">Activity</div><div class="inv-tl">' + timeline + '</div>';
   if (typeof lucide !== 'undefined') lucide.createIcons();
 }
@@ -1122,3 +1139,92 @@ window.invPrintNow = invPrintNow;
 function invDrSet(id, html) { var el = document.getElementById(id); if (el) el.innerHTML = html; }
 function invDrField(id, val) { var el = document.getElementById(id); if (el) el.value = val; }
 function invDrVal(id) { return ((document.getElementById(id) || {}).value || '').trim(); }
+
+// ── Send Invoice by email (via the sender's connected Gmail) ─────────────────
+
+function invSendDialog(id) {
+  var inv = invById(id);
+  if (!inv) return;
+  if (!inv.token) { showToast('Finalize the invoice first.'); return; }
+  invModal('Send ' + invEsc(inv.number || 'invoice') + ' by email',
+    '<div class="inv-dr-field"><label>To</label><input id="inv-send-to" type="email" value="' + invEsc((inv.client || {}).email || '') + '" placeholder="client@email.com" /></div>' +
+    '<div class="inv-dr-field"><label>Message (optional)</label><textarea id="inv-send-msg" maxlength="800" placeholder="A short note above the invoice details…"></textarea></div>' +
+    '<div style="font-size:11px;color:var(--text-m);">Sends from your connected Gmail with a View &amp; Pay button linking to the client page.</div>',
+    inv.sentAt ? 'Resend invoice' : 'Send invoice',
+    async function() {
+      var to = ((document.getElementById('inv-send-to') || {}).value || '').trim();
+      if (!/^\S+@\S+\.\S+$/.test(to)) { showToast('Enter a valid recipient email.'); return false; }
+      var r = await invFetch('POST', '/invoice/email', {
+        id: id, to: to, message: (document.getElementById('inv-send-msg') || {}).value || '',
+      });
+      if (r.status === 200 && r.data.invoice) {
+        invMerge(r.data.invoice);
+        showToast('Invoice sent to ' + to + '.');
+        return true;
+      }
+      if (r.status === 409 && r.data && r.data.error === 'GMAIL_NOT_CONNECTED') {
+        showToast('Connect Gmail on the Inbox page first — then invoice emails send from your own address.');
+        return false;
+      }
+      showToast((r.data && (r.data.message || r.data.error)) || 'Could not send.');
+      return false;
+    });
+}
+window.invSendDialog = invSendDialog;
+
+// ── Payment receipt document (separate template, not the invoice re-labeled) ──
+
+async function invReceiptPrint(id, pid) {
+  var inv = invById(id);
+  if (!inv || !(inv.payments || []).length) { showToast('No recorded payments for this invoice.'); return; }
+  var pay = pid ? inv.payments.find(function(x) { return x.pid === pid; }) : inv.payments[inv.payments.length - 1];
+  if (!pay) return;
+  var cfg = await invLoadSettings();
+  var b = cfg.billing || {}, pr = cfg.profile || {};
+  var host = document.getElementById('inv-print-view');
+  if (!host) return;
+  var c = inv.client || {};
+  var refunded = (pay.refunds || []).reduce(function(a, rf) { return a + rf.amountC; }, 0);
+  var sellerLines = [
+    b.legalName || pr.businessName || '',
+    b.address1 || '', b.address2 || '',
+    [b.city, b.region, b.postal].filter(Boolean).join(', '),
+    b.country || '', b.supportEmail || pr.contactEmail || '',
+  ].filter(Boolean);
+  var doc =
+    '<div class="ivd">' +
+      '<div class="ivd-top"><div><div class="ivd-h1">Payment Receipt</div>' +
+        '<table class="ivd-meta">' +
+        '<tr><td>Receipt number</td><td>' + invEsc(pay.receiptNo || '—') + '</td></tr>' +
+        '<tr><td>Related invoice</td><td>' + invEsc(inv.number || '—') + '</td></tr>' +
+        '<tr><td>Payment date</td><td>' + invFmtDate(pay.date) + '</td></tr>' +
+        '<tr><td>Payment method</td><td>' + invEsc(pay.method || '—') + '</td></tr>' +
+        (pay.reference ? '<tr><td>Reference</td><td>' + invEsc(pay.reference) + '</td></tr>' : '') +
+        '</table></div>' +
+        '<div class="ivd-brand">Flowaify</div></div>' +
+      '<div class="ivd-cols"><div><div class="ivd-col-h">' + invEsc(sellerLines[0] || 'Seller') + '</div>' +
+        sellerLines.slice(1).map(function(l) { return '<div>' + invEsc(l) + '</div>'; }).join('') + '</div>' +
+        '<div><div class="ivd-col-h">Received from</div><div>' + invEsc(c.name || '') + '</div>' +
+        (c.company ? '<div>' + invEsc(c.company) + '</div>' : '') +
+        (c.email ? '<div>' + invEsc(c.email) + '</div>' : '') + '</div></div>' +
+      '<div class="ivd-amount">' + invFmtC(pay.amountC - refunded, inv.currency) + ' ' + (inv.currency || 'USD') + ' received</div>' +
+      '<table class="ivd-items"><thead><tr><th>Description</th><th>Amount</th></tr></thead><tbody>' +
+        '<tr><td>Payment toward invoice ' + invEsc(inv.number || '') +
+          (inv.items && inv.items.length ? '<div class="ivd-desc2">' + inv.items.map(function(it) { return invEsc(it.desc); }).filter(Boolean).join(' · ').slice(0, 200) + '</div>' : '') +
+        '</td><td>' + invFmtC(pay.amountC, inv.currency) + '</td></tr>' +
+        (refunded ? '<tr><td>Refunded</td><td>−' + invFmtC(refunded, inv.currency) + '</td></tr>' : '') +
+      '</tbody></table>' +
+      '<div class="ivd-totals">' +
+        '<div><span>Total received</span><span>' + invFmtC(pay.amountC - refunded, inv.currency) + '</span></div>' +
+        '<div class="ivd-due"><span>Invoice balance remaining</span><span>' + invFmtC(inv.remainingC, inv.currency) + ' ' + (inv.currency || 'USD') + '</span></div>' +
+      '</div>' +
+      '<div class="ivd-foot">' + (b.supportEmail || pr.contactEmail ? 'Questions? ' + invEsc(b.supportEmail || pr.contactEmail) : '') + '</div>' +
+    '</div>';
+  host.innerHTML =
+    '<div class="inv-print-bar"><button class="btn-mini btn-mini-ghost" onclick="invClosePrint()">Close</button>' +
+    '<button class="btn-mini btn-mini-primary" onclick="invPrintNow()"><i data-lucide="printer"></i>Download / Print</button></div>' +
+    '<div>' + doc + '</div>';
+  host.classList.add('open');
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+window.invReceiptPrint = invReceiptPrint;

@@ -130,6 +130,9 @@
     select:focus { border-color: var(--blue); box-shadow: 0 0 0 3px var(--blue-dim); }
     select:disabled { opacity: 0.55; cursor: default; }
     select option { background: var(--bg-card); color: var(--text); }
+    #update-banner { position: fixed; bottom: 18px; left: 50%; transform: translate(-50%, 80px); z-index: 700; display: flex; align-items: center; gap: 12px; padding: 10px 16px; background: var(--bg-card); border: 1px solid var(--card-border); border-radius: 8px; box-shadow: 0 8px 28px rgba(0,0,0,0.18); font-size: 12.5px; color: var(--text); transition: transform 0.25s var(--ease); }
+    #update-banner.show { transform: translate(-50%, 0); }
+    #update-banner button { padding: 5px 14px; border-radius: 5px; border: 1px solid var(--blue); background: var(--blue); color: #fff; font-size: 12px; font-weight: 600; font-family: inherit; cursor: pointer; }
 
     /* ───────── SUITE HEADER ───────── */
     .suite-bar {
@@ -3197,6 +3200,10 @@
   <!-- Invoice row actions + modal -->
   <div class="card-ctx-menu" id="inv-row-menu"></div>
   <div id="inv-modal" onclick="if(event.target===this)invModalClose()"></div>
+  <div id="update-banner" role="status">
+    <span>A new version of the dashboard is available.</span>
+    <button onclick="location.reload()">Refresh</button>
+  </div>
 
   <!-- Invoice drawer (fixed) -->
   <div id="inv-drawer-overlay" onclick="closeInvoiceDrawer()"></div>
@@ -3961,13 +3968,30 @@
 <script src="teams.js?v=9"></script>
 <script src="settings.js?v=9"></script>
 <script src="analytics.js?v=2"></script>
-<script src="invoice.js?v=5"></script>
+<script src="invoice.js?v=6"></script>
 <script src="inbox.js?v=2"></script>
 <script src="flowy.js?v=10"></script>
-<script src="reports.js?v=3"></script>
+<script src="reports.js?v=4"></script>
 <script>
 const AUTH0_DOMAIN    = 'auth.flowaify.app';
 const AUTH0_CLIENT_ID = 'tx74Owqn3jVeSaVuxfFHsKloqbPqfAmN';
+
+/* ── Update check: version.json is bumped on every deploy; when a newer
+   build is live, a quiet banner offers a refresh (ends the hard-refresh
+   guessing game for clients). ── */
+const FLW_BUILD = 202607151;
+async function flwVersionCheck() {
+  try {
+    const r = await fetch('version.json?t=' + Date.now(), { cache: 'no-store' });
+    const v = await r.json();
+    if (v && v.build && v.build > FLW_BUILD) {
+      const b = document.getElementById('update-banner');
+      if (b) b.classList.add('show');
+    }
+  } catch (e) {}
+}
+setTimeout(flwVersionCheck, 45000);
+setInterval(flwVersionCheck, 20 * 60000);
 let auth0Client;
 
 async function initAuth() {
@@ -3975,10 +3999,28 @@ async function initAuth() {
     auth0Client = await auth0.createAuth0Client({
       domain: AUTH0_DOMAIN, clientId: AUTH0_CLIENT_ID,
       cacheLocation: 'localstorage',
+      useRefreshTokens: true,
       authorizationParams: {
         redirect_uri: window.location.origin + '/portal.html',
       }
     });
+    /* Session keeper: every consumer calls getIdTokenClaims(), so refresh
+       there. getTokenSilently() is instant while the cached token is valid,
+       rotates the refresh token when it expired, and only when refresh is
+       truly impossible do we send the user back to login. */
+    const _origGetClaims = auth0Client.getIdTokenClaims.bind(auth0Client);
+    auth0Client.getIdTokenClaims = async function() {
+      try { await auth0Client.getTokenSilently(); }
+      catch (e) {
+        const code = e && e.error;
+        if (code === 'login_required' || code === 'missing_refresh_token' || code === 'invalid_grant') {
+          window.location.href = 'portal.html';
+          return null;
+        }
+        /* transient/network error: fall through to the cached claims */
+      }
+      return _origGetClaims();
+    };
     window.__auth0Client = auth0Client;
     const ok = await auth0Client.isAuthenticated();
     if (!ok) { window.location.href = 'portal.html'; return; }

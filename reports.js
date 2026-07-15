@@ -383,6 +383,9 @@ function rptRowMenu(e, id) {
     it('external-link', 'Open report', 'rptOpenViewer(\'' + id + '\')');
     it('download', 'Download PDF', 'rptDownloadPdf(\'' + id + '\')');
     if (!r.legacy) it('table', 'Download CSV', 'rptDownloadCsv(\'' + id + '\')');
+    if (!r.legacy && member) it('link', r.hasToken ? 'Copy secure link' : 'Create secure link', 'rptShareLink(\'' + id + '\')');
+    if (!r.legacy && member) it('mail', 'Email report', 'rptEmailDialog(\'' + id + '\')');
+    if (r.hasToken && member) it('link-2', 'Revoke link', 'rptRevokeLink(\'' + id + '\')', true);
     it('message-square', 'Share to team chat', 'reportsShareTeam(\'' + id + '\')');
     if (member && !r.legacy) it('copy', 'Duplicate', 'rptDuplicate(\'' + id + '\')');
     if (member) it('pencil', 'Rename', 'rptRename(\'' + id + '\')');
@@ -460,6 +463,10 @@ function rptRenderPanel() {
   if (st === 'ready' || st === 'archived') {
     actions += '<button class="inv-act-primary" onclick="rptOpenViewer(\'' + r.id + '\')"><i data-lucide="external-link"></i>View Report</button>';
     actions += '<button class="inv-act-ghost" onclick="rptDownloadPdf(\'' + r.id + '\')"><i data-lucide="download"></i>Download PDF</button>';
+    if (!r.legacy && member) {
+      actions += '<button class="inv-act-ghost" onclick="rptEmailDialog(\'' + r.id + '\')"><i data-lucide="mail"></i>Email Report</button>';
+      actions += '<button class="inv-act-ghost" onclick="rptShareLink(\'' + r.id + '\')"><i data-lucide="link"></i>' + (r.hasToken ? 'Copy Secure Link' : 'Create Secure Link') + '</button>';
+    }
   } else if (st === 'failed') {
     if (member) actions += '<button class="inv-act-primary" onclick="rptRetry(\'' + r.id + '\')"><i data-lucide="rotate-ccw"></i>Retry Generation</button>';
   }
@@ -622,7 +629,7 @@ function rptMergeIdx(rec) {
     detailLevel: rec.detailLevel, sections: rec.sections, generatedBy: rec.generatedBy,
     generatedByName: rec.generatedByName, createdAt: rec.createdAt, generatedAt: rec.generatedAt,
     lastViewedAt: rec.lastViewedAt, archivedAt: rec.archivedAt, errorMsg: rec.errorMsg,
-    legacy: !!rec.legacyHtml, keyMetrics: rec.snapshot ? rec.snapshot.keyMetrics : null,
+    legacy: !!rec.legacyHtml, hasToken: !!rec.token, keyMetrics: rec.snapshot ? rec.snapshot.keyMetrics : null,
   };
   var i = _rptList.findIndex(function(x) { return x.id === rec.id; });
   if (i !== -1) _rptList[i] = entry; else _rptList.unshift(entry);
@@ -1182,3 +1189,58 @@ async function rptFlowGenerate() {
   }
 }
 window.rptFlowGenerate = rptFlowGenerate;
+
+// ── Secure external link + email delivery ─────────────────────────────────────
+
+function rptPublicUrl(rec) { return 'https://flowaify.app/report.html?r=' + rec.token; }
+
+async function rptShareLink(id) {
+  var res = await rptFetch('POST', '/report/token', { id: id });
+  if (res.status !== 200 || !res.data.report || !res.data.report.token) {
+    showToast((res.data && res.data.error) || 'Could not create the link.');
+    return;
+  }
+  rptMergeIdx(res.data.report);
+  try { await navigator.clipboard.writeText(rptPublicUrl(res.data.report)); showToast('Secure link copied — anyone with it can view this report.'); }
+  catch (e) { window.prompt('Copy this secure report link:', rptPublicUrl(res.data.report)); }
+}
+window.rptShareLink = rptShareLink;
+
+function rptRevokeLink(id) {
+  if (typeof invConfirm !== 'function') return;
+  invConfirm('Revoke the secure link?', 'The existing link stops working immediately for anyone holding it.', 'Revoke link', true, async function() {
+    var res = await rptFetch('POST', '/report/token', { id: id, revoke: true });
+    if (res.status === 200 && res.data.report) { rptMergeIdx(res.data.report); showToast('Link revoked.'); }
+    else showToast('Could not revoke.');
+  });
+}
+window.rptRevokeLink = rptRevokeLink;
+
+function rptEmailDialog(id) {
+  var r = rptById(id);
+  if (!r || typeof invModal !== 'function') return;
+  invModal('Email report — ' + rptEsc(r.name),
+    '<div class="inv-dr-field"><label>To</label><input id="rpt-email-to" type="email" placeholder="client@email.com" /></div>' +
+    '<div class="inv-dr-field"><label>Message (optional)</label><textarea id="rpt-email-msg" maxlength="800" placeholder="A short note above the key results…"></textarea></div>' +
+    '<div style="font-size:11px;color:var(--text-m);">Sends from your connected Gmail with three key results and a secure View Report link.</div>',
+    'Send report',
+    async function() {
+      var to = ((document.getElementById('rpt-email-to') || {}).value || '').trim();
+      if (!/^\S+@\S+\.\S+$/.test(to)) { showToast('Enter a valid recipient email.'); return false; }
+      var res = await rptFetch('POST', '/report/email', {
+        id: id, to: to, message: (document.getElementById('rpt-email-msg') || {}).value || '',
+      });
+      if (res.status === 200 && res.data.report) {
+        rptMergeIdx(res.data.report);
+        showToast('Report sent to ' + to + '.');
+        return true;
+      }
+      if (res.status === 409 && res.data && res.data.error === 'GMAIL_NOT_CONNECTED') {
+        showToast('Connect Gmail on the Inbox page first — then reports send from your own address.');
+        return false;
+      }
+      showToast((res.data && (res.data.message || res.data.error)) || 'Could not send.');
+      return false;
+    });
+}
+window.rptEmailDialog = rptEmailDialog;
