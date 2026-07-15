@@ -94,11 +94,13 @@ export default {
         return handleTeamMessages(request, env, corsHeaders);
       }
 
-      if (url.pathname === '/team/messages/send' && request.method === 'POST') {
+      /* '/team/post' and '/team/pulse' are ad-blocker-resistant aliases:
+         filter lists commonly block URLs matching 'messages/send' and 'typing' */
+      if ((url.pathname === '/team/messages/send' || url.pathname === '/team/post') && request.method === 'POST') {
         return handleTeamSend(request, env, corsHeaders);
       }
 
-      if (url.pathname === '/team/typing' && request.method === 'POST') {
+      if ((url.pathname === '/team/typing' || url.pathname === '/team/pulse') && request.method === 'POST') {
         return handleTeamTyping(request, env, corsHeaders);
       }
 
