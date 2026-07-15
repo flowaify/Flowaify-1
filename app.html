@@ -1043,6 +1043,66 @@
     #page-automations .g2 > .card > .p20 { flex: 1; overflow-y: auto; }
     #page-automations .g2 > .card:first-child > .p20 { padding-top: 2px; }
     #auto-activity { flex: 1; overflow-y: auto; min-height: 240px; }
+    .auto-strip { display: flex; align-items: stretch; padding: 14px 6px; margin-bottom: 14px; flex-shrink: 0; }
+    .auto-strip-cell { flex: 1; display: flex; align-items: center; gap: 12px; padding: 2px 18px; min-width: 0; }
+    .auto-strip-cell > i, .auto-strip-cell > svg { width: 16px; height: 16px; color: var(--text-m); flex-shrink: 0; }
+    .auto-strip-div { width: 1px; background: var(--border); margin: 2px 0; }
+    .as-val { font-size: 18px; font-weight: 700; color: var(--text); letter-spacing: -0.01em; line-height: 1.2; }
+    .as-label { font-size: 11.5px; font-weight: 600; color: var(--text-s); margin-top: 1px; }
+    .as-sub { font-size: 10.5px; color: var(--text-m); }
+    .auto-g2 { flex: 1; min-height: 0; display: grid; grid-template-columns: 1fr 380px; gap: 14px; align-items: stretch; }
+    .auto-rules-card { display: flex; flex-direction: column; min-height: 0; }
+    .auto-cmdbar { display: flex; align-items: center; gap: 8px; padding: 9px 14px; border-bottom: 1px solid var(--border); flex-shrink: 0; flex-wrap: wrap; }
+    #auto-rules-list { flex: 1; overflow-y: auto; min-height: 0; }
+    .auto-rule { display: flex; align-items: flex-start; gap: 13px; padding: 14px 16px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.12s; position: relative; }
+    .auto-rule:last-child { border-bottom: none; }
+    .auto-rule:hover { background: var(--hover); }
+    .auto-rule.sel { background: var(--blue-dim); }
+    .auto-rule.sel::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 2px; background: var(--blue); }
+    .auto-rule-body { flex: 1; min-width: 0; }
+    .auto-rule-top { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .auto-rule-name { font-size: 13px; font-weight: 700; color: var(--text); }
+    .ar-pill { display: inline-flex; align-items: center; gap: 5px; padding: 1.5px 8px; border-radius: 20px; font-size: 10px; font-weight: 700; letter-spacing: 0.03em; text-transform: uppercase; }
+    .ar-pill .ar-dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+    .ar-live   { background: var(--green-dim); color: var(--green); }
+    .ar-paused { background: var(--hover); color: var(--text-m); }
+    .ar-setup  { background: var(--amber-dim); color: var(--amber); }
+    .auto-rule-desc { font-size: 12px; color: var(--text-m); line-height: 1.55; margin-top: 3px; }
+    .auto-rule-meta { display: flex; align-items: center; gap: 14px; margin-top: 6px; font-size: 11px; color: var(--text-m); flex-wrap: wrap; }
+    .auto-rule-meta strong { color: var(--text-s); font-weight: 600; }
+    .auto-rule-side { display: flex; align-items: center; gap: 6px; flex-shrink: 0; margin-top: 2px; }
+    .auto-rule-kebab { width: 24px; height: 24px; border: none; background: transparent; color: var(--text-m); border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 700; opacity: 0; transition: opacity 0.12s; line-height: 1; }
+    .auto-rule:hover .auto-rule-kebab, .auto-rule.sel .auto-rule-kebab { opacity: 1; }
+    .auto-rule-kebab:hover { background: var(--hover); color: var(--text); }
+    .auto-right { display: flex; flex-direction: column; gap: 14px; min-height: 0; }
+    .auto-health-card, .auto-detail-card { flex-shrink: 0; }
+    .auto-runs-card { flex: 1; min-height: 140px; display: flex; flex-direction: column; }
+    #auto-health { padding: 6px 16px 12px; }
+    .ah-row { display: flex; align-items: center; gap: 9px; padding: 6px 0; font-size: 12px; color: var(--text-s); }
+    .ah-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+    .ah-ok .ah-dot { background: var(--green); }
+    .ah-warn .ah-dot { background: var(--amber); }
+    .ah-mut .ah-dot { background: var(--text-m); opacity: 0.5; }
+    .ah-row strong { color: var(--text); font-weight: 600; }
+    #auto-rule-detail { padding: 4px 16px 14px; }
+    .ard-krow { display: flex; justify-content: space-between; gap: 12px; padding: 4.5px 0; font-size: 12px; }
+    .ard-krow > span:first-child { color: var(--text-m); flex-shrink: 0; }
+    .ard-krow > span:last-child { color: var(--text); font-weight: 500; text-align: right; }
+    .ard-next { margin-top: 10px; padding: 9px 12px; background: var(--blue-dim); border-radius: 5px; font-size: 12px; color: var(--text-s); line-height: 1.5; }
+    .ard-next strong { color: var(--text); }
+    .ard-actions { display: flex; gap: 7px; margin-top: 10px; flex-wrap: wrap; }
+    .auto-runs-chip { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 20px; background: var(--blue-dim); color: var(--blue); font-size: 10.5px; font-weight: 600; cursor: pointer; }
+    .auto-run-rule { font-size: 10.5px; color: var(--text-m); }
+    @media (max-width: 1100px) {
+      .auto-g2 { grid-template-columns: 1fr; }
+      #page-automations { overflow-y: auto; }
+      .auto-g2 > * { min-height: auto; }
+      #auto-rules-list { overflow: visible; }
+      .auto-strip { flex-wrap: wrap; }
+      .auto-strip-cell { min-width: 45%; padding: 8px 12px; }
+      .auto-strip-div { display: none; }
+      .auto-rule-kebab { opacity: 1; }
+    }
     .auto-control-row { display: flex; align-items: flex-start; gap: 14px; padding: 15px 0; border-bottom: 1px solid var(--border); }
     .auto-control-row:last-child { border-bottom: none; }
     .auto-ctrl-icon-wrap { width: 34px; height: 34px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
@@ -2828,105 +2888,101 @@
   <!-- AUTOMATIONS -->
   <div class="page" id="page-automations">
 
-    <div class="stats-grid sg-4 mb20">
-      <div class="card stat-card"><div class="stat-top"><div class="stat-label"><i data-lucide="zap" class="kpi-glyph kg-blue"></i>Active Automations</div></div><div class="stat-val" id="val-auto-active">—</div></div>
-      <div class="card stat-card"><div class="stat-top"><div class="stat-label"><i data-lucide="sparkles" class="kpi-glyph kg-purple"></i>AI Replies</div><div id="await-ai-auto"></div></div><div class="stat-val" id="val-ai-replies-auto">—</div></div>
-      <div class="card stat-card"><div class="stat-top"><div class="stat-label"><i data-lucide="repeat-2" class="kpi-glyph kg-amber"></i>Sequences</div><div id="await-fu-auto"></div></div><div class="stat-val" id="val-follow-ups-auto">—</div></div>
-      <div class="card stat-card"><div class="stat-top"><div class="stat-label"><i data-lucide="calendar-check" class="kpi-glyph kg-teal"></i>Booked Calls</div></div><div class="stat-val" id="val-booked-auto">—</div></div>
+    <div class="inv-head">
+      <div>
+        <div class="inv-head-title">Automations</div>
+        <div class="inv-head-sub">Control automated replies, follow-ups, scoring, and workflow rules for this account.</div>
+      </div>
     </div>
 
-    <div class="g2">
-      <div class="card">
+    <div class="card auto-strip" role="status" aria-label="Automation system status">
+      <div class="auto-strip-cell">
+        <i data-lucide="zap"></i>
+        <div><div class="as-val" id="as-active">—</div><div class="as-label">Active rules</div><div class="as-sub">Running now</div></div>
+      </div>
+      <div class="auto-strip-div"></div>
+      <div class="auto-strip-cell">
+        <i data-lucide="pause-circle"></i>
+        <div><div class="as-val" id="as-paused">—</div><div class="as-label">Paused rules</div><div class="as-sub">Manual or disabled</div></div>
+      </div>
+      <div class="auto-strip-div"></div>
+      <div class="auto-strip-cell">
+        <i data-lucide="alert-triangle"></i>
+        <div><div class="as-val" id="as-setup">—</div><div class="as-label">Needs setup</div><div class="as-sub">Action required</div></div>
+      </div>
+      <div class="auto-strip-div"></div>
+      <div class="auto-strip-cell">
+        <i data-lucide="check-circle"></i>
+        <div><div class="as-val" id="as-last">—</div><div class="as-label">Last check</div><div class="as-sub" id="as-last-sub">Automation status</div></div>
+      </div>
+    </div>
+
+    <div class="g2 auto-g2">
+
+      <!-- LEFT: rules -->
+      <div class="card auto-rules-card">
         <div class="sec-head">
-          <div class="sec-title">Automation Controls</div>
-          <div style="display:flex;align-items:center;gap:10px;">
+          <div>
+            <div class="sec-title">Automation Rules</div>
+            <div class="sec-sub">Manage how Flowaify responds, follows up, scores, and routes lead activity.</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;flex-shrink:0;">
             <span class="save-status" id="auto-save-status">Saved</span>
             <button class="btn-mini btn-mini-ghost" id="auto-master-btn" onclick="autoMasterToggle()">Pause all</button>
           </div>
         </div>
-        <div class="p20">
-
-          <div class="auto-control-row">
-            <div class="auto-ctrl-icon-wrap kg-purple"><i data-lucide="sparkles"></i></div>
-            <div class="auto-ctrl-body">
-              <div class="auto-ctrl-label">AI Auto-Reply</div>
-              <div class="auto-ctrl-desc">AI sends an instant personalized reply to every new qualified lead. When paused, replies are drafted and held for manual team approval before sending.</div>
-            </div>
-            <div class="toggle on" id="tog-autoreply" onclick="toggleAuto(this,'autoreply')"></div>
+        <div class="auto-cmdbar">
+          <div class="inv-tb-search"><i data-lucide="search"></i>
+            <input id="auto-rule-search" type="text" placeholder="Search rules…" oninput="autoRulesFilterChange()" aria-label="Search rules" />
           </div>
-
-          <div class="auto-control-row">
-            <div class="auto-ctrl-icon-wrap kg-blue"><i data-lucide="mail"></i></div>
-            <div class="auto-ctrl-body">
-              <div class="auto-ctrl-label">Email Follow-up Sequence</div>
-              <div class="auto-ctrl-desc">Sends scheduled email touches after initial contact. Cadence: <span id="auto-email-cadence" class="auto-cadence-val">Days 3, 7</span>. Pausing stops all future touches. Does not affect the initial confirmation email.</div>
-            </div>
-            <div class="toggle on" id="tog-email" onclick="toggleAuto(this,'email')"></div>
-          </div>
-
-          <div class="auto-control-row">
-            <div class="auto-ctrl-icon-wrap kg-green"><i data-lucide="message-square"></i></div>
-            <div class="auto-ctrl-body">
-              <div class="auto-ctrl-label">SMS Follow-up Sequence</div>
-              <div class="auto-ctrl-desc">Sends scheduled text messages after intake. Cadence: <span id="auto-sms-cadence" class="auto-cadence-val">Days 0, 5, 7</span>. Applies only to leads in the configured SMS segments.</div>
-              <div class="auto-provision-note" id="auto-sms-note" style="display:none;">
-                <i data-lucide="info" style="width:12px;height:12px;flex-shrink:0;"></i>
-                SMS not provisioned for this account. Contact Flowaify to enable.
-              </div>
-            </div>
-            <div class="toggle on" id="tog-sms" onclick="toggleAuto(this,'sms')"></div>
-          </div>
-
-          <div class="auto-control-row">
-            <div class="auto-ctrl-icon-wrap kg-amber"><i data-lucide="zap"></i></div>
-            <div class="auto-ctrl-body">
-              <div class="auto-ctrl-label">Deep-Score Escalation</div>
-              <div class="auto-ctrl-desc">Runs a premium AI analysis on leads scoring at or above <span id="auto-esc-threshold" class="auto-cadence-val">60/100</span>. Sends a deeply personalized reply and flags the lead for priority follow-up.</div>
-            </div>
-            <div class="toggle" id="tog-escalation" onclick="toggleAuto(this,'escalation')"></div>
-          </div>
-
-          <div class="auto-control-row">
-            <div class="auto-ctrl-icon-wrap kg-teal"><i data-lucide="clock"></i></div>
-            <div class="auto-ctrl-body">
-              <div class="auto-ctrl-label">Pause Outside Business Hours</div>
-              <div class="auto-ctrl-desc">Holds all outgoing AI replies received overnight or on weekends. Queued replies send when the next business day opens. When off, AI responds immediately at any hour.</div>
-            </div>
-            <div class="toggle" id="tog-pause-hours" onclick="toggleAuto(this,'pause-hours')"></div>
-          </div>
-
-          <div class="auto-control-row" style="border-bottom:none;">
-            <div class="auto-ctrl-icon-wrap kg-red"><i data-lucide="activity"></i></div>
-            <div class="auto-ctrl-body">
-              <div class="auto-ctrl-label">Behavioral Signal Tracking</div>
-              <div class="auto-ctrl-desc">When a lead replies to any email, writes an engagement signal to their CRM record and marks them Engaged — automatically stopping further follow-up sequences.</div>
-            </div>
-            <div class="toggle" id="tog-behavioral" onclick="toggleAuto(this,'behavioral')"></div>
-          </div>
-
+          <select id="auto-rule-fstatus" class="inv-tb-select" onchange="autoRulesFilterChange()" aria-label="Filter by status">
+            <option value="all">All statuses</option>
+            <option value="live">Live</option>
+            <option value="paused">Paused</option>
+            <option value="setup">Needs setup</option>
+          </select>
+          <select id="auto-rule-ftype" class="inv-tb-select" onchange="autoRulesFilterChange()" aria-label="Filter by type">
+            <option value="all">All types</option>
+            <option>Replies</option><option>Follow-ups</option><option>Messaging</option>
+            <option>Scoring</option><option>Scheduling</option><option>Tracking</option>
+          </select>
         </div>
+        <div id="auto-rules-list"></div>
       </div>
 
-      <div class="card">
-        <div class="sec-head">
-          <div style="display:flex;align-items:center;gap:8px;">
-            <div class="sec-title">Recent Activity</div>
-            <span class="auto-live-badge" id="auto-live-dot"><span class="auto-live-pulse"></span>Live</span>
-          </div>
-          <div style="display:flex;align-items:center;gap:10px;">
-            <span class="auto-sync-ts" id="auto-sync-ts"></span>
-            <span class="sec-link" onclick="showPage('activity')">View all</span>
-          </div>
+      <!-- RIGHT: health / details / runs -->
+      <div class="auto-right">
+        <div class="card auto-health-card">
+          <div class="sec-head"><div class="sec-title">Automation Health</div></div>
+          <div id="auto-health"></div>
         </div>
-        <div id="auto-activity">
-          <div class="empty-state" style="padding:40px 20px;">
-            <i data-lucide="activity"></i>
-            <div class="empty-state-title">Loading activity…</div>
+        <div class="card auto-detail-card">
+          <div class="sec-head"><div class="sec-title">Rule Details</div></div>
+          <div id="auto-rule-detail"></div>
+        </div>
+        <div class="card auto-runs-card">
+          <div class="sec-head">
+            <div style="display:flex;align-items:center;gap:8px;">
+              <div class="sec-title">Recent Runs</div>
+              <span class="auto-live-badge" id="auto-live-dot"><span class="auto-live-pulse"></span>Live</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;">
+              <span class="auto-runs-chip" id="auto-runs-chip" style="display:none;" onclick="autoRunsClearFilter()">Filtered <i data-lucide="x" style="width:10px;height:10px;"></i></span>
+              <span class="auto-sync-ts" id="auto-sync-ts"></span>
+              <span class="sec-link" onclick="showPage('activity')">View all runs</span>
+            </div>
+          </div>
+          <div id="auto-activity">
+            <div class="empty-state" style="padding:40px 20px;">
+              <i data-lucide="activity"></i>
+              <div class="empty-state-title">Loading runs…</div>
+            </div>
           </div>
         </div>
       </div>
     </div>
   </div>
+  <div class="card-ctx-menu" id="auto-rule-menu"></div>
 
   <!-- ANALYTICS -->
   <div class="page" id="page-analytics">
@@ -3886,7 +3942,7 @@
 
 <script src="crm.js?v=34"></script>
 <script src="teams.js?v=9"></script>
-<script src="settings.js?v=4"></script>
+<script src="settings.js?v=5"></script>
 <script src="analytics.js?v=2"></script>
 <script src="invoice.js?v=5"></script>
 <script src="inbox.js?v=2"></script>

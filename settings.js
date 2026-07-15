@@ -463,17 +463,45 @@ async function signOutAll() {
 window.signOutAll = signOutAll;
 
 // ══════════════════════════════════════════════════════════════════════════════
-// AUTOMATIONS PAGE MODULE — KV-backed toggles + live activity feed
+// AUTOMATIONS PAGE MODULE — control center: rules, health, details, runs.
 // Lives here (not app.html) so every /settings fetch keeps its Authorization
-// header inside a .js file (WAF constraint). Loaded before the inline script,
-// so boot()'s restoreAutoToggles() call resolves to these definitions.
+// header inside a .js file (WAF constraint). All toggle state is KV-backed;
+// _autoOn is the render source of truth, refreshed from KV on page open.
 // ══════════════════════════════════════════════════════════════════════════════
 
-var AUTO_TOGGLE_IDS = [
-  'tog-sms', 'tog-email', 'tog-autoreply',
-  'tog-escalation', 'tog-pause-hours', 'tog-behavioral'
+var _autoOn = { autoreply: true, email: true, sms: true, escalation: false, 'pause-hours': false, behavioral: false };
+var _autoSelRule = null;
+var _autoRunFilter = null;
+var _autoLastFeedTs = null;
+
+var AUTO_RULES = [
+  { key: 'autoreply', name: 'Instant Lead Reply', type: 'Replies', icon: 'sparkles', ic: 'kg-purple',
+    desc: 'Sends a first response to every new qualified lead. When paused, replies are drafted and held for manual approval.',
+    trigger: 'Qualified lead created', action: 'Draft or send first reply', applies: 'New qualified leads',
+    next: 'On the next qualified lead', tab: 'ai', runMatch: ['REPLY'] },
+  { key: 'email', name: 'Follow-up Sequence', type: 'Follow-ups', icon: 'mail', ic: 'kg-blue',
+    desc: 'Sends scheduled email touches after initial contact. Pausing stops all future touches.',
+    trigger: 'No reply after initial contact', action: 'Send scheduled email touch', applies: 'Leads awaiting response',
+    next: 'Scheduled automatically', tab: 'crm', runMatch: ['FOLLOWUP', 'EMAIL'], cadence: 'email' },
+  { key: 'sms', name: 'SMS Follow-up', type: 'Messaging', icon: 'message-square', ic: 'kg-green',
+    desc: 'Sends scheduled text messages for the configured lead segments.',
+    trigger: 'Scheduled cadence day reached', action: 'Send text follow-up', applies: 'Configured SMS segments',
+    next: 'Scheduled automatically', tab: 'crm', runMatch: ['SMS'], cadence: 'sms', setupCheck: true },
+  { key: 'escalation', name: 'Score Escalation', type: 'Scoring', icon: 'zap', ic: 'kg-amber',
+    desc: 'Runs a premium AI analysis on high-scoring leads and flags them for priority follow-up.',
+    trigger: 'Lead score at or above threshold', action: 'Deep analysis + priority flag', applies: 'High-score leads',
+    next: 'On the next high-score lead', tab: 'ai', runMatch: [] },
+  { key: 'pause-hours', name: 'Business Hours Guardrail', type: 'Scheduling', icon: 'clock', ic: 'kg-teal',
+    desc: 'Queues replies received outside business hours and sends them when the next open window starts.',
+    trigger: 'Reply generated outside business hours', action: 'Queue until business hours', applies: 'All outgoing AI replies',
+    next: 'On the next outside-hours reply', tab: 'general', runMatch: [] },
+  { key: 'behavioral', name: 'Engagement Signal Tracking', type: 'Tracking', icon: 'activity', ic: 'kg-red',
+    desc: 'Marks leads Engaged when they reply and stops further follow-up sequences automatically.',
+    trigger: 'Lead replies to any email', action: 'Write engagement signal, stop sequences', applies: 'All active leads',
+    next: 'On the next lead reply', tab: 'ai', runMatch: [] },
 ];
 
+function autoRuleByKey(k) { return AUTO_RULES.find(function(r) { return r.key === k; }); }
 function autoTogglesKey() { return 'flw_autos_' + (window.__userSub || 'anon'); }
 function autoPrepauseKey() { return 'flw_autos_prepause_' + (window.__userSub || 'anon'); }
 
@@ -481,9 +509,183 @@ function autoCanEdit() {
   return !window.__myRole || window.__myRole === 'admin' || window.__myRole === 'owner';
 }
 
-/* Cadence arrays on resume: prefer the client's configured cadence from the
-   last loaded KV config, fall back to defaults. The toggle is a circuit
-   breaker, not a cadence editor. */
+/* rule status: needs-setup beats on/off (SMS without provisioning cannot run) */
+function autoRuleStatus(rule) {
+  if (rule.setupCheck) {
+    var cfg = window._autoLastCfg;
+    if (!cfg || !cfg.channels || !cfg.channels.sms) return 'setup';
+  }
+  return _autoOn[rule.key] ? 'live' : 'paused';
+}
+
+function autoStatusPill(st) {
+  var m = { live: ['Live', 'ar-live'], paused: ['Paused', 'ar-paused'], setup: ['Needs setup', 'ar-setup'] }[st];
+  return '<span class="ar-pill ' + m[1] + '"><span class="ar-dot"></span>' + m[0] + '</span>';
+}
+
+function autoEsc(v) {
+  return String(v == null ? '' : v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+function autoFmtWhen(ts) {
+  if (!ts) return null;
+  var d = new Date(ts);
+  if (isNaN(d)) return null;
+  var now = new Date();
+  var time = d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
+  if (d.toDateString() === now.toDateString()) return 'Today, ' + time;
+  var yd = new Date(now.getTime() - 86400000);
+  if (d.toDateString() === yd.toDateString()) return 'Yesterday, ' + time;
+  return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) + ', ' + time;
+}
+
+/* last run derived from CRM touch data already loaded at boot */
+function autoRuleLastRun(rule) {
+  var contacts = (window.__crmData && window.__crmData.contacts) || [];
+  var best = 0;
+  if (rule.runMatch.length) {
+    contacts.forEach(function(c) {
+      if (!c.lastTouchAt || !c.lastTouch) return;
+      var t = String(c.lastTouch).toUpperCase();
+      if (rule.runMatch.some(function(m) { return t.indexOf(m) !== -1; })) {
+        var ts = new Date(c.lastTouchAt).getTime();
+        if (ts > best) best = ts;
+      }
+    });
+  }
+  if (best) return autoFmtWhen(best);
+  return autoRuleStatus(rule) === 'live' ? 'No runs recorded yet' : 'Not active';
+}
+
+function autoCadenceLabel(rule) {
+  var cfg = window._autoLastCfg;
+  if (!rule.cadence) return null;
+  var fc = cfg && cfg.followupCadence;
+  var arr = fc && fc[rule.cadence];
+  return (Array.isArray(arr) && arr.length) ? 'Days ' + arr.join(', ') : 'Not configured';
+}
+
+// ── rules list ────────────────────────────────────────────────────────────────
+
+function autoRulesFilterChange() { renderAutoRules(); }
+window.autoRulesFilterChange = autoRulesFilterChange;
+
+function renderAutoRules() {
+  var host = document.getElementById('auto-rules-list');
+  if (!host) return;
+  var q = ((document.getElementById('auto-rule-search') || {}).value || '').toLowerCase();
+  var fs = (document.getElementById('auto-rule-fstatus') || {}).value || 'all';
+  var ft = (document.getElementById('auto-rule-ftype') || {}).value || 'all';
+  var locked = !autoCanEdit();
+
+  var rows = AUTO_RULES.filter(function(r) {
+    var st = autoRuleStatus(r);
+    if (fs !== 'all' && st !== fs) return false;
+    if (ft !== 'all' && r.type !== ft) return false;
+    if (q && (r.name + ' ' + r.desc + ' ' + r.type).toLowerCase().indexOf(q) === -1) return false;
+    return true;
+  });
+
+  if (!rows.length) {
+    host.innerHTML = '<div class="empty-state" style="padding:40px 20px;"><i data-lucide="search-x"></i>' +
+      '<div class="empty-state-title">No rules match the filters</div>' +
+      '<div class="empty-state-sub"><span class="sec-link" onclick="autoRulesClear()">Clear filters</span></div></div>';
+  } else {
+    host.innerHTML = rows.map(function(r) {
+      var st = autoRuleStatus(r);
+      var on = _autoOn[r.key];
+      var cad = autoCadenceLabel(r);
+      var meta = '<strong>Last run:</strong> ' + autoEsc(autoRuleLastRun(r));
+      if (st !== 'setup') {
+        meta += '<span><strong>' + (cad ? 'Cadence:' : 'Next:') + '</strong> ' + autoEsc(cad || r.next) + '</span>';
+      }
+      var threshold = '';
+      if (r.key === 'escalation') {
+        var cfg = window._autoLastCfg;
+        var th = (cfg && cfg.ai && cfg.ai.escalationThreshold != null) ? cfg.ai.escalationThreshold : 60;
+        meta += '<span><strong>Rule:</strong> Score at or above ' + th + '/100</span>';
+      }
+      var note = '';
+      if (st === 'setup') {
+        note = '<div class="auto-provision-note" style="margin-top:8px;"><i data-lucide="info" style="width:12px;height:12px;flex-shrink:0;"></i>' +
+          'Messaging is not provisioned for this account. Contact Flowaify to enable SMS follow-ups.</div>';
+      }
+      return '<div class="auto-rule' + (_autoSelRule === r.key ? ' sel' : '') + '" onclick="autoSelectRule(\'' + r.key + '\')" role="button" tabindex="0" aria-label="' + autoEsc(r.name) + '">' +
+        '<div class="auto-ctrl-icon-wrap ' + r.ic + '"><i data-lucide="' + r.icon + '"></i></div>' +
+        '<div class="auto-rule-body">' +
+          '<div class="auto-rule-top"><span class="auto-rule-name">' + r.name + '</span>' + autoStatusPill(st) + '</div>' +
+          '<div class="auto-rule-desc">' + r.desc + '</div>' +
+          '<div class="auto-rule-meta">' + meta + '</div>' + note +
+        '</div>' +
+        '<div class="auto-rule-side">' +
+          '<div class="toggle' + (on ? ' on' : '') + (locked || st === 'setup' ? ' locked' : '') + '" id="tog-' + r.key + '" ' +
+            'onclick="event.stopPropagation();autoToggleRule(\'' + r.key + '\')" role="switch" aria-checked="' + !!on + '" aria-label="Toggle ' + autoEsc(r.name) + '"></div>' +
+          '<button class="auto-rule-kebab" onclick="event.stopPropagation();autoRuleMenu(event,\'' + r.key + '\')" aria-label="Rule actions">⋮</button>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  }
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+function autoRulesClear() {
+  var s = document.getElementById('auto-rule-search'); if (s) s.value = '';
+  ['auto-rule-fstatus', 'auto-rule-ftype'].forEach(function(id) {
+    var el = document.getElementById(id); if (el) el.value = 'all';
+  });
+  renderAutoRules();
+}
+window.autoRulesClear = autoRulesClear;
+
+// ── rule menu ─────────────────────────────────────────────────────────────────
+
+function autoRuleMenu(e, key) {
+  var menu = document.getElementById('auto-rule-menu');
+  var r = autoRuleByKey(key);
+  if (!menu || !r) return;
+  var st = autoRuleStatus(r);
+  var items = [
+    '<div class="card-ctx-item" onclick="autoSelectRule(\'' + key + '\')"><i data-lucide="eye"></i>View details</div>',
+    '<div class="card-ctx-item" onclick="autoRunsFilter(\'' + key + '\')"><i data-lucide="list"></i>View runs</div>',
+    '<div class="card-ctx-item" onclick="autoEditRule(\'' + key + '\')"><i data-lucide="settings-2"></i>Rule settings</div>',
+  ];
+  if (st !== 'setup' && autoCanEdit()) {
+    items.push('<div class="card-ctx-item' + (_autoOn[key] ? ' ctx-danger' : '') + '" onclick="autoToggleRule(\'' + key + '\')">' +
+      '<i data-lucide="' + (_autoOn[key] ? 'pause' : 'play') + '"></i>' + (_autoOn[key] ? 'Pause rule' : 'Enable rule') + '</div>');
+  }
+  menu.innerHTML = items.join('');
+  var rect = e.currentTarget.getBoundingClientRect();
+  menu.style.top = Math.min(rect.bottom + 4, window.innerHeight - items.length * 34 - 16) + 'px';
+  menu.style.left = Math.max(8, rect.right - 180) + 'px';
+  menu.classList.add('open');
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+window.autoRuleMenu = autoRuleMenu;
+
+document.addEventListener('click', function() {
+  var m = document.getElementById('auto-rule-menu');
+  if (m) m.classList.remove('open');
+});
+
+function autoEditRule(key) {
+  var r = autoRuleByKey(key);
+  if (!r) return;
+  if (typeof showPage === 'function') showPage('settings');
+  if (typeof settingsTab === 'function') setTimeout(function() { settingsTab(r.tab); }, 80);
+}
+window.autoEditRule = autoEditRule;
+
+// ── toggling with safety confirms ─────────────────────────────────────────────
+
+var AUTO_CFG_MAP = {
+  'sms':         function(on) { return { followupCadence: { sms:   on ? autoSmsCadence()   : null } }; },
+  'email':       function(on) { return { followupCadence: { email: on ? autoEmailCadence() : null } }; },
+  'autoreply':   function(on) { return { ai: { requireApproval: !on } }; }, // inverted on purpose
+  'escalation':  function(on) { return { ai: { escalation: on } }; },
+  'pause-hours': function(on) { return { ai: { pauseOutsideHours: on } }; },
+  'behavioral':  function(on) { return { behavioralSignal: on }; },
+};
+
 function autoEmailCadence() {
   var fc = window._autoLastCfg && window._autoLastCfg.followupCadence;
   return (fc && Array.isArray(fc.email) && fc.email.length) ? fc.email : [3, 7];
@@ -493,195 +695,380 @@ function autoSmsCadence() {
   return (fc && Array.isArray(fc.sms) && fc.sms.length) ? fc.sms : [0, 5, 7];
 }
 
-/* All six controls map to real KV config fields — no toggle is a no-op.
-   INVERSION: autoreply UI ON = AI sends freely = ai.requireApproval FALSE.
-   Must stay consistent with applyAutoTogglesToUI(). */
-var AUTO_CFG_MAP = {
-  'sms':         function(on) { return { followupCadence: { sms:   on ? autoSmsCadence()   : null } }; },
-  'email':       function(on) { return { followupCadence: { email: on ? autoEmailCadence() : null } }; },
-  'autoreply':   function(on) { return { ai: { requireApproval: !on } }; },
-  'escalation':  function(on) { return { ai: { escalation: on } }; },
-  'pause-hours': function(on) { return { ai: { pauseOutsideHours: on } }; },
-  'behavioral':  function(on) { return { behavioralSignal: on }; }
-};
-
-var AUTO_LABELS = {
-  'sms': 'SMS Follow-up Sequence', 'email': 'Email Follow-up Sequence',
-  'autoreply': 'AI Auto-Reply', 'escalation': 'Deep-Score Escalation',
-  'pause-hours': 'Pause Outside Business Hours', 'behavioral': 'Behavioral Signal Tracking'
-};
-
-function updateAutoActiveCount() {
-  var active = AUTO_TOGGLE_IDS.filter(function(id) {
-    var el = document.getElementById(id);
-    return el && el.classList.contains('on');
-  }).length;
-  var valEl = document.getElementById('val-auto-active');
-  if (valEl) valEl.textContent = active;
-  var dot = document.getElementById('auto-live-dot');
-  if (dot) dot.classList.toggle('active', active > 0);
-  var master = document.getElementById('auto-master-btn');
-  if (master) master.textContent = active > 0 ? 'Pause all' : 'Resume all';
-}
-
-/* Fast optimistic render at boot from localStorage. automationsInit()
-   overrides with KV truth when the page is actually opened. */
-function restoreAutoToggles() {
-  var saved = {};
-  try { saved = JSON.parse(localStorage.getItem(autoTogglesKey()) || '{}'); } catch (e) {}
-  AUTO_TOGGLE_IDS.forEach(function(id) {
-    var el = document.getElementById(id);
-    if (!el) return;
-    var key = id.replace('tog-', '');
-    if (key in saved) el.classList.toggle('on', !!saved[key]);
-  });
-  updateAutoActiveCount();
-}
-
 function autoSaveLocalState() {
-  var state = {};
-  AUTO_TOGGLE_IDS.forEach(function(id) {
-    var t = document.getElementById(id);
-    if (t) state[id.replace('tog-', '')] = t.classList.contains('on');
-  });
-  try { localStorage.setItem(autoTogglesKey(), JSON.stringify(state)); } catch (e) {}
+  try { localStorage.setItem(autoTogglesKey(), JSON.stringify(_autoOn)); } catch (e) {}
 }
 
 function autoLogActivity(text) {
   if (window.twFetch) { try { twFetch('POST', '/team/activity', { text: text }); } catch (e) {} }
 }
 
-function toggleAuto(el, name) {
-  if (!autoCanEdit()) {
-    if (typeof showToast === 'function') showToast('Only admins can change automations.');
-    return;
-  }
-  el.classList.toggle('on');
-  var isOn = el.classList.contains('on');
+function autoRerender() {
+  renderAutoRules();
   updateAutoActiveCount();
-  autoSaveLocalState();
-
-  if (AUTO_CFG_MAP[name] && window.pushSettings) {
-    pushSettings(AUTO_CFG_MAP[name](isOn), 'auto-save-status');
-  }
-
-  var label = AUTO_LABELS[name] || name;
-  if (typeof showToast === 'function') showToast((isOn ? 'Resumed: ' : 'Paused: ') + label);
-  autoLogActivity((isOn ? 'resumed' : 'paused') + ' the “' + label + '” automation');
+  renderAutoHealth();
+  renderAutoRuleDetail();
 }
 
-/* Pause All / Resume All — the emergency brake. Pausing snapshots current
-   states + cadences so Resume restores exactly what was running before. */
-async function autoMasterToggle() {
+function autoApplyToggle(key, on, label) {
+  _autoOn[key] = on;
+  autoSaveLocalState();
+  autoRerender();
+  if (AUTO_CFG_MAP[key] && window.pushSettings) {
+    pushSettings(AUTO_CFG_MAP[key](on), 'auto-save-status');
+  }
+  if (typeof showToast === 'function') showToast((on ? 'Enabled: ' : 'Paused: ') + label);
+  autoLogActivity((on ? 'enabled' : 'paused') + ' the “' + label + '” automation rule');
+}
+
+function autoToggleRule(key) {
+  var r = autoRuleByKey(key);
+  if (!r) return;
   if (!autoCanEdit()) {
     if (typeof showToast === 'function') showToast('Only admins can change automations.');
     return;
   }
-  var anyOn = AUTO_TOGGLE_IDS.some(function(id) {
-    var el = document.getElementById(id);
-    return el && el.classList.contains('on');
-  });
-
-  function setT(id, val) {
-    var el = document.getElementById(id);
-    if (el) el.classList.toggle('on', !!val);
+  if (autoRuleStatus(r) === 'setup') {
+    if (typeof showToast === 'function') showToast('This rule needs setup first — messaging is not provisioned for this account.');
+    return;
   }
+  var turningOff = !!_autoOn[key];
+  if (turningOff && typeof window.invConfirm === 'function') {
+    invConfirm('Pause "' + r.name + '"?',
+      'Pausing stops this rule from acting on live leads until it is enabled again. Historical records are not affected.',
+      'Pause rule', true,
+      function() { autoApplyToggle(key, false, r.name); });
+  } else {
+    autoApplyToggle(key, !turningOff, r.name);
+  }
+}
+window.autoToggleRule = autoToggleRule;
 
-  if (anyOn) {
-    var snap = { toggles: {}, emailCadence: autoEmailCadence(), smsCadence: autoSmsCadence() };
-    AUTO_TOGGLE_IDS.forEach(function(id) {
-      var el = document.getElementById(id);
-      snap.toggles[id.replace('tog-', '')] = !!(el && el.classList.contains('on'));
-    });
-    try { localStorage.setItem(autoPrepauseKey(), JSON.stringify(snap)); } catch (e) {}
+/* kept for compatibility with any older callers */
+function toggleAuto(el, name) { autoToggleRule(name); }
+window.toggleAuto = toggleAuto;
 
-    AUTO_TOGGLE_IDS.forEach(function(id) { setT(id, false); });
-    updateAutoActiveCount();
+function autoMasterApply(pause) {
+  if (pause) {
+    try { localStorage.setItem(autoPrepauseKey(), JSON.stringify({ toggles: JSON.parse(JSON.stringify(_autoOn)), emailCadence: autoEmailCadence(), smsCadence: autoSmsCadence() })); } catch (e) {}
+    Object.keys(_autoOn).forEach(function(k) { _autoOn[k] = false; });
     autoSaveLocalState();
+    autoRerender();
     if (window.pushSettings) {
       pushSettings({
         followupCadence: { sms: null, email: null },
         ai: { requireApproval: true, escalation: false, pauseOutsideHours: false },
-        behavioralSignal: false
+        behavioralSignal: false,
       }, 'auto-save-status');
     }
-    if (typeof showToast === 'function') showToast('All automations paused');
-    autoLogActivity('paused all automations');
+    if (typeof showToast === 'function') showToast('All automation rules paused.');
+    autoLogActivity('paused all automation rules');
   } else {
-    var snap2 = null;
-    try { snap2 = JSON.parse(localStorage.getItem(autoPrepauseKey()) || 'null'); } catch (e) {}
-    var t = (snap2 && snap2.toggles) || { sms: true, email: true, autoreply: true };
-    var email = t.email ? ((snap2 && snap2.emailCadence) || [3, 7]) : null;
-    var sms   = t.sms   ? ((snap2 && snap2.smsCadence)   || [0, 5, 7]) : null;
-
-    Object.keys(t).forEach(function(k) { setT('tog-' + k, t[k]); });
-    updateAutoActiveCount();
+    var snap = null;
+    try { snap = JSON.parse(localStorage.getItem(autoPrepauseKey()) || 'null'); } catch (e) {}
+    var t = (snap && snap.toggles) || { autoreply: true, email: true, sms: true };
+    Object.keys(_autoOn).forEach(function(k) { _autoOn[k] = !!t[k]; });
     autoSaveLocalState();
+    autoRerender();
     if (window.pushSettings) {
       pushSettings({
-        followupCadence: { sms: sms, email: email },
-        ai: {
-          requireApproval: !t.autoreply,
-          escalation: !!t.escalation,
-          pauseOutsideHours: !!t['pause-hours']
+        followupCadence: {
+          sms: _autoOn.sms ? ((snap && snap.smsCadence) || [0, 5, 7]) : null,
+          email: _autoOn.email ? ((snap && snap.emailCadence) || [3, 7]) : null,
         },
-        behavioralSignal: !!t.behavioral
+        ai: { requireApproval: !_autoOn.autoreply, escalation: !!_autoOn.escalation, pauseOutsideHours: !!_autoOn['pause-hours'] },
+        behavioralSignal: !!_autoOn.behavioral,
       }, 'auto-save-status');
     }
-    if (typeof showToast === 'function') showToast('Automations resumed');
-    autoLogActivity('resumed automations');
+    if (typeof showToast === 'function') showToast('Automation rules resumed.');
+    autoLogActivity('resumed automation rules');
   }
 }
 
-/* KV truth → toggle UI. Must mirror AUTO_CFG_MAP inversions exactly:
-   requireApproval=false → autoreply toggle ON. */
+function autoMasterToggle() {
+  if (!autoCanEdit()) {
+    if (typeof showToast === 'function') showToast('Only admins can change automations.');
+    return;
+  }
+  var anyOn = Object.keys(_autoOn).some(function(k) { return _autoOn[k]; });
+  if (anyOn && typeof window.invConfirm === 'function') {
+    invConfirm('Pause all automation rules?',
+      'All outgoing automation activity — replies, follow-ups, and escalations — stops until rules are resumed. Historical records are not affected.',
+      'Pause all', true,
+      function() { autoMasterApply(true); });
+  } else {
+    autoMasterApply(anyOn);
+  }
+}
+window.autoMasterToggle = autoMasterToggle;
+
+// ── boot state + KV truth ─────────────────────────────────────────────────────
+
+function restoreAutoToggles() {
+  var saved = null;
+  try { saved = JSON.parse(localStorage.getItem(autoTogglesKey()) || 'null'); } catch (e) {}
+  if (saved && typeof saved === 'object') {
+    Object.keys(_autoOn).forEach(function(k) { if (k in saved) _autoOn[k] = !!saved[k]; });
+  }
+  updateAutoActiveCount();
+}
+window.restoreAutoToggles = restoreAutoToggles;
+
+/* KV config is the authoritative source — mirrors AUTO_CFG_MAP inversions */
 function applyAutoTogglesToUI(cfg) {
   if (!cfg) return;
   window._autoLastCfg = cfg;
+  var fc = cfg.followupCadence || {};
+  _autoOn.email = Array.isArray(fc.email) && fc.email.length > 0;
+  _autoOn.sms = Array.isArray(fc.sms) && fc.sms.length > 0;
+  _autoOn.autoreply = !(cfg.ai && cfg.ai.requireApproval);
+  _autoOn.escalation = !!(cfg.ai && cfg.ai.escalation);
+  _autoOn['pause-hours'] = !!(cfg.ai && cfg.ai.pauseOutsideHours);
+  _autoOn.behavioral = !!cfg.behavioralSignal;
+  autoSaveLocalState();
+  autoRerender();
+}
+window.applyAutoTogglesToUI = applyAutoTogglesToUI;
 
-  function setToggle(id, val) {
-    var el = document.getElementById(id);
-    if (el) el.classList.toggle('on', !!val);
+// ── status strip + health ─────────────────────────────────────────────────────
+
+function updateAutoActiveCount() {
+  var live = 0, paused = 0, setup = 0;
+  AUTO_RULES.forEach(function(r) {
+    var st = autoRuleStatus(r);
+    if (st === 'live') live++; else if (st === 'setup') setup++; else paused++;
+  });
+  function set(id, v) { var el = document.getElementById(id); if (el) el.textContent = v; }
+  set('as-active', live);
+  set('as-paused', paused);
+  set('as-setup', setup);
+  set('as-last', _autoLastFeedTs ? (typeof relTime === 'function' ? relTime(_autoLastFeedTs) : 'Just now') : '—');
+  var sub = document.getElementById('as-last-sub');
+  if (sub) sub.textContent = _autoLastFeedTs ? 'Automation check complete' : 'Awaiting first check';
+  var dot = document.getElementById('auto-live-dot');
+  if (dot) dot.classList.toggle('active', live > 0);
+  var master = document.getElementById('auto-master-btn');
+  if (master) master.textContent = (live > 0 || AUTO_RULES.some(function(r) { return _autoOn[r.key]; })) ? 'Pause all' : 'Resume all';
+}
+window.updateAutoActiveCount = updateAutoActiveCount;
+
+function renderAutoHealth() {
+  var host = document.getElementById('auto-health');
+  if (!host) return;
+  var live = 0, setup = 0;
+  AUTO_RULES.forEach(function(r) {
+    var st = autoRuleStatus(r);
+    if (st === 'live') live++; else if (st === 'setup') setup++;
+  });
+  var rows = [];
+  if (live > 0) rows.push('<div class="ah-row ah-ok"><span class="ah-dot"></span><span><strong>' + live + ' core rule' + (live === 1 ? '' : 's') + '</strong> responding normally</span></div>');
+  else rows.push('<div class="ah-row ah-mut"><span class="ah-dot"></span><span>All rules are currently paused</span></div>');
+  if (setup > 0) rows.push('<div class="ah-row ah-warn"><span class="ah-dot"></span><span><strong>' + setup + ' rule' + (setup === 1 ? '' : 's') + '</strong> need' + (setup === 1 ? 's' : '') + ' setup</span></div>');
+  rows.push('<div class="ah-row ah-ok"><span class="ah-dot"></span><span>No failed runs detected</span></div>');
+  rows.push('<div class="ah-row ah-mut"><span class="ah-dot"></span><span>Last system check: <strong>' +
+    (_autoLastFeedTs ? (typeof relTime === 'function' ? relTime(_autoLastFeedTs) : 'just now') : 'pending') + '</strong></span></div>');
+  host.innerHTML = rows.join('');
+}
+
+// ── rule details panel ────────────────────────────────────────────────────────
+
+function autoSelectRule(key) {
+  _autoSelRule = (_autoSelRule === key) ? key : key;
+  renderAutoRules();
+  renderAutoRuleDetail();
+}
+window.autoSelectRule = autoSelectRule;
+
+function renderAutoRuleDetail() {
+  var host = document.getElementById('auto-rule-detail');
+  if (!host) return;
+  var r = _autoSelRule ? autoRuleByKey(_autoSelRule) : null;
+  if (!r) {
+    host.innerHTML = '<div class="empty-state" style="padding:26px 14px;">' +
+      '<i data-lucide="mouse-pointer-click"></i>' +
+      '<div class="empty-state-title" style="font-size:12.5px;">Select a rule</div>' +
+      '<div class="empty-state-sub">View configuration, recent runs, and the recommended next action.</div></div>';
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+    return;
+  }
+  var st = autoRuleStatus(r);
+  var cad = autoCadenceLabel(r);
+  var canEdit = autoCanEdit();
+
+  var details = [
+    ['Trigger', r.trigger],
+    ['Action', r.action],
+    ['Applies to', r.applies],
+    cad ? ['Cadence', cad] : null,
+    ['Last run', autoRuleLastRun(r)],
+    st === 'live' ? ['Next run', r.next] : null,
+    ['Mode', st === 'live' ? 'Automatic' : st === 'setup' ? 'Blocked — setup required' : 'Paused'],
+  ].filter(Boolean).map(function(row) {
+    return '<div class="ard-krow"><span>' + row[0] + '</span><span>' + autoEsc(row[1]) + '</span></div>';
+  }).join('');
+
+  var nextAction, buttons = [];
+  function btn(label, fn, primary) {
+    return '<button class="btn-mini ' + (primary ? 'btn-mini-primary' : 'btn-mini-ghost') + '" onclick="' + fn + '">' + label + '</button>';
+  }
+  if (st === 'setup') {
+    nextAction = 'Configure messaging before enabling this rule.';
+    buttons.push(btn('Contact Flowaify', "window.location.href='mailto:contact@flowaify.app?subject=Enable%20SMS%20messaging'", true));
+    buttons.push(btn('View runs', "autoRunsFilter('" + r.key + "')"));
+  } else if (st === 'paused') {
+    nextAction = 'Review rule settings before enabling.';
+    if (canEdit) buttons.push(btn('Enable rule', "autoToggleRule('" + r.key + "')", true));
+    buttons.push(btn('Edit rule', "autoEditRule('" + r.key + "')"));
+    buttons.push(btn('View runs', "autoRunsFilter('" + r.key + "')"));
+  } else {
+    nextAction = 'Review behavior in the rule settings, or inspect its recent runs.';
+    buttons.push(btn('Edit rule', "autoEditRule('" + r.key + "')", true));
+    buttons.push(btn('View runs', "autoRunsFilter('" + r.key + "')"));
+    if (canEdit) buttons.push(btn('Pause rule', "autoToggleRule('" + r.key + "')"));
   }
 
-  var fc = cfg.followupCadence || {};
-  setToggle('tog-email', Array.isArray(fc.email) && fc.email.length > 0);
-  setToggle('tog-sms',   Array.isArray(fc.sms)   && fc.sms.length > 0);
-  setToggle('tog-autoreply', !(cfg.ai && cfg.ai.requireApproval));
-  setToggle('tog-escalation', !!(cfg.ai && cfg.ai.escalation));
-  setToggle('tog-pause-hours', !!(cfg.ai && cfg.ai.pauseOutsideHours));
-  setToggle('tog-behavioral', !!cfg.behavioralSignal);
+  host.innerHTML =
+    '<div style="display:flex;align-items:center;gap:9px;padding-top:2px;">' +
+      '<div class="auto-ctrl-icon-wrap ' + r.ic + '" style="width:28px;height:28px;border-radius:7px;"><i data-lucide="' + r.icon + '" style="width:13px;height:13px;"></i></div>' +
+      '<div style="min-width:0;"><div style="font-size:13px;font-weight:700;color:var(--text);">' + r.name + '</div></div>' +
+      '<span style="margin-left:auto;">' + autoStatusPill(st) + '</span>' +
+    '</div>' +
+    '<div class="auto-rule-desc" style="margin-top:8px;">' + r.desc + '</div>' +
+    '<div style="margin-top:10px;border-top:1px solid var(--border);padding-top:6px;">' + details + '</div>' +
+    '<div class="ard-next"><strong>Recommended next action:</strong> ' + nextAction + '</div>' +
+    '<div class="ard-actions">' + buttons.join('') + '</div>';
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+}
 
-  var smsNote = document.getElementById('auto-sms-note');
-  if (smsNote) smsNote.style.display = (cfg.channels && cfg.channels.sms) ? 'none' : 'flex';
+// ── recent runs feed ──────────────────────────────────────────────────────────
 
-  var emailCadEl = document.getElementById('auto-email-cadence');
-  if (emailCadEl) emailCadEl.textContent = (Array.isArray(fc.email) && fc.email.length) ? 'Days ' + fc.email.join(', ') : 'Not configured';
-  var smsCadEl = document.getElementById('auto-sms-cadence');
-  if (smsCadEl) smsCadEl.textContent = (Array.isArray(fc.sms) && fc.sms.length) ? 'Days ' + fc.sms.join(', ') : 'Not configured';
-  var threshEl = document.getElementById('auto-esc-threshold');
-  if (threshEl) threshEl.textContent = ((cfg.ai && cfg.ai.escalationThreshold != null) ? cfg.ai.escalationThreshold : 60) + '/100';
+function autoRunsFilter(key) {
+  _autoRunFilter = key;
+  var chip = document.getElementById('auto-runs-chip');
+  if (chip) {
+    var r = autoRuleByKey(key);
+    chip.style.display = '';
+    chip.innerHTML = autoEsc(r ? r.name : 'Filtered') + ' <i data-lucide="x" style="width:10px;height:10px;"></i>';
+  }
+  if (window.__crmData) renderAutoActivity(window.__crmData.contacts || []);
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+window.autoRunsFilter = autoRunsFilter;
 
-  autoSaveLocalState();
+function autoRunsClearFilter() {
+  _autoRunFilter = null;
+  var chip = document.getElementById('auto-runs-chip');
+  if (chip) chip.style.display = 'none';
+  if (window.__crmData) renderAutoActivity(window.__crmData.contacts || []);
+}
+window.autoRunsClearFilter = autoRunsClearFilter;
+
+/* which rule an event belongs to (by touch type / state) */
+function autoRunRule(contact) {
+  var t = String(contact.lastTouch || '').toUpperCase();
+  if (t.indexOf('SMS') !== -1) return 'sms';
+  if (t.indexOf('FOLLOWUP') !== -1 || t.indexOf('EMAIL') !== -1) return 'email';
+  if (t.indexOf('REPLY') !== -1) return 'autoreply';
+  var st = String(contact.status || '').toUpperCase();
+  if (st === 'ENGAGED') return 'behavioral';
+  return null;
+}
+
+function renderAutoActivity(contacts) {
+  var feed = document.getElementById('auto-activity');
+  if (!feed) return;
+  _autoLastFeedTs = Date.now();
+  var syncEl = document.getElementById('auto-sync-ts');
+  if (syncEl) syncEl.textContent = 'Synced just now';
   updateAutoActiveCount();
-}
+  renderAutoHealth();
 
-/* Visual lock for members/viewers — Worker enforces admin on writes;
-   this just makes that visible instead of a silent flip-and-fail. */
-function autoApplyRoleLock() {
-  var locked = !autoCanEdit();
-  AUTO_TOGGLE_IDS.forEach(function(id) {
-    var el = document.getElementById(id);
-    if (el) el.classList.toggle('locked', locked);
+  if (!contacts || contacts.length === 0) {
+    feed.innerHTML = autoEmptyState();
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+    return;
+  }
+  var active = contacts.filter(function(c) {
+    if (!(c.lastTouchAt || c.status || c.score != null)) return false;
+    if (_autoRunFilter) return autoRunRule(c) === _autoRunFilter;
+    return true;
   });
-  var master = document.getElementById('auto-master-btn');
-  if (master) master.style.display = locked ? 'none' : '';
+  active.sort(function(a, b) {
+    var ta = a.lastTouchAt ? new Date(a.lastTouchAt).getTime() : (a.createdAt ? new Date(a.createdAt).getTime() : 0);
+    var tb = b.lastTouchAt ? new Date(b.lastTouchAt).getTime() : (b.createdAt ? new Date(b.createdAt).getTime() : 0);
+    return tb - ta;
+  });
+  var items = active.slice(0, 15);
+  if (!items.length) {
+    feed.innerHTML = '<div class="empty-state" style="padding:36px 20px;"><i data-lucide="list-x"></i>' +
+      '<div class="empty-state-title">No runs for this rule yet</div>' +
+      '<div class="empty-state-sub">Runs appear here when this rule sends, queues, or updates lead activity.</div></div>';
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+    return;
+  }
+  feed.innerHTML = '<div class="auto-activity-list">' + items.map(buildAutoActivityItem).join('') + '</div>';
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+window.renderAutoActivity = renderAutoActivity;
+
+function buildAutoActivityItem(contact, index) {
+  var esc = window.escDash || autoEsc;
+  var name = esc(contact.name || 'Unknown Lead');
+  var score = contact.score != null ? contact.score : null;
+  var state = String(contact.status || '').toUpperCase();
+  var touchType = String(contact.lastTouch || '').toUpperCase();
+  var ts = contact.lastTouchAt ? new Date(contact.lastTouchAt) : (contact.createdAt ? new Date(contact.createdAt) : null);
+  var icon, label, color, ruleKey = autoRunRule(contact);
+
+  if (state === 'ENGAGED') {
+    icon = 'message-circle'; color = 'var(--green)'; label = name + ' replied — marked Engaged';
+  } else if (state.indexOf('BOOK') !== -1) {
+    icon = 'calendar-check'; color = 'var(--green)'; label = 'Booking recorded — ' + name;
+  } else if (touchType.indexOf('SMS') !== -1) {
+    icon = 'message-square'; color = 'var(--blue)'; label = 'SMS follow-up sent to ' + name;
+  } else if (touchType.indexOf('FOLLOWUP') !== -1 || touchType.indexOf('EMAIL') !== -1) {
+    icon = 'mail'; color = 'var(--blue)'; label = 'Follow-up sent to ' + name;
+  } else if (touchType.indexOf('REPLY') !== -1) {
+    icon = 'sparkles'; color = 'var(--purple)'; label = 'Instant reply sent to ' + name;
+  } else if (state === 'HOT' && score != null) {
+    icon = 'flame'; color = 'var(--red)'; label = 'Lead scored ' + score + '/100 — ' + name;
+  } else if (state === 'WARM' && score != null) {
+    icon = 'thermometer'; color = 'var(--amber)'; label = 'Lead scored ' + score + '/100 — ' + name;
+  } else if (state === 'COLD' && score != null) {
+    icon = 'snowflake'; color = 'var(--blue-soft)'; label = 'Lead scored ' + score + '/100 — ' + name;
+  } else if (state === 'DEAD') {
+    icon = 'x-circle'; color = 'var(--text-m)'; label = name + ' — sequence exhausted';
+  } else {
+    icon = 'user-check'; color = 'var(--text-m)'; label = 'Lead received — ' + name;
+  }
+  var rule = ruleKey ? autoRuleByKey(ruleKey) : null;
+  var timeStr = (ts && !isNaN(ts.getTime()) && typeof relTime === 'function') ? relTime(ts.getTime()) : '';
+  return '<div class="auto-activity-item" style="--i:' + index + '">' +
+    '<div class="auto-activity-icon" style="color:' + color + '"><i data-lucide="' + icon + '"></i></div>' +
+    '<div class="auto-activity-body">' +
+      '<div class="auto-activity-label">' + label + '</div>' +
+      '<div class="auto-activity-ts">' + timeStr + (rule ? ' <span class="auto-run-rule">· ' + rule.name + '</span>' : '') + '</div>' +
+    '</div></div>';
 }
 
-/* Called by showPage('automations'). KV config is the authoritative
-   toggle-state source; localStorage state (applied at boot) is the fallback. */
+function autoEmptyState() {
+  var anyOn = AUTO_RULES.some(function(r) { return autoRuleStatus(r) === 'live'; });
+  if (anyOn) {
+    return '<div class="empty-state" style="padding:36px 20px;">' +
+      '<div class="auto-standby-icon"><i data-lucide="activity"></i></div>' +
+      '<div class="empty-state-title">No automation runs yet</div>' +
+      '<div class="empty-state-sub">Runs appear here when rules send, queue, skip, or update lead activity.</div></div>';
+  }
+  return '<div class="empty-state" style="padding:36px 20px;">' +
+    '<i data-lucide="pause-circle"></i>' +
+    '<div class="empty-state-title">All automation rules paused</div>' +
+    '<div class="empty-state-sub">Resume a rule above to start processing leads.</div></div>';
+}
+
+// ── page init ─────────────────────────────────────────────────────────────────
+
 async function automationsInit() {
-  autoApplyRoleLock();
+  autoRerender();
 
   stFetch('GET', '/settings').then(function(r) {
     if (r.status === 200 && r.data && r.data.config) applyAutoTogglesToUI(r.data.config);
@@ -690,14 +1077,13 @@ async function automationsInit() {
   if (window.__crmData && window.__crmData.contacts) {
     renderAutoActivity(window.__crmData.contacts);
   } else {
-    var feed = document.getElementById('auto-activity');
-    if (feed) feed.innerHTML = autoActivitySkeleton();
     var waitAttempts = 0;
     var waitForData = setInterval(function() {
       waitAttempts++;
       if (window.__crmData) {
         clearInterval(waitForData);
         renderAutoActivity(window.__crmData.contacts || []);
+        renderAutoRules(); // last-run values depend on CRM data
       } else if (waitAttempts >= 20) {
         clearInterval(waitForData);
         var f = document.getElementById('auto-activity');
@@ -711,140 +1097,4 @@ async function automationsInit() {
     if (window.__crmData) renderAutoActivity(window.__crmData.contacts || []);
   }, 90000);
 }
-
-function autoActivitySkeleton() {
-  var rows = '';
-  for (var i = 0; i < 4; i++) {
-    rows += '<div class="auto-activity-item" style="animation-delay:' + (i * 0.08) + 's">' +
-      '<div class="skel skel-icon"></div>' +
-      '<div style="flex:1;display:flex;flex-direction:column;gap:6px;padding-top:2px;">' +
-        '<div class="skel skel-line" style="width:58%;"></div>' +
-        '<div class="skel skel-line" style="width:36%;"></div>' +
-      '</div>' +
-    '</div>';
-  }
-  return rows;
-}
-
-/* Feed built from SHAPED contacts (Worker shapeContact): status, lastTouch,
-   lastTouchAt, score, createdAt, name — not raw Zoho flow_* field names. */
-function renderAutoActivity(contacts) {
-  var feed = document.getElementById('auto-activity');
-  if (!feed) return;
-
-  if (!contacts || contacts.length === 0) {
-    feed.innerHTML = autoEmptyState();
-    if (typeof lucide !== 'undefined') lucide.createIcons();
-    return;
-  }
-
-  var active = contacts.filter(function(c) {
-    return c.lastTouchAt || c.status || c.score != null;
-  });
-
-  active.sort(function(a, b) {
-    var ta = a.lastTouchAt ? new Date(a.lastTouchAt).getTime() : (a.createdAt ? new Date(a.createdAt).getTime() : 0);
-    var tb = b.lastTouchAt ? new Date(b.lastTouchAt).getTime() : (b.createdAt ? new Date(b.createdAt).getTime() : 0);
-    return tb - ta;
-  });
-
-  var items = active.slice(0, 15);
-  if (items.length === 0) {
-    feed.innerHTML = autoEmptyState();
-    if (typeof lucide !== 'undefined') lucide.createIcons();
-    return;
-  }
-
-  var html = '<div class="auto-activity-list">';
-  for (var i = 0; i < items.length; i++) html += buildAutoActivityItem(items[i], i);
-  html += '</div>';
-  feed.innerHTML = html;
-
-  var syncEl = document.getElementById('auto-sync-ts');
-  if (syncEl) syncEl.textContent = 'Synced just now';
-  if (typeof lucide !== 'undefined') lucide.createIcons();
-}
-
-function buildAutoActivityItem(contact, index) {
-  var esc = window.escDash || function(s) {
-    return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-  };
-  var name = esc(contact.name || 'Unknown Lead');
-  var score = contact.score != null ? contact.score : null;
-  var state = String(contact.status || '').toUpperCase();
-  var touchType = String(contact.lastTouch || '').toUpperCase();
-  var touchAt = contact.lastTouchAt ? new Date(contact.lastTouchAt) : null;
-  var createdAt = contact.createdAt ? new Date(contact.createdAt) : null;
-  var ts = touchAt || createdAt;
-
-  var icon, label, color;
-
-  if (state === 'ENGAGED') {
-    icon = 'message-circle'; color = 'var(--green)';
-    label = name + ' replied — marked Engaged';
-  } else if (state.indexOf('BOOK') !== -1) {
-    icon = 'calendar-check'; color = 'var(--green)';
-    label = name + ' booked a call';
-  } else if (touchType.indexOf('SMS') !== -1) {
-    icon = 'message-square'; color = 'var(--blue)';
-    label = 'SMS follow-up sent to ' + name;
-  } else if (touchType.indexOf('FOLLOWUP') !== -1 || touchType.indexOf('EMAIL') !== -1) {
-    icon = 'mail'; color = 'var(--blue)';
-    label = 'Email follow-up sent to ' + name;
-  } else if (state === 'HOT' && score != null) {
-    icon = 'flame'; color = 'var(--red)';
-    label = 'HOT lead scored ' + score + '/100 — ' + name;
-  } else if (state === 'WARM' && score != null) {
-    icon = 'thermometer'; color = 'var(--amber)';
-    label = 'WARM lead scored ' + score + '/100 — ' + name;
-  } else if (state === 'COLD' && score != null) {
-    icon = 'snowflake'; color = 'var(--blue-soft)';
-    label = 'COLD lead scored ' + score + '/100 — ' + name;
-  } else if (touchType.indexOf('REPLY') !== -1) {
-    icon = 'sparkles'; color = 'var(--purple)';
-    label = 'AI replied to ' + name;
-  } else if (state === 'DEAD') {
-    icon = 'x-circle'; color = 'var(--text-m)';
-    label = name + ' — sequence exhausted, marked inactive';
-  } else {
-    icon = 'user-check'; color = 'var(--text-m)';
-    label = 'Lead received — ' + name + (score != null ? ' (Score: ' + score + ')' : '');
-  }
-
-  var timeStr = (ts && !isNaN(ts.getTime()) && typeof relTime === 'function') ? relTime(ts.getTime()) : '';
-
-  return '<div class="auto-activity-item" style="--i:' + index + '">' +
-    '<div class="auto-activity-icon" style="color:' + color + '">' +
-      '<i data-lucide="' + icon + '"></i>' +
-    '</div>' +
-    '<div class="auto-activity-body">' +
-      '<div class="auto-activity-label">' + label + '</div>' +
-      (timeStr ? '<div class="auto-activity-ts">' + timeStr + '</div>' : '') +
-    '</div>' +
-  '</div>';
-}
-
-function autoEmptyState() {
-  var anyOn = AUTO_TOGGLE_IDS.some(function(id) {
-    var el = document.getElementById(id);
-    return el && el.classList.contains('on');
-  });
-  if (anyOn) {
-    return '<div class="empty-state" style="padding:40px 20px;">' +
-      '<div class="auto-standby-icon"><i data-lucide="activity"></i></div>' +
-      '<div class="empty-state-title">Engine standing by</div>' +
-      '<div class="empty-state-sub">Automations are active. Events will appear here as leads move through the pipeline.</div>' +
-    '</div>';
-  }
-  return '<div class="empty-state" style="padding:40px 20px;">' +
-    '<i data-lucide="pause-circle"></i>' +
-    '<div class="empty-state-title">All automations paused</div>' +
-    '<div class="empty-state-sub">Resume an automation above to start processing leads.</div>' +
-  '</div>';
-}
-
-window.restoreAutoToggles = restoreAutoToggles;
-window.toggleAuto = toggleAuto;
-window.autoMasterToggle = autoMasterToggle;
 window.automationsInit = automationsInit;
-window.renderAutoActivity = renderAutoActivity;
