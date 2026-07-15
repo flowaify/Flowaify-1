@@ -3990,7 +3990,7 @@ const AUTH0_CLIENT_ID = 'tx74Owqn3jVeSaVuxfFHsKloqbPqfAmN';
 /* ── Update check: version.json is bumped on every deploy; when a newer
    build is live, a quiet banner offers a refresh (ends the hard-refresh
    guessing game for clients). ── */
-const FLW_BUILD = 202607155;
+const FLW_BUILD = 202607156;
 async function flwVersionCheck() {
   try {
     const r = await fetch('version.json?t=' + Date.now(), { cache: 'no-store' });
@@ -4011,6 +4011,7 @@ async function initAuth() {
       domain: AUTH0_DOMAIN, clientId: AUTH0_CLIENT_ID,
       cacheLocation: 'localstorage',
       useRefreshTokens: true,
+      useRefreshTokensFallback: true,
       authorizationParams: {
         redirect_uri: window.location.origin + '/portal.html',
       }
@@ -4023,12 +4024,13 @@ async function initAuth() {
     auth0Client.getIdTokenClaims = async function() {
       try { await auth0Client.getTokenSilently(); }
       catch (e) {
-        const code = e && e.error;
-        if (code === 'login_required' || code === 'missing_refresh_token' || code === 'invalid_grant') {
+        /* Only a real logged-out state sends the user to login. Everything
+           else (missing refresh token, transient network) falls through to
+           the cached claims — the API returning 401 is handled by the UI,
+           never by silently dropping the request. */
+        if (e && e.error === 'login_required') {
           window.location.href = 'portal.html';
-          return null;
         }
-        /* transient/network error: fall through to the cached claims */
       }
       return _origGetClaims();
     };
