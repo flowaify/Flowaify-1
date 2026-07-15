@@ -38,6 +38,11 @@ async function teamsInit() {
     }
   } catch (e) {}
   _teamsPollingId = setInterval(teamsPoll, 4000);
+  var tin = document.getElementById('teams-input');
+  if (tin && !tin._twTypingBound) {
+    tin._twTypingBound = true;
+    tin.addEventListener('input', function() { if (this.value) twTypingPing(); });
+  }
 }
 window.teamsInit = teamsInit;
 
@@ -382,6 +387,7 @@ async function teamsSendMsg() {
 window.teamsSendMsg = teamsSendMsg;
 
 function teamsKeyDown(e) {
+  if (event && event.key !== "Enter") twTypingPing();
   if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); teamsSendMsg(); }
 }
 window.teamsKeyDown = teamsKeyDown;
