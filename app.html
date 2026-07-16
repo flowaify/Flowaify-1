@@ -3977,7 +3977,7 @@
 
 <script src="crm.js?v=34"></script>
 <script src="teams.js?v=14"></script>
-<script src="settings.js?v=9"></script>
+<script src="settings.js?v=10"></script>
 <script src="analytics.js?v=2"></script>
 <script src="invoice.js?v=6"></script>
 <script src="inbox.js?v=2"></script>
@@ -3990,7 +3990,7 @@ const AUTH0_CLIENT_ID = 'tx74Owqn3jVeSaVuxfFHsKloqbPqfAmN';
 /* ── Update check: version.json is bumped on every deploy; when a newer
    build is live, a quiet banner offers a refresh (ends the hard-refresh
    guessing game for clients). ── */
-const FLW_BUILD = 202607158; window.FLW_BUILD = FLW_BUILD;
+const FLW_BUILD = 202607159; window.FLW_BUILD = FLW_BUILD;
 async function flwVersionCheck() {
   try {
     const r = await fetch('version.json?t=' + Date.now(), { cache: 'no-store' });
@@ -4045,6 +4045,7 @@ async function boot(user) {
   document.getElementById('auth-gate').style.display = 'none';
   document.getElementById('app').style.display = 'block';
   if (user) {
+    try { localStorage.setItem('flw_remember', '1'); } catch (e) {}
     window.__userSub = user.sub || null;
     window.__userName = user.name || '';
     window.__userEmail = user.email || '';
@@ -4093,8 +4094,9 @@ async function boot(user) {
 }
 
 async function dashLogout() {
-  try { await auth0Client.logout({ logoutParams: { returnTo: 'https://flowaify.app/portal.html' } }); }
-  catch(e) { window.location.href = 'https://flowaify.app/portal.html'; }
+  try { localStorage.removeItem('flw_remember'); } catch (e) {}
+  try { await auth0Client.logout({ logoutParams: { returnTo: 'https://flowaify.app/portal.html?lo=1' } }); }
+  catch(e) { window.location.href = 'https://flowaify.app/portal.html?lo=1'; }
 }
 
 const PAGE_META = {

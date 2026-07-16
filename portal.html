@@ -607,8 +607,28 @@ async function initAuth() {
       await auth0Client.handleRedirectCallback();
       window.history.replaceState({}, document.title, window.location.pathname);
     }
+    const loggedOut = window.location.search.includes('lo=1');
+    if (loggedOut) window.history.replaceState({}, document.title, window.location.pathname);
     const ok = await auth0Client.isAuthenticated();
-    if (!ok) { boot(null); return; }
+    if (!ok) {
+      /* Remember me: if this browser was signed in before (and didn't sign
+         out on purpose), bounce silently through Auth0 — while the Auth0
+         session cookie is alive this completes without showing the login
+         form. Loop guard: one automatic attempt per 90 seconds. */
+      let remembered = false;
+      try { remembered = localStorage.getItem('flw_remember') === '1'; } catch (e) {}
+      const lastAuto = +(sessionStorage.getItem('flw_auto_login_at') || 0);
+      if (remembered && !loggedOut && Date.now() - lastAuto > 90000) {
+        sessionStorage.setItem('flw_auto_login_at', String(Date.now()));
+        const gate = document.getElementById('auth-gate');
+        if (gate) gate.style.display = '';
+        await auth0Client.loginWithRedirect({ appState: { returnTo: '/portal.html' } });
+        return;
+      }
+      boot(null);
+      return;
+    }
+    try { localStorage.setItem('flw_remember', '1'); } catch (e) {}
     boot(await auth0Client.getUser());
   } catch(e) { console.error(e); boot(null); }
 }
@@ -619,8 +639,9 @@ async function portalLogin() {
 }
 
 async function portalLogout() {
-  try { await auth0Client.logout({ logoutParams: { returnTo: 'https://flowaify.app/portal.html' } }); }
-  catch(e) { window.location.href = 'https://flowaify.app/portal.html'; }
+  try { localStorage.removeItem('flw_remember'); } catch (e) {}
+  try { await auth0Client.logout({ logoutParams: { returnTo: 'https://flowaify.app/portal.html?lo=1' } }); }
+  catch(e) { window.location.href = 'https://flowaify.app/portal.html?lo=1'; }
 }
 
 function boot(user) {

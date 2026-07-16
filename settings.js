@@ -455,10 +455,11 @@ async function sendPasswordReset() {
 window.sendPasswordReset = sendPasswordReset;
 
 async function signOutAll() {
+  try { localStorage.removeItem('flw_remember'); } catch (e) {}
   if (!confirm('Sign out of all sessions? You will be logged out immediately.')) return;
   var client = window.__auth0Client || window.auth0Client;
   if (!client) return;
-  try { await client.logout({ logoutParams: { returnTo: 'https://flowaify.app/portal.html' } }); } catch (e) {}
+  try { await client.logout({ logoutParams: { returnTo: 'https://flowaify.app/portal.html?lo=1' } }); } catch (e) {}
 }
 window.signOutAll = signOutAll;
 
