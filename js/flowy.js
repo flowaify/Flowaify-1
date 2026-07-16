@@ -101,13 +101,13 @@ function flBot(html, opts) {
   var foot = opts.ai
     ? '<div class="fl-foot"><i data-lucide="sparkles"></i>AI answer · based on your live CRM data</div>'
     : (opts.instant ? '<div class="fl-foot"><i data-lucide="zap"></i>Instant · from your live data</div>' : '');
-  flAdd('<div class="fl-orb-sm"><img class="logo-white" src="logo-transparent.png" alt="" /></div><div class="fl-bubble">' + html + foot + '</div>', 'fl-bot');
+  flAdd('<div class="fl-orb-sm"><img class="logo-white" src="assets/logo-transparent.png" alt="" /></div><div class="fl-bubble">' + html + foot + '</div>', 'fl-bot');
 }
 function flTyping(show) {
   var ex = document.getElementById('fl-typing');
   if (ex) ex.remove();
   if (show) {
-    flAdd('<div class="fl-orb-sm"><img class="logo-white" src="logo-transparent.png" alt="" /></div><div class="fl-bubble fl-dots"><span></span><span></span><span></span></div>', 'fl-bot')
+    flAdd('<div class="fl-orb-sm"><img class="logo-white" src="assets/logo-transparent.png" alt="" /></div><div class="fl-bubble fl-dots"><span></span><span></span><span></span></div>', 'fl-bot')
       .id = 'fl-typing';
   }
 }
@@ -212,7 +212,7 @@ async function flowyAskAI(q) {
     // Streamed answer: live-typing bubble
     window.__flStreaming = true;
     flStopUI(true);
-    var live = flAdd('<div class="fl-orb-sm"><img class="logo-white" src="logo-transparent.png" alt="" /></div><div class="fl-bubble"><span class="fl-live"></span></div>', 'fl-bot');
+    var live = flAdd('<div class="fl-orb-sm"><img class="logo-white" src="assets/logo-transparent.png" alt="" /></div><div class="fl-bubble"><span class="fl-live"></span></div>', 'fl-bot');
     var liveSpan = live ? live.querySelector('.fl-live') : null;
     var reader = res.body.getReader();
     var dec = new TextDecoder();
@@ -338,7 +338,7 @@ function flowyContext() {
   } catch (e) {}
   if (flowyNews === null) {
     flowyNews = [];
-    fetch('whatsnew.json', { cache: 'no-cache' }).then(function(r) { return r.json(); })
+    fetch('assets/data/whatsnew.json', { cache: 'no-cache' }).then(function(r) { return r.json(); })
       .then(function(items) {
         if (Array.isArray(items)) flowyNews = items.slice(0, 3).map(function(it) { return it.title; });
       }).catch(function() {});
@@ -1124,7 +1124,7 @@ function flowyShareInChatIntent(lead) {
 function flowyFaqLoad() {
   if (flowyFaq !== null) return;
   flowyFaq = [];
-  fetch('flowyfaq.json', { cache: 'no-cache' }).then(function(r) { return r.json(); })
+  fetch('assets/data/flowyfaq.json', { cache: 'no-cache' }).then(function(r) { return r.json(); })
     .then(function(items) { if (Array.isArray(items)) flowyFaq = items; })
     .catch(function() {});
 }

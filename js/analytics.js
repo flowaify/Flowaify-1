@@ -1,7 +1,7 @@
 // ============================================================================
 // analytics.js — Flowaify Analytics Page (v1)
 // Replaces the renderAnalyticsStats() and renderCharts() implementations in
-// crm.js via window.* overrides (this file loads after crm.js).
+// dashboard.js via window.* overrides (this file loads after dashboard.js).
 //
 // Adapted from the product handoff with four codebase-specific fixes:
 //   1. renderCharts here KEEPS the Overview page's charts (src-list donut and
@@ -9,10 +9,10 @@
 //   2. Chart grid/tick colors are theme-aware (the handoff hardcoded white
 //      grid lines, which vanish in light mode).
 //   3. Await pills use the existing .state-pill markup via anSetPill() — the
-//      crm.js setAwaitPill() is built for a different element shape.
+//      dashboard.js setAwaitPill() is built for a different element shape.
 //   4. Status Breakdown bars are click-through to the Leads page tabs.
 //
-// DO NOT call renderFunnel() or renderStageList() here — rerender() in crm.js
+// DO NOT call renderFunnel() or renderStageList() here — rerender() in dashboard.js
 // already calls them after renderCharts() returns.
 // ============================================================================
 

@@ -1,2 +1,4 @@
 cloudflare-worker/.wrangler/
 .DS_Store
+.claude/
+_archive/

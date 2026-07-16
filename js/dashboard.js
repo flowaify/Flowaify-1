@@ -550,7 +550,7 @@ function calBuildEvents(data) {
     evs.push({ type: 'due', ts: new Date(d.closingDate).getTime(), name: d.name,
       desc: (d.stage ? d.stage : 'Closing') + (d.amount != null ? ' · ' + fmtMoney(d.amount) : ''), amount: d.amount, hasTime: false });
   });
-  /* open team tasks with due dates (loaded by teams.js) */
+  /* open team tasks with due dates (loaded by team.js) */
   (window.__twTasks || []).forEach(function(t) {
     if (!t.due || t.status !== 'open') return;
     evs.push({ type: 'task', ts: t.due, name: t.title,

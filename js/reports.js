@@ -637,7 +637,7 @@ function rptMergeIdx(rec) {
   rptRenderAll();
 }
 
-// share to team chat (compatibility with teams.js payload shape)
+// share to team chat (compatibility with team.js payload shape)
 function reportsShareTeam(id) {
   var r = rptById(id || _rptSel);
   if (!r) return;

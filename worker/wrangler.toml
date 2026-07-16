@@ -9,5 +9,9 @@ binding = "AI"
 binding = "TEAM_KV"
 id = "d3aae082c21d42a68da4817e3bd7be7c"
 
+routes = [
+  { pattern = "api.flowaify.app", custom_domain = true }
+]
+
 [triggers]
 crons = ["17 9 * * *"]

@@ -9,10 +9,10 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Flowaify" />
   <title>Flowaify — Dashboard</title>
-  <link rel="icon" type="image/png" href="logo-transparent.png" />
+  <link rel="icon" type="image/png" href="assets/logo-transparent.png" />
   <link rel="manifest" href="manifest.json" />
   <meta name="theme-color" content="#16161a" />
-  <link rel="apple-touch-icon" href="logo-transparent.png" />
+  <link rel="apple-touch-icon" href="assets/logo-transparent.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -2197,7 +2197,7 @@
 <body>
 
 <div id="auth-gate">
-  <img class="ag-logo" src="logo-transparent.png" alt="" onerror="this.style.display='none'" />
+  <img class="ag-logo" src="assets/logo-transparent.png" alt="" onerror="this.style.display='none'" />
   <div class="ag-spinner"></div>
   <p class="ag-label">Loading dashboard…</p>
 </div>
@@ -2210,7 +2210,7 @@
 <header class="suite-bar">
   <button class="mob-ham" onclick="toggleMob()"><i data-lucide="menu"></i></button>
   <div class="suite-left">
-    <img class="suite-logo" src="logo-transparent.png" alt="" onerror="this.style.display='none'" />
+    <img class="suite-logo" src="assets/logo-transparent.png" alt="" onerror="this.style.display='none'" />
     <span class="suite-name">Flowaify</span>
     <span class="suite-div"></span>
     <span class="suite-ctx">Dashboard</span>
@@ -2224,7 +2224,7 @@
   </div>
   <div class="suite-right">
   <button class="suite-icon-btn msearch-btn" onclick="toggleMSearch(event)" title="Search"><i data-lucide="search"></i></button>
-  <button class="suite-flowy-btn" onclick="toggleFlowy()" title="Ask Flowy (⌘J)"><img class="logo-white" src="logo-transparent.png" alt="" /><span class="suite-flowy-txt">Flowy</span></button>
+  <button class="suite-flowy-btn" onclick="toggleFlowy()" title="Ask Flowy (⌘J)"><img class="logo-white" src="assets/logo-transparent.png" alt="" /><span class="suite-flowy-txt">Flowy</span></button>
   <button class="suite-icon-btn" id="theme-toggle" onclick="toggleTheme()" title="Toggle dark mode"><i data-lucide="moon"></i></button>
   <div class="bell-wrap">
     <button class="suite-icon-btn" onclick="toggleNotifDrawer(event)" title="Notifications"><i data-lucide="bell"></i><span class="bell-badge" id="bell-badge" style="display:none;">0</span></button>
@@ -3845,13 +3845,13 @@
     <div class="fn-cta">Ask Flowy →</div>
   </div>
 </div>
-<button id="flowy-fab" onclick="toggleFlowy()" title="Ask Flowy (⌘J)"><img src="logo-transparent.png" alt="Flowy" /><span id="fab-badge" style="display:none;">0</span></button>
+<button id="flowy-fab" onclick="toggleFlowy()" title="Ask Flowy (⌘J)"><img src="assets/logo-transparent.png" alt="Flowy" /><span id="fab-badge" style="display:none;">0</span></button>
 
 <!-- FLOWY AI PANEL -->
 <aside id="flowy-panel">
   <div class="interactive-dot-bg" aria-hidden="true"></div>
   <div class="fl-head">
-    <div class="fl-orb"><img class="logo-white" src="logo-transparent.png" alt="" /></div>
+    <div class="fl-orb"><img class="logo-white" src="assets/logo-transparent.png" alt="" /></div>
     <div class="fl-title">Flowy</div>
     <span class="fl-ai-pill">AI</span>
     <button class="fl-close" onclick="toggleFlowy()" title="Close"><i data-lucide="x"></i></button>
@@ -3975,14 +3975,14 @@
 
 <div id="toast"><div class="toast-icon"><i data-lucide="check"></i></div><div id="toast-msg" style="font-size:12.5px;font-weight:600;color:var(--text-s);line-height:1.45;"></div></div>
 
-<script src="crm.js?v=34"></script>
-<script src="teams.js?v=14"></script>
-<script src="settings.js?v=10"></script>
-<script src="analytics.js?v=2"></script>
-<script src="invoice.js?v=6"></script>
-<script src="inbox.js?v=2"></script>
-<script src="flowy.js?v=10"></script>
-<script src="reports.js?v=4"></script>
+<script src="js/dashboard.js?v=35"></script>
+<script src="js/team.js?v=15"></script>
+<script src="js/js/settings.js?v=10"></script>
+<script src="js/analytics.js?v=2"></script>
+<script src="js/invoice.js?v=6"></script>
+<script src="js/inbox.js?v=2"></script>
+<script src="js/flowy.js?v=10"></script>
+<script src="js/reports.js?v=4"></script>
 <script>
 const AUTH0_DOMAIN    = 'auth.flowaify.app';
 const AUTH0_CLIENT_ID = 'tx74Owqn3jVeSaVuxfFHsKloqbPqfAmN';
@@ -3990,7 +3990,7 @@ const AUTH0_CLIENT_ID = 'tx74Owqn3jVeSaVuxfFHsKloqbPqfAmN';
 /* ── Update check: version.json is bumped on every deploy; when a newer
    build is live, a quiet banner offers a refresh (ends the hard-refresh
    guessing game for clients). ── */
-const FLW_BUILD = 202607159; window.FLW_BUILD = FLW_BUILD;
+const FLW_BUILD = 202607160; window.FLW_BUILD = FLW_BUILD;
 async function flwVersionCheck() {
   try {
     const r = await fetch('version.json?t=' + Date.now(), { cache: 'no-store' });
@@ -4149,9 +4149,9 @@ function showToast(msg) {
   clearTimeout(t._t); t._t = setTimeout(() => t.style.display='none', 4200);
 }
 
-/* ── Automation toggles — all logic lives in settings.js (WAF: auth headers
+/* ── Automation toggles — all logic lives in js/settings.js (WAF: auth headers
    stay in .js files). restoreAutoToggles/toggleAuto/automationsInit are
-   defined there and available globally since settings.js loads first. ── */
+   defined there and available globally since js/settings.js loads first. ── */
 
 /* ── Workspace settings (shared key with portal.html) ── */
 const DASH_SETTING_IDS = ['s2-biz-name','s2-biz-email','s2-biz-phone','s2-biz-site','s2-industry','s2-tz','s2-goal-leads'];
@@ -4432,7 +4432,7 @@ function buildNotifItems() {
   var data = window.__crmData;
   var readIds = notifReadIds();
 
-  // Team mentions (populated by teams.js polling /team/mentions)
+  // Team mentions (populated by js/team.js polling /team/mentions)
   (window.__twMentions || []).slice(0, 5).forEach(function(m) {
     var id = 'mn_' + m.ts;
     items.push({
