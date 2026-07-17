@@ -12,6 +12,8 @@
   <link rel="icon" type="image/png" href="assets/images/logo-transparent.png" />
   <link rel="manifest" href="assets/manifest.json" />
   <link rel="preload" href="assets/fonts/geist-variable.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href="assets/fonts/phosphor/Phosphor-Light.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="stylesheet" href="assets/fonts/phosphor/phosphor-light.css" />
   <meta name="theme-color" content="#16161a" />
   <link rel="apple-touch-icon" href="assets/images/logo-transparent.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -171,6 +173,29 @@
       #update-banner { bottom: calc(84px + env(safe-area-inset-bottom, 0px)); font-size: 12px; }
     }
     #update-banner button { padding: 5px 14px; border-radius: 5px; border: 1px solid var(--blue); background: var(--blue); color: #fff; font-size: 12px; font-weight: 600; font-family: inherit; cursor: pointer; }
+    /* ── PHASE E: Phosphor icons, machined dark, shimmer, spotlight ── */
+    i[class^="ph-"], i[class*=" ph-"] { line-height: 1; display: inline-flex; align-items: center; justify-content: center; }
+    .nav-item i[class*="ph-"] { font-size: 16px; }
+    .nav-collapse i[class*="ph-"] { font-size: 16px; }
+    i.kpi-glyph[class*="ph-"] { font-size: 15px; }
+    .empty-state i[class*="ph-"] { font-size: 24px; }
+    .exq-btn i[class*="ph-"] { font-size: 13px; }
+    .qa-btn i[class*="ph-"] { font-size: 14px; }
+    .sec-link i[class*="ph-"], .btn-mini i[class*="ph-"], .cmd-primary i[class*="ph-"] { font-size: 13px; }
+    [data-theme="dark"] .card { background-image: linear-gradient(180deg, rgba(255,255,255,0.035), rgba(255,255,255,0) 16%); }
+    .skel { position: relative; overflow: hidden; }
+    .skel::after { content: ''; position: absolute; inset: 0; transform: translateX(-100%); background: linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent); animation: skelSweep 1.6s var(--ease) infinite; }
+    [data-theme="dark"] .skel::after { background: linear-gradient(90deg, transparent, rgba(255,255,255,0.07), transparent); }
+    @keyframes skelSweep { to { transform: translateX(100%); } }
+    /* spotlight border: cursor-lit edge on overview widgets (desktop only) */
+    @media (hover: hover) {
+      .ov-spot { position: relative; }
+      .ov-spot::before { content: ''; position: absolute; inset: -1px; border-radius: inherit; padding: 1px;
+        background: radial-gradient(180px circle at var(--mx, 50%) var(--my, 50%), var(--blue-border), transparent 70%);
+        -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); -webkit-mask-composite: xor; mask-composite: exclude;
+        opacity: 0; transition: opacity 0.25s; pointer-events: none; }
+      .ov-spot:hover::before { opacity: 1; }
+    }
     /* ── MOTION SYSTEM (Phase C) ── */
     @keyframes popIn { from { opacity: 0; transform: scale(0.96) translateY(8px); } to { opacity: 1; transform: none; } }
     @keyframes menuIn { from { opacity: 0; transform: scale(0.97) translateY(-3px); } to { opacity: 1; transform: none; } }
@@ -2322,32 +2347,32 @@
 
 <!-- SIDEBAR -->
 <aside class="sidebar" id="sidebar">
-  <button class="nav-collapse" onclick="toggleNavRail()" title="Collapse navigation"><i data-lucide="menu"></i></button>
+  <button class="nav-collapse" onclick="toggleNavRail()" title="Collapse navigation"><i class="ph-light ph-list"></i></button>
 
-  <div class="nav-item active" data-page="overview" title="Overview"><i data-lucide="home"></i><span class="nav-txt">Overview</span></div>
+  <div class="nav-item active" data-page="overview" title="Overview"><i class="ph-light ph-house"></i><span class="nav-txt">Overview</span></div>
 
   <div class="nav-group-label">Pipeline</div>
-  <div class="nav-item" data-page="leads" title="Leads"><i data-lucide="users-round"></i><span class="nav-txt">Leads</span></div>
-  <div class="nav-item" data-page="activity" title="Activity"><i data-lucide="history"></i><span class="nav-txt">Activity</span></div>
-  <div class="nav-item" data-page="calendar" title="Calendar"><i data-lucide="calendar"></i><span class="nav-txt">Calendar</span></div>
+  <div class="nav-item" data-page="leads" title="Leads"><i class="ph-light ph-users-three"></i><span class="nav-txt">Leads</span></div>
+  <div class="nav-item" data-page="activity" title="Activity"><i class="ph-light ph-clock-counter-clockwise"></i><span class="nav-txt">Activity</span></div>
+  <div class="nav-item" data-page="calendar" title="Calendar"><i class="ph-light ph-calendar-blank"></i><span class="nav-txt">Calendar</span></div>
 
   <div class="nav-group-label">Automate</div>
-  <div class="nav-item" data-page="automations" title="Automations"><i data-lucide="workflow"></i><span class="nav-txt">Automations</span></div>
+  <div class="nav-item" data-page="automations" title="Automations"><i class="ph-light ph-flow-arrow"></i><span class="nav-txt">Automations</span></div>
 
   <div class="nav-group-label">Workspace</div>
-  <div class="nav-item" data-page="team" title="Team"><i data-lucide="users"></i><span class="nav-txt">Team</span></div>
-  <div class="nav-item" data-page="inbox" title="Inbox"><i data-lucide="inbox"></i><span class="nav-txt">Inbox <span id="inbox-nav-badge" style="display:none;background:var(--red);color:#fff;font-size:9px;font-weight:700;border-radius:8px;padding:1px 5px;margin-left:4px;vertical-align:middle;"></span></span></div>
+  <div class="nav-item" data-page="team" title="Team"><i class="ph-light ph-users"></i><span class="nav-txt">Team</span></div>
+  <div class="nav-item" data-page="inbox" title="Inbox"><i class="ph-light ph-tray"></i><span class="nav-txt">Inbox <span id="inbox-nav-badge" style="display:none;background:var(--red);color:#fff;font-size:9px;font-weight:700;border-radius:8px;padding:1px 5px;margin-left:4px;vertical-align:middle;"></span></span></div>
 
   <div class="nav-group-label">Finance</div>
-  <div class="nav-item" data-page="invoices" title="Invoices"><i data-lucide="file-text"></i><span class="nav-txt">Invoices</span></div>
-  <div class="nav-item" data-page="reports" title="Reports"><i data-lucide="bar-chart-2"></i><span class="nav-txt">Reports</span></div>
+  <div class="nav-item" data-page="invoices" title="Invoices"><i class="ph-light ph-file-text"></i><span class="nav-txt">Invoices</span></div>
+  <div class="nav-item" data-page="reports" title="Reports"><i class="ph-light ph-chart-bar"></i><span class="nav-txt">Reports</span></div>
 
   <div class="nav-group-label">Insights</div>
-  <div class="nav-item" data-page="analytics" title="Analytics"><i data-lucide="chart-column"></i><span class="nav-txt">Analytics</span></div>
+  <div class="nav-item" data-page="analytics" title="Analytics"><i class="ph-light ph-chart-line-up"></i><span class="nav-txt">Analytics</span></div>
 
   <div class="sidebar-sep"></div>
 
-  <div class="nav-item" data-page="settings" title="Settings"><i data-lucide="settings"></i><span class="nav-txt">Settings</span></div>
+  <div class="nav-item" data-page="settings" title="Settings"><i class="ph-light ph-gear"></i><span class="nav-txt">Settings</span></div>
 
   <div class="sidebar-bottom">
     <div class="preview-badge" onclick="showToast('Live mode — data syncs automatically every 60 seconds.')">
@@ -2367,7 +2392,7 @@
     </div>
     <div class="topbar-right">
       <span class="sync-label" id="sync-label"></span>
-      <button class="cmd-primary" id="btn-refresh" onclick="refreshData()"><i data-lucide="refresh-cw"></i>Refresh</button>
+      <button class="cmd-primary" id="btn-refresh" onclick="refreshData()"><i class="ph-light ph-arrows-clockwise"></i>Refresh</button>
       <span class="cmd-div"></span>
       <div class="seg" id="range-seg">
         <button class="seg-btn" onclick="setRangeSeg(7,this)">7 days</button>
@@ -2375,12 +2400,12 @@
         <button class="seg-btn" onclick="setRangeSeg(90,this)">90 days</button>
       </div>
       <span class="cmd-div"></span>
-      <a class="cmd-btn" href="portal.html"><i data-lucide="layout-grid"></i>Workspace</a>
+      <a class="cmd-btn" href="portal.html"><i class="ph-light ph-squares-four"></i>Workspace</a>
     </div>
   </header>
 
   <div id="err-banner" style="display:none;">
-    <i data-lucide="wifi-off"></i>
+    <i class="ph-light ph-wifi-slash"></i>
     <span>Couldn't reach your CRM data. Check your connection and try again.</span>
     <button class="btn-mini btn-mini-primary" onclick="refreshData()">Retry</button>
   </div>
@@ -2388,18 +2413,18 @@
   <!-- OVERVIEW -->
   <div class="page active" id="page-overview">
     <div class="stats-grid" id="ov-kpi-grid">
-      <div class="card stat-card" id="kpi-new-leads" data-wid="new-leads"><div class="card-handle" onclick="cardCtxOpen(event,'kpi-new-leads')" title="Card options"><span></span><span></span><span></span></div><div class="stat-top"><div class="stat-label"><i data-lucide="user-plus" class="kpi-glyph kg-blue"></i>New Leads Today</div></div><div class="stat-val-row"><div class="stat-val" id="val-new-leads">—</div><div class="spark" id="spark-new-leads"></div></div><div class="stat-delta-row" id="delta-new-leads"></div><div class="stat-hint">Leads captured today</div></div>
-      <div class="card stat-card" id="kpi-response" data-wid="response-time"><div class="card-handle" onclick="cardCtxOpen(event,'kpi-response')" title="Card options"><span></span><span></span><span></span></div><div class="stat-top"><div class="stat-label"><i data-lucide="zap" class="kpi-glyph kg-green"></i>Avg Response</div><div id="await-response"></div></div><div class="stat-val" id="val-response-time">—</div><div class="stat-hint" id="hint-response" data-live="First-touch speed on new leads" data-empty="Tracks once replies start sending">Tracks once replies start sending</div></div>
-      <div class="card stat-card" id="kpi-ai-replies" data-wid="ai-replies"><div class="card-handle" onclick="cardCtxOpen(event,'kpi-ai-replies')" title="Card options"><span></span><span></span><span></span></div><div class="stat-top"><div class="stat-label"><i data-lucide="sparkles" class="kpi-glyph kg-purple"></i>AI Replies</div><div id="await-ai-replies"></div></div><div class="stat-val" id="val-ai-replies">—</div><div class="stat-hint" id="hint-ai-replies" data-live="Instant responses sent by Flowaify AI" data-empty="Counts each automated reply sent">Counts each automated reply sent</div></div>
-      <div class="card stat-card" id="kpi-follow-ups" data-wid="follow-ups"><div class="card-handle" onclick="cardCtxOpen(event,'kpi-follow-ups')" title="Card options"><span></span><span></span><span></span></div><div class="stat-top"><div class="stat-label"><i data-lucide="repeat-2" class="kpi-glyph kg-amber"></i>Sequences</div><div id="await-follow-ups"></div></div><div class="stat-val" id="val-follow-ups">—</div><div class="stat-hint" id="hint-follow-ups" data-live="HOT + WARM leads in follow-up" data-empty="Active sequences appear here">Active sequences appear here</div></div>
-      <div class="card stat-card" id="kpi-pipeline" data-wid="pipeline"><div class="card-handle" onclick="cardCtxOpen(event,'kpi-pipeline')" title="Card options"><span></span><span></span><span></span></div><div class="stat-top"><div class="stat-label"><i data-lucide="dollar-sign" class="kpi-glyph kg-green"></i>Pipeline Value</div></div><div class="stat-val" id="val-pipeline">—</div><div id="delta-pipeline"></div><div class="stat-hint">Total value of all open deals</div></div>
-      <div class="card stat-card" id="kpi-booked-calls" data-wid="booked-calls"><div class="card-handle" onclick="cardCtxOpen(event,'kpi-booked-calls')" title="Card options"><span></span><span></span><span></span></div><div class="stat-top"><div class="stat-label"><i data-lucide="calendar-check" class="kpi-glyph kg-teal"></i>Booked Calls</div></div><div class="stat-val" id="val-booked-calls">—</div><div class="stat-hint">Deals or contacts marked as booked</div></div>
+      <div class="card stat-card" id="kpi-new-leads" data-wid="new-leads"><div class="card-handle" onclick="cardCtxOpen(event,'kpi-new-leads')" title="Card options"><span></span><span></span><span></span></div><div class="stat-top"><div class="stat-label"><i class="ph-light ph-user-plus kpi-glyph kg-blue"></i>New Leads Today</div></div><div class="stat-val-row"><div class="stat-val" id="val-new-leads">—</div><div class="spark" id="spark-new-leads"></div></div><div class="stat-delta-row" id="delta-new-leads"></div><div class="stat-hint">Leads captured today</div></div>
+      <div class="card stat-card" id="kpi-response" data-wid="response-time"><div class="card-handle" onclick="cardCtxOpen(event,'kpi-response')" title="Card options"><span></span><span></span><span></span></div><div class="stat-top"><div class="stat-label"><i class="ph-light ph-lightning kpi-glyph kg-green"></i>Avg Response</div><div id="await-response"></div></div><div class="stat-val" id="val-response-time">—</div><div class="stat-hint" id="hint-response" data-live="First-touch speed on new leads" data-empty="Tracks once replies start sending">Tracks once replies start sending</div></div>
+      <div class="card stat-card" id="kpi-ai-replies" data-wid="ai-replies"><div class="card-handle" onclick="cardCtxOpen(event,'kpi-ai-replies')" title="Card options"><span></span><span></span><span></span></div><div class="stat-top"><div class="stat-label"><i class="ph-light ph-sparkle kpi-glyph kg-purple"></i>AI Replies</div><div id="await-ai-replies"></div></div><div class="stat-val" id="val-ai-replies">—</div><div class="stat-hint" id="hint-ai-replies" data-live="Instant responses sent by Flowaify AI" data-empty="Counts each automated reply sent">Counts each automated reply sent</div></div>
+      <div class="card stat-card" id="kpi-follow-ups" data-wid="follow-ups"><div class="card-handle" onclick="cardCtxOpen(event,'kpi-follow-ups')" title="Card options"><span></span><span></span><span></span></div><div class="stat-top"><div class="stat-label"><i class="ph-light ph-repeat kpi-glyph kg-amber"></i>Sequences</div><div id="await-follow-ups"></div></div><div class="stat-val" id="val-follow-ups">—</div><div class="stat-hint" id="hint-follow-ups" data-live="HOT + WARM leads in follow-up" data-empty="Active sequences appear here">Active sequences appear here</div></div>
+      <div class="card stat-card" id="kpi-pipeline" data-wid="pipeline"><div class="card-handle" onclick="cardCtxOpen(event,'kpi-pipeline')" title="Card options"><span></span><span></span><span></span></div><div class="stat-top"><div class="stat-label"><i class="ph-light ph-currency-dollar kpi-glyph kg-green"></i>Pipeline Value</div></div><div class="stat-val" id="val-pipeline">—</div><div id="delta-pipeline"></div><div class="stat-hint">Total value of all open deals</div></div>
+      <div class="card stat-card" id="kpi-booked-calls" data-wid="booked-calls"><div class="card-handle" onclick="cardCtxOpen(event,'kpi-booked-calls')" title="Card options"><span></span><span></span><span></span></div><div class="stat-top"><div class="stat-label"><i class="ph-light ph-calendar-check kpi-glyph kg-teal"></i>Booked Calls</div></div><div class="stat-val" id="val-booked-calls">—</div><div class="stat-hint">Deals or contacts marked as booked</div></div>
     </div>
 
     <div class="g3 ov-mid" id="ov-mid-grid">
       <div class="card" id="card-sources">
         <div class="card-handle" onclick="cardCtxOpen(event,'card-sources')" title="Card options"><span></span><span></span><span></span></div>
-        <div class="sec-head"><div class="sec-title">Lead Sources</div><button class="exq-btn" onclick="flowyExplain('my lead sources')" title="Ask Flowy to explain"><i data-lucide="sparkles"></i></button></div>
+        <div class="sec-head"><div class="sec-title">Lead Sources</div><button class="exq-btn" onclick="flowyExplain('my lead sources')" title="Ask Flowy to explain"><i class="ph-light ph-sparkle"></i></button></div>
         <div id="src-list"></div>
       </div>
       <div class="card" id="card-goal">
@@ -2410,7 +2435,7 @@
       <div class="card" id="card-resp">
         <div class="card-handle" onclick="cardCtxOpen(event,'card-resp')" title="Card options"><span></span><span></span><span></span></div>
         <div class="sec-head"><div class="sec-title">Response Time</div><span class="state-pill awaiting" id="pill-resp-ov"><span class="sp-dot"></span>Awaiting data</span></div>
-        <div class="chart-wrap" style="padding:12px 16px;height:80px;"><canvas id="ch-resp"></canvas><div class="chart-empty"><i data-lucide="trending-up"></i><div class="chart-empty-title">No data yet</div><div class="chart-empty-text">Fills in once automations start responding to leads.</div></div></div>
+        <div class="chart-wrap" style="padding:12px 16px;height:80px;"><canvas id="ch-resp"></canvas><div class="chart-empty"><i class="ph-light ph-trend-up"></i><div class="chart-empty-title">No data yet</div><div class="chart-empty-text">Fills in once automations start responding to leads.</div></div></div>
         <div class="benchmark-note">Target: under 90 seconds</div>
       </div>
       <div class="card" id="card-funnel" style="display:none;">
@@ -2437,7 +2462,7 @@
           </div>
         </div>
         <div id="top-leads-list">
-          <div class="empty-state" style="padding:34px 20px;"><i data-lucide="users"></i><div class="empty-state-title">No leads yet</div><div class="empty-state-sub">Priority leads appear here as contacts come in.</div></div>
+          <div class="empty-state" style="padding:34px 20px;"><i class="ph-light ph-users"></i><div class="empty-state-title">No leads yet</div><div class="empty-state-sub">Priority leads appear here as contacts come in.</div></div>
         </div>
       </div>
       </div>
@@ -2451,27 +2476,27 @@
           <div class="card-handle" onclick="cardCtxOpen(event,'card-attn')" title="Card options"><span></span><span></span><span></span></div>
           <div class="sec-head"><div class="sec-title">Needs Attention</div><div class="sec-link" onclick="showPage('leads')" style="margin-right:18px;">View all</div></div>
           <div id="attn-list"></div>
-          <div class="empty-state" id="attn-empty" style="padding:22px 18px;"><i data-lucide="shield-alert"></i><div class="empty-state-title">All clear</div><div class="empty-state-sub">No leads need immediate attention.</div></div>
+          <div class="empty-state" id="attn-empty" style="padding:22px 18px;"><i class="ph-light ph-shield-warning"></i><div class="empty-state-title">All clear</div><div class="empty-state-sub">No leads need immediate attention.</div></div>
         </div>
         <div class="card" id="card-activity">
           <div class="card-handle" onclick="cardCtxOpen(event,'card-activity')" title="Card options"><span></span><span></span><span></span></div>
           <div class="sec-head"><div class="sec-title">Live Activity</div><div style="display:flex;align-items:center;gap:6px;margin-right:18px;"><div class="live-dot"></div><span style="font-size:10.5px;font-weight:700;color:var(--green);">Live</span></div></div>
-          <div id="ov-activity"><div class="empty-state" style="padding:22px 18px;"><i data-lucide="activity"></i><div class="empty-state-title">No activity yet</div><div class="empty-state-sub">New leads, touches, and booked calls will appear here as they happen.</div></div></div>
+          <div id="ov-activity"><div class="empty-state" style="padding:22px 18px;"><i class="ph-light ph-pulse"></i><div class="empty-state-title">No activity yet</div><div class="empty-state-sub">New leads, touches, and booked calls will appear here as they happen.</div></div></div>
         </div>
         <div class="card" id="card-quick" style="display:none;">
           <div class="card-handle" onclick="cardCtxOpen(event,'card-quick')" title="Card options"><span></span><span></span><span></span></div>
           <div class="sec-head"><div class="sec-title">Quick Actions</div></div>
           <div class="qa-grid">
-            <button class="qa-btn" onclick="showPage('invoices');setTimeout(function(){if(window.openNewInvoice)openNewInvoice();},150);"><i data-lucide="file-plus-2"></i>New Invoice</button>
-            <button class="qa-btn" onclick="showPage('reports');setTimeout(function(){if(window.openReportEditor)openReportEditor();},150);"><i data-lucide="bar-chart-2"></i>New Report</button>
-            <button class="qa-btn" onclick="showPage('team');setTimeout(function(){if(window.openInvite)openInvite();},200);"><i data-lucide="user-plus"></i>Invite</button>
-            <button class="qa-btn" onclick="if(window.toggleFlowy)toggleFlowy();"><i data-lucide="sparkles"></i>Ask Flowy</button>
+            <button class="qa-btn" onclick="showPage('invoices');setTimeout(function(){if(window.openNewInvoice)openNewInvoice();},150);"><i class="ph-light ph-file-plus"></i>New Invoice</button>
+            <button class="qa-btn" onclick="showPage('reports');setTimeout(function(){if(window.openReportEditor)openReportEditor();},150);"><i class="ph-light ph-chart-bar"></i>New Report</button>
+            <button class="qa-btn" onclick="showPage('team');setTimeout(function(){if(window.openInvite)openInvite();},200);"><i class="ph-light ph-user-plus"></i>Invite</button>
+            <button class="qa-btn" onclick="if(window.toggleFlowy)toggleFlowy();"><i class="ph-light ph-sparkle"></i>Ask Flowy</button>
           </div>
         </div>
         <div class="card" id="card-team" style="display:none;">
           <div class="card-handle" onclick="cardCtxOpen(event,'card-team')" title="Card options"><span></span><span></span><span></span></div>
           <div class="sec-head"><div class="sec-title">Team Chat</div><div class="sec-link" onclick="showPage('team')" style="margin-right:18px;">Open</div></div>
-          <div id="ov-team-list"><div class="empty-state" style="padding:22px 18px;"><i data-lucide="message-square"></i><div class="empty-state-title">Loading channels…</div></div></div>
+          <div id="ov-team-list"><div class="empty-state" style="padding:22px 18px;"><i class="ph-light ph-chats"></i><div class="empty-state-title">Loading channels…</div></div></div>
         </div>
       </div>
     </div>
@@ -4058,7 +4083,7 @@ const AUTH0_CLIENT_ID = 'tx74Owqn3jVeSaVuxfFHsKloqbPqfAmN';
 /* ── Update check: version.json is bumped on every deploy; when a newer
    build is live, a quiet banner offers a refresh (ends the hard-refresh
    guessing game for clients). ── */
-const FLW_BUILD = 202607170; window.FLW_BUILD = FLW_BUILD;
+const FLW_BUILD = 202607171; window.FLW_BUILD = FLW_BUILD;
 async function flwVersionCheck() {
   try {
     const r = await fetch('assets/data/version.json?t=' + Date.now(), { cache: 'no-store' });

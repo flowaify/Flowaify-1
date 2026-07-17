@@ -3275,3 +3275,19 @@ function exportTeamCsv() {
   if (typeof showToast === 'function') showToast('Exported ' + rows.length + ' team members.');
 }
 window.exportTeamCsv = exportTeamCsv;
+
+/* ── Overview spotlight borders: cursor-lit edges on widget cards ──────────── */
+(function () {
+  if (!window.matchMedia || !matchMedia('(hover: hover)').matches) return;
+  ['ov-mid-grid', 'ov-bot-main', 'ov-bot-side'].forEach(function (id) {
+    var g = document.getElementById(id);
+    if (!g) return;
+    g.addEventListener('mousemove', function (e) {
+      var c = e.target.closest ? e.target.closest('.card') : null;
+      if (!c || c.parentElement !== g) return;
+      var r = c.getBoundingClientRect();
+      c.style.setProperty('--mx', (e.clientX - r.left) + 'px');
+      c.style.setProperty('--my', (e.clientY - r.top) + 'px');
+    });
+  });
+})();
