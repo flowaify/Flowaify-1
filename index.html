@@ -233,7 +233,13 @@
       .wf-custom { flex-direction: column; text-align: center; margin: 40px 16px 0; padding: 26px 22px; }
     }
     @media (max-width: 600px) { #who-for { padding: 60px 0 !important; } .wf-card { padding: 26px 22px; } .wf-arrow { display: none; } }
-    @media (prefers-reduced-motion: reduce) { .wf-track, .wf-card, .wf-arrow, .wf-dot { transition: none; } .wf-track.moving { filter: none; } }
+    /* Carousel is user-driven + horizontal + explicitly wanted — keep it sliding even where the page honors Reduce Motion. Class selectors + !important outrank the global `*` reset below. */
+    @media (prefers-reduced-motion: reduce) {
+      .wf-track { transition: transform 0.72s cubic-bezier(0.22,1,0.36,1), filter 0.3s ease !important; }
+      .wf-card { transition: transform 0.62s cubic-bezier(0.22,1,0.36,1), opacity 0.62s ease, filter 0.62s ease, box-shadow 0.62s ease !important; }
+      .wf-dot { transition: all 0.28s !important; }
+      .wf-arrow { transition: all 0.2s !important; }
+    }
 
     /* Reveal */
     .reveal {
