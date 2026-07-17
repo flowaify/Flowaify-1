@@ -10,7 +10,7 @@
   <meta name="apple-mobile-web-app-title" content="Flowaify" />
   <title>Flowaify — Dashboard</title>
   <link rel="icon" type="image/png" href="assets/logo-transparent.png" />
-  <link rel="manifest" href="manifest.json" />
+  <link rel="manifest" href="assets/manifest.json" />
   <meta name="theme-color" content="#16161a" />
   <link rel="apple-touch-icon" href="assets/logo-transparent.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -3990,10 +3990,10 @@ const AUTH0_CLIENT_ID = 'tx74Owqn3jVeSaVuxfFHsKloqbPqfAmN';
 /* ── Update check: version.json is bumped on every deploy; when a newer
    build is live, a quiet banner offers a refresh (ends the hard-refresh
    guessing game for clients). ── */
-const FLW_BUILD = 202607162; window.FLW_BUILD = FLW_BUILD;
+const FLW_BUILD = 202607163; window.FLW_BUILD = FLW_BUILD;
 async function flwVersionCheck() {
   try {
-    const r = await fetch('version.json?t=' + Date.now(), { cache: 'no-store' });
+    const r = await fetch('assets/data/version.json?t=' + Date.now(), { cache: 'no-store' });
     const v = await r.json();
     if (v && v.build && v.build > FLW_BUILD) {
       const b = document.getElementById('update-banner');

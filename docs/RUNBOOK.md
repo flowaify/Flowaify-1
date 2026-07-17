@@ -3,7 +3,7 @@
 ## Deploying frontend
 
 1. Edit files. If you changed a `pages/` module, bump its `?v=` in every HTML that loads it.
-2. Bump BOTH `version.json` `build` and `FLW_BUILD` in app.html (same number,
+2. Bump BOTH `assets/data/version.json` `build` and `FLW_BUILD` in app.html (same number,
    format `2026MMDDN`) — this triggers the in-app "new version available" banner.
 3. `git push origin main` → GitHub Pages serves in ~1 minute.
 

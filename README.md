@@ -19,7 +19,7 @@ what's in this repo is exactly what ships.
 ├── invoice.html        PUBLIC client-facing invoice page (token links in client emails)
 ├── report.html         PUBLIC shared-report page (token links)
 ├── 404.html
-├── manifest.json, sw.js, favicon.ico, version.json
+├── manifest.json, sw.js, favicon.ico
 ├── pages/              One folder per dashboard page (module + future page files)
 │   ├── dashboard/        Core: boot, CRM data, overview, leads, activity, calendar
 │   ├── team/             Team hub: chat, channels, tasks, presence, typing
@@ -41,7 +41,7 @@ what's in this repo is exactly what ships.
 1. **Root HTML files never move or rename** — Auth0 callbacks, emailed invoice/report
    links, the service-worker scope, and client bookmarks all point at them.
 2. **Authorization headers live only in `js/*.js`**, never inline in HTML (WAF rule).
-3. **Every deploy bumps `version.json` + `FLW_BUILD`** in app.html (update banner),
+3. **Every deploy bumps `assets/data/version.json` + `FLW_BUILD`** in app.html (update banner),
    and any changed JS file's `?v=` query in the HTML that loads it (cache-bust).
 4. Money is **integer cents** end-to-end; the Worker recomputes all totals server-side.
 5. Completed reports/invoices are **immutable snapshots** — never recompute after the fact.
