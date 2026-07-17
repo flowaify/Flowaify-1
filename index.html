@@ -192,7 +192,7 @@
     .wf-ind:hover { color: #0F172A; }
     .wf-ind:hover svg { color: #6A7382; }
     .wf-ind.active { background: #fff; color: #0F172A; box-shadow: 0 2px 10px -3px rgba(15,23,42,0.18), 0 1px 2px rgba(15,23,42,0.05); }
-    .wf-ind.active svg { color: var(--blue); }
+    .wf-ind.active svg { color: #0F172A; }
     .wf-ind:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
 
     /* Two-column main */
@@ -206,20 +206,20 @@
     .wf-feat:not(:last-child)::after { content: ''; position: absolute; left: 20px; right: 20px; bottom: 0; height: 1px; background: rgba(15,23,42,0.08); transition: opacity 0.3s ease; }
     .wf-feat:hover:not(.active) { background: rgba(255,255,255,0.5); }
     .wf-feat.active { background: #fff; box-shadow: 0 16px 38px -24px rgba(15,23,42,0.32), inset 0 1px 0 rgba(255,255,255,0.85); }
-    .wf-feat.active::before { content: ''; position: absolute; left: 0; top: 14px; bottom: 14px; width: 3px; border-radius: 0 3px 3px 0; background: var(--blue); }
+    .wf-feat.active::before { content: ''; position: absolute; left: 0; top: 14px; bottom: 14px; width: 3px; border-radius: 0 3px 3px 0; background: #334155; }
     .wf-feat.active::after { opacity: 0; }
     .wf-feat:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
     .wf-feat-ico { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
       background: rgba(15,23,42,0.05); color: #6A7382; transition: background 0.3s ease, color 0.3s ease; }
     .wf-feat-ico svg { width: 19px; height: 19px; }
-    .wf-feat.active .wf-feat-ico { background: rgba(0,87,255,0.09); color: var(--blue); }
+    .wf-feat.active .wf-feat-ico { background: rgba(15,23,42,0.06); color: #0F172A; }
     .wf-feat-txt { min-width: 0; }
     .wf-feat-title { display: block; font-size: 15px; font-weight: 650; color: #0F172A; letter-spacing: -0.01em; margin-bottom: 3px; }
     .wf-feat-desc { display: block; font-size: 13px; line-height: 1.5; color: #6A7382; }
 
     /* Right preview */
     .wf-preview { min-width: 0; }
-    .wf-frame { position: relative; border-radius: 16px; overflow: hidden; background: #fff; aspect-ratio: 3835 / 2156;
+    .wf-frame { position: relative; border-radius: 16px; overflow: hidden; background: #fff; aspect-ratio: 1920 / 959;
       border: 1px solid rgba(15,23,42,0.1); box-shadow: 0 44px 84px -44px rgba(15,23,42,0.36), 0 10px 26px -18px rgba(15,23,42,0.16); }
     .wf-frame img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: top left; display: block;
       transition: opacity 0.42s ease, transform 0.42s cubic-bezier(0.22,1,0.36,1); }
@@ -1667,8 +1667,8 @@
           <div class="wf-features" id="wf-features" role="tablist" aria-orientation="vertical" aria-label="Workflows"></div>
           <div class="wf-preview">
             <div class="wf-frame" id="wf-frame" role="tabpanel" aria-live="polite">
-              <!-- TODO: swap in real per-industry / per-workflow dashboard captures here. Until those exist, every view reuses the real light Leads dashboard screenshot. -->
-              <img id="wf-img" src="assets/images/hero-leads-light.png" alt="Flowaify dashboard" loading="lazy" decoding="async">
+              <!-- Real captured Flowaify dashboard pages, one per workflow — mapped in the IMG table in the controller script below. -->
+              <img id="wf-img" src="assets/images/clipboard_2026-07-17_15-37.png" alt="Flowaify Leads dashboard" loading="lazy" decoding="async">
             </div>
             <div class="wf-detail" id="wf-detail">
               <div class="wf-detail-title" id="wf-detail-title"></div>
@@ -4614,10 +4614,20 @@ updateNavHero();
   var root = document.getElementById('wf-root');
   if (!root) return;
 
-  // Real dashboard screenshots available today.
-  // TODO: capture per-industry / per-workflow dashboard views and point each feature's `img` at its own file.
-  // Until then every workflow reuses the real light Leads dashboard (no fabricated screens).
-  var IMG_LEADS = 'assets/images/hero-leads-light.png';
+  // Real dashboard screenshots — one captured Flowaify page per workflow.
+  // Each feature's `img` points at the page that supports that workflow.
+  var IMG = {
+    overview:    'assets/images/clipboard_2026-07-17_15-36.png',
+    leads:       'assets/images/clipboard_2026-07-17_15-37.png',
+    activity:    'assets/images/clipboard_2026-07-17_15-2.png',
+    calendar:    'assets/images/clipboard_2026-07-17_15-38.png',
+    automations: 'assets/images/clipboard_2026-07-17_15-3.png',
+    team:        'assets/images/clipboard_2026-07-17_15-4.png',
+    inbox:       'assets/images/clipboard_2026-07-17_15-5.png',
+    reports:     'assets/images/clipboard_2026-07-17_15-6.png',
+    analytics:   'assets/images/clipboard_2026-07-17_15-7.png',
+    invoices:    'assets/images/clipboard_2026-07-17_15-39.png'
+  };
 
   var S = 'fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"';
   var IC = {
@@ -4642,87 +4652,87 @@ updateNavHero();
   // ── Data structure: industries -> features -> { title, desc, img, detailTitle, detailText } ──
   var INDUSTRIES = [
     { id:'home', label:'Home Services', icon:IC.house, features:[
-      { id:'quotes', ic:'doc', title:'Quote Requests', desc:'Capture and organize new quote requests instantly.', img:IMG_LEADS,
+      { id:'quotes', ic:'doc', title:'Quote Requests', desc:'Capture and organize new quote requests instantly.', img:IMG.leads,
         detailTitle:'Capture more opportunities with every quote request.',
         detailText:'Flowaify helps home service teams capture, organize, and respond to quote requests quickly, so more interest turns into booked jobs.' },
-      { id:'sms', ic:'chat', title:'SMS Follow-Up', desc:'Keep prospects engaged after the first inquiry.', img:IMG_LEADS,
+      { id:'sms', ic:'chat', title:'SMS Follow-Up', desc:'Keep prospects engaged after the first inquiry.', img:IMG.automations,
         detailTitle:'Keep prospects engaged after the first response.',
         detailText:'Automated SMS follow-up helps your team stay top of mind without manually chasing every inquiry.' },
-      { id:'sched', ic:'cal', title:'Scheduling', desc:'Book jobs fast and reduce back-and-forth.', img:IMG_LEADS,
+      { id:'sched', ic:'cal', title:'Scheduling', desc:'Book jobs fast and reduce back-and-forth.', img:IMG.calendar,
         detailTitle:'Book jobs faster with less back-and-forth.',
         detailText:'Flowaify moves quotes to booked visits and keeps the calendar full while your crews stay on site.' },
-      { id:'pipe', ic:'funnel', title:'Pipeline Visibility', desc:"See every lead's status and next step in one view.", img:IMG_LEADS,
+      { id:'pipe', ic:'funnel', title:'Pipeline Visibility', desc:"See every lead's status and next step in one view.", img:IMG.overview,
         detailTitle:"See every lead's status and next step at a glance.",
         detailText:'Flowaify keeps every quote, follow-up, and booked job in one clear view, so nothing slips between calls.' },
-      { id:'report', ic:'chart', title:'Reporting', desc:'Track performance and close more jobs consistently.', img:IMG_LEADS,
+      { id:'report', ic:'chart', title:'Reporting', desc:'Track performance and close more jobs consistently.', img:IMG.reports,
         detailTitle:"Track what's working and close more jobs.",
         detailText:'Flowaify shows response times, booked jobs, and conversion trends so your team improves week over week.' }
     ]},
     { id:'agencies', label:'Agencies', icon:IC.brief, features:[
-      { id:'discovery', ic:'call', title:'Discovery Calls', desc:'Route new prospects into the right sales conversation.', img:IMG_LEADS,
+      { id:'discovery', ic:'call', title:'Discovery Calls', desc:'Route new prospects into the right sales conversation.', img:IMG.calendar,
         detailTitle:'Route new prospects into the right conversation.',
         detailText:'Flowaify captures inbound project inquiries and moves qualified prospects toward a booked discovery call.' },
-      { id:'email', ic:'chat', title:'Custom Email Follow-Up', desc:'Send tailored follow-ups without manual chasing.', img:IMG_LEADS,
+      { id:'email', ic:'chat', title:'Custom Email Follow-Up', desc:'Send tailored follow-ups without manual chasing.', img:IMG.automations,
         detailTitle:'Send tailored follow-ups without the manual chase.',
         detailText:'Flowaify follows up with the right message at the right time, so promising leads never go cold.' },
-      { id:'handoff', ic:'users', title:'Client Handoffs', desc:'Keep internal teams aligned after a lead converts.', img:IMG_LEADS,
+      { id:'handoff', ic:'users', title:'Client Handoffs', desc:'Keep internal teams aligned after a lead converts.', img:IMG.team,
         detailTitle:'Keep internal teams aligned after a lead converts.',
         detailText:'Flowaify hands new clients to the right people with the context they need to start delivery cleanly.' },
-      { id:'campaign', ic:'funnel', title:'Campaign Visibility', desc:'Track which channels are driving qualified leads.', img:IMG_LEADS,
+      { id:'campaign', ic:'funnel', title:'Campaign Visibility', desc:'Track which channels are driving qualified leads.', img:IMG.analytics,
         detailTitle:'See which channels drive qualified leads.',
         detailText:'Flowaify connects every inquiry back to its source, so you can invest in what is actually working.' },
-      { id:'reports', ic:'chart', title:'Reports', desc:'Generate clear performance summaries for your team.', img:IMG_LEADS,
+      { id:'reports', ic:'chart', title:'Reports', desc:'Generate clear performance summaries for your team.', img:IMG.reports,
         detailTitle:'Turn lead activity into clear reporting.',
         detailText:'Flowaify helps agencies understand which sources, campaigns, and follow-ups are moving opportunities forward.' }
     ]},
     { id:'clinics', label:'Clinics', icon:IC.cross, features:[
-      { id:'consult', ic:'doc', title:'Consultation Requests', desc:'Capture new patient or client inquiries in one place.', img:IMG_LEADS,
+      { id:'consult', ic:'doc', title:'Consultation Requests', desc:'Capture new patient or client inquiries in one place.', img:IMG.leads,
         detailTitle:'Capture every new patient inquiry in one place.',
         detailText:'Flowaify collects consultation requests from every channel, so your front desk never loses track of a new patient.' },
-      { id:'apptfu', ic:'chat', title:'Appointment Follow-Up', desc:'Reduce no-shows and missed opportunities.', img:IMG_LEADS,
+      { id:'apptfu', ic:'chat', title:'Appointment Follow-Up', desc:'Reduce no-shows and missed opportunities.', img:IMG.automations,
         detailTitle:'Keep consultations moving with less front desk pressure.',
         detailText:'Flowaify helps clinics follow up with inquiries, reduce missed opportunities, and keep appointments organized.' },
-      { id:'frontdesk', ic:'users', title:'Front Desk Support', desc:'Lower manual workload for incoming requests.', img:IMG_LEADS,
+      { id:'frontdesk', ic:'users', title:'Front Desk Support', desc:'Lower manual workload for incoming requests.', img:IMG.inbox,
         detailTitle:'Lower the manual load on your front desk.',
         detailText:'Flowaify handles first responses and reminders, so your team can focus on the patients in the room.' },
-      { id:'calendar', ic:'cal', title:'Calendar Activity', desc:'Keep consultations and follow-ups organized.', img:IMG_LEADS,
+      { id:'calendar', ic:'cal', title:'Calendar Activity', desc:'Keep consultations and follow-ups organized.', img:IMG.calendar,
         detailTitle:'Keep consultations and follow-ups organized.',
         detailText:'Flowaify keeps every appointment and follow-up in one clear calendar view your team can trust.' },
-      { id:'history', ic:'history', title:'Activity History', desc:'See what happened with every inquiry.', img:IMG_LEADS,
+      { id:'history', ic:'history', title:'Activity History', desc:'See what happened with every inquiry.', img:IMG.activity,
         detailTitle:'See what happened with every inquiry.',
         detailText:'Flowaify keeps a full record of each patient inquiry, so anyone on your team can pick up where the last person left off.' }
     ]},
     { id:'realestate', label:'Real Estate', icon:IC.build, features:[
-      { id:'buyer', ic:'call', title:'Buyer Inquiries', desc:'Respond quickly when interest is highest.', img:IMG_LEADS,
+      { id:'buyer', ic:'call', title:'Buyer Inquiries', desc:'Respond quickly when interest is highest.', img:IMG.activity,
         detailTitle:'Respond the moment buyer interest is highest.',
         detailText:'Flowaify answers new buyer inquiries instantly and routes them to the right agent before they move on.' },
-      { id:'seller', ic:'tag', title:'Seller Leads', desc:'Keep valuation and listing requests moving.', img:IMG_LEADS,
+      { id:'seller', ic:'tag', title:'Seller Leads', desc:'Keep valuation and listing requests moving.', img:IMG.overview,
         detailTitle:'Keep valuation and listing requests moving.',
         detailText:'Flowaify captures seller leads and follows up consistently, so listing opportunities do not slip away.' },
-      { id:'showing', ic:'cal', title:'Showing Requests', desc:'Organize appointments and next steps clearly.', img:IMG_LEADS,
+      { id:'showing', ic:'cal', title:'Showing Requests', desc:'Organize appointments and next steps clearly.', img:IMG.calendar,
         detailTitle:'Organize showings and next steps clearly.',
         detailText:'Flowaify keeps showing requests, confirmations, and follow-ups in one place, so nothing gets missed.' },
-      { id:'scoring', ic:'target', title:'Lead Scoring', desc:'Prioritize the opportunities most likely to move forward.', img:IMG_LEADS,
+      { id:'scoring', ic:'target', title:'Lead Scoring', desc:'Prioritize the opportunities most likely to move forward.', img:IMG.leads,
         detailTitle:'Prioritize the buyers and sellers most ready to move.',
         detailText:'Flowaify helps real estate teams focus on high-intent inquiries and track every opportunity clearly.' },
-      { id:'pipe', ic:'funnel', title:'Pipeline Visibility', desc:'Track buyers, sellers, and open opportunities.', img:IMG_LEADS,
+      { id:'pipe', ic:'funnel', title:'Pipeline Visibility', desc:'Track buyers, sellers, and open opportunities.', img:IMG.analytics,
         detailTitle:'Track buyers, sellers, and open opportunities.',
         detailText:'Flowaify gives your team one clear view of every active lead and exactly where it stands.' }
     ]},
     { id:'legal', label:'Legal Services', icon:IC.scale, features:[
-      { id:'intake', ic:'doc', title:'Intake Requests', desc:'Organize new case inquiries from the first message.', img:IMG_LEADS,
+      { id:'intake', ic:'doc', title:'Intake Requests', desc:'Organize new case inquiries from the first message.', img:IMG.leads,
         detailTitle:'Keep every case inquiry organized from the first message.',
         detailText:'Flowaify helps legal teams capture, qualify, and route new intake requests with better visibility.' },
-      { id:'qualify', ic:'check', title:'Qualification', desc:'Identify which inquiries need review first.', img:IMG_LEADS,
+      { id:'qualify', ic:'check', title:'Qualification', desc:'Identify which inquiries need review first.', img:IMG.overview,
         detailTitle:'Identify which inquiries need review first.',
         detailText:'Flowaify sorts new intake by priority, so your team spends time on the cases that matter most.' },
-      { id:'booking', ic:'cal', title:'Consultation Booking', desc:'Move qualified leads toward scheduled calls.', img:IMG_LEADS,
+      { id:'booking', ic:'cal', title:'Consultation Booking', desc:'Move qualified leads toward scheduled calls.', img:IMG.calendar,
         detailTitle:'Move qualified inquiries toward scheduled calls.',
         detailText:'Flowaify guides qualified leads to a booked consultation without the back-and-forth.' },
-      { id:'review', ic:'users', title:'Team Review', desc:'Assign follow-up and internal handoffs clearly.', img:IMG_LEADS,
+      { id:'review', ic:'users', title:'Team Review', desc:'Assign follow-up and internal handoffs clearly.', img:IMG.team,
         detailTitle:'Assign follow-up and internal handoffs clearly.',
         detailText:'Flowaify routes each inquiry to the right team member, so nothing waits without an owner.' },
-      { id:'report', ic:'chart', title:'Reporting', desc:'Track intake volume and follow-up performance.', img:IMG_LEADS,
+      { id:'report', ic:'chart', title:'Reporting', desc:'Track intake volume and follow-up performance.', img:IMG.reports,
         detailTitle:'Track intake volume and follow-up performance.',
         detailText:'Flowaify shows how many inquiries come in, how fast you respond, and where every case stands.' }
     ]}
@@ -4737,7 +4747,7 @@ updateNavHero();
   var reduce   = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   var state = { ind: 0, feat: 0 };
-  var curImg = IMG_LEADS;
+  var curImg = IMG.leads;
 
   function esc(t){ return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
