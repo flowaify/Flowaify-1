@@ -171,15 +171,27 @@
       .marquee-track > .tool-item:nth-child(n+9) { display: none; }
     }
     /* ── Built for your workflow — industry / workflow showcase ── */
-    #who-for { background: linear-gradient(180deg, #EEF0F4 0%, #E7EAEF 100%); padding: 104px 0 !important; }
-    .wf-wrap { max-width: 1200px; margin: 0 auto; padding: 0 40px; }
+    #who-for { position: relative; overflow: hidden; background: linear-gradient(180deg, #EEF0F4 0%, #E7EAEF 100%); padding: 104px 0 !important; }
+    #who-for::before { content: ''; position: absolute; inset: 0; pointer-events: none;
+      background: radial-gradient(1200px 720px at 50% 6%, rgba(255,255,255,0.85), transparent 60%), linear-gradient(180deg, #F1F3F7 0%, #E7EAEF 100%); }
+    #who-for::after { content: ''; position: absolute; inset: 0; pointer-events: none;
+      background: repeating-linear-gradient(90deg, rgba(15,23,42,0.05) 0 1px, transparent 1px 118px);
+      -webkit-mask-image: linear-gradient(180deg, transparent, #000 12%, #000 84%, transparent);
+              mask-image: linear-gradient(180deg, transparent, #000 12%, #000 84%, transparent); }
+    .wf-wrap { position: relative; z-index: 1; max-width: 1200px; margin: 0 auto; padding: 0 40px; }
     .wf-intro { max-width: 780px; margin: 0 auto; text-align: center; }
     .wf-eyebrow-top { font-size: 11px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--blue); }
     .wf-h2 { font-family: 'Montserrat','Plus Jakarta Sans',sans-serif; font-size: clamp(1.95rem, 3vw, 2.8rem); font-weight: 700; letter-spacing: -0.025em; line-height: 1.13; color: #0F172A; margin: 16px 0 18px; text-wrap: balance; }
     .wf-sub { font-size: 16.5px; line-height: 1.7; color: #55606F; max-width: 640px; margin: 0 auto; text-wrap: pretty; }
 
+    /* Raised canvas panel — the whole showcase sits on one machined surface */
+    .wf-canvas { position: relative; margin: 44px auto 0; padding: 34px 40px 42px; border-radius: 28px;
+      background: rgba(255,255,255,0.55); -webkit-backdrop-filter: blur(14px) saturate(150%); backdrop-filter: blur(14px) saturate(150%);
+      border: 1px solid rgba(15,23,42,0.08);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.85), 0 40px 90px -50px rgba(15,23,42,0.30), 0 12px 30px -22px rgba(15,23,42,0.14); }
+
     /* Industry tab bar */
-    .wf-industries { display: flex; justify-content: center; margin: 46px auto 0; }
+    .wf-industries { display: flex; justify-content: center; margin: 0 auto; }
     .wf-ind-bar { display: inline-flex; gap: 4px; padding: 6px; border-radius: 16px; max-width: 100%; overflow-x: auto; scrollbar-width: none;
       background: rgba(255,255,255,0.62); border: 1px solid rgba(15,23,42,0.08);
       box-shadow: inset 0 1px 0 rgba(255,255,255,0.7), 0 12px 32px -20px rgba(15,23,42,0.24);
@@ -187,16 +199,24 @@
     .wf-ind-bar::-webkit-scrollbar { display: none; }
     .wf-ind { display: inline-flex; align-items: center; gap: 10px; white-space: nowrap; flex-shrink: 0; padding: 12px 22px; min-height: 44px;
       border-radius: 11px; border: none; background: transparent; cursor: pointer; font-family: inherit; font-size: 14.5px; font-weight: 600; color: #55606F; letter-spacing: -0.01em;
-      transition: color 0.25s ease, background 0.25s ease, box-shadow 0.25s ease; }
+      transition: color 0.25s ease, background 0.25s ease, box-shadow 0.3s cubic-bezier(0.22,1,0.36,1), transform 0.3s cubic-bezier(0.22,1,0.36,1); }
     .wf-ind svg { width: 18px; height: 18px; color: #97A0AE; transition: color 0.25s ease; flex-shrink: 0; }
     .wf-ind:hover { color: #0F172A; }
     .wf-ind:hover svg { color: #6A7382; }
-    .wf-ind.active { background: #fff; color: #0F172A; box-shadow: 0 2px 10px -3px rgba(15,23,42,0.18), 0 1px 2px rgba(15,23,42,0.05); }
+    .wf-ind.active { background: #fff; color: #0F172A; transform: translateY(-1px); box-shadow: 0 4px 14px -4px rgba(15,23,42,0.2), 0 1px 2px rgba(15,23,42,0.05); }
     .wf-ind.active svg { color: #0F172A; }
     .wf-ind:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
 
     /* Two-column main */
-    .wf-main { display: grid; grid-template-columns: minmax(300px, 358px) 1fr; gap: 42px; align-items: start; margin-top: 44px; }
+    .wf-main { position: relative; display: grid; grid-template-columns: minmax(300px, 358px) 1fr; gap: 42px; align-items: start; margin-top: 40px; }
+
+    /* Hairline connector: active workflow -> dashboard */
+    .wf-connector { position: absolute; height: 1px; z-index: 3; pointer-events: none; opacity: 0;
+      background: linear-gradient(90deg, rgba(51,65,85,0.04), rgba(51,65,85,0.32));
+      transition: opacity 0.4s ease, top 0.5s cubic-bezier(0.22,1,0.36,1); }
+    .wf-connector.on { opacity: 1; }
+    .wf-connector::after { content: ''; position: absolute; right: -2px; top: 50%; width: 6px; height: 6px; border-radius: 50%;
+      background: #334155; transform: translateY(-50%); box-shadow: 0 0 0 3px rgba(51,65,85,0.10); }
 
     /* Left feature list */
     .wf-features { display: flex; flex-direction: column; }
@@ -217,10 +237,16 @@
     .wf-feat-title { display: block; font-size: 15px; font-weight: 650; color: #0F172A; letter-spacing: -0.01em; margin-bottom: 3px; }
     .wf-feat-desc { display: block; font-size: 13px; line-height: 1.5; color: #6A7382; }
 
-    /* Right preview */
+    /* Right preview — machined tray (double-bezel) around the real capture */
     .wf-preview { min-width: 0; }
-    .wf-frame { position: relative; border-radius: 16px; overflow: hidden; background: #fff; aspect-ratio: 1920 / 959;
-      border: 1px solid rgba(15,23,42,0.1); box-shadow: 0 44px 84px -44px rgba(15,23,42,0.36), 0 10px 26px -18px rgba(15,23,42,0.16); }
+    .wf-tray { position: relative; padding: 9px; border-radius: 22px; background: rgba(15,23,42,0.035);
+      border: 1px solid rgba(15,23,42,0.09);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.75), 0 46px 88px -46px rgba(15,23,42,0.38), 0 12px 30px -20px rgba(15,23,42,0.16);
+      transform-style: preserve-3d; will-change: transform; transition: transform 0.3s cubic-bezier(0.22,1,0.36,1); }
+    .wf-tray::after { content: ''; position: absolute; left: 8%; right: 8%; bottom: -24px; height: 40px; z-index: -1; pointer-events: none;
+      background: radial-gradient(60% 100% at 50% 0%, rgba(15,23,42,0.18), transparent 72%); filter: blur(12px); }
+    .wf-frame { position: relative; border-radius: 14px; overflow: hidden; background: #fff; aspect-ratio: 1920 / 959;
+      border: 1px solid rgba(15,23,42,0.08); box-shadow: 0 1px 2px rgba(15,23,42,0.08); }
     .wf-frame img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: top left; display: block;
       transition: opacity 0.42s ease, transform 0.42s cubic-bezier(0.22,1,0.36,1); }
     .wf-frame.swapping img { opacity: 0; transform: translateY(10px) scale(0.995); }
@@ -238,6 +264,7 @@
     .wf-cta-text { font-size: 14px; color: #55606F; line-height: 1.6; max-width: 580px; }
 
     @media (max-width: 980px) {
+      .wf-canvas { padding: 24px 22px 30px; border-radius: 22px; }
       .wf-main { grid-template-columns: 1fr; gap: 30px; }
       .wf-cta { flex-direction: column; text-align: center; align-items: center; }
       .wf-cta-text { max-width: none; }
@@ -245,6 +272,7 @@
     @media (max-width: 620px) {
       #who-for { padding: 68px 0 !important; }
       .wf-wrap { padding: 0 18px; }
+      .wf-canvas { padding: 18px 14px 24px; border-radius: 18px; }
       .wf-ind-bar { justify-content: flex-start; }
       .wf-feat { padding: 16px 14px; }
       .wf-feat:not(:last-child)::after { left: 14px; right: 14px; }
@@ -1660,20 +1688,25 @@
       </div>
 
       <div id="wf-root" class="reveal">
-        <div class="wf-industries">
-          <div class="wf-ind-bar" id="wf-ind-bar" role="tablist" aria-label="Industries"></div>
-        </div>
-        <div class="wf-main">
-          <div class="wf-features" id="wf-features" role="tablist" aria-orientation="vertical" aria-label="Workflows"></div>
-          <div class="wf-preview">
-            <div class="wf-frame" id="wf-frame" role="tabpanel" aria-live="polite">
-              <!-- Real captured Flowaify dashboard pages, one per workflow — mapped in the IMG table in the controller script below. -->
-              <img id="wf-img" src="assets/images/clipboard_2026-07-17_15-37.png" alt="Flowaify Leads dashboard" loading="lazy" decoding="async">
+        <div class="wf-canvas">
+          <div class="wf-industries">
+            <div class="wf-ind-bar" id="wf-ind-bar" role="tablist" aria-label="Industries"></div>
+          </div>
+          <div class="wf-main">
+            <div class="wf-features" id="wf-features" role="tablist" aria-orientation="vertical" aria-label="Workflows"></div>
+            <div class="wf-preview">
+              <div class="wf-tray" id="wf-tray">
+                <div class="wf-frame" id="wf-frame" role="tabpanel" aria-live="polite">
+                  <!-- Real captured Flowaify dashboard pages, one per workflow — mapped in the IMG table in the controller script below. -->
+                  <img id="wf-img" src="assets/images/clipboard_2026-07-17_15-37.png" alt="Flowaify Leads dashboard" loading="lazy" decoding="async">
+                </div>
+              </div>
+              <div class="wf-detail" id="wf-detail">
+                <div class="wf-detail-title" id="wf-detail-title"></div>
+                <p class="wf-detail-text" id="wf-detail-text"></p>
+              </div>
             </div>
-            <div class="wf-detail" id="wf-detail">
-              <div class="wf-detail-title" id="wf-detail-title"></div>
-              <p class="wf-detail-text" id="wf-detail-text"></p>
-            </div>
+            <div class="wf-connector" id="wf-connector" aria-hidden="true"></div>
           </div>
         </div>
       </div>
@@ -4745,6 +4778,10 @@ updateNavHero();
   var dTitle   = document.getElementById('wf-detail-title');
   var dText    = document.getElementById('wf-detail-text');
   var reduce   = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var canvas    = document.querySelector('.wf-canvas');
+  var tray      = document.getElementById('wf-tray');
+  var preview   = document.querySelector('.wf-preview');
+  var connector = document.getElementById('wf-connector');
 
   var state = { ind: 0, feat: 0 };
   var curImg = IMG.leads;
@@ -4798,6 +4835,7 @@ updateNavHero();
     });
     renderFeatures();
     renderPreview(true);
+    requestAnimationFrame(positionConnector);
   }
   function selectFeature(i) {
     if (i === state.feat) return;
@@ -4808,6 +4846,7 @@ updateNavHero();
       b.tabIndex = k === i ? 0 : -1;
     });
     renderPreview(true);
+    requestAnimationFrame(positionConnector);
   }
 
   indBar.addEventListener('click', function (e) {
@@ -4830,9 +4869,36 @@ updateNavHero();
     selectFeature(n); featWrap.children[n].focus();
   });
 
+  // Hairline connector — links the active workflow to the dashboard (desktop two-column only)
+  function positionConnector() {
+    if (!connector || !preview) return;
+    if (!window.matchMedia('(min-width: 981px)').matches) { connector.classList.remove('on'); return; }
+    var active = featWrap.children[state.feat];
+    if (!active) { connector.classList.remove('on'); return; }
+    var featRight = featWrap.offsetLeft + featWrap.offsetWidth;
+    connector.style.left = featRight + 'px';
+    connector.style.width = Math.max(0, preview.offsetLeft - featRight) + 'px';
+    connector.style.top = (active.offsetTop + active.offsetHeight / 2) + 'px';
+    connector.classList.add('on');
+  }
+
+  // Tasteful mouse-parallax tilt on the machined tray (desktop pointers, motion allowed)
+  if (canvas && tray && preview && !reduce && window.matchMedia('(pointer: fine)').matches) {
+    preview.addEventListener('pointermove', function (e) {
+      var r = tray.getBoundingClientRect();
+      var dx = Math.max(-1, Math.min(1, (e.clientX - (r.left + r.width / 2)) / (r.width / 2)));
+      var dy = Math.max(-1, Math.min(1, (e.clientY - (r.top + r.height / 2)) / (r.height / 2)));
+      tray.style.transform = 'perspective(1200px) rotateX(' + (-dy * 2.2).toFixed(2) + 'deg) rotateY(' + (dx * 2.6).toFixed(2) + 'deg)';
+    });
+    preview.addEventListener('pointerleave', function () { tray.style.transform = ''; });
+  }
+
   buildIndustries();
   renderFeatures();
   renderPreview(false);
+  requestAnimationFrame(positionConnector);
+  window.addEventListener('load', positionConnector);
+  window.addEventListener('resize', function () { requestAnimationFrame(positionConnector); }, { passive: true });
 })();
 </script>
 </body>
