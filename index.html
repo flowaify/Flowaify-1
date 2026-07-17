@@ -176,18 +176,18 @@
     .wf-eyebrow-top { font-size: 11px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--blue); }
     .wf-h2 { font-family: 'Montserrat','Plus Jakarta Sans',sans-serif; font-size: clamp(2rem, 3vw, 2.95rem); font-weight: 700; letter-spacing: -0.025em; line-height: 1.1; color: #0F172A; margin: 14px 0 18px; }
     .wf-sub { font-size: 16.5px; line-height: 1.7; color: #55606F; max-width: 560px; margin: 0 auto; }
-    .wf-stage { position: relative; max-width: 1120px; margin: 48px auto 0; padding: 0 58px; }
-    .wf-peek { position: absolute; top: 50%; transform: translateY(-50%); width: 176px; z-index: 1; cursor: pointer;
-      background: rgba(255,255,255,0.42); border: 1px solid rgba(255,255,255,0.55); border-radius: 15px; padding: 20px 18px;
-      -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); opacity: 0.7; transition: opacity 0.3s, transform 0.3s; box-shadow: 0 16px 36px -22px rgba(15,23,42,0.2); }
-    .wf-peek:hover { opacity: 1; transform: translateY(-50%) scale(1.02); }
-    .wf-peek-left { left: -22px; } .wf-peek-right { right: -22px; }
-    .wf-peek .pk-name { font-family: 'Montserrat',sans-serif; font-size: 15px; font-weight: 700; letter-spacing: -0.01em; color: #46505F; line-height: 1.3; }
-    .wf-peek .pk-hint { font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #A0A8B4; margin-bottom: 7px; }
-    .wf-peek.hidden { opacity: 0; pointer-events: none; }
-    #wf-active { position: relative; z-index: 3; background: rgba(255,255,255,0.62); -webkit-backdrop-filter: blur(18px) saturate(160%); backdrop-filter: blur(18px) saturate(160%);
-      border: 1px solid rgba(255,255,255,0.78); border-radius: 20px; padding: 36px 40px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.85), 0 34px 74px -30px rgba(15,23,42,0.3);
-      transition: opacity 0.32s ease, transform 0.42s cubic-bezier(0.16,1,0.3,1); }
+    .wf-stage { position: relative; max-width: 1120px; margin: 48px auto 0; }
+    .wf-viewport { overflow: hidden; padding: 26px 4px; }
+    .wf-track { display: flex; align-items: center; gap: 30px; transition: transform 0.72s cubic-bezier(0.22,1,0.36,1), filter 0.3s ease; will-change: transform; }
+    .wf-track.moving { filter: blur(2.6px); }
+    .wf-card { flex: 0 0 min(900px, 92vw); box-sizing: border-box; cursor: pointer;
+      background: rgba(255,255,255,0.64); -webkit-backdrop-filter: blur(18px) saturate(160%); backdrop-filter: blur(18px) saturate(160%);
+      border: 1px solid rgba(255,255,255,0.72); border-radius: 20px; padding: 36px 40px;
+      box-shadow: 0 24px 60px -30px rgba(15,23,42,0.26);
+      transform: scale(0.9); opacity: 0.42; filter: blur(1.4px);
+      transition: transform 0.62s cubic-bezier(0.22,1,0.36,1), opacity 0.62s ease, filter 0.62s ease, box-shadow 0.62s ease; }
+    .wf-card.active { transform: scale(1); opacity: 1; filter: none; cursor: default;
+      border-color: rgba(255,255,255,0.86); box-shadow: inset 0 1px 0 rgba(255,255,255,0.85), 0 34px 76px -30px rgba(15,23,42,0.32); }
     .wf-grid { display: grid; grid-template-columns: 1.02fr 0.98fr; gap: 40px; align-items: start; }
     .wf-cat { font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #7A8494; margin-bottom: 12px; }
     .wf-title { font-family: 'Montserrat',sans-serif; font-size: clamp(1.35rem, 1.9vw, 1.72rem); font-weight: 700; letter-spacing: -0.02em; line-height: 1.2; color: #0F172A; margin-bottom: 14px; }
@@ -228,13 +228,12 @@
     .wf-custom-ico { width: 60px; height: 60px; border-radius: 15px; flex-shrink: 0; display: flex; align-items: center; justify-content: center;
       background: rgba(0,87,255,0.08); border: 1px solid rgba(0,87,255,0.16); color: var(--blue); }
     @media (max-width: 960px) {
-      .wf-peek { display: none; }
       .wf-stage { padding: 0 46px; }
       .wf-grid { grid-template-columns: 1fr; gap: 24px; }
       .wf-custom { flex-direction: column; text-align: center; margin: 40px 16px 0; padding: 26px 22px; }
     }
-    @media (max-width: 600px) { #who-for { padding: 60px 0 !important; } #wf-active { padding: 26px 22px; } .wf-arrow { display: none; } }
-    @media (prefers-reduced-motion: reduce) { #wf-active, .wf-peek, .wf-arrow, .wf-dot { transition: none; } }
+    @media (max-width: 600px) { #who-for { padding: 60px 0 !important; } .wf-card { padding: 26px 22px; } .wf-arrow { display: none; } }
+    @media (prefers-reduced-motion: reduce) { .wf-track, .wf-card, .wf-arrow, .wf-dot { transition: none; } .wf-track.moving { filter: none; } }
 
     /* Reveal */
     .reveal {
@@ -1644,9 +1643,7 @@
     </div>
 
     <div class="wf-stage reveal">
-      <div class="wf-peek wf-peek-left" id="wf-peek-l"><div class="pk-hint">Prev</div><div class="pk-name"></div></div>
-      <div id="wf-active"></div>
-      <div class="wf-peek wf-peek-right" id="wf-peek-r"><div class="pk-hint">Next</div><div class="pk-name"></div></div>
+      <div class="wf-viewport"><div class="wf-track" id="wf-track"></div></div>
       <button class="wf-arrow wf-prev" id="wf-prev" aria-label="Previous industry"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button>
       <button class="wf-arrow wf-next" id="wf-next" aria-label="Next industry"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></button>
     </div>
@@ -4584,52 +4581,42 @@ updateNavHero();
 })();
 </script>
 <script>
-// ─── WHO WE BUILD FOR — industry showcase ───────────────────────────────────
+// ─── WHO WE BUILD FOR — industry showcase (sliding track) ───────────────────
 (function () {
-  var stage = document.getElementById('wf-active');
-  if (!stage) return;
+  var track = document.getElementById('wf-track');
+  if (!track) return;
 
   var IND = [
-    { cat:'Agencies',
-      title:'Discovery calls and client onboarding pile up fast.',
+    { cat:'Agencies', title:'Discovery calls and client onboarding pile up fast.',
       desc:'Prospects, discovery bookings, and new-client intake arrive across channels while you deliver work. Flowaify captures every inquiry, books the call, and runs onboarding follow-up automatically.',
       checks:['Instant replies to inbound project inquiries','Discovery calls booked without the back-and-forth','Onboarding steps followed up until complete'],
       lead:{title:'New Project Inquiry', sub:'Brand & website retainer', src:'Contact Form', time:'3m ago'},
       follow:{label:'Email Follow-Up', state:'Scheduled', detail:'Proposal recap in 10 min'},
-      cal:{label:'Discovery Call', when:'Tomorrow, 11:00 AM'},
-      score:{num:82, label:'Hot'} },
-    { cat:'Home Services',
-      title:'When your team is in the field, new leads still need a fast response.',
+      cal:{label:'Discovery Call', when:'Tomorrow, 11:00 AM'}, score:{num:82, label:'Hot'} },
+    { cat:'Home Services', title:'When your team is in the field, new leads still need a fast response.',
       desc:'Quote requests and missed calls come in while you are on the job. Flowaify responds the moment a form is submitted, follows up automatically, and keeps your schedule full while the crew stays on task.',
       checks:['Faster replies to form and quote requests','Follow-up for leads that do not answer right away','Clear visibility into booked jobs and open work'],
       lead:{title:'New Quote Request', sub:'Kitchen faucet installation', src:'Website Form', time:'2m ago'},
       follow:{label:'SMS Follow-Up', state:'Scheduled', detail:'First follow-up in 5 min'},
-      cal:{label:'Technician Visit', when:'Today, 2:00 PM'},
-      score:{num:78, label:'Warm'} },
-    { cat:'Med Spas & Clinics',
-      title:'Consultation requests arrive after hours and overwhelm the front desk.',
+      cal:{label:'Technician Visit', when:'Today, 2:00 PM'}, score:{num:78, label:'Warm'} },
+    { cat:'Med Spas & Clinics', title:'Consultation requests arrive after hours and overwhelm the front desk.',
       desc:'Inquiries come through Instagram, forms, and referrals around the clock. Flowaify answers every one 24/7, collects intake details, and confirms appointments, cutting no-shows without extra desk hours.',
       checks:['24/7 replies to consultation inquiries','Intake collected before the appointment','Reminders that reduce no-shows'],
       lead:{title:'New Consultation', sub:'Botox & filler consult', src:'Instagram DM', time:'just now'},
       follow:{label:'SMS Reminder', state:'Scheduled', detail:'24h before appointment'},
-      cal:{label:'Consultation', when:'Thu, 4:30 PM'},
-      score:{num:74, label:'Warm'} },
-    { cat:'Real Estate',
-      title:'Buyer and seller inquiries go cold the moment an agent is on site.',
+      cal:{label:'Consultation', when:'Thu, 4:30 PM'}, score:{num:74, label:'Warm'} },
+    { cat:'Real Estate', title:'Buyer and seller inquiries go cold the moment an agent is on site.',
       desc:'Leads from portals and forms need a same-minute reply. Flowaify responds instantly, routes to the right agent, syncs the CRM, and keeps following up until they engage.',
       checks:['Instant response to buyer and seller inquiries','Routing to the right agent automatically','Follow-up that runs while agents show homes'],
       lead:{title:'New Buyer Lead', sub:'3-bed listing on Maple Ave', src:'Zillow', time:'1m ago'},
       follow:{label:'Auto-Reply Sent', state:'Delivered', detail:'Routed to Sarah M.'},
-      cal:{label:'Showing', when:'Sat, 1:00 PM'},
-      score:{num:85, label:'Hot'} },
-    { cat:'Mortgage',
-      title:'Pre-approval inquiries need a same-minute response you cannot always give.',
+      cal:{label:'Showing', when:'Sat, 1:00 PM'}, score:{num:85, label:'Hot'} },
+    { cat:'Mortgage', title:'Pre-approval inquiries need a same-minute response you cannot always give.',
       desc:'Brokers live on calls and in consultations. Flowaify acknowledges every inquiry instantly, sends qualification questions, creates the CRM contact, and follows up until they book.',
       checks:['Instant acknowledgment of every inquiry','Qualification questions sent automatically','Follow-up until the lead reaches the calendar'],
       lead:{title:'Pre-Approval Request', sub:'First-time buyer, $420k', src:'Landing Page', time:'4m ago'},
       follow:{label:'Qualification Sent', state:'Awaiting reply', detail:'5 questions texted'},
-      cal:{label:'Broker Call', when:'Today, 3:15 PM'},
-      score:{num:80, label:'Hot'} }
+      cal:{label:'Broker Call', when:'Today, 3:15 PM'}, score:{num:80, label:'Hot'} }
   ];
 
   var CK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
@@ -4637,16 +4624,13 @@ updateNavHero();
   var I_CAL = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>';
   var MODICO = {
     'Inbox':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>',
-    'SMS':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
-    'Calendar':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>',
+    'SMS':I_MSG, 'Calendar':I_CAL,
     'Team':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="3.5"/><path d="M21 21v-2a4 4 0 0 0-3-3.85"/></svg>',
     'Reports':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3v18h18"/><path d="M7 14l3-3 3 3 5-5"/></svg>',
     'AI Agent':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M12 3l1.6 4.4L18 9l-4.4 1.6L12 15l-1.6-4.4L6 9l4.4-1.6z"/></svg>'
   };
-  var MODNAMES = ['Inbox','SMS','Calendar','Team','Reports','AI Agent'];
-  var MODS = '<span class="lbl">Flowaify handles</span>' + MODNAMES.map(function (m) {
-    return '<span class="wf-mod">' + MODICO[m] + m + '</span>';
-  }).join('');
+  var MODS = '<span class="lbl">Flowaify handles</span>' + ['Inbox','SMS','Calendar','Team','Reports','AI Agent'].map(function (m) {
+    return '<span class="wf-mod">' + MODICO[m] + m + '</span>'; }).join('');
 
   function esc(t) { return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
   function gauge(n) {
@@ -4669,14 +4653,18 @@ updateNavHero();
         '<div class="wf-widget wf-row"><span class="wf-w-ico">' + I_MSG + '</span><div><div class="wf-w-title2">' + esc(d.follow.label) + '</div><div class="wf-meta">' + esc(d.follow.state) + ' · ' + esc(d.follow.detail) + '</div></div></div>' +
         '<div class="wf-widget wf-row"><span class="wf-w-ico">' + I_CAL + '</span><div><div class="wf-w-title2">' + esc(d.cal.label) + '</div><div class="wf-meta">' + esc(d.cal.when) + '</div></div></div>' +
         '<div class="wf-widget wf-score">' + gauge(d.score.num) + '<div><div class="wf-w-title2">Lead Score</div><div class="wf-meta">' + esc(d.score.label) + '</div></div></div>' +
-      '</div></div>' +
-      '<div class="wf-modules">' + MODS + '</div>';
+      '</div></div><div class="wf-modules">' + MODS + '</div>';
   }
 
   var N = IND.length, idx = 0;
   var prevBtn = document.getElementById('wf-prev'), nextBtn = document.getElementById('wf-next');
-  var peekL = document.getElementById('wf-peek-l'), peekR = document.getElementById('wf-peek-r');
   var dotsWrap = document.getElementById('wf-dots');
+  var cards = IND.map(function (d, i) {
+    var el = document.createElement('div');
+    el.className = 'wf-card'; el.innerHTML = build(i);
+    el.addEventListener('click', function () { go(i); });
+    track.appendChild(el); return el;
+  });
   IND.forEach(function (d, i) {
     var b = document.createElement('button');
     b.className = 'wf-dot'; b.setAttribute('aria-label', d.cat);
@@ -4685,35 +4673,29 @@ updateNavHero();
   });
   var dots = Array.prototype.slice.call(dotsWrap.children);
 
-  function setPeek(el, j) {
-    if (j < 0 || j >= N) { el.classList.add('hidden'); el.onclick = null; return; }
-    el.classList.remove('hidden');
-    el.querySelector('.pk-name').textContent = IND[j].cat;
-    el.onclick = function () { go(j); };
+  function layout() {
+    var vpW = track.parentElement.clientWidth;
+    var cw = cards[0].offsetWidth;
+    var gap = parseFloat(getComputedStyle(track).columnGap || getComputedStyle(track).gap) || 30;
+    track.style.transform = 'translateX(' + (vpW / 2 - (idx * (cw + gap) + cw / 2)) + 'px)';
+    cards.forEach(function (c, i) { c.classList.toggle('active', i === idx); });
+    dots.forEach(function (d, i) { d.classList.toggle('active', i === idx); });
+    if (prevBtn) prevBtn.disabled = idx === 0;
+    if (nextBtn) nextBtn.disabled = idx === N - 1;
   }
-  function frame(i) {
-    dots.forEach(function (d, k) { d.classList.toggle('active', k === i); });
-    if (prevBtn) prevBtn.disabled = i === 0;
-    if (nextBtn) nextBtn.disabled = i === N - 1;
-    setPeek(peekL, i - 1); setPeek(peekR, i + 1);
-  }
-  function paint(i) { stage.innerHTML = build(i); frame(i); }
-  function go(i, dir) {
+  var settleTimer = null;
+  function go(i) {
     i = Math.max(0, Math.min(N - 1, i));
     if (i === idx) return;
-    dir = i > idx ? 1 : -1;
-    stage.style.opacity = '0';
-    stage.style.transform = 'translateX(' + (dir > 0 ? -16 : 16) + 'px)';
-    setTimeout(function () {
-      idx = i; paint(i);
-      stage.style.transition = 'none';
-      stage.style.transform = 'translateX(' + (dir > 0 ? 16 : -16) + 'px)';
-      void stage.offsetWidth;
-      stage.style.transition = '';
-      stage.style.opacity = '1';
-      stage.style.transform = 'translateX(0)';
-    }, 220);
+    idx = i;
+    track.classList.add('moving');
+    layout();
+    clearTimeout(settleTimer);
+    settleTimer = setTimeout(function () { track.classList.remove('moving'); }, 780);
   }
+  track.addEventListener('transitionend', function (e) {
+    if (e.propertyName === 'transform') track.classList.remove('moving');
+  });
   if (prevBtn) prevBtn.addEventListener('click', function () { go(idx - 1); });
   if (nextBtn) nextBtn.addEventListener('click', function () { go(idx + 1); });
   var wrap = document.querySelector('.wf-stage');
@@ -4725,15 +4707,16 @@ updateNavHero();
     });
   }
   var sx = null;
-  stage.addEventListener('touchstart', function (e) { sx = e.touches[0].clientX; }, { passive: true });
-  stage.addEventListener('touchend', function (e) {
+  track.addEventListener('touchstart', function (e) { sx = e.touches[0].clientX; }, { passive: true });
+  track.addEventListener('touchend', function (e) {
     if (sx === null) return;
     var dx = e.changedTouches[0].clientX - sx;
     if (Math.abs(dx) > 45) go(idx + (dx < 0 ? 1 : -1));
     sx = null;
   }, { passive: true });
-
-  paint(0);
+  window.addEventListener('resize', layout, { passive: true });
+  window.addEventListener('load', layout);
+  layout();
 })();
 </script>
 </body>
