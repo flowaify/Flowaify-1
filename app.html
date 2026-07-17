@@ -206,6 +206,11 @@
     .empty-state i[class*="ph-"] { font-size: 24px; }
     .exq-btn i[class*="ph-"] { font-size: 13px; }
     .qa-btn i[class*="ph-"] { font-size: 14px; }
+    .row-act i[class*="ph-"] { font-size: 15px; }
+    .li-icon i[class*="ph-"] { font-size: 15px; }
+    .lp-act-btn i[class*="ph-"] { font-size: 14px; }
+    .lead-table .status-chip i[class*="ph-"] { font-size: 12px; }
+    .card-ctx-item i[class*="ph-"] { font-size: 14px; }
     .sec-link i[class*="ph-"], .btn-mini i[class*="ph-"], .cmd-primary i[class*="ph-"] { font-size: 13px; }
     [data-theme="dark"] .card { background-image: linear-gradient(180deg, rgba(255,255,255,0.035), rgba(255,255,255,0) 16%); }
     .skel { position: relative; overflow: hidden; }
@@ -579,7 +584,7 @@
     .gauge-foot { display: flex; justify-content: space-between; width: 100%; margin-top: 14px; font-size: 11px; color: var(--text-m); }
 
     /* AVATARS */
-    .lead-avatar { width: 26px; height: 26px; border-radius: 50%; color: #fff; font-size: 10px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .lead-avatar { width: 26px; height: 26px; border-radius: 8px; color: #fff; font-size: 10px; font-weight: 650; letter-spacing: 0.02em; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
     .lead-cell { display: flex; align-items: center; gap: 9px; }
 
     /* SORTABLE HEADERS */
@@ -826,7 +831,7 @@
 
     /* STATUS PICKER + NOTE (lead detail) */
     .status-picker { display: flex; gap: 6px; flex-wrap: wrap; }
-    .status-chip { border: 1px solid var(--input-border); background: transparent; border-radius: 4px; font-family: inherit; font-size: 10.5px; font-weight: 700; letter-spacing: 0.3px; padding: 5px 10px; cursor: pointer; color: var(--text-m); transition: all 0.12s; }
+    .status-chip { border: 1px solid var(--input-border); background: transparent; border-radius: var(--r-input); font-family: inherit; font-size: 10.5px; font-weight: 650; letter-spacing: 0.05em; padding: 5px 10px; cursor: pointer; color: var(--text-m); transition: border-color 0.12s, background 0.12s, color 0.12s, transform 0.1s; }
     .status-chip:hover { color: var(--text); border-color: var(--text-m); }
     .status-chip.sc-hot.active    { background: var(--red-dim);    color: var(--red);    border-color: rgba(220,38,38,0.4); }
     .status-chip.sc-warm.active   { background: var(--amber-dim);  color: #d97706;       border-color: rgba(217,119,6,0.4); }
@@ -2026,8 +2031,11 @@
     .cols-item:hover { background: var(--hover); }
     .cols-item input { accent-color: var(--blue); pointer-events: none; }
     /* lead intelligence panel */
-    .li-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 12px 14px; }
-    .li-card { border: 1px solid var(--border); border-radius: 5px; padding: 11px 12px; display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+    .li-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; padding: 4px 14px 8px; }
+    .li-card { border: none; border-radius: 0; padding: 11px 10px; display: flex; flex-direction: column; gap: 3px; min-width: 0; border-bottom: 1px solid var(--border); }
+    .li-card:nth-child(odd) { border-right: 1px solid var(--border); padding-right: 14px; }
+    .li-card:nth-child(even) { padding-left: 14px; }
+    .li-card:nth-last-child(-n+2) { border-bottom: none; }
     .li-icon { display: flex; margin-bottom: 3px; }
     .li-icon i, .li-icon svg { width: 15px; height: 15px; }
     .li-num { font-size: 19px; font-weight: 700; color: var(--text); letter-spacing: -0.5px; line-height: 1.1; }
@@ -2047,7 +2055,8 @@
     .lp-sec { padding: 11px 16px; border-top: 1px solid var(--border); }
     .lp-sec-label { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-m); margin-bottom: 8px; }
     .lp-actions { display: flex; flex-direction: column; gap: 7px; }
-    .lp-act-btn { display: flex; align-items: center; gap: 9px; padding: 9px 12px; border: 1px solid var(--border); border-radius: 5px; background: transparent; font-size: 12px; font-weight: 600; color: var(--text); cursor: pointer; font-family: inherit; transition: background 0.12s, border-color 0.12s; }
+    .lp-act-btn { display: flex; align-items: center; gap: 9px; padding: 9px 12px; border: 1px solid var(--border); border-radius: var(--r-input); background: transparent; font-size: 12px; font-weight: 600; color: var(--text); cursor: pointer; font-family: inherit; transition: background 0.12s, border-color 0.12s, transform 0.1s; }
+    .lp-act-btn:hover { border-color: var(--blue-border); }
     .lp-act-btn:hover { background: var(--blue-dim); border-color: var(--blue); }
     .lp-act-btn i, .lp-act-btn svg { width: 14px; height: 14px; color: var(--blue); flex-shrink: 0; }
     .lp-tl-item { display: flex; gap: 10px; padding: 4px 0; }
@@ -2162,7 +2171,7 @@
     .skel-table tbody tr { transition: background 0.12s; }
     .skel-table tbody tr:hover { background: var(--hover); }
     #full-leads-tbody tr { cursor: pointer; }
-    tr.row-selected { background: rgba(0,87,255,0.04) !important; box-shadow: inset 2px 0 0 var(--blue); }
+    tr.row-selected { background: var(--blue-dim) !important; box-shadow: inset 2.5px 0 0 var(--blue); }
     .skel-bar { height: 11px; border-radius: 5px; }
     .table-empty-overlay {
       position: absolute; inset: 0; top: 38px; display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -4111,7 +4120,7 @@ const AUTH0_CLIENT_ID = 'tx74Owqn3jVeSaVuxfFHsKloqbPqfAmN';
 /* ── Update check: version.json is bumped on every deploy; when a newer
    build is live, a quiet banner offers a refresh (ends the hard-refresh
    guessing game for clients). ── */
-const FLW_BUILD = 202607174; window.FLW_BUILD = FLW_BUILD;
+const FLW_BUILD = 202607175; window.FLW_BUILD = FLW_BUILD;
 async function flwVersionCheck() {
   try {
     const r = await fetch('assets/data/version.json?t=' + Date.now(), { cache: 'no-store' });
