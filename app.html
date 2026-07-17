@@ -21,6 +21,31 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <script>
+  /* Phosphor migration shim: every createIcons() call first converts mapped
+     data-lucide icons to Phosphor Light classes; unmapped names fall back to
+     Lucide SVGs so nothing ever renders blank. */
+  (function () {
+    var PH = {"activity": "pulse", "alert-circle": "warning-circle", "alert-triangle": "warning", "arrow-up": "arrow-up", "at-sign": "at", "bar-chart-2": "chart-bar", "bell": "bell", "bell-off": "bell-slash", "calendar": "calendar-blank", "calendar-check": "calendar-check", "calendar-days": "calendar-dots", "check": "check", "check-circle": "check-circle", "check-square": "check-square", "chevron-down": "caret-down", "chevron-left": "caret-left", "chevron-right": "caret-right", "clock": "clock", "columns-3": "columns", "copy": "copy", "database": "database", "dollar-sign": "currency-dollar", "download": "download-simple", "external-link": "arrow-square-out", "eye": "eye", "eye-off": "eye-slash", "file": "file", "file-bar-chart": "chart-donut", "file-text": "file-text", "file-x": "file-x", "filter": "funnel", "flame": "fire", "globe": "globe", "history": "clock-counter-clockwise", "info": "info", "layout-dashboard": "layout", "layout-grid": "squares-four", "layout-panel-left": "sidebar", "life-buoy": "lifebuoy", "lightbulb": "lightbulb", "link": "link", "list": "list-bullets", "list-x": "x-circle", "lock": "lock", "log-out": "sign-out", "mail": "envelope-simple", "mail-open": "envelope-open", "menu": "list", "message-square": "chats", "mic": "microphone", "monitor": "monitor", "moon": "moon", "sun": "sun", "more-vertical": "dots-three-vertical", "mouse-pointer-click": "cursor-click", "panel-right": "sidebar-simple", "pause-circle": "pause-circle", "pen-line": "pencil-simple-line", "pencil": "pencil-simple", "percent": "percent", "phone-call": "phone-call", "pie-chart": "chart-pie", "plus": "plus", "printer": "printer", "reply": "arrow-bend-up-left", "rotate-ccw": "arrow-counter-clockwise", "search": "magnifying-glass", "search-x": "magnifying-glass", "settings-2": "sliders", "share-2": "share-network", "sparkles": "sparkle", "square": "square", "trash-2": "trash", "trending-up": "trend-up", "user-circle": "user-circle", "user-plus": "user-plus", "user-x": "user-minus", "users": "users", "users-round": "users-three", "x": "x", "zap": "lightning", "home": "house", "settings": "gear", "refresh-cw": "arrows-clockwise", "wifi-off": "wifi-slash", "inbox": "tray", "chart-column": "chart-line-up", "workflow": "flow-arrow", "repeat-2": "repeat", "shield-alert": "shield-warning", "target": "target", "file-plus-2": "file-plus", "columns": "columns", "dots-six-vertical": "dots-six-vertical", "git-branch": "git-branch", "flask-conical": "flask", "banknote": "money", "undo-2": "arrow-u-up-left", "receipt": "receipt", "archive": "archive", "archive-restore": "archive-tray", "table": "table", "link-2": "link-simple", "layers": "stack", "briefcase": "briefcase", "sliders-horizontal": "sliders-horizontal", "gauge": "gauge", "hourglass": "hourglass", "user-check": "user-check", "thermometer": "thermometer", "snowflake": "snowflake", "x-circle": "x-circle", "message-circle": "chat-circle", "scroll-text": "scroll", "play": "play", "pause": "pause", "ban": "prohibit", "file-search": "file-magnifying-glass", "send": "paper-plane-tilt", "bar-chart": "chart-bar"};
+    function phConvert() {
+      document.querySelectorAll('i[data-lucide]').forEach(function (el) {
+        var ph = PH[el.getAttribute('data-lucide')];
+        if (!ph) return;
+        el.removeAttribute('data-lucide');
+        el.classList.add('ph-light', 'ph-' + ph);
+      });
+    }
+    function wrap() {
+      if (!window.lucide || !lucide.createIcons || lucide.__phWrapped) return;
+      var orig = lucide.createIcons.bind(lucide);
+      lucide.createIcons = function (opts) { phConvert(); try { orig(opts); } catch (e) {} };
+      lucide.__phWrapped = true;
+      phConvert();
+    }
+    wrap();
+    document.addEventListener('DOMContentLoaded', wrap);
+  })();
+  </script>
   <script src="https://cdn.auth0.com/js/auth0-spa-js/2.18/auth0-spa-js.production.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
   <style>
@@ -189,12 +214,12 @@
     @keyframes skelSweep { to { transform: translateX(100%); } }
     /* spotlight border: cursor-lit edge on overview widgets (desktop only) */
     @media (hover: hover) {
-      .ov-spot { position: relative; }
-      .ov-spot::before { content: ''; position: absolute; inset: -1px; border-radius: inherit; padding: 1px;
+      #ov-mid-grid > .card, #ov-bot-main > .card, #ov-bot-side > .card { position: relative; }
+      #ov-mid-grid > .card::before, #ov-bot-main > .card::before, #ov-bot-side > .card::before { content: ''; position: absolute; inset: -1px; border-radius: inherit; padding: 1px;
         background: radial-gradient(180px circle at var(--mx, 50%) var(--my, 50%), var(--blue-border), transparent 70%);
         -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); -webkit-mask-composite: xor; mask-composite: exclude;
         opacity: 0; transition: opacity 0.25s; pointer-events: none; }
-      .ov-spot:hover::before { opacity: 1; }
+      #ov-mid-grid > .card:hover::before, #ov-bot-main > .card:hover::before, #ov-bot-side > .card:hover::before { opacity: 1; }
     }
     /* ── MOTION SYSTEM (Phase C) ── */
     @keyframes popIn { from { opacity: 0; transform: scale(0.96) translateY(8px); } to { opacity: 1; transform: none; } }
@@ -4068,7 +4093,7 @@
 
 <div id="toast"><div class="toast-icon"><i data-lucide="check"></i></div><div id="toast-msg" style="font-size:12.5px;font-weight:600;color:var(--text-s);line-height:1.45;"></div></div>
 
-<script src="pages/dashboard/dashboard.js?v=35"></script>
+<script src="pages/dashboard/dashboard.js?v=36"></script>
 <script src="pages/team/team.js?v=15"></script>
 <script src="pages/settings/settings.js?v=10"></script>
 <script src="pages/analytics/analytics.js?v=2"></script>
@@ -4083,7 +4108,7 @@ const AUTH0_CLIENT_ID = 'tx74Owqn3jVeSaVuxfFHsKloqbPqfAmN';
 /* ── Update check: version.json is bumped on every deploy; when a newer
    build is live, a quiet banner offers a refresh (ends the hard-refresh
    guessing game for clients). ── */
-const FLW_BUILD = 202607171; window.FLW_BUILD = FLW_BUILD;
+const FLW_BUILD = 202607172; window.FLW_BUILD = FLW_BUILD;
 async function flwVersionCheck() {
   try {
     const r = await fetch('assets/data/version.json?t=' + Date.now(), { cache: 'no-store' });
