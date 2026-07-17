@@ -170,75 +170,85 @@
       .marquee-track { animation: none; justify-content: center; width: 100%; flex-wrap: wrap; gap: 20px 40px; }
       .marquee-track > .tool-item:nth-child(n+9) { display: none; }
     }
-    /* ── Who We Build For — industry showcase (Operator's Desk) ── */
-    #who-for { background: linear-gradient(180deg, #EEF0F4 0%, #E7EAEF 100%); padding: 96px 0 !important; }
-    .wf-intro { max-width: 720px; margin: 0 auto; text-align: center; padding: 0 24px; }
-    .wf-eyebrow-top { font-size: 11px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--blue); }
-    .wf-h2 { font-family: 'Montserrat','Plus Jakarta Sans',sans-serif; font-size: clamp(2rem, 3vw, 2.95rem); font-weight: 700; letter-spacing: -0.025em; line-height: 1.1; color: #0F172A; margin: 14px 0 18px; }
-    .wf-sub { font-size: 16.5px; line-height: 1.7; color: #55606F; max-width: 560px; margin: 0 auto; }
-    .wf-stage { position: relative; max-width: 1120px; margin: 48px auto 0; }
-    .wf-viewport { overflow: hidden; padding: 26px 4px; }
-    .wf-track { display: flex; align-items: center; gap: 30px; transition: transform 0.72s cubic-bezier(0.22,1,0.36,1), filter 0.3s ease; will-change: transform; }
-    .wf-track.moving { filter: blur(2.6px); }
-    .wf-card { flex: 0 0 min(900px, 92vw); box-sizing: border-box; cursor: pointer;
-      background: rgba(255,255,255,0.64); -webkit-backdrop-filter: blur(18px) saturate(160%); backdrop-filter: blur(18px) saturate(160%);
-      border: 1px solid rgba(255,255,255,0.72); border-radius: 20px; padding: 36px 40px;
-      box-shadow: 0 24px 60px -30px rgba(15,23,42,0.26);
-      transform: scale(0.9); opacity: 0.42; filter: blur(1.4px);
-      transition: transform 0.62s cubic-bezier(0.22,1,0.36,1), opacity 0.62s ease, filter 0.62s ease, box-shadow 0.62s ease; }
-    .wf-card.active { transform: scale(1); opacity: 1; filter: none; cursor: default;
-      border-color: rgba(255,255,255,0.86); box-shadow: inset 0 1px 0 rgba(255,255,255,0.85), 0 34px 76px -30px rgba(15,23,42,0.32); }
-    .wf-grid { display: grid; grid-template-columns: 1.02fr 0.98fr; gap: 40px; align-items: start; }
-    .wf-cat { font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #7A8494; margin-bottom: 12px; }
-    .wf-title { font-family: 'Montserrat',sans-serif; font-size: clamp(1.35rem, 1.9vw, 1.72rem); font-weight: 700; letter-spacing: -0.02em; line-height: 1.2; color: #0F172A; margin-bottom: 14px; }
-    .wf-desc { font-size: 14.5px; line-height: 1.68; color: #55606F; margin-bottom: 18px; }
-    .wf-check { list-style: none; display: flex; flex-direction: column; gap: 10px; margin: 0; padding: 0; }
-    .wf-check li { display: flex; align-items: flex-start; gap: 10px; font-size: 13.5px; color: #3A4453; line-height: 1.5; }
-    .wf-check .ck { width: 18px; height: 18px; border-radius: 50%; background: rgba(5,150,105,0.1); color: #059669; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
-    .wf-check .ck svg { width: 11px; height: 11px; }
-    .wf-right { display: flex; flex-direction: column; gap: 10px; }
-    .wf-widget { background: #fff; border: 1px solid rgba(15,23,42,0.08); border-radius: 12px; padding: 13px 15px; box-shadow: 0 2px 8px -5px rgba(15,23,42,0.12); }
-    .wf-lead .lead-top { display: flex; align-items: center; gap: 8px; }
-    .wf-lead .dot { width: 8px; height: 8px; border-radius: 50%; background: #059669; flex-shrink: 0; box-shadow: 0 0 0 3px rgba(5,150,105,0.14); }
-    .wf-lead .lead-title { font-size: 13px; font-weight: 700; color: #0F172A; flex: 1; }
-    .wf-badge { font-size: 9px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: #059669; background: rgba(5,150,105,0.1); padding: 2px 7px; border-radius: 5px; }
-    .wf-lead .lead-sub { font-size: 12.5px; color: #3A4453; margin: 5px 0 3px; }
-    .wf-meta { font-size: 11px; color: #8A93A0; }
-    .wf-row { display: flex; align-items: center; gap: 11px; }
-    .wf-w-ico { width: 30px; height: 30px; border-radius: 8px; background: #F1F3F7; color: #6A7382; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-    .wf-w-ico svg { width: 15px; height: 15px; }
-    .wf-w-title2 { font-size: 12.5px; font-weight: 650; color: #0F172A; }
-    .wf-score { display: flex; align-items: center; gap: 12px; }
-    .wf-modules { display: flex; align-items: center; gap: 15px; flex-wrap: wrap; margin-top: 22px; padding-top: 17px; border-top: 1px solid rgba(15,23,42,0.08); }
-    .wf-modules .lbl { font-size: 12px; font-weight: 650; color: #0F172A; }
-    .wf-mod { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: #6A7382; }
-    .wf-mod svg { width: 14px; height: 14px; color: #8A93A0; }
-    .wf-arrow { position: absolute; top: 50%; transform: translateY(-50%); z-index: 8; width: 42px; height: 42px; border-radius: 50%; border: 1px solid rgba(15,23,42,0.14);
-      background: rgba(255,255,255,0.85); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); color: #0F172A; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; box-shadow: 0 4px 14px -6px rgba(15,23,42,0.24); }
-    .wf-arrow:hover:not(:disabled) { background: #fff; transform: translateY(-50%) scale(1.07); }
-    .wf-arrow:disabled { opacity: 0.3; cursor: default; }
-    .wf-prev { left: -6px; } .wf-next { right: -6px; }
-    .wf-arrow svg { width: 18px; height: 18px; }
-    .wf-dots { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 28px; }
-    .wf-dot { width: 7px; height: 7px; border-radius: 50%; background: rgba(15,23,42,0.16); cursor: pointer; transition: all 0.28s; border: none; padding: 0; }
-    .wf-dot.active { background: var(--blue); width: 22px; border-radius: 4px; }
-    .wf-custom { display: flex; align-items: center; gap: 28px; max-width: 1000px; margin: 56px auto 0; padding: 30px 40px; border-radius: 18px;
-      background: rgba(255,255,255,0.5); -webkit-backdrop-filter: blur(16px) saturate(160%); backdrop-filter: blur(16px) saturate(160%);
-      border: 1px solid rgba(255,255,255,0.6); box-shadow: inset 0 1px 0 rgba(255,255,255,0.7), 0 16px 42px -22px rgba(15,23,42,0.18); }
-    .wf-custom-ico { width: 60px; height: 60px; border-radius: 15px; flex-shrink: 0; display: flex; align-items: center; justify-content: center;
-      background: rgba(0,87,255,0.08); border: 1px solid rgba(0,87,255,0.16); color: var(--blue); }
-    @media (max-width: 960px) {
-      .wf-stage { padding: 0 46px; }
-      .wf-grid { grid-template-columns: 1fr; gap: 24px; }
-      .wf-custom { flex-direction: column; text-align: center; margin: 40px 16px 0; padding: 26px 22px; }
+    /* ── Built for your workflow — industry / workflow showcase ── */
+    #who-for { background: linear-gradient(180deg, #EEF0F4 0%, #E7EAEF 100%); padding: 104px 0 !important; }
+    .wf-wrap { max-width: 1200px; margin: 0 auto; padding: 0 40px; }
+    .wf-intro { max-width: 780px; margin: 0 auto; text-align: center; }
+    .wf-eyebrow-top { font-size: 11px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--blue); }
+    .wf-h2 { font-family: 'Montserrat','Plus Jakarta Sans',sans-serif; font-size: clamp(1.95rem, 3vw, 2.8rem); font-weight: 700; letter-spacing: -0.025em; line-height: 1.13; color: #0F172A; margin: 16px 0 18px; text-wrap: balance; }
+    .wf-sub { font-size: 16.5px; line-height: 1.7; color: #55606F; max-width: 640px; margin: 0 auto; text-wrap: pretty; }
+
+    /* Industry tab bar */
+    .wf-industries { display: flex; justify-content: center; margin: 46px auto 0; }
+    .wf-ind-bar { display: inline-flex; gap: 4px; padding: 6px; border-radius: 16px; max-width: 100%; overflow-x: auto; scrollbar-width: none;
+      background: rgba(255,255,255,0.62); border: 1px solid rgba(15,23,42,0.08);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.7), 0 12px 32px -20px rgba(15,23,42,0.24);
+      -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
+    .wf-ind-bar::-webkit-scrollbar { display: none; }
+    .wf-ind { display: inline-flex; align-items: center; gap: 10px; white-space: nowrap; flex-shrink: 0; padding: 12px 22px; min-height: 44px;
+      border-radius: 11px; border: none; background: transparent; cursor: pointer; font-family: inherit; font-size: 14.5px; font-weight: 600; color: #55606F; letter-spacing: -0.01em;
+      transition: color 0.25s ease, background 0.25s ease, box-shadow 0.25s ease; }
+    .wf-ind svg { width: 18px; height: 18px; color: #97A0AE; transition: color 0.25s ease; flex-shrink: 0; }
+    .wf-ind:hover { color: #0F172A; }
+    .wf-ind:hover svg { color: #6A7382; }
+    .wf-ind.active { background: #fff; color: #0F172A; box-shadow: 0 2px 10px -3px rgba(15,23,42,0.18), 0 1px 2px rgba(15,23,42,0.05); }
+    .wf-ind.active svg { color: var(--blue); }
+    .wf-ind:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+
+    /* Two-column main */
+    .wf-main { display: grid; grid-template-columns: minmax(300px, 358px) 1fr; gap: 42px; align-items: start; margin-top: 44px; }
+
+    /* Left feature list */
+    .wf-features { display: flex; flex-direction: column; }
+    .wf-feat { position: relative; display: grid; grid-template-columns: auto 1fr; gap: 15px; align-items: start; padding: 18px 20px; border-radius: 14px;
+      border: none; background: transparent; cursor: pointer; text-align: left; font-family: inherit; width: 100%;
+      transition: background 0.3s ease, box-shadow 0.3s ease; }
+    .wf-feat:not(:last-child)::after { content: ''; position: absolute; left: 20px; right: 20px; bottom: 0; height: 1px; background: rgba(15,23,42,0.08); transition: opacity 0.3s ease; }
+    .wf-feat:hover:not(.active) { background: rgba(255,255,255,0.5); }
+    .wf-feat.active { background: #fff; box-shadow: 0 16px 38px -24px rgba(15,23,42,0.32), inset 0 1px 0 rgba(255,255,255,0.85); }
+    .wf-feat.active::before { content: ''; position: absolute; left: 0; top: 14px; bottom: 14px; width: 3px; border-radius: 0 3px 3px 0; background: var(--blue); }
+    .wf-feat.active::after { opacity: 0; }
+    .wf-feat:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+    .wf-feat-ico { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+      background: rgba(15,23,42,0.05); color: #6A7382; transition: background 0.3s ease, color 0.3s ease; }
+    .wf-feat-ico svg { width: 19px; height: 19px; }
+    .wf-feat.active .wf-feat-ico { background: rgba(0,87,255,0.09); color: var(--blue); }
+    .wf-feat-txt { min-width: 0; }
+    .wf-feat-title { display: block; font-size: 15px; font-weight: 650; color: #0F172A; letter-spacing: -0.01em; margin-bottom: 3px; }
+    .wf-feat-desc { display: block; font-size: 13px; line-height: 1.5; color: #6A7382; }
+
+    /* Right preview */
+    .wf-preview { min-width: 0; }
+    .wf-frame { position: relative; border-radius: 16px; overflow: hidden; background: #fff; aspect-ratio: 3835 / 2156;
+      border: 1px solid rgba(15,23,42,0.1); box-shadow: 0 44px 84px -44px rgba(15,23,42,0.36), 0 10px 26px -18px rgba(15,23,42,0.16); }
+    .wf-frame img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: top left; display: block;
+      transition: opacity 0.42s ease, transform 0.42s cubic-bezier(0.22,1,0.36,1); }
+    .wf-frame.swapping img { opacity: 0; transform: translateY(10px) scale(0.995); }
+    .wf-detail { margin-top: 30px; max-width: 640px; transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.22,1,0.36,1); }
+    .wf-detail.swapping { opacity: 0; transform: translateY(8px); }
+    .wf-detail-title { font-family: 'Montserrat','Plus Jakarta Sans',sans-serif; font-size: clamp(1.15rem, 1.7vw, 1.4rem); font-weight: 700; letter-spacing: -0.02em; line-height: 1.28; color: #0F172A; margin-bottom: 10px; }
+    .wf-detail-text { font-size: 15px; line-height: 1.66; color: #55606F; }
+
+    /* CTA strip */
+    .wf-cta { display: flex; align-items: center; gap: 28px; max-width: 1120px; margin: 66px auto 0; padding: 30px 40px; border-radius: 18px;
+      background: rgba(255,255,255,0.55); -webkit-backdrop-filter: blur(16px) saturate(160%); backdrop-filter: blur(16px) saturate(160%);
+      border: 1px solid rgba(255,255,255,0.6); box-shadow: inset 0 1px 0 rgba(255,255,255,0.7), 0 16px 42px -24px rgba(15,23,42,0.18); }
+    .wf-cta-txt { flex: 1; min-width: 0; }
+    .wf-cta-title { font-family: 'Montserrat','Plus Jakarta Sans',sans-serif; font-size: 19px; font-weight: 700; letter-spacing: -0.02em; color: #0F172A; line-height: 1.25; margin-bottom: 6px; }
+    .wf-cta-text { font-size: 14px; color: #55606F; line-height: 1.6; max-width: 580px; }
+
+    @media (max-width: 980px) {
+      .wf-main { grid-template-columns: 1fr; gap: 30px; }
+      .wf-cta { flex-direction: column; text-align: center; align-items: center; }
+      .wf-cta-text { max-width: none; }
     }
-    @media (max-width: 600px) { #who-for { padding: 60px 0 !important; } .wf-card { padding: 26px 22px; } .wf-arrow { display: none; } }
-    /* Carousel is user-driven + horizontal + explicitly wanted — keep it sliding even where the page honors Reduce Motion. Class selectors + !important outrank the global `*` reset below. */
-    @media (prefers-reduced-motion: reduce) {
-      .wf-track { transition: transform 0.72s cubic-bezier(0.22,1,0.36,1), filter 0.3s ease !important; }
-      .wf-card { transition: transform 0.62s cubic-bezier(0.22,1,0.36,1), opacity 0.62s ease, filter 0.62s ease, box-shadow 0.62s ease !important; }
-      .wf-dot { transition: all 0.28s !important; }
-      .wf-arrow { transition: all 0.2s !important; }
+    @media (max-width: 620px) {
+      #who-for { padding: 68px 0 !important; }
+      .wf-wrap { padding: 0 18px; }
+      .wf-ind-bar { justify-content: flex-start; }
+      .wf-feat { padding: 16px 14px; }
+      .wf-feat:not(:last-child)::after { left: 14px; right: 14px; }
+      .wf-cta { padding: 26px 22px; margin-top: 46px; }
     }
 
     /* Reveal */
@@ -1640,31 +1650,43 @@
     </div>
   </section>
 
-  <!-- ─── WHO THIS IS FOR ─────────────────────────────────────────────────── -->
+  <!-- ─── BUILT FOR YOUR WORKFLOW — industry / workflow showcase ──────────── -->
   <section id="who-for">
-    <div class="wf-intro reveal">
-      <span class="wf-eyebrow-top">Built for your workflow</span>
-      <h2 class="wf-h2">Built around how your industry works.</h2>
-      <p class="wf-sub">Flowaify adapts to the way your team handles new opportunities &mdash; first response, follow-up, scheduling, reporting, team handoffs, and pipeline visibility &mdash; tuned to your niche.</p>
-    </div>
-
-    <div class="wf-stage reveal">
-      <div class="wf-viewport"><div class="wf-track" id="wf-track"></div></div>
-      <button class="wf-arrow wf-prev" id="wf-prev" aria-label="Previous industry"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button>
-      <button class="wf-arrow wf-next" id="wf-next" aria-label="Next industry"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></button>
-    </div>
-
-    <div class="wf-dots" id="wf-dots"></div>
-
-    <div class="wf-custom reveal">
-      <div class="wf-custom-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:26px;height:26px;"><path d="M12 2v4M12 18v4M2 12h4M18 12h4M5 5l2.8 2.8M16.2 16.2 19 19M19 5l-2.8 2.8M7.8 16.2 5 19"/><circle cx="12" cy="12" r="3.2"/></svg></div>
-      <div style="flex:1;min-width:0;">
-        <div style="font-family:'Montserrat',sans-serif;font-size:19px;font-weight:700;letter-spacing:-0.02em;color:#0F172A;line-height:1.25;margin-bottom:6px;">Not seeing your exact workflow? We build around it.</div>
-        <p style="font-size:14px;color:#55606F;line-height:1.6;max-width:560px;">Every Flowaify system is customized around your lead sources, follow-up process, team structure, and reporting needs.</p>
+    <div class="wf-wrap">
+      <div class="wf-intro reveal">
+        <span class="wf-eyebrow-top">Built for your workflow</span>
+        <h2 class="wf-h2">One managed platform. Custom-built for the way your business handles leads.</h2>
+        <p class="wf-sub">Flowaify adapts to different industry workflows by helping your team respond faster, follow up consistently, and close more business.</p>
       </div>
-      <a href="site/onboarding/" class="hero-btn-primary" style="flex-shrink:0;">Request a Custom Plan
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-      </a>
+
+      <div id="wf-root" class="reveal">
+        <div class="wf-industries">
+          <div class="wf-ind-bar" id="wf-ind-bar" role="tablist" aria-label="Industries"></div>
+        </div>
+        <div class="wf-main">
+          <div class="wf-features" id="wf-features" role="tablist" aria-orientation="vertical" aria-label="Workflows"></div>
+          <div class="wf-preview">
+            <div class="wf-frame" id="wf-frame" role="tabpanel" aria-live="polite">
+              <!-- TODO: swap in real per-industry / per-workflow dashboard captures here. Until those exist, every view reuses the real light Leads dashboard screenshot. -->
+              <img id="wf-img" src="assets/images/hero-leads-light.png" alt="Flowaify dashboard" loading="lazy" decoding="async">
+            </div>
+            <div class="wf-detail" id="wf-detail">
+              <div class="wf-detail-title" id="wf-detail-title"></div>
+              <p class="wf-detail-text" id="wf-detail-text"></p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="wf-cta reveal">
+        <div class="wf-cta-txt">
+          <div class="wf-cta-title">Not seeing your exact workflow? We build around it.</div>
+          <p class="wf-cta-text">Every Flowaify system is customized around your lead sources, follow-up process, team structure, and reporting needs.</p>
+        </div>
+        <a href="site/onboarding/" class="hero-btn-primary" style="flex-shrink:0;">Request a Custom Plan
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </a>
+      </div>
     </div>
   </section>
 
@@ -4587,142 +4609,220 @@ updateNavHero();
 })();
 </script>
 <script>
-// ─── WHO WE BUILD FOR — industry showcase (sliding track) ───────────────────
+// ─── BUILT FOR YOUR WORKFLOW — industry / workflow showcase ───────────────────
 (function () {
-  var track = document.getElementById('wf-track');
-  if (!track) return;
+  var root = document.getElementById('wf-root');
+  if (!root) return;
 
-  var IND = [
-    { cat:'Agencies', title:'Discovery calls and client onboarding pile up fast.',
-      desc:'Prospects, discovery bookings, and new-client intake arrive across channels while you deliver work. Flowaify captures every inquiry, books the call, and runs onboarding follow-up automatically.',
-      checks:['Instant replies to inbound project inquiries','Discovery calls booked without the back-and-forth','Onboarding steps followed up until complete'],
-      lead:{title:'New Project Inquiry', sub:'Brand & website retainer', src:'Contact Form', time:'3m ago'},
-      follow:{label:'Email Follow-Up', state:'Scheduled', detail:'Proposal recap in 10 min'},
-      cal:{label:'Discovery Call', when:'Tomorrow, 11:00 AM'}, score:{num:82, label:'Hot'} },
-    { cat:'Home Services', title:'When your team is in the field, new leads still need a fast response.',
-      desc:'Quote requests and missed calls come in while you are on the job. Flowaify responds the moment a form is submitted, follows up automatically, and keeps your schedule full while the crew stays on task.',
-      checks:['Faster replies to form and quote requests','Follow-up for leads that do not answer right away','Clear visibility into booked jobs and open work'],
-      lead:{title:'New Quote Request', sub:'Kitchen faucet installation', src:'Website Form', time:'2m ago'},
-      follow:{label:'SMS Follow-Up', state:'Scheduled', detail:'First follow-up in 5 min'},
-      cal:{label:'Technician Visit', when:'Today, 2:00 PM'}, score:{num:78, label:'Warm'} },
-    { cat:'Med Spas & Clinics', title:'Consultation requests arrive after hours and overwhelm the front desk.',
-      desc:'Inquiries come through Instagram, forms, and referrals around the clock. Flowaify answers every one 24/7, collects intake details, and confirms appointments, cutting no-shows without extra desk hours.',
-      checks:['24/7 replies to consultation inquiries','Intake collected before the appointment','Reminders that reduce no-shows'],
-      lead:{title:'New Consultation', sub:'Botox & filler consult', src:'Instagram DM', time:'just now'},
-      follow:{label:'SMS Reminder', state:'Scheduled', detail:'24h before appointment'},
-      cal:{label:'Consultation', when:'Thu, 4:30 PM'}, score:{num:74, label:'Warm'} },
-    { cat:'Real Estate', title:'Buyer and seller inquiries go cold the moment an agent is on site.',
-      desc:'Leads from portals and forms need a same-minute reply. Flowaify responds instantly, routes to the right agent, syncs the CRM, and keeps following up until they engage.',
-      checks:['Instant response to buyer and seller inquiries','Routing to the right agent automatically','Follow-up that runs while agents show homes'],
-      lead:{title:'New Buyer Lead', sub:'3-bed listing on Maple Ave', src:'Zillow', time:'1m ago'},
-      follow:{label:'Auto-Reply Sent', state:'Delivered', detail:'Routed to Sarah M.'},
-      cal:{label:'Showing', when:'Sat, 1:00 PM'}, score:{num:85, label:'Hot'} },
-    { cat:'Mortgage', title:'Pre-approval inquiries need a same-minute response you cannot always give.',
-      desc:'Brokers live on calls and in consultations. Flowaify acknowledges every inquiry instantly, sends qualification questions, creates the CRM contact, and follows up until they book.',
-      checks:['Instant acknowledgment of every inquiry','Qualification questions sent automatically','Follow-up until the lead reaches the calendar'],
-      lead:{title:'Pre-Approval Request', sub:'First-time buyer, $420k', src:'Landing Page', time:'4m ago'},
-      follow:{label:'Qualification Sent', state:'Awaiting reply', detail:'5 questions texted'},
-      cal:{label:'Broker Call', when:'Today, 3:15 PM'}, score:{num:80, label:'Hot'} }
+  // Real dashboard screenshots available today.
+  // TODO: capture per-industry / per-workflow dashboard views and point each feature's `img` at its own file.
+  // Until then every workflow reuses the real light Leads dashboard (no fabricated screens).
+  var IMG_LEADS = 'assets/images/hero-leads-light.png';
+
+  var S = 'fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"';
+  var IC = {
+    doc:   '<svg viewBox="0 0 24 24" ' + S + '><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h4"/></svg>',
+    chat:  '<svg viewBox="0 0 24 24" ' + S + '><path d="M21 15a2 2 0 0 1-2 2H8l-4 4V6a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2z"/></svg>',
+    cal:   '<svg viewBox="0 0 24 24" ' + S + '><rect x="3" y="4.5" width="18" height="16" rx="2"/><path d="M3 9.5h18M8 3v3M16 3v3"/></svg>',
+    funnel:'<svg viewBox="0 0 24 24" ' + S + '><path d="M3 5h18l-7 8.5V20l-4-2v-4.5z"/></svg>',
+    chart: '<svg viewBox="0 0 24 24" ' + S + '><path d="M4 20V4M4 20h16"/><path d="M8 17v-4M13 17V9M18 17V6"/></svg>',
+    call:  '<svg viewBox="0 0 24 24" ' + S + '><path d="M5 4h3l2 5-2.4 1.4a11 11 0 0 0 5 5L14 13l5 2v3a2 2 0 0 1-2.2 2A16 16 0 0 1 3 6.2 2 2 0 0 1 5 4z"/></svg>',
+    users: '<svg viewBox="0 0 24 24" ' + S + '><path d="M16 20v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"/><circle cx="9.5" cy="8" r="3.2"/><path d="M21 20v-1.8a4 4 0 0 0-3-3.8"/><path d="M15 4.3a3.2 3.2 0 0 1 0 6.1"/></svg>',
+    target:'<svg viewBox="0 0 24 24" ' + S + '><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.6"/><circle cx="12" cy="12" r="1.1"/></svg>',
+    history:'<svg viewBox="0 0 24 24" ' + S + '><path d="M3.5 12a8.5 8.5 0 1 0 2.6-6.1L3 8"/><path d="M3 4v4h4"/><path d="M12 8v4.2l3 1.8"/></svg>',
+    house: '<svg viewBox="0 0 24 24" ' + S + '><path d="M3.5 10.5 12 3.5l8.5 7"/><path d="M5.5 9.2V20h13V9.2"/><path d="M9.5 20v-5.5h5V20"/></svg>',
+    brief: '<svg viewBox="0 0 24 24" ' + S + '><path d="M4 8.5h16a1 1 0 0 1 1 1V19a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5a1 1 0 0 1 1-1Z"/><path d="M9 8.5V6.5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/><path d="M3 13.5h18"/></svg>',
+    cross: '<svg viewBox="0 0 24 24" ' + S + '><rect x="4.5" y="4.5" width="15" height="15" rx="4"/><path d="M12 9v6M9 12h6"/></svg>',
+    build: '<svg viewBox="0 0 24 24" ' + S + '><path d="M3 21h18"/><path d="M6 21V4h9v17"/><path d="M15 21V10h4v11"/><path d="M9 7h3M9 11h3M9 15h3"/></svg>',
+    scale: '<svg viewBox="0 0 24 24" ' + S + '><path d="M12 3.5v15.5"/><path d="M8 20h8"/><path d="M5 7.5h14"/><path d="m12 4-7 3.5M12 4l7 3.5"/><path d="M5 7.5 2.6 12.8a2.4 2.4 0 0 0 4.8 0z"/><path d="M19 7.5 16.6 12.8a2.4 2.4 0 0 0 4.8 0z"/></svg>',
+    check: '<svg viewBox="0 0 24 24" ' + S + '><circle cx="12" cy="12" r="8.6"/><path d="m8.4 12.2 2.5 2.5 4.7-4.9"/></svg>',
+    tag:   '<svg viewBox="0 0 24 24" ' + S + '><path d="M20.5 13.4 13 20.9a2 2 0 0 1-2.8 0l-6.1-6.1a2 2 0 0 1 0-2.8L11.6 4.5a2 2 0 0 1 1.5-.6l5.4.1a2 2 0 0 1 2 2l.1 5.4a2 2 0 0 1-.6 1.5z"/><circle cx="15.4" cy="8.6" r="1.3"/></svg>'
+  };
+
+  // ── Data structure: industries -> features -> { title, desc, img, detailTitle, detailText } ──
+  var INDUSTRIES = [
+    { id:'home', label:'Home Services', icon:IC.house, features:[
+      { id:'quotes', ic:'doc', title:'Quote Requests', desc:'Capture and organize new quote requests instantly.', img:IMG_LEADS,
+        detailTitle:'Capture more opportunities with every quote request.',
+        detailText:'Flowaify helps home service teams capture, organize, and respond to quote requests quickly, so more interest turns into booked jobs.' },
+      { id:'sms', ic:'chat', title:'SMS Follow-Up', desc:'Keep prospects engaged after the first inquiry.', img:IMG_LEADS,
+        detailTitle:'Keep prospects engaged after the first response.',
+        detailText:'Automated SMS follow-up helps your team stay top of mind without manually chasing every inquiry.' },
+      { id:'sched', ic:'cal', title:'Scheduling', desc:'Book jobs fast and reduce back-and-forth.', img:IMG_LEADS,
+        detailTitle:'Book jobs faster with less back-and-forth.',
+        detailText:'Flowaify moves quotes to booked visits and keeps the calendar full while your crews stay on site.' },
+      { id:'pipe', ic:'funnel', title:'Pipeline Visibility', desc:"See every lead's status and next step in one view.", img:IMG_LEADS,
+        detailTitle:"See every lead's status and next step at a glance.",
+        detailText:'Flowaify keeps every quote, follow-up, and booked job in one clear view, so nothing slips between calls.' },
+      { id:'report', ic:'chart', title:'Reporting', desc:'Track performance and close more jobs consistently.', img:IMG_LEADS,
+        detailTitle:"Track what's working and close more jobs.",
+        detailText:'Flowaify shows response times, booked jobs, and conversion trends so your team improves week over week.' }
+    ]},
+    { id:'agencies', label:'Agencies', icon:IC.brief, features:[
+      { id:'discovery', ic:'call', title:'Discovery Calls', desc:'Route new prospects into the right sales conversation.', img:IMG_LEADS,
+        detailTitle:'Route new prospects into the right conversation.',
+        detailText:'Flowaify captures inbound project inquiries and moves qualified prospects toward a booked discovery call.' },
+      { id:'email', ic:'chat', title:'Custom Email Follow-Up', desc:'Send tailored follow-ups without manual chasing.', img:IMG_LEADS,
+        detailTitle:'Send tailored follow-ups without the manual chase.',
+        detailText:'Flowaify follows up with the right message at the right time, so promising leads never go cold.' },
+      { id:'handoff', ic:'users', title:'Client Handoffs', desc:'Keep internal teams aligned after a lead converts.', img:IMG_LEADS,
+        detailTitle:'Keep internal teams aligned after a lead converts.',
+        detailText:'Flowaify hands new clients to the right people with the context they need to start delivery cleanly.' },
+      { id:'campaign', ic:'funnel', title:'Campaign Visibility', desc:'Track which channels are driving qualified leads.', img:IMG_LEADS,
+        detailTitle:'See which channels drive qualified leads.',
+        detailText:'Flowaify connects every inquiry back to its source, so you can invest in what is actually working.' },
+      { id:'reports', ic:'chart', title:'Reports', desc:'Generate clear performance summaries for your team.', img:IMG_LEADS,
+        detailTitle:'Turn lead activity into clear reporting.',
+        detailText:'Flowaify helps agencies understand which sources, campaigns, and follow-ups are moving opportunities forward.' }
+    ]},
+    { id:'clinics', label:'Clinics', icon:IC.cross, features:[
+      { id:'consult', ic:'doc', title:'Consultation Requests', desc:'Capture new patient or client inquiries in one place.', img:IMG_LEADS,
+        detailTitle:'Capture every new patient inquiry in one place.',
+        detailText:'Flowaify collects consultation requests from every channel, so your front desk never loses track of a new patient.' },
+      { id:'apptfu', ic:'chat', title:'Appointment Follow-Up', desc:'Reduce no-shows and missed opportunities.', img:IMG_LEADS,
+        detailTitle:'Keep consultations moving with less front desk pressure.',
+        detailText:'Flowaify helps clinics follow up with inquiries, reduce missed opportunities, and keep appointments organized.' },
+      { id:'frontdesk', ic:'users', title:'Front Desk Support', desc:'Lower manual workload for incoming requests.', img:IMG_LEADS,
+        detailTitle:'Lower the manual load on your front desk.',
+        detailText:'Flowaify handles first responses and reminders, so your team can focus on the patients in the room.' },
+      { id:'calendar', ic:'cal', title:'Calendar Activity', desc:'Keep consultations and follow-ups organized.', img:IMG_LEADS,
+        detailTitle:'Keep consultations and follow-ups organized.',
+        detailText:'Flowaify keeps every appointment and follow-up in one clear calendar view your team can trust.' },
+      { id:'history', ic:'history', title:'Activity History', desc:'See what happened with every inquiry.', img:IMG_LEADS,
+        detailTitle:'See what happened with every inquiry.',
+        detailText:'Flowaify keeps a full record of each patient inquiry, so anyone on your team can pick up where the last person left off.' }
+    ]},
+    { id:'realestate', label:'Real Estate', icon:IC.build, features:[
+      { id:'buyer', ic:'call', title:'Buyer Inquiries', desc:'Respond quickly when interest is highest.', img:IMG_LEADS,
+        detailTitle:'Respond the moment buyer interest is highest.',
+        detailText:'Flowaify answers new buyer inquiries instantly and routes them to the right agent before they move on.' },
+      { id:'seller', ic:'tag', title:'Seller Leads', desc:'Keep valuation and listing requests moving.', img:IMG_LEADS,
+        detailTitle:'Keep valuation and listing requests moving.',
+        detailText:'Flowaify captures seller leads and follows up consistently, so listing opportunities do not slip away.' },
+      { id:'showing', ic:'cal', title:'Showing Requests', desc:'Organize appointments and next steps clearly.', img:IMG_LEADS,
+        detailTitle:'Organize showings and next steps clearly.',
+        detailText:'Flowaify keeps showing requests, confirmations, and follow-ups in one place, so nothing gets missed.' },
+      { id:'scoring', ic:'target', title:'Lead Scoring', desc:'Prioritize the opportunities most likely to move forward.', img:IMG_LEADS,
+        detailTitle:'Prioritize the buyers and sellers most ready to move.',
+        detailText:'Flowaify helps real estate teams focus on high-intent inquiries and track every opportunity clearly.' },
+      { id:'pipe', ic:'funnel', title:'Pipeline Visibility', desc:'Track buyers, sellers, and open opportunities.', img:IMG_LEADS,
+        detailTitle:'Track buyers, sellers, and open opportunities.',
+        detailText:'Flowaify gives your team one clear view of every active lead and exactly where it stands.' }
+    ]},
+    { id:'legal', label:'Legal Services', icon:IC.scale, features:[
+      { id:'intake', ic:'doc', title:'Intake Requests', desc:'Organize new case inquiries from the first message.', img:IMG_LEADS,
+        detailTitle:'Keep every case inquiry organized from the first message.',
+        detailText:'Flowaify helps legal teams capture, qualify, and route new intake requests with better visibility.' },
+      { id:'qualify', ic:'check', title:'Qualification', desc:'Identify which inquiries need review first.', img:IMG_LEADS,
+        detailTitle:'Identify which inquiries need review first.',
+        detailText:'Flowaify sorts new intake by priority, so your team spends time on the cases that matter most.' },
+      { id:'booking', ic:'cal', title:'Consultation Booking', desc:'Move qualified leads toward scheduled calls.', img:IMG_LEADS,
+        detailTitle:'Move qualified inquiries toward scheduled calls.',
+        detailText:'Flowaify guides qualified leads to a booked consultation without the back-and-forth.' },
+      { id:'review', ic:'users', title:'Team Review', desc:'Assign follow-up and internal handoffs clearly.', img:IMG_LEADS,
+        detailTitle:'Assign follow-up and internal handoffs clearly.',
+        detailText:'Flowaify routes each inquiry to the right team member, so nothing waits without an owner.' },
+      { id:'report', ic:'chart', title:'Reporting', desc:'Track intake volume and follow-up performance.', img:IMG_LEADS,
+        detailTitle:'Track intake volume and follow-up performance.',
+        detailText:'Flowaify shows how many inquiries come in, how fast you respond, and where every case stands.' }
+    ]}
   ];
 
-  var CK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
-  var I_MSG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>';
-  var I_CAL = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>';
-  var MODICO = {
-    'Inbox':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>',
-    'SMS':I_MSG, 'Calendar':I_CAL,
-    'Team':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="3.5"/><path d="M21 21v-2a4 4 0 0 0-3-3.85"/></svg>',
-    'Reports':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3v18h18"/><path d="M7 14l3-3 3 3 5-5"/></svg>',
-    'AI Agent':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M12 3l1.6 4.4L18 9l-4.4 1.6L12 15l-1.6-4.4L6 9l4.4-1.6z"/></svg>'
-  };
-  var MODS = '<span class="lbl">Flowaify handles</span>' + ['Inbox','SMS','Calendar','Team','Reports','AI Agent'].map(function (m) {
-    return '<span class="wf-mod">' + MODICO[m] + m + '</span>'; }).join('');
+  var indBar   = document.getElementById('wf-ind-bar');
+  var featWrap = document.getElementById('wf-features');
+  var frame    = document.getElementById('wf-frame');
+  var img      = document.getElementById('wf-img');
+  var dTitle   = document.getElementById('wf-detail-title');
+  var dText    = document.getElementById('wf-detail-text');
+  var reduce   = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  function esc(t) { return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-  function gauge(n) {
-    var off = (138.23 * (1 - n / 100)).toFixed(1);
-    return '<svg width="54" height="54" viewBox="0 0 56 56"><circle cx="28" cy="28" r="22" fill="none" stroke="#E3E7ED" stroke-width="5"/>' +
-      '<circle cx="28" cy="28" r="22" fill="none" stroke="#0057FF" stroke-width="5" stroke-linecap="round" stroke-dasharray="138.23" stroke-dashoffset="' + off + '" transform="rotate(-90 28 28)"/>' +
-      '<text x="28" y="33" text-anchor="middle" font-family="Montserrat,sans-serif" font-size="15" font-weight="700" fill="#0F172A">' + n + '</text></svg>';
+  var state = { ind: 0, feat: 0 };
+  var curImg = IMG_LEADS;
+
+  function esc(t){ return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  function buildIndustries() {
+    indBar.innerHTML = INDUSTRIES.map(function (ind, i) {
+      return '<button class="wf-ind' + (i === state.ind ? ' active' : '') + '" role="tab" aria-selected="' + (i === state.ind) +
+        '" tabindex="' + (i === state.ind ? '0' : '-1') + '" data-ind="' + i + '">' + ind.icon + '<span>' + esc(ind.label) + '</span></button>';
+    }).join('');
   }
-  function build(i) {
-    var d = IND[i];
-    var checks = d.checks.map(function (c) { return '<li><span class="ck">' + CK + '</span><span>' + esc(c) + '</span></li>'; }).join('');
-    return '<div class="wf-grid"><div class="wf-left">' +
-      '<div class="wf-cat">' + esc(d.cat) + '</div>' +
-      '<h3 class="wf-title">' + esc(d.title) + '</h3>' +
-      '<p class="wf-desc">' + esc(d.desc) + '</p>' +
-      '<ul class="wf-check">' + checks + '</ul></div>' +
-      '<div class="wf-right">' +
-        '<div class="wf-widget wf-lead"><div class="lead-top"><span class="dot"></span><span class="lead-title">' + esc(d.lead.title) + '</span><span class="wf-badge">New</span></div>' +
-          '<div class="lead-sub">' + esc(d.lead.sub) + '</div><div class="wf-meta">' + esc(d.lead.src) + ' · ' + esc(d.lead.time) + '</div></div>' +
-        '<div class="wf-widget wf-row"><span class="wf-w-ico">' + I_MSG + '</span><div><div class="wf-w-title2">' + esc(d.follow.label) + '</div><div class="wf-meta">' + esc(d.follow.state) + ' · ' + esc(d.follow.detail) + '</div></div></div>' +
-        '<div class="wf-widget wf-row"><span class="wf-w-ico">' + I_CAL + '</span><div><div class="wf-w-title2">' + esc(d.cal.label) + '</div><div class="wf-meta">' + esc(d.cal.when) + '</div></div></div>' +
-        '<div class="wf-widget wf-score">' + gauge(d.score.num) + '<div><div class="wf-w-title2">Lead Score</div><div class="wf-meta">' + esc(d.score.label) + '</div></div></div>' +
-      '</div></div><div class="wf-modules">' + MODS + '</div>';
+  function renderFeatures() {
+    var feats = INDUSTRIES[state.ind].features;
+    featWrap.innerHTML = feats.map(function (f, i) {
+      return '<button class="wf-feat' + (i === state.feat ? ' active' : '') + '" role="tab" aria-selected="' + (i === state.feat) +
+        '" tabindex="' + (i === state.feat ? '0' : '-1') + '" data-feat="' + i + '">' +
+        '<span class="wf-feat-ico">' + IC[f.ic] + '</span>' +
+        '<span class="wf-feat-txt"><span class="wf-feat-title">' + esc(f.title) + '</span><span class="wf-feat-desc">' + esc(f.desc) + '</span></span>' +
+        '</button>';
+    }).join('');
+  }
+  function renderPreview(animate) {
+    var f = INDUSTRIES[state.ind].features[state.feat];
+    var imgChanges = f.img !== curImg;
+    if (animate && !reduce) {
+      frame.classList.remove('swapping'); dText.parentNode.classList.remove('swapping');
+      document.getElementById('wf-detail').classList.add('swapping');
+      if (imgChanges) frame.classList.add('swapping');
+    }
+    var apply = function () {
+      if (imgChanges) { img.src = f.img; curImg = f.img; }
+      img.alt = f.detailTitle + ' — Flowaify dashboard view';
+      dTitle.textContent = f.detailTitle;
+      dText.textContent = f.detailText;
+      requestAnimationFrame(function () {
+        frame.classList.remove('swapping');
+        document.getElementById('wf-detail').classList.remove('swapping');
+      });
+    };
+    if (animate && !reduce) setTimeout(apply, 200); else apply();
   }
 
-  var N = IND.length, idx = 0;
-  var prevBtn = document.getElementById('wf-prev'), nextBtn = document.getElementById('wf-next');
-  var dotsWrap = document.getElementById('wf-dots');
-  var cards = IND.map(function (d, i) {
-    var el = document.createElement('div');
-    el.className = 'wf-card'; el.innerHTML = build(i);
-    el.addEventListener('click', function () { go(i); });
-    track.appendChild(el); return el;
-  });
-  IND.forEach(function (d, i) {
-    var b = document.createElement('button');
-    b.className = 'wf-dot'; b.setAttribute('aria-label', d.cat);
-    b.addEventListener('click', function () { go(i); });
-    dotsWrap.appendChild(b);
-  });
-  var dots = Array.prototype.slice.call(dotsWrap.children);
-
-  function layout() {
-    var vpW = track.parentElement.clientWidth;
-    var cw = cards[0].offsetWidth;
-    var gap = parseFloat(getComputedStyle(track).columnGap || getComputedStyle(track).gap) || 30;
-    track.style.transform = 'translateX(' + (vpW / 2 - (idx * (cw + gap) + cw / 2)) + 'px)';
-    cards.forEach(function (c, i) { c.classList.toggle('active', i === idx); });
-    dots.forEach(function (d, i) { d.classList.toggle('active', i === idx); });
-    if (prevBtn) prevBtn.disabled = idx === 0;
-    if (nextBtn) nextBtn.disabled = idx === N - 1;
-  }
-  var settleTimer = null;
-  function go(i) {
-    i = Math.max(0, Math.min(N - 1, i));
-    if (i === idx) return;
-    idx = i;
-    track.classList.add('moving');
-    layout();
-    clearTimeout(settleTimer);
-    settleTimer = setTimeout(function () { track.classList.remove('moving'); }, 780);
-  }
-  track.addEventListener('transitionend', function (e) {
-    if (e.propertyName === 'transform') track.classList.remove('moving');
-  });
-  if (prevBtn) prevBtn.addEventListener('click', function () { go(idx - 1); });
-  if (nextBtn) nextBtn.addEventListener('click', function () { go(idx + 1); });
-  var wrap = document.querySelector('.wf-stage');
-  if (wrap) {
-    wrap.setAttribute('tabindex', '0');
-    wrap.addEventListener('keydown', function (e) {
-      if (e.key === 'ArrowLeft') { go(idx - 1); e.preventDefault(); }
-      else if (e.key === 'ArrowRight') { go(idx + 1); e.preventDefault(); }
+  function selectIndustry(i) {
+    if (i === state.ind) return;
+    state.ind = i; state.feat = 0;
+    Array.prototype.forEach.call(indBar.children, function (b, k) {
+      b.classList.toggle('active', k === i);
+      b.setAttribute('aria-selected', k === i);
+      b.tabIndex = k === i ? 0 : -1;
     });
+    renderFeatures();
+    renderPreview(true);
   }
-  var sx = null;
-  track.addEventListener('touchstart', function (e) { sx = e.touches[0].clientX; }, { passive: true });
-  track.addEventListener('touchend', function (e) {
-    if (sx === null) return;
-    var dx = e.changedTouches[0].clientX - sx;
-    if (Math.abs(dx) > 45) go(idx + (dx < 0 ? 1 : -1));
-    sx = null;
-  }, { passive: true });
-  window.addEventListener('resize', layout, { passive: true });
-  window.addEventListener('load', layout);
-  layout();
+  function selectFeature(i) {
+    if (i === state.feat) return;
+    state.feat = i;
+    Array.prototype.forEach.call(featWrap.children, function (b, k) {
+      b.classList.toggle('active', k === i);
+      b.setAttribute('aria-selected', k === i);
+      b.tabIndex = k === i ? 0 : -1;
+    });
+    renderPreview(true);
+  }
+
+  indBar.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-ind]'); if (b) selectIndustry(+b.dataset.ind);
+  });
+  indBar.addEventListener('keydown', function (e) {
+    if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+    e.preventDefault();
+    var n = (state.ind + (e.key === 'ArrowRight' ? 1 : -1) + INDUSTRIES.length) % INDUSTRIES.length;
+    selectIndustry(n); indBar.children[n].focus();
+  });
+  featWrap.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-feat]'); if (b) selectFeature(+b.dataset.feat);
+  });
+  featWrap.addEventListener('keydown', function (e) {
+    if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+    e.preventDefault();
+    var len = INDUSTRIES[state.ind].features.length;
+    var n = (state.feat + (e.key === 'ArrowDown' ? 1 : -1) + len) % len;
+    selectFeature(n); featWrap.children[n].focus();
+  });
+
+  buildIndustries();
+  renderFeatures();
+  renderPreview(false);
 })();
 </script>
 </body>
