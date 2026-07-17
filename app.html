@@ -11,6 +11,7 @@
   <title>Flowaify — Dashboard</title>
   <link rel="icon" type="image/png" href="assets/images/logo-transparent.png" />
   <link rel="manifest" href="assets/manifest.json" />
+  <link rel="preload" href="assets/fonts/geist-variable.woff2" as="font" type="font/woff2" crossorigin />
   <meta name="theme-color" content="#16161a" />
   <link rel="apple-touch-icon" href="assets/images/logo-transparent.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -24,7 +25,7 @@
     #auth-gate {
       position: fixed; inset: 0; z-index: 9999; background: #fff;
       display: flex; align-items: center; justify-content: center;
-      flex-direction: column; gap: 14px; font-family: 'Segoe UI', Inter, -apple-system, sans-serif;
+      flex-direction: column; gap: 14px; font-family: var(--font-sans);
     }
     #auth-gate .ag-logo { width: 40px; height: 40px; object-fit: contain; }
     #auth-gate .ag-spinner {
@@ -108,7 +109,23 @@
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { background: var(--bg); }
-    html, body { height: 100%; font-family: 'Segoe UI', Inter, -apple-system, sans-serif; background: var(--bg); color: var(--text); font-size: 14px; line-height: 1.5; overflow-x: hidden; }
+    @font-face {
+      font-family: 'Geist';
+      src: url('assets/fonts/geist-variable.woff2') format('woff2-variations');
+      font-weight: 100 900;
+      font-style: normal;
+      font-display: swap;
+    }
+    :root { --font-sans: 'Geist', -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+    html, body { height: 100%; font-family: var(--font-sans); background: var(--bg); color: var(--text); font-size: 14px; line-height: 1.5; overflow-x: hidden; font-optical-sizing: auto; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+    /* ── Type system: numerals, titles, labels ── */
+    table, .stat-val, .as-val, .inv-p-amount, .rpt-km-val, .inv-amt, .bp-val, .ch-num, .rpd-kpi-v { font-variant-numeric: tabular-nums; }
+    .stat-val { letter-spacing: -0.02em; }
+    .inv-p-amount, .as-val { letter-spacing: -0.015em; }
+    .inv-head-title { letter-spacing: -0.022em; }
+    .sec-title { letter-spacing: -0.008em; }
+    .empty-state-title, .inv-head-title, .sec-title { text-wrap: balance; }
+    .inv-p-sec, .rf-label, .as-label, .inv-dr-section-label, .rpt-nav-h, .auto-rules-divider, .inv-col-h { letter-spacing: 0.07em; }
     a { text-decoration: none; color: inherit; }
     * { -webkit-tap-highlight-color: transparent; }
     .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
@@ -3990,7 +4007,7 @@ const AUTH0_CLIENT_ID = 'tx74Owqn3jVeSaVuxfFHsKloqbPqfAmN';
 /* ── Update check: version.json is bumped on every deploy; when a newer
    build is live, a quiet banner offers a refresh (ends the hard-refresh
    guessing game for clients). ── */
-const FLW_BUILD = 202607165; window.FLW_BUILD = FLW_BUILD;
+const FLW_BUILD = 202607166; window.FLW_BUILD = FLW_BUILD;
 async function flwVersionCheck() {
   try {
     const r = await fetch('assets/data/version.json?t=' + Date.now(), { cache: 'no-store' });
