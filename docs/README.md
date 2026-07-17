@@ -31,7 +31,7 @@ what's in this repo is exactly what ships.
 │   ├── flowy/            Flowy AI assistant rail (cross-page)
 │   └── portal/           Portal-page logic
 ├── site/               Secondary marketing pages (demo, team, onboarding, changelog, auth0-login)
-├── assets/             Images, favicons + assets/data/ (flowyfaq, whatsnew)
+├── assets/             images/ · favicons/ · data/ · manifest.json
 ├── worker/             Cloudflare Worker (API) + wrangler.toml — see docs/
 └── docs/               ARCHITECTURE.md · RUNBOOK.md
 ```

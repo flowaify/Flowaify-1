@@ -9,10 +9,10 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Flowaify" />
   <title>Flowaify — Dashboard</title>
-  <link rel="icon" type="image/png" href="assets/logo-transparent.png" />
+  <link rel="icon" type="image/png" href="assets/images/logo-transparent.png" />
   <link rel="manifest" href="assets/manifest.json" />
   <meta name="theme-color" content="#16161a" />
-  <link rel="apple-touch-icon" href="assets/logo-transparent.png" />
+  <link rel="apple-touch-icon" href="assets/images/logo-transparent.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -2197,7 +2197,7 @@
 <body>
 
 <div id="auth-gate">
-  <img class="ag-logo" src="assets/logo-transparent.png" alt="" onerror="this.style.display='none'" />
+  <img class="ag-logo" src="assets/images/logo-transparent.png" alt="" onerror="this.style.display='none'" />
   <div class="ag-spinner"></div>
   <p class="ag-label">Loading dashboard…</p>
 </div>
@@ -2210,7 +2210,7 @@
 <header class="suite-bar">
   <button class="mob-ham" onclick="toggleMob()"><i data-lucide="menu"></i></button>
   <div class="suite-left">
-    <img class="suite-logo" src="assets/logo-transparent.png" alt="" onerror="this.style.display='none'" />
+    <img class="suite-logo" src="assets/images/logo-transparent.png" alt="" onerror="this.style.display='none'" />
     <span class="suite-name">Flowaify</span>
     <span class="suite-div"></span>
     <span class="suite-ctx">Dashboard</span>
@@ -2224,7 +2224,7 @@
   </div>
   <div class="suite-right">
   <button class="suite-icon-btn msearch-btn" onclick="toggleMSearch(event)" title="Search"><i data-lucide="search"></i></button>
-  <button class="suite-flowy-btn" onclick="toggleFlowy()" title="Ask Flowy (⌘J)"><img class="logo-white" src="assets/logo-transparent.png" alt="" /><span class="suite-flowy-txt">Flowy</span></button>
+  <button class="suite-flowy-btn" onclick="toggleFlowy()" title="Ask Flowy (⌘J)"><img class="logo-white" src="assets/images/logo-transparent.png" alt="" /><span class="suite-flowy-txt">Flowy</span></button>
   <button class="suite-icon-btn" id="theme-toggle" onclick="toggleTheme()" title="Toggle dark mode"><i data-lucide="moon"></i></button>
   <div class="bell-wrap">
     <button class="suite-icon-btn" onclick="toggleNotifDrawer(event)" title="Notifications"><i data-lucide="bell"></i><span class="bell-badge" id="bell-badge" style="display:none;">0</span></button>
@@ -3845,13 +3845,13 @@
     <div class="fn-cta">Ask Flowy →</div>
   </div>
 </div>
-<button id="flowy-fab" onclick="toggleFlowy()" title="Ask Flowy (⌘J)"><img src="assets/logo-transparent.png" alt="Flowy" /><span id="fab-badge" style="display:none;">0</span></button>
+<button id="flowy-fab" onclick="toggleFlowy()" title="Ask Flowy (⌘J)"><img src="assets/images/logo-transparent.png" alt="Flowy" /><span id="fab-badge" style="display:none;">0</span></button>
 
 <!-- FLOWY AI PANEL -->
 <aside id="flowy-panel">
   <div class="interactive-dot-bg" aria-hidden="true"></div>
   <div class="fl-head">
-    <div class="fl-orb"><img class="logo-white" src="assets/logo-transparent.png" alt="" /></div>
+    <div class="fl-orb"><img class="logo-white" src="assets/images/logo-transparent.png" alt="" /></div>
     <div class="fl-title">Flowy</div>
     <span class="fl-ai-pill">AI</span>
     <button class="fl-close" onclick="toggleFlowy()" title="Close"><i data-lucide="x"></i></button>
@@ -3990,7 +3990,7 @@ const AUTH0_CLIENT_ID = 'tx74Owqn3jVeSaVuxfFHsKloqbPqfAmN';
 /* ── Update check: version.json is bumped on every deploy; when a newer
    build is live, a quiet banner offers a refresh (ends the hard-refresh
    guessing game for clients). ── */
-const FLW_BUILD = 202607163; window.FLW_BUILD = FLW_BUILD;
+const FLW_BUILD = 202607164; window.FLW_BUILD = FLW_BUILD;
 async function flwVersionCheck() {
   try {
     const r = await fetch('assets/data/version.json?t=' + Date.now(), { cache: 'no-store' });
