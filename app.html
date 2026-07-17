@@ -3990,7 +3990,7 @@ const AUTH0_CLIENT_ID = 'tx74Owqn3jVeSaVuxfFHsKloqbPqfAmN';
 /* ── Update check: version.json is bumped on every deploy; when a newer
    build is live, a quiet banner offers a refresh (ends the hard-refresh
    guessing game for clients). ── */
-const FLW_BUILD = 202607164; window.FLW_BUILD = FLW_BUILD;
+const FLW_BUILD = 202607165; window.FLW_BUILD = FLW_BUILD;
 async function flwVersionCheck() {
   try {
     const r = await fetch('assets/data/version.json?t=' + Date.now(), { cache: 'no-store' });
