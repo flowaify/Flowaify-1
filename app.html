@@ -3975,14 +3975,14 @@
 
 <div id="toast"><div class="toast-icon"><i data-lucide="check"></i></div><div id="toast-msg" style="font-size:12.5px;font-weight:600;color:var(--text-s);line-height:1.45;"></div></div>
 
-<script src="js/dashboard.js?v=35"></script>
-<script src="js/team.js?v=15"></script>
-<script src="js/settings.js?v=10"></script>
-<script src="js/analytics.js?v=2"></script>
-<script src="js/invoice.js?v=6"></script>
-<script src="js/inbox.js?v=2"></script>
-<script src="js/flowy.js?v=10"></script>
-<script src="js/reports.js?v=4"></script>
+<script src="pages/dashboard/dashboard.js?v=35"></script>
+<script src="pages/team/team.js?v=15"></script>
+<script src="pages/settings/settings.js?v=10"></script>
+<script src="pages/analytics/analytics.js?v=2"></script>
+<script src="pages/invoices/invoice.js?v=6"></script>
+<script src="pages/inbox/inbox.js?v=2"></script>
+<script src="pages/flowy/flowy.js?v=10"></script>
+<script src="pages/reports/reports.js?v=4"></script>
 <script>
 const AUTH0_DOMAIN    = 'auth.flowaify.app';
 const AUTH0_CLIENT_ID = 'tx74Owqn3jVeSaVuxfFHsKloqbPqfAmN';
@@ -3990,7 +3990,7 @@ const AUTH0_CLIENT_ID = 'tx74Owqn3jVeSaVuxfFHsKloqbPqfAmN';
 /* ── Update check: version.json is bumped on every deploy; when a newer
    build is live, a quiet banner offers a refresh (ends the hard-refresh
    guessing game for clients). ── */
-const FLW_BUILD = 202607161; window.FLW_BUILD = FLW_BUILD;
+const FLW_BUILD = 202607162; window.FLW_BUILD = FLW_BUILD;
 async function flwVersionCheck() {
   try {
     const r = await fetch('version.json?t=' + Date.now(), { cache: 'no-store' });
@@ -4149,9 +4149,9 @@ function showToast(msg) {
   clearTimeout(t._t); t._t = setTimeout(() => t.style.display='none', 4200);
 }
 
-/* ── Automation toggles — all logic lives in js/settings.js (WAF: auth headers
+/* ── Automation toggles — all logic lives in pages/settings/settings.js (WAF: auth headers
    stay in .js files). restoreAutoToggles/toggleAuto/automationsInit are
-   defined there and available globally since js/settings.js loads first. ── */
+   defined there and available globally since pages/settings/settings.js loads first. ── */
 
 /* ── Workspace settings (shared key with portal.html) ── */
 const DASH_SETTING_IDS = ['s2-biz-name','s2-biz-email','s2-biz-phone','s2-biz-site','s2-industry','s2-tz','s2-goal-leads'];
@@ -4432,7 +4432,7 @@ function buildNotifItems() {
   var data = window.__crmData;
   var readIds = notifReadIds();
 
-  // Team mentions (populated by js/team.js polling /team/mentions)
+  // Team mentions (populated by pages/team/team.js polling /team/mentions)
   (window.__twMentions || []).slice(0, 5).forEach(function(m) {
     var id = 'mn_' + m.ts;
     items.push({

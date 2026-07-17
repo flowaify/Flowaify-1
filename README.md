@@ -18,18 +18,19 @@ what's in this repo is exactly what ships.
 ├── app.html            The dashboard SPA (all pages live inside, toggled by showPage)
 ├── invoice.html        PUBLIC client-facing invoice page (token links in client emails)
 ├── report.html         PUBLIC shared-report page (token links)
-├── demo / team / onboarding / changelog / auth0-login / 404 .html
+├── 404.html
 ├── manifest.json, sw.js, favicon.ico, version.json
-├── js/                 All application modules (see docs/ARCHITECTURE.md)
-│   ├── dashboard.js      Core: boot, CRM data, overview, leads, charts, activity
-│   ├── team.js           Team hub: chat, channels, tasks, presence, typing
-│   ├── settings.js       Settings pages + automations control center (KV-backed)
-│   ├── invoice.js        Invoicing (server-truth store, payments, receipts)
-│   ├── reports.js        Reports (snapshots, AI narrative, viewer, documents)
-│   ├── analytics.js      Analytics page + customizable widget grid
-│   ├── inbox.js          Gmail OAuth inbox
-│   ├── flowy.js          Flowy AI assistant rail + intents
-│   └── portal.js         Portal-page logic
+├── pages/              One folder per dashboard page (module + future page files)
+│   ├── dashboard/        Core: boot, CRM data, overview, leads, activity, calendar
+│   ├── team/             Team hub: chat, channels, tasks, presence, typing
+│   ├── settings/         Settings + automations control center (KV-backed)
+│   ├── invoices/         Invoicing (server-truth store, payments, receipts)
+│   ├── reports/          Reports (snapshots, AI narrative, documents)
+│   ├── analytics/        Analytics widget grid
+│   ├── inbox/            Gmail OAuth inbox
+│   ├── flowy/            Flowy AI assistant rail (cross-page)
+│   └── portal/           Portal-page logic
+├── site/               Secondary marketing pages (demo, team, onboarding, changelog, auth0-login)
 ├── assets/             Images, favicons + assets/data/ (flowyfaq, whatsnew)
 ├── worker/             Cloudflare Worker (API) + wrangler.toml — see docs/
 └── docs/               ARCHITECTURE.md · RUNBOOK.md
@@ -47,7 +48,7 @@ what's in this repo is exactly what ships.
 
 ## Quickstart for developers
 
-- Frontend: edit, then push to `main` — GitHub Pages deploys (~1 min). No compiler.
+- Frontend: edit (page modules live in `pages/<page>/`), then push to `main` — GitHub Pages deploys (~1 min). No compiler.
 - API: `cd worker && npx wrangler deploy` (needs Cloudflare auth).
 - Full deploy checklist, KV key map, and client onboarding: **docs/RUNBOOK.md**.
 - System map (pages → modules → Worker routes → KV): **docs/ARCHITECTURE.md**.

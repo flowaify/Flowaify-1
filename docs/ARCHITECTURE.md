@@ -7,7 +7,7 @@ Auth0 (SPA SDK v2) · Zoho CRM as system of record · Gmail API for outbound ema
 
 ```
 Browser (flowaify.app, GitHub Pages)
-  app.html  ──▶ js/* modules ──▶ Worker (flowaify-crm-proxy.…workers.dev)
+  app.html  ──▶ pages/* modules ──▶ Worker (flowaify-crm-proxy.…workers.dev)
                                    ├── Zoho CRM  (leads/deals, per-client creds)
                                    ├── TEAM_KV   (all platform data, key map below)
                                    ├── Workers AI (Flowy chat + report narratives)
@@ -34,16 +34,16 @@ Browser (flowaify.app, GitHub Pages)
 
 | Dashboard page | Module | Notes |
 |---|---|---|
-| Overview | js/dashboard.js | customizable widget engine (OV_*), KPIs, charts |
-| Leads / Activity / Calendar | js/dashboard.js | write-back via /update |
-| Automations | js/settings.js | control center; toggles are KV-backed config |
-| Team | js/team.js | chat (4s adaptive poll), tasks, provisioning, typing |
-| Inbox | js/inbox.js | Gmail OAuth (tokens in KV per user) |
-| Invoices | js/invoice.js | v2 store, INV-###### numbering, payments/receipts |
-| Reports | js/reports.js | snapshot engine, AI narrative, doc renderer |
-| Analytics | js/analytics.js | AN_* widget grid |
-| Settings | js/settings.js | mirrors KV config; billing/seller details |
-| Flowy rail | js/flowy.js | streams /ai; intents can drive pages |
+| Overview | pages/dashboard/dashboard.js | customizable widget engine (OV_*), KPIs, charts |
+| Leads / Activity / Calendar | pages/dashboard/dashboard.js | write-back via /update |
+| Automations | pages/settings/settings.js | control center; toggles are KV-backed config |
+| Team | pages/team/team.js | chat (4s adaptive poll), tasks, provisioning, typing |
+| Inbox | pages/inbox/inbox.js | Gmail OAuth (tokens in KV per user) |
+| Invoices | pages/invoices/invoice.js | v2 store, INV-###### numbering, payments/receipts |
+| Reports | pages/reports/reports.js | snapshot engine, AI narrative, doc renderer |
+| Analytics | pages/analytics/analytics.js | AN_* widget grid |
+| Settings | pages/settings/settings.js | mirrors KV config; billing/seller details |
+| Flowy rail | pages/flowy/flowy.js | streams /ai; intents can drive pages |
 
 ## Worker route map (worker/index.js)
 
@@ -76,7 +76,7 @@ errs:{ID}                error ring (cap 50)       bak:{date}:{key} nightly back
 ## Frontend conventions
 
 - Modules are classic scripts sharing globals; load order in app.html matters
-  (dashboard.js first → team → settings → analytics → invoice → reports → flowy → inbox).
+  (pages/dashboard first → team → settings → analytics → invoice → reports → flowy → inbox).
 - Shared helpers: `invModal/invConfirm` (dialogs), `showToast`, `relTime`, `escDash`,
   `avatarHtml`. Theme via CSS custom properties; light+dark both required; **no new
   color tokens** without design approval.
