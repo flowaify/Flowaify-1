@@ -186,16 +186,15 @@
 
     /* Raised canvas panel — the whole showcase sits on one machined surface */
     .wf-canvas { position: relative; margin: 44px auto 0; padding: 34px 40px 42px; border-radius: 28px;
-      background: rgba(255,255,255,0.55); -webkit-backdrop-filter: blur(14px) saturate(150%); backdrop-filter: blur(14px) saturate(150%);
+      background: rgba(255,255,255,0.9);
       border: 1px solid rgba(15,23,42,0.08);
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.85), 0 40px 90px -50px rgba(15,23,42,0.30), 0 12px 30px -22px rgba(15,23,42,0.14); }
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.95), 0 40px 90px -50px rgba(15,23,42,0.30), 0 12px 30px -22px rgba(15,23,42,0.14); }
 
     /* Industry tab bar */
     .wf-industries { display: flex; justify-content: center; margin: 0 auto; }
     .wf-ind-bar { display: inline-flex; gap: 4px; padding: 6px; border-radius: 16px; max-width: 100%; overflow-x: auto; scrollbar-width: none;
-      background: rgba(255,255,255,0.62); border: 1px solid rgba(15,23,42,0.08);
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.7), 0 12px 32px -20px rgba(15,23,42,0.24);
-      -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
+      background: rgba(15,23,42,0.035); border: 1px solid rgba(15,23,42,0.07);
+      box-shadow: inset 0 1px 2px rgba(15,23,42,0.04); }
     .wf-ind-bar::-webkit-scrollbar { display: none; }
     .wf-ind { display: inline-flex; align-items: center; gap: 10px; white-space: nowrap; flex-shrink: 0; padding: 12px 22px; min-height: 44px;
       border-radius: 11px; border: none; background: transparent; cursor: pointer; font-family: inherit; font-size: 14.5px; font-weight: 600; color: #55606F; letter-spacing: -0.01em;
@@ -210,13 +209,12 @@
     /* Two-column main */
     .wf-main { position: relative; display: grid; grid-template-columns: minmax(300px, 358px) 1fr; gap: 42px; align-items: start; margin-top: 40px; }
 
-    /* Hairline connector: active workflow -> dashboard */
-    .wf-connector { position: absolute; height: 1px; z-index: 3; pointer-events: none; opacity: 0;
-      background: linear-gradient(90deg, rgba(51,65,85,0.04), rgba(51,65,85,0.32));
-      transition: opacity 0.4s ease, top 0.5s cubic-bezier(0.22,1,0.36,1); }
-    .wf-connector.on { opacity: 1; }
-    .wf-connector::after { content: ''; position: absolute; right: -2px; top: 50%; width: 6px; height: 6px; border-radius: 50%;
-      background: #334155; transform: translateY(-50%); box-shadow: 0 0 0 3px rgba(51,65,85,0.10); }
+    /* Hairline connector: active workflow -> dashboard (SVG so it always reaches the tray) */
+    .wf-conn { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; z-index: 3; pointer-events: none; opacity: 0; transition: opacity 0.4s ease; }
+    .wf-conn.on { opacity: 1; }
+    #wf-conn-path { fill: none; stroke: #334155; stroke-width: 1; stroke-opacity: 0.34; }
+    #wf-conn-halo { fill: rgba(51,65,85,0.12); }
+    #wf-conn-dot { fill: #334155; }
 
     /* Left feature list */
     .wf-features { display: flex; flex-direction: column; }
@@ -242,7 +240,7 @@
     .wf-tray { position: relative; padding: 9px; border-radius: 22px; background: rgba(15,23,42,0.035);
       border: 1px solid rgba(15,23,42,0.09);
       box-shadow: inset 0 1px 0 rgba(255,255,255,0.75), 0 46px 88px -46px rgba(15,23,42,0.38), 0 12px 30px -20px rgba(15,23,42,0.16);
-      transform-style: preserve-3d; will-change: transform; transition: transform 0.3s cubic-bezier(0.22,1,0.36,1); }
+      transition: transform 0.3s cubic-bezier(0.22,1,0.36,1); }
     .wf-tray::after { content: ''; position: absolute; left: 8%; right: 8%; bottom: -24px; height: 40px; z-index: -1; pointer-events: none;
       background: radial-gradient(60% 100% at 50% 0%, rgba(15,23,42,0.18), transparent 72%); filter: blur(12px); }
     .wf-frame { position: relative; border-radius: 14px; overflow: hidden; background: #fff; aspect-ratio: 1920 / 959;
@@ -284,7 +282,7 @@
       opacity: 0; transform: translateY(24px);
       transition: opacity 0.6s ease, transform 0.6s cubic-bezier(.34,1.56,.64,1);
     }
-    .reveal.in { opacity: 1; transform: translateY(0); }
+    .reveal.in { opacity: 1; transform: none; }
 
     /* Float badge */
     .badge {
@@ -1706,7 +1704,11 @@
                 <p class="wf-detail-text" id="wf-detail-text"></p>
               </div>
             </div>
-            <div class="wf-connector" id="wf-connector" aria-hidden="true"></div>
+            <svg class="wf-conn" id="wf-conn" aria-hidden="true">
+              <path id="wf-conn-path"></path>
+              <circle id="wf-conn-halo" r="6"></circle>
+              <circle id="wf-conn-dot" r="3.2"></circle>
+            </svg>
           </div>
         </div>
       </div>
@@ -4781,7 +4783,10 @@ updateNavHero();
   var canvas    = document.querySelector('.wf-canvas');
   var tray      = document.getElementById('wf-tray');
   var preview   = document.querySelector('.wf-preview');
-  var connector = document.getElementById('wf-connector');
+  var connSvg   = document.getElementById('wf-conn');
+  var connPath  = document.getElementById('wf-conn-path');
+  var connDot   = document.getElementById('wf-conn-dot');
+  var connHalo  = document.getElementById('wf-conn-halo');
 
   var state = { ind: 0, feat: 0 };
   var curImg = IMG.leads;
@@ -4835,7 +4840,7 @@ updateNavHero();
     });
     renderFeatures();
     renderPreview(true);
-    requestAnimationFrame(positionConnector);
+    requestAnimationFrame(function () { positionConnector(true); });
   }
   function selectFeature(i) {
     if (i === state.feat) return;
@@ -4846,7 +4851,7 @@ updateNavHero();
       b.tabIndex = k === i ? 0 : -1;
     });
     renderPreview(true);
-    requestAnimationFrame(positionConnector);
+    requestAnimationFrame(function () { positionConnector(true); });
   }
 
   indBar.addEventListener('click', function (e) {
@@ -4869,36 +4874,58 @@ updateNavHero();
     selectFeature(n); featWrap.children[n].focus();
   });
 
-  // Hairline connector — links the active workflow to the dashboard (desktop two-column only)
-  function positionConnector() {
-    if (!connector || !preview) return;
-    if (!window.matchMedia('(min-width: 981px)').matches) { connector.classList.remove('on'); return; }
+  // Hairline connector — a curved wire that always reaches the dashboard (desktop two-column only)
+  var connState = { y0: null, y1: null, raf: 0 };
+  function drawConn(x0, y0, x1, y1) {
+    var mx = (x0 + x1) / 2;
+    connPath.setAttribute('d', 'M' + x0 + ',' + y0 + ' C' + mx + ',' + y0 + ' ' + mx + ',' + y1 + ' ' + x1 + ',' + y1);
+    connDot.setAttribute('cx', x1); connDot.setAttribute('cy', y1);
+    connHalo.setAttribute('cx', x1); connHalo.setAttribute('cy', y1);
+  }
+  function positionConnector(animate) {
+    if (!connSvg || !preview || !tray) return;
+    if (!window.matchMedia('(min-width: 981px)').matches) { connSvg.classList.remove('on'); connState.y0 = null; return; }
     var active = featWrap.children[state.feat];
-    if (!active) { connector.classList.remove('on'); return; }
-    var featRight = featWrap.offsetLeft + featWrap.offsetWidth;
-    connector.style.left = featRight + 'px';
-    connector.style.width = Math.max(0, preview.offsetLeft - featRight) + 'px';
-    connector.style.top = (active.offsetTop + active.offsetHeight / 2) + 'px';
-    connector.classList.add('on');
+    if (!active) { connSvg.classList.remove('on'); return; }
+    var x0 = featWrap.offsetLeft + featWrap.offsetWidth;
+    var x1 = preview.offsetLeft;
+    var y0 = active.offsetTop + active.offsetHeight / 2;
+    var trayTop = tray.offsetTop, trayBot = trayTop + tray.offsetHeight;
+    var y1 = Math.max(trayTop + 16, Math.min(trayBot - 16, y0));   // clamp the dashboard end into the tray
+    connSvg.classList.add('on');
+    cancelAnimationFrame(connState.raf);
+    if (animate === false || connState.y0 == null || reduce) {
+      connState.y0 = y0; connState.y1 = y1; drawConn(x0, y0, x1, y1); return;
+    }
+    var s0 = connState.y0, s1 = connState.y1, t0 = performance.now(), dur = 440;
+    (function step(now) {
+      var p = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - p, 3);
+      var cy0 = s0 + (y0 - s0) * e, cy1 = s1 + (y1 - s1) * e;
+      drawConn(x0, cy0, x1, cy1);
+      connState.y0 = cy0; connState.y1 = cy1;
+      if (p < 1) connState.raf = requestAnimationFrame(step);
+    })(t0);
   }
 
-  // Tasteful mouse-parallax tilt on the machined tray (desktop pointers, motion allowed)
+  // Tasteful mouse-parallax tilt on the machined tray (desktop pointers, motion allowed).
+  // will-change is toggled only during hover so the screenshot stays crisp at rest.
   if (canvas && tray && preview && !reduce && window.matchMedia('(pointer: fine)').matches) {
+    preview.addEventListener('pointerenter', function () { tray.style.willChange = 'transform'; });
     preview.addEventListener('pointermove', function (e) {
       var r = tray.getBoundingClientRect();
       var dx = Math.max(-1, Math.min(1, (e.clientX - (r.left + r.width / 2)) / (r.width / 2)));
       var dy = Math.max(-1, Math.min(1, (e.clientY - (r.top + r.height / 2)) / (r.height / 2)));
       tray.style.transform = 'perspective(1200px) rotateX(' + (-dy * 2.2).toFixed(2) + 'deg) rotateY(' + (dx * 2.6).toFixed(2) + 'deg)';
     });
-    preview.addEventListener('pointerleave', function () { tray.style.transform = ''; });
+    preview.addEventListener('pointerleave', function () { tray.style.transform = ''; tray.style.willChange = 'auto'; });
   }
 
   buildIndustries();
   renderFeatures();
   renderPreview(false);
-  requestAnimationFrame(positionConnector);
-  window.addEventListener('load', positionConnector);
-  window.addEventListener('resize', function () { requestAnimationFrame(positionConnector); }, { passive: true });
+  requestAnimationFrame(function () { positionConnector(false); });
+  window.addEventListener('load', function () { positionConnector(false); });
+  window.addEventListener('resize', function () { requestAnimationFrame(function () { positionConnector(false); }); }, { passive: true });
 })();
 </script>
 </body>
