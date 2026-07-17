@@ -12,9 +12,15 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="preload" href="assets/fonts/clash-display.woff2" as="font" type="font/woff2" crossorigin />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 
   <style>
+    @font-face {
+      font-family: 'Clash Display';
+      src: url('assets/fonts/clash-display.woff2') format('woff2-variations');
+      font-weight: 200 700; font-style: normal; font-display: swap;
+    }
     /* ── Design Tokens ── */
     :root {
       --bg:          #FFFFFF;
@@ -470,12 +476,10 @@
     }
     #hero-section::after {
       content: ''; position: absolute; inset: 0; pointer-events: none;
-      background:
-        linear-gradient(rgba(15,23,42,0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(15,23,42,0.03) 1px, transparent 1px);
-      background-size: 72px 72px;
-      -webkit-mask-image: radial-gradient(1200px 820px at 62% 42%, #000 0%, transparent 80%);
-              mask-image: radial-gradient(1200px 820px at 62% 42%, #000 0%, transparent 80%);
+      z-index: 1;
+      background: repeating-linear-gradient(90deg, rgba(15,23,42,0.05) 0 1px, transparent 1px 118px);
+      -webkit-mask-image: linear-gradient(180deg, transparent, #000 14%, #000 82%, transparent);
+              mask-image: linear-gradient(180deg, transparent, #000 14%, #000 82%, transparent);
     }
     .hero-inner {
       position: relative; z-index: 2; max-width: 1400px; margin: 0 auto; width: 100%;
@@ -493,8 +497,9 @@
     #hero-pill .lbl { font-size: 11px; font-weight: 600; letter-spacing: 0.12em;
       text-transform: uppercase; color: rgba(15,23,42,0.62); }
     #hero-h1 {
-      font-size: clamp(2.3rem, 3.35vw, 3.4rem); font-weight: 700; line-height: 1.08;
-      letter-spacing: -0.03em; color: #0F172A; margin-bottom: 22px;
+      font-family: 'Clash Display', 'Plus Jakarta Sans', sans-serif;
+      font-size: clamp(2.55rem, 3.7vw, 3.85rem); font-weight: 600; line-height: 1.04;
+      letter-spacing: -0.018em; color: #0F172A; margin-bottom: 22px;
     }
     #hero-h1 .word-blur { color: #0F172A; }
     #hero-sub {
@@ -532,7 +537,7 @@
     .proof-card {
       display: flex; align-items: center; gap: 11px; padding: 13px 14px; border-radius: 13px;
       background: #FFFFFF; border: 1px solid rgba(15,23,42,0.08);
-      box-shadow: 0 1px 3px rgba(15,23,42,0.05), 0 6px 20px -12px rgba(15,23,42,0.12);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.9), 0 1px 3px rgba(15,23,42,0.05), 0 6px 20px -12px rgba(15,23,42,0.12);
       transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
     }
     .proof-card:hover { border-color: rgba(15,23,42,0.15); box-shadow: 0 2px 6px rgba(15,23,42,0.07), 0 12px 28px -14px rgba(15,23,42,0.18); transform: translateY(-2px); }
@@ -553,10 +558,10 @@
       border: 1px solid rgba(15,23,42,0.10); will-change: transform; }
     .dash-panel img { display: block; width: 100%; height: auto; }
     .dash-back { top: 0; left: 0; width: 82%; z-index: 1; }
-    .dash-back .dash-panel { box-shadow: 0 24px 58px -20px rgba(15,23,42,0.34);
+    .dash-back .dash-panel { box-shadow: inset 0 1px 0 rgba(255,255,255,0.12), 0 24px 58px -20px rgba(15,23,42,0.34);
       animation: floatBack 7s ease-in-out infinite; }
     .dash-front { bottom: 0; right: -4%; width: 90%; z-index: 2; }
-    .dash-front .dash-panel { box-shadow: 0 42px 88px -26px rgba(15,23,42,0.44);
+    .dash-front .dash-panel { box-shadow: inset 0 1px 0 rgba(255,255,255,0.16), 0 42px 88px -26px rgba(15,23,42,0.44);
       border-color: rgba(15,23,42,0.13); animation: floatFront 8.6s ease-in-out infinite; }
     @keyframes floatBack { 0%,100% { transform: translateY(0) rotate(-0.15deg); } 50% { transform: translateY(-9px) rotate(0.12deg); } }
     @keyframes floatFront { 0%,100% { transform: translateY(0) rotate(0.16deg); } 50% { transform: translateY(-13px) rotate(-0.13deg); } }
