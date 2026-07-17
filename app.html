@@ -670,10 +670,10 @@
 
     /* CARD DRAG HANDLES + CUSTOMIZE MODE */
     .card { position: relative; }
-    .card-handle { position: absolute; top: 9px; right: 9px; width: 22px; height: 22px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2.5px; cursor: pointer; opacity: 0; transition: opacity 0.15s; border-radius: 3px; z-index: 10; }
-    .card-handle:hover { background: var(--hover); opacity: 1 !important; }
+    .card-handle { position: absolute; top: 7px; right: 7px; width: 24px; height: 24px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2.5px; cursor: pointer; opacity: 0; transition: opacity 0.15s, box-shadow 0.15s; border-radius: 6px; z-index: 15; background: var(--bg-card); border: 1px solid var(--border); box-shadow: var(--shadow-1); }
+    .card-handle:hover { background: var(--hover); opacity: 1 !important; box-shadow: var(--shadow-2); }
     .card-handle span { width: 11px; height: 1.5px; background: var(--text-m); border-radius: 1px; display: block; }
-    .card:hover > .card-handle { opacity: 0.45; }
+    .card:hover > .card-handle { opacity: 1; }
     body.ov-customize #ov-kpi-grid > .card, body.ov-customize #ov-mid-grid > .card, body.ov-customize #ov-bot-side > .card, body.ov-customize #ov-bot-main > .card, body.ov-customize #an-grid > .card { outline: 1px dashed rgba(59,130,246,.35); outline-offset: -1px; }
     body.ov-customize .ov-zone-empty { min-height: 72px; outline: 1.5px dashed var(--border); outline-offset: -2px; border-radius: 4px; position: relative; }
     body.ov-customize .ov-zone-empty::after { content: 'Drop widgets here'; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 500; color: var(--text-m); pointer-events: none; }
@@ -4108,7 +4108,7 @@ const AUTH0_CLIENT_ID = 'tx74Owqn3jVeSaVuxfFHsKloqbPqfAmN';
 /* ── Update check: version.json is bumped on every deploy; when a newer
    build is live, a quiet banner offers a refresh (ends the hard-refresh
    guessing game for clients). ── */
-const FLW_BUILD = 202607172; window.FLW_BUILD = FLW_BUILD;
+const FLW_BUILD = 202607173; window.FLW_BUILD = FLW_BUILD;
 async function flwVersionCheck() {
   try {
     const r = await fetch('assets/data/version.json?t=' + Date.now(), { cache: 'no-store' });
