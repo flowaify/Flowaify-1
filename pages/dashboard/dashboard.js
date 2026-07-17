@@ -374,7 +374,7 @@ function renderSourceList(containerId, counts, emptyTitle, emptySub) {
         options: {
           cutout: '68%',
           plugins: { legend: { display: false }, tooltip: { callbacks: { label: function(ctx) { return ' ' + ctx.label + ': ' + ctx.parsed; } } } },
-          animation: { duration: 500 }
+          animation: { duration: 500, easing: 'easeOutQuart' }
         }
       });
     }
@@ -2749,7 +2749,7 @@ function renderCharts(data, ranged, days) {
         options: {
           plugins: { legend: { display: false }, tooltip: { callbacks: { label: function(ctx) { return ctx.raw + 's'; } } } },
           scales: { x: { ticks: { font: { size: 10 } } }, y: { ticks: { font: { size: 10 }, callback: function(v) { return v + 's'; } } } },
-          animation: { duration: 400 }
+          animation: { duration: 450, easing: 'easeOutQuart' }
         }
       });
     }
@@ -2778,7 +2778,7 @@ function renderCharts(data, ranged, days) {
           x: { ticks: { font: { size: 9 }, maxTicksLimit: 10, color: 'rgba(255,255,255,0.7)' }, grid: { display: false } },
           y: { ticks: { font: { size: 10 }, stepSize: 1, color: 'rgba(255,255,255,0.7)' }, grid: { color: 'rgba(255,255,255,0.12)' } }
         },
-        animation: { duration: 400 }
+        animation: { duration: 450, easing: 'easeOutQuart' }
       }
     });
   }
@@ -2803,7 +2803,7 @@ function renderCharts(data, ranged, days) {
       options: {
         plugins: { legend: { display: false } },
         scales: { x: { ticks: { font: { size: 10 } } }, y: { ticks: { font: { size: 10 }, stepSize: 1 } } },
-        animation: { duration: 400 }
+        animation: { duration: 450, easing: 'easeOutQuart' }
       }
     });
   }
@@ -2824,7 +2824,7 @@ function renderCharts(data, ranged, days) {
       options: {
         plugins: { legend: { display: false } },
         scales: { x: { ticks: { font: { size: 10 } } }, y: { ticks: { font: { size: 10 }, stepSize: 1 } } },
-        animation: { duration: 400 }
+        animation: { duration: 450, easing: 'easeOutQuart' }
       }
     });
   }
@@ -2841,7 +2841,7 @@ function renderCharts(data, ranged, days) {
       options: {
         plugins: { legend: { display: false } },
         scales: { x: { ticks: { font: { size: 9 }, maxTicksLimit: 10 } }, y: { ticks: { font: { size: 10 }, stepSize: 1 } } },
-        animation: { duration: 400 }
+        animation: { duration: 450, easing: 'easeOutQuart' }
       }
     });
   }
