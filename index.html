@@ -479,7 +479,7 @@
     }
     .hero-inner {
       position: relative; z-index: 2; max-width: 1400px; margin: 0 auto; width: 100%;
-      padding: 0 60px; display: grid; grid-template-columns: 1.02fr 1.12fr;
+      padding: 0 60px; display: grid; grid-template-columns: 1fr 1.24fr;
       gap: 68px; align-items: center;
     }
     .hero-copy { max-width: 620px; }
@@ -543,16 +543,25 @@
     .proof-card .s { font-size: 10.5px; color: #78818E; margin-top: 2px; }
     /* dashboard composite */
     #hero-visual { position: relative; opacity: 0; }
-    .dash-stack { position: relative; width: 100%; aspect-ratio: 1.36 / 1; }
-    .dash-glow { position: absolute; left: 50%; top: 47%; transform: translate(-50%,-50%);
-      width: 80%; height: 72%; background: radial-gradient(ellipse, rgba(15,23,42,0.055), transparent 68%);
-      filter: blur(64px); pointer-events: none; z-index: 0; }
-    .dash { position: absolute; border-radius: 12px; overflow: hidden;
-      border: 1px solid rgba(15,23,42,0.10); background: #0B0D10; }
-    .dash img { display: block; width: 100%; height: auto; }
-    .dash-back { top: 0; left: 0; width: 77%; z-index: 1; box-shadow: 0 24px 56px -20px rgba(15,23,42,0.32); }
-    .dash-front { bottom: 0; right: 0; width: 82%; z-index: 2;
-      box-shadow: 0 40px 80px -28px rgba(15,23,42,0.4); border-color: rgba(15,23,42,0.12); }
+    .dash-stack { position: relative; width: 100%; aspect-ratio: 1.3 / 1; }
+    .dash-glow { position: absolute; left: 50%; top: 48%; transform: translate(-50%,-50%);
+      width: 88%; height: 78%; background: radial-gradient(ellipse, rgba(15,23,42,0.06), transparent 68%);
+      filter: blur(70px); pointer-events: none; z-index: 0; }
+    .dash-pos { position: absolute; will-change: transform;
+      transition: transform 0.55s cubic-bezier(0.16,1,0.3,1); }
+    .dash-panel { border-radius: 13px; overflow: hidden; background: #0B0D10;
+      border: 1px solid rgba(15,23,42,0.10); will-change: transform; }
+    .dash-panel img { display: block; width: 100%; height: auto; }
+    .dash-back { top: 0; left: 0; width: 82%; z-index: 1; }
+    .dash-back .dash-panel { box-shadow: 0 24px 58px -20px rgba(15,23,42,0.34);
+      animation: floatBack 7s ease-in-out infinite; }
+    .dash-front { bottom: 0; right: -4%; width: 90%; z-index: 2; }
+    .dash-front .dash-panel { box-shadow: 0 42px 88px -26px rgba(15,23,42,0.44);
+      border-color: rgba(15,23,42,0.13); animation: floatFront 8.6s ease-in-out infinite; }
+    @keyframes floatBack { 0%,100% { transform: translateY(0) rotate(-0.15deg); } 50% { transform: translateY(-9px) rotate(0.12deg); } }
+    @keyframes floatFront { 0%,100% { transform: translateY(0) rotate(0.16deg); } 50% { transform: translateY(-13px) rotate(-0.13deg); } }
+    @media (prefers-reduced-motion: reduce) { .dash-back .dash-panel, .dash-front .dash-panel { animation: none !important; } }
+    @media (max-width: 768px) { .dash-back .dash-panel, .dash-front .dash-panel { animation: none; } .dash-front { right: 0; width: 86%; } }
 
     /* ══ NAV — adaptive: dark over hero, light past it ══ */
     #portal-btn {
@@ -1502,12 +1511,12 @@
       <div id="hero-visual" style="transform:translateY(24px);">
         <div class="dash-stack">
           <div class="dash-glow"></div>
-          <div class="dash dash-back">
+          <div class="dash-pos dash-back"><div class="dash-panel">
             <img src="assets/images/hero-overview-dark.png" alt="Flowaify Overview dashboard" width="1920" height="1080" loading="eager" decoding="async" />
-          </div>
-          <div class="dash dash-front">
+          </div></div>
+          <div class="dash-pos dash-front"><div class="dash-panel">
             <img src="assets/images/hero-leads-light.png" alt="Flowaify Leads dashboard" width="1920" height="1080" loading="eager" decoding="async" />
-          </div>
+          </div></div>
         </div>
       </div>
 
@@ -3554,6 +3563,26 @@
     gsap.to('#hero-proof',   { opacity: 1, y: 0, duration: 0.55, ease: 'power3.out', delay: 0.22 });
     gsap.to('#hero-visual',  { opacity: 1, y: 0,   duration: 0.85, ease: 'power3.out', delay: 0.05 });
   }, lastDelay);
+})();
+
+// ─── HERO DASHBOARD PARALLAX (desktop, motion-safe) ──────────────────────────
+(function() {
+  if (!window.matchMedia('(hover: hover)').matches) return;
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  var hero = document.getElementById('hero-section');
+  var back = document.querySelector('.dash-back');
+  var front = document.querySelector('.dash-front');
+  if (!hero || !back || !front) return;
+  hero.addEventListener('mousemove', function(e) {
+    var r = hero.getBoundingClientRect();
+    var nx = (e.clientX - r.left) / r.width - 0.5;
+    var ny = (e.clientY - r.top) / r.height - 0.5;
+    back.style.transform  = 'translate3d(' + (nx * 14).toFixed(1) + 'px,' + (ny * 12).toFixed(1) + 'px,0)';
+    front.style.transform = 'translate3d(' + (nx * 26).toFixed(1) + 'px,' + (ny * 20).toFixed(1) + 'px,0)';
+  }, { passive: true });
+  hero.addEventListener('mouseleave', function() {
+    back.style.transform = ''; front.style.transform = '';
+  });
 })();
 
 initScrollReveal();
