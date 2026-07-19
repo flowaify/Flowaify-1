@@ -7,231 +7,266 @@
   <meta name="description" content="Tell us about your business and our team will build your Flowaify lead-automation system." />
   <link rel="icon" type="image/png" href="/assets/images/logo-transparent.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
   <script>emailjs.init('K8h7HdhcJxPejdDHU');</script>
   <style>
     :root{
       --blue:#0057FF; --ink:#0F172A; --muted:#55606F; --faint:#8A93A0;
-      --border:rgba(15,23,42,0.1); --line:rgba(15,23,42,0.08); --charcoal:#0F1116;
+      --line:rgba(15,23,42,0.08); --border:rgba(15,23,42,0.11); --charcoal:#12141A;
+      --ease:cubic-bezier(.22,1,.36,1);
     }
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     html{-webkit-text-size-adjust:100%}
-    body{font-family:'Plus Jakarta Sans',sans-serif;color:var(--ink);font-size:14px;-webkit-font-smoothing:antialiased;
-      background:linear-gradient(180deg,#F4F6F9 0%,#E7EAEF 100%);min-height:100vh;display:flex;flex-direction:column}
+    body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;color:var(--ink);font-size:14px;-webkit-font-smoothing:antialiased;
+      min-height:100dvh;
+      background:
+        radial-gradient(1000px 560px at 18% -6%, rgba(255,255,255,0.85), transparent 58%),
+        linear-gradient(180deg,#EFF1F5 0%,#E6E9EF 100%);}
     a{text-decoration:none;color:inherit}
+    ::selection{background:rgba(0,87,255,0.14)}
 
-    /* Top bar */
-    .ob-top{display:flex;align-items:center;justify-content:space-between;width:100%;max-width:1120px;margin:0 auto;padding:22px 32px}
+    /* ── Top bar ── */
+    .ob-top{position:relative;z-index:2;display:flex;align-items:center;justify-content:space-between;max-width:1160px;margin:0 auto;padding:24px 40px}
     .ob-brand{display:inline-flex;align-items:center;gap:10px}
     .ob-brand img{width:30px;height:30px;object-fit:contain}
-    .ob-brand span{font-size:17px;font-weight:800;letter-spacing:-0.03em;color:var(--ink)}
-    .ob-top-links{display:inline-flex;align-items:center;gap:8px}
-    .ob-top-link{display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border-radius:9px;font-size:13.5px;font-weight:600;color:var(--muted);transition:color .18s,background .18s}
-    .ob-top-link:hover{color:var(--ink);background:rgba(15,23,42,0.04)}
-    .ob-top-link i{width:14px;height:14px}
-    .ob-top-link.contact{border:1px solid var(--border);color:var(--ink)}
-    .ob-top-link.contact:hover{border-color:rgba(15,23,42,0.2);background:#fff}
+    .ob-brand span{font-size:17px;font-weight:800;letter-spacing:-0.035em;color:var(--ink)}
+    .top-links{display:inline-flex;align-items:center;gap:6px}
+    .top-link{display:inline-flex;align-items:center;gap:6px;padding:9px 13px;border-radius:10px;font-size:13.5px;font-weight:600;color:var(--muted);transition:color .2s,background .2s,border-color .2s}
+    .top-link:hover{color:var(--ink);background:rgba(15,23,42,0.045)}
+    .top-link i{width:15px;height:15px}
+    .top-link.solid{border:1px solid var(--border);color:var(--ink);background:rgba(255,255,255,0.6)}
+    .top-link.solid:hover{border-color:rgba(15,23,42,0.22);background:#fff}
 
-    /* Main */
-    .ob-main{flex:1;width:100%;max-width:600px;margin:0 auto;padding:20px 20px 72px}
-    .ob-header{text-align:center;margin-bottom:30px}
-    .ob-eyebrow{font-size:11px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:var(--blue)}
-    .ob-title{font-family:'Montserrat','Plus Jakarta Sans',sans-serif;font-size:30px;font-weight:800;letter-spacing:-0.03em;line-height:1.12;color:var(--ink);margin:12px 0 10px}
-    .ob-sub{font-size:14.5px;color:var(--muted);line-height:1.6;max-width:440px;margin:0 auto}
+    /* ── Shell ── */
+    .ob-shell{max-width:1080px;margin:0 auto;padding:20px 40px 96px;display:grid;grid-template-columns:0.86fr 1fr;gap:72px;align-items:start}
 
-    /* Step tracker */
-    .steps{display:flex;align-items:center;justify-content:center;margin-bottom:26px}
-    .step{display:inline-flex;align-items:center;gap:9px}
-    .step-num{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;border:1.5px solid var(--border);color:var(--faint);background:#fff;transition:all .25s;flex-shrink:0}
-    .step.active .step-num,.step.done .step-num{background:var(--blue);border-color:var(--blue);color:#fff}
-    .step-label{font-size:12px;font-weight:600;color:var(--faint);transition:color .25s;white-space:nowrap}
-    .step.active .step-label,.step.done .step-label{color:var(--ink)}
-    .step-line{width:44px;height:1.5px;background:var(--border);margin:0 12px;transition:background .25s;flex-shrink:0}
-    .step-line.done{background:var(--blue)}
+    /* ── Left rail ── */
+    .ob-rail{position:sticky;top:36px;padding-top:24px}
+    .rail-eyebrow{font-size:11px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:var(--blue)}
+    .rail-title{font-family:'Montserrat','Plus Jakarta Sans',sans-serif;font-size:clamp(1.9rem,2.6vw,2.5rem);font-weight:800;letter-spacing:-0.035em;line-height:1.08;color:var(--ink);margin:14px 0 14px}
+    .rail-sub{font-size:15px;line-height:1.65;color:var(--muted);max-width:340px}
 
-    /* Card */
-    .ob-card{background:#fff;border:1px solid var(--border);border-radius:20px;padding:34px 34px 30px;
-      box-shadow:0 30px 70px -42px rgba(15,23,42,0.3),inset 0 1px 0 rgba(255,255,255,0.9)}
+    /* vertical stepper */
+    .vstep{list-style:none;margin:40px 0 0}
+    .vstep-item{position:relative;display:flex;align-items:flex-start;gap:15px;padding-bottom:26px}
+    .vstep-item:last-child{padding-bottom:0}
+    .vstep-item:not(:last-child)::after{content:'';position:absolute;left:15.25px;top:38px;bottom:6px;width:1.5px;background:var(--border);transition:background .3s}
+    .vstep-item.done:not(:last-child)::after{background:var(--blue)}
+    .vstep-num{position:relative;z-index:1;width:32px;height:32px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;
+      font-size:12.5px;font-weight:700;border:1.5px solid var(--border);background:#fff;color:var(--faint);transition:all .3s var(--ease)}
+    .vstep-item.active .vstep-num{border-color:var(--blue);color:var(--blue);box-shadow:0 0 0 4px rgba(0,87,255,0.1)}
+    .vstep-item.done .vstep-num{background:var(--blue);border-color:var(--blue);color:#fff}
+    .vstep-tx{padding-top:5px}
+    .vstep-t{display:block;font-size:14px;font-weight:650;letter-spacing:-0.01em;color:var(--faint);transition:color .3s}
+    .vstep-item.active .vstep-t,.vstep-item.done .vstep-t{color:var(--ink)}
+    .vstep-s{display:block;font-size:12.5px;color:var(--faint);margin-top:2px}
+
+    .rail-trust{list-style:none;margin:40px 0 0;padding-top:26px;border-top:1px solid var(--line)}
+    .rail-trust li{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--muted);padding:6px 0}
+    .rail-trust li i{width:15px;height:15px;color:var(--blue);flex-shrink:0}
+
+    /* mobile progress (hidden on desktop) */
+    .mprog{display:none;margin-bottom:22px}
+    .mprog-track{height:6px;border-radius:100px;background:rgba(15,23,42,0.08);overflow:hidden}
+    .mprog-fill{height:100%;width:33.33%;border-radius:100px;background:var(--blue);transition:width .4s var(--ease)}
+    .mprog-label{font-size:12.5px;font-weight:600;color:var(--muted);margin-top:9px}
+
+    /* ── Form card ── */
+    .ob-card{background:#fff;border:1px solid var(--border);border-radius:22px;padding:36px 36px 30px;
+      box-shadow:0 1px 0 rgba(255,255,255,0.9) inset, 0 40px 80px -46px rgba(15,23,42,0.32), 0 8px 24px -18px rgba(15,23,42,0.18)}
     .step-content{display:none}
-    .step-content.active{display:block;animation:fade-up .3s cubic-bezier(.22,1,.36,1)}
-    @keyframes fade-up{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-    .step-title{font-family:'Montserrat','Plus Jakarta Sans',sans-serif;font-size:18px;font-weight:700;letter-spacing:-0.02em;color:var(--ink);margin-bottom:5px}
-    .step-desc{font-size:13px;color:var(--muted);line-height:1.55;margin-bottom:22px}
+    .step-content.active{display:block;animation:fade-up .34s var(--ease)}
+    @keyframes fade-up{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+    .step-title{font-family:'Montserrat','Plus Jakarta Sans',sans-serif;font-size:19px;font-weight:700;letter-spacing:-0.02em;color:var(--ink);margin-bottom:6px}
+    .step-desc{font-size:13.5px;color:var(--muted);line-height:1.55;margin-bottom:24px}
 
-    /* Fields */
-    .field{margin-bottom:16px}
-    .field-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-    .field label{display:block;font-size:12.5px;font-weight:600;color:var(--ink);letter-spacing:-0.01em;margin-bottom:7px}
+    .field{margin-bottom:17px}
+    .field-row{display:grid;grid-template-columns:1fr 1fr;gap:15px}
+    .field label{display:block;font-size:12.5px;font-weight:600;color:var(--ink);letter-spacing:-0.01em;margin-bottom:8px}
     .field .req{color:var(--blue)}
-    .field input,.field select,.field textarea{width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:11px;font-size:14px;font-family:inherit;color:var(--ink);background:#fff;outline:none;resize:vertical;transition:border-color .15s,box-shadow .15s}
-    .field input::placeholder,.field textarea::placeholder{color:#AEB4BE}
-    .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(0,87,255,0.1)}
-    .field textarea{min-height:92px;line-height:1.55}
-    .field.invalid input,.field.invalid textarea{border-color:#DC2626;box-shadow:0 0 0 3px rgba(220,38,38,0.08)}
-    .field-err{display:none;font-size:11.5px;font-weight:600;color:#DC2626;margin-top:6px}
+    .field input,.field select,.field textarea{width:100%;padding:12px 15px;border:1.5px solid var(--border);border-radius:11px;font-size:14px;font-family:inherit;color:var(--ink);background:#fff;outline:none;resize:vertical;transition:border-color .16s,box-shadow .16s}
+    .field input::placeholder,.field textarea::placeholder{color:#B2B8C2}
+    .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3.5px rgba(0,87,255,0.1)}
+    .field select{appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2355606F' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:38px}
+    .field textarea{min-height:96px;line-height:1.55}
+    .field.invalid input,.field.invalid textarea{border-color:#DC2626;box-shadow:0 0 0 3.5px rgba(220,38,38,0.09)}
+    .field-err{display:none;font-size:11.5px;font-weight:600;color:#DC2626;margin-top:7px}
     .field.invalid .field-err{display:block}
-    .field-hint{font-size:11.5px;color:var(--faint);margin-top:6px}
 
-    /* Checkboxes */
-    .check-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
-    .check-item{display:flex;align-items:center;gap:10px;padding:11px 13px;border:1.5px solid var(--border);border-radius:11px;background:#fff;cursor:pointer;user-select:none;transition:border-color .15s,background .15s}
-    .check-item:hover{border-color:rgba(0,87,255,0.28)}
-    .check-item.checked{border-color:var(--blue);background:rgba(0,87,255,0.05)}
-    .check-box{width:18px;height:18px;border-radius:5px;border:1.5px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .15s}
+    .check-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .check-item{display:flex;align-items:center;gap:11px;padding:12px 14px;border:1.5px solid var(--border);border-radius:12px;background:#fff;cursor:pointer;user-select:none;transition:border-color .16s,background .16s}
+    .check-item:hover{border-color:rgba(0,87,255,0.3)}
+    .check-item.checked{border-color:var(--blue);background:rgba(0,87,255,0.045)}
+    .check-box{width:19px;height:19px;border-radius:6px;border:1.5px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .16s}
     .check-item.checked .check-box{background:var(--blue);border-color:var(--blue)}
-    .check-item.checked .check-box::after{content:'✓';font-size:11px;color:#fff;font-weight:800}
+    .check-item.checked .check-box::after{content:'';width:5px;height:9px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg) translateY(-1px)}
     .check-label{font-size:13px;font-weight:500;color:var(--muted)}
     .check-item.checked .check-label{color:var(--ink)}
 
-    /* Review */
-    .review-row{display:flex;justify-content:space-between;gap:18px;padding:11px 0;border-bottom:1px solid var(--line)}
+    .review-row{display:flex;justify-content:space-between;gap:20px;padding:12px 0;border-bottom:1px solid var(--line)}
     .review-row:last-child{border-bottom:none}
     .review-k{font-size:12.5px;font-weight:600;color:var(--faint);flex-shrink:0}
     .review-v{font-size:13px;font-weight:500;color:var(--ink);text-align:right}
 
-    /* Nav */
-    .ob-nav{display:flex;align-items:center;justify-content:space-between;margin-top:26px}
-    .btn-prev{display:inline-flex;align-items:center;gap:6px;padding:11px 18px;border:1.5px solid var(--border);border-radius:11px;background:#fff;font-size:13.5px;font-weight:600;color:var(--muted);cursor:pointer;font-family:inherit;transition:all .15s}
-    .btn-prev:hover{border-color:rgba(15,23,42,0.2);color:var(--ink)}
+    .ob-nav{display:flex;align-items:center;justify-content:space-between;margin-top:28px}
+    .btn-prev{display:inline-flex;align-items:center;gap:6px;padding:12px 18px;border:1.5px solid var(--border);border-radius:11px;background:#fff;font-size:13.5px;font-weight:600;color:var(--muted);cursor:pointer;font-family:inherit;transition:all .16s}
+    .btn-prev:hover{border-color:rgba(15,23,42,0.22);color:var(--ink)}
     .btn-prev i{width:14px;height:14px}
-    .btn-next{display:inline-flex;align-items:center;gap:7px;padding:12px 24px;border:1px solid rgba(255,255,255,0.06);border-radius:11px;background:var(--charcoal);color:#fff;font-size:13.5px;font-weight:650;cursor:pointer;font-family:inherit;box-shadow:0 12px 26px -12px rgba(15,23,42,0.45);transition:background .18s,transform .18s}
-    .btn-next:hover{background:#1b1f28;transform:translateY(-1px)}
-    .btn-next:disabled{opacity:.6;cursor:default;transform:none}
+    .btn-next{display:inline-flex;align-items:center;gap:8px;padding:13px 26px;border:1px solid rgba(255,255,255,0.08);border-radius:11px;background:var(--charcoal);color:#fff;font-size:13.5px;font-weight:650;cursor:pointer;font-family:inherit;
+      box-shadow:0 14px 28px -14px rgba(15,23,42,0.5);transition:background .2s,transform .2s var(--ease),box-shadow .2s}
+    .btn-next:hover{background:#20242e;transform:translateY(-1px);box-shadow:0 18px 34px -16px rgba(15,23,42,0.55)}
+    .btn-next:active{transform:translateY(0)}
+    .btn-next:disabled{opacity:.6;cursor:default;transform:none;box-shadow:none}
     .btn-next i{width:14px;height:14px}
 
-    /* Below-card contact option */
-    .ob-foot{text-align:center;margin-top:22px;font-size:13px;color:var(--faint)}
+    .ob-foot{margin-top:22px;font-size:13px;color:var(--faint)}
     .ob-foot a{color:var(--blue);font-weight:600}
 
-    /* Success */
-    .ob-success{display:none;text-align:center;padding:16px 0 8px}
-    .ob-success-icon{width:58px;height:58px;border-radius:18px;background:rgba(5,150,105,0.1);display:flex;align-items:center;justify-content:center;margin:0 auto 20px}
-    .ob-success-icon i{width:28px;height:28px;color:#059669}
+    .ob-success{display:none;padding:12px 0 6px}
+    .ob-success-icon{width:56px;height:56px;border-radius:16px;background:rgba(5,150,105,0.1);display:flex;align-items:center;justify-content:center;margin-bottom:20px}
+    .ob-success-icon i{width:27px;height:27px;color:#059669}
     .ob-success-title{font-family:'Montserrat','Plus Jakarta Sans',sans-serif;font-size:23px;font-weight:800;letter-spacing:-0.02em;color:var(--ink);margin-bottom:10px}
-    .ob-success-sub{font-size:14.5px;color:var(--muted);line-height:1.65;max-width:400px;margin:0 auto 26px}
-    .ob-success-actions{display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap}
-    .btn-home{display:inline-flex;align-items:center;gap:7px;padding:12px 22px;border-radius:11px;background:var(--charcoal);color:#fff;font-size:13.5px;font-weight:650;border:1px solid rgba(255,255,255,0.06)}
-    .btn-ghost{display:inline-flex;align-items:center;gap:6px;padding:12px 20px;border-radius:11px;border:1.5px solid var(--border);color:var(--muted);font-size:13.5px;font-weight:600;background:#fff}
+    .ob-success-sub{font-size:14.5px;color:var(--muted);line-height:1.65;max-width:420px;margin-bottom:26px}
+    .ob-success-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+    .btn-home{display:inline-flex;align-items:center;gap:7px;padding:12px 22px;border-radius:11px;background:var(--charcoal);color:#fff;font-size:13.5px;font-weight:650;border:1px solid rgba(255,255,255,0.08)}
+    .btn-ghost{display:inline-flex;align-items:center;gap:7px;padding:12px 20px;border-radius:11px;border:1.5px solid var(--border);color:var(--muted);font-size:13.5px;font-weight:600;background:#fff}
 
-    @media(max-width:600px){
+    @media(max-width:900px){
+      .ob-top{padding:20px 22px}
+      .top-link.back span{display:none}
+      .ob-shell{grid-template-columns:1fr;gap:26px;padding:8px 22px 72px}
+      .ob-rail{position:static;padding-top:8px}
+      .rail-sub{max-width:none}
+      .vstep,.rail-trust{display:none}
+      .mprog{display:block}
+    }
+    @media(max-width:560px){
       .ob-top{padding:18px 18px}
-      .ob-top-link{padding:8px 10px;font-size:13px}
-      .ob-top-link.back span{display:none}
-      .ob-main{padding:12px 16px 64px}
-      .ob-title{font-size:25px}
-      .ob-card{padding:24px 20px}
+      .ob-shell{padding:8px 18px 64px}
+      .ob-card{padding:26px 20px}
       .field-row,.check-grid{grid-template-columns:1fr}
-      .step-label{display:none}
-      .step-line{width:32px;margin:0 8px}
+      .rail-title{font-size:1.75rem}
     }
   </style>
 </head>
 <body>
-  <!-- Top bar: back to website + contact us -->
   <header class="ob-top">
     <a class="ob-brand" href="/" aria-label="Back to Flowaify home">
       <img src="/assets/images/flowaify-logo.webp" alt="" onerror="this.style.display='none'" />
       <span>Flowaify</span>
     </a>
-    <nav class="ob-top-links">
-      <a class="ob-top-link back" href="/"><i data-lucide="arrow-left"></i><span>Back to website</span></a>
-      <a class="ob-top-link contact" href="mailto:contact@flowaify.app"><i data-lucide="mail"></i>Contact us</a>
+    <nav class="top-links">
+      <a class="top-link back" href="/"><i data-lucide="arrow-left"></i><span>Back to website</span></a>
+      <a class="top-link solid" href="mailto:contact@flowaify.app"><i data-lucide="mail"></i>Contact us</a>
     </nav>
   </header>
 
-  <main class="ob-main">
-    <div class="ob-header">
-      <span class="ob-eyebrow">Get started</span>
-      <h1 class="ob-title">Let's build your system.</h1>
-      <p class="ob-sub">A few quick details and our team will design your Flowaify lead-automation setup. Takes about two minutes.</p>
-    </div>
+  <div class="ob-shell">
+    <!-- Left: context rail -->
+    <aside class="ob-rail">
+      <span class="rail-eyebrow">Get started</span>
+      <h1 class="rail-title">Let's build your lead system.</h1>
+      <p class="rail-sub">Share a few details and our team designs your Flowaify setup for you — most systems go live in about 24 hours.</p>
 
-    <!-- Step tracker -->
-    <div class="steps" id="steps-bar">
-      <div class="step active" id="step-ind-1"><div class="step-num">1</div><div class="step-label">Your business</div></div>
-      <div class="step-line" id="line-1"></div>
-      <div class="step" id="step-ind-2"><div class="step-num">2</div><div class="step-label">What you need</div></div>
-      <div class="step-line" id="line-2"></div>
-      <div class="step" id="step-ind-3"><div class="step-num">3</div><div class="step-label">Review</div></div>
-    </div>
+      <ol class="vstep" id="vstep">
+        <li class="vstep-item active" id="step-ind-1"><span class="vstep-num">1</span><span class="vstep-tx"><span class="vstep-t">Your business</span><span class="vstep-s">Who we're building for</span></span></li>
+        <li class="vstep-item" id="step-ind-2"><span class="vstep-num">2</span><span class="vstep-tx"><span class="vstep-t">What you need</span><span class="vstep-s">Goals &amp; current setup</span></span></li>
+        <li class="vstep-item" id="step-ind-3"><span class="vstep-num">3</span><span class="vstep-tx"><span class="vstep-t">Review &amp; submit</span><span class="vstep-s">Confirm and send</span></span></li>
+      </ol>
 
-    <div class="ob-card">
+      <ul class="rail-trust">
+        <li><i data-lucide="check"></i> You own everything we build</li>
+        <li><i data-lucide="check"></i> No technical work on your side</li>
+        <li><i data-lucide="check"></i> A specialist reviews every setup</li>
+      </ul>
+    </aside>
 
-      <!-- STEP 1 -->
-      <section class="step-content active" id="sc-1">
-        <div class="step-title">Your business</div>
-        <div class="step-desc">The basics, so we know who we're building for and how to reach you.</div>
-        <div class="field"><label>Business name <span class="req">*</span></label><input id="f-biz-name" type="text" autocomplete="organization" placeholder="Acme Roofing LLC" /><div class="field-err">Please enter your business name.</div></div>
-        <div class="field-row">
-          <div class="field"><label>Your name <span class="req">*</span></label><input id="f-contact" type="text" autocomplete="name" placeholder="Jane Smith" /><div class="field-err">Please enter your name.</div></div>
-          <div class="field"><label>Phone</label><input id="f-phone" type="tel" autocomplete="tel" placeholder="(555) 000-0000" /></div>
-        </div>
-        <div class="field"><label>Business email <span class="req">*</span></label><input id="f-email" type="email" autocomplete="email" placeholder="you@yourbusiness.com" /><div class="field-err">Please enter a valid email address.</div></div>
-        <div class="field"><label>Industry</label><input id="f-industry" type="text" placeholder="Roofing, HVAC, real estate, med spa…" /></div>
-      </section>
+    <!-- Right: form -->
+    <main class="ob-form">
+      <div class="mprog" id="mprog">
+        <div class="mprog-track"><div class="mprog-fill" id="mp-fill"></div></div>
+        <div class="mprog-label" id="mp-label">Step 1 of 3 · Your business</div>
+      </div>
 
-      <!-- STEP 2 -->
-      <section class="step-content" id="sc-2">
-        <div class="step-title">What you need</div>
-        <div class="step-desc">Tell us what you'd like Flowaify to handle. Pick as many as apply.</div>
-        <div class="field">
-          <label>What should we help with?</label>
-          <div class="check-grid" id="goals-grid">
-            <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-label">Respond to leads faster</div></div>
-            <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-label">Book more appointments</div></div>
-            <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-label">Follow up automatically</div></div>
-            <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-label">Re-engage old leads</div></div>
-            <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-label">Reduce manual work</div></div>
-            <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-label">Track performance</div></div>
+      <div class="ob-card">
+        <!-- STEP 1 -->
+        <section class="step-content active" id="sc-1">
+          <div class="step-title">Your business</div>
+          <div class="step-desc">The basics, so we know who we're building for and how to reach you.</div>
+          <div class="field"><label>Business name <span class="req">*</span></label><input id="f-biz-name" type="text" autocomplete="organization" placeholder="Acme Roofing LLC" /><div class="field-err">Please enter your business name.</div></div>
+          <div class="field-row">
+            <div class="field"><label>Your name <span class="req">*</span></label><input id="f-contact" type="text" autocomplete="name" placeholder="Jane Smith" /><div class="field-err">Please enter your name.</div></div>
+            <div class="field"><label>Phone</label><input id="f-phone" type="tel" autocomplete="tel" placeholder="(555) 000-0000" /></div>
+          </div>
+          <div class="field"><label>Business email <span class="req">*</span></label><input id="f-email" type="email" autocomplete="email" placeholder="you@yourbusiness.com" /><div class="field-err">Please enter a valid email address.</div></div>
+          <div class="field"><label>Industry</label><input id="f-industry" type="text" placeholder="Roofing, HVAC, real estate, med spa…" /></div>
+        </section>
+
+        <!-- STEP 2 -->
+        <section class="step-content" id="sc-2">
+          <div class="step-title">What you need</div>
+          <div class="step-desc">Tell us what you'd like Flowaify to handle — pick as many as apply.</div>
+          <div class="field">
+            <label>What should we help with?</label>
+            <div class="check-grid" id="goals-grid">
+              <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-label">Respond to leads faster</div></div>
+              <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-label">Book more appointments</div></div>
+              <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-label">Follow up automatically</div></div>
+              <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-label">Re-engage old leads</div></div>
+              <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-label">Reduce manual work</div></div>
+              <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-label">Track performance</div></div>
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field"><label>Current CRM or tools</label><input id="f-crm" type="text" placeholder="HubSpot, GoHighLevel, none…" /></div>
+            <div class="field"><label>Ideal follow-up speed</label>
+              <select id="f-followup">
+                <option>Immediately (under 60 seconds)</option>
+                <option>Within 5 minutes</option>
+                <option>Within 15 minutes</option>
+                <option>Within the hour</option>
+              </select>
+            </div>
+          </div>
+          <div class="field"><label>Anything else we should know?</label><textarea id="f-challenge" placeholder="Optional — your biggest challenge right now, or any context that would help."></textarea></div>
+        </section>
+
+        <!-- STEP 3 -->
+        <section class="step-content" id="sc-3">
+          <div class="step-title">Review &amp; submit</div>
+          <div class="step-desc">A quick look before you send. Our team will reach out within a few hours.</div>
+          <div id="review-content"></div>
+        </section>
+
+        <!-- Success -->
+        <div class="ob-success" id="ob-success">
+          <div class="ob-success-icon"><i data-lucide="check"></i></div>
+          <div class="ob-success-title">You're all set.</div>
+          <div class="ob-success-sub">We received your details. A Flowaify specialist will reach out to <span id="success-email">you</span> shortly to begin your setup.</div>
+          <div class="ob-success-actions">
+            <a class="btn-home" href="/"><i data-lucide="arrow-left"></i> Back to website</a>
+            <a class="btn-ghost" href="mailto:contact@flowaify.app"><i data-lucide="mail"></i> Contact us</a>
           </div>
         </div>
-        <div class="field-row">
-          <div class="field"><label>Current CRM or tools</label><input id="f-crm" type="text" placeholder="HubSpot, GoHighLevel, none…" /></div>
-          <div class="field"><label>Ideal follow-up speed</label>
-            <select id="f-followup">
-              <option>Immediately (under 60 seconds)</option>
-              <option>Within 5 minutes</option>
-              <option>Within 15 minutes</option>
-              <option>Within the hour</option>
-            </select>
-          </div>
-        </div>
-        <div class="field"><label>Anything else we should know?</label><textarea id="f-challenge" placeholder="Optional — your biggest challenge right now, or any context that would help."></textarea></div>
-      </section>
 
-      <!-- STEP 3 -->
-      <section class="step-content" id="sc-3">
-        <div class="step-title">Review &amp; submit</div>
-        <div class="step-desc">Quick look before you send. Our team will reach out within a few hours.</div>
-        <div id="review-content"></div>
-      </section>
-
-      <!-- Success -->
-      <div class="ob-success" id="ob-success">
-        <div class="ob-success-icon"><i data-lucide="check"></i></div>
-        <div class="ob-success-title">You're all set.</div>
-        <div class="ob-success-sub">We received your details. A Flowaify specialist will reach out to <span id="success-email">you</span> shortly to begin your setup.</div>
-        <div class="ob-success-actions">
-          <a class="btn-home" href="/"><i data-lucide="arrow-left"></i> Back to website</a>
-          <a class="btn-ghost" href="mailto:contact@flowaify.app"><i data-lucide="mail"></i> Contact us</a>
+        <!-- Nav -->
+        <div class="ob-nav" id="ob-nav">
+          <button class="btn-prev" id="btn-prev" onclick="prevStep()" style="visibility:hidden"><i data-lucide="arrow-left"></i> Back</button>
+          <button class="btn-next" id="btn-next" onclick="nextStep()">Continue <i data-lucide="arrow-right"></i></button>
         </div>
       </div>
 
-      <!-- Nav -->
-      <div class="ob-nav" id="ob-nav">
-        <button class="btn-prev" id="btn-prev" onclick="prevStep()" style="visibility:hidden"><i data-lucide="arrow-left"></i> Back</button>
-        <button class="btn-next" id="btn-next" onclick="nextStep()">Continue <i data-lucide="arrow-right"></i></button>
-      </div>
-    </div>
-
-    <p class="ob-foot" id="ob-foot">Prefer to talk first? Email <a href="mailto:contact@flowaify.app">contact@flowaify.app</a>.</p>
-  </main>
+      <p class="ob-foot" id="ob-foot">Prefer to talk first? Email <a href="mailto:contact@flowaify.app">contact@flowaify.app</a>.</p>
+    </main>
+  </div>
 
   <script>
     var currentStep = 1;
     var totalSteps = 3;
+    var stepLabels = ['Your business', 'What you need', 'Review & submit'];
 
     function setStep(n) {
       document.querySelectorAll('.step-content').forEach(function (el) { el.classList.remove('active'); });
@@ -240,11 +275,9 @@
         var ind = document.getElementById('step-ind-' + i);
         ind.classList.remove('active', 'done');
         if (i < n) ind.classList.add('done'); else if (i === n) ind.classList.add('active');
-        if (i < totalSteps) {
-          var line = document.getElementById('line-' + i);
-          if (i < n) line.classList.add('done'); else line.classList.remove('done');
-        }
       }
+      document.getElementById('mp-fill').style.width = (n / totalSteps * 100) + '%';
+      document.getElementById('mp-label').textContent = 'Step ' + n + ' of ' + totalSteps + ' · ' + stepLabels[n - 1];
       document.getElementById('btn-prev').style.visibility = n > 1 ? 'visible' : 'hidden';
       var next = document.getElementById('btn-next');
       if (n === totalSteps) { next.innerHTML = 'Submit <i data-lucide="send"></i>'; buildReview(); }
@@ -262,7 +295,6 @@
     function prevStep() { if (currentStep > 1) setStep(currentStep - 1); }
     function toggleCheck(el) { el.classList.toggle('checked'); }
 
-    // clear an error the moment the user fixes it
     document.addEventListener('input', function (e) {
       var f = e.target.closest && e.target.closest('.field');
       if (f) f.classList.remove('invalid');
@@ -279,8 +311,8 @@
     }
     function validateStep(n) {
       if (n !== 1) return true;
-      // run all three so every invalid field is flagged
       var a = markReq('f-biz-name'), b = markReq('f-contact'), c = markEmail('f-email');
+      if (!(a && b && c)) { var bad = document.querySelector('#sc-1 .field.invalid input'); if (bad) bad.focus(); }
       return a && b && c;
     }
 
@@ -289,6 +321,7 @@
       return [].slice.call(document.querySelectorAll('#goals-grid .check-item.checked'))
         .map(function (el) { return el.querySelector('.check-label').textContent; }).join(', ');
     }
+    function escapeHtml(t) { return String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
 
     function buildReview() {
       var rows = [
@@ -305,7 +338,6 @@
         return '<div class="review-row"><span class="review-k">' + r[0] + '</span><span class="review-v">' + escapeHtml(r[1]) + '</span></div>';
       }).join('');
     }
-    function escapeHtml(t) { return String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
 
     function submitForm() {
       var btn = document.getElementById('btn-next');
@@ -340,8 +372,9 @@
         document.getElementById('success-email').textContent = params.client_email;
         document.querySelectorAll('.step-content').forEach(function (el) { el.classList.remove('active'); });
         document.getElementById('ob-nav').style.display = 'none';
-        document.getElementById('steps-bar').style.display = 'none';
         document.getElementById('ob-foot').style.display = 'none';
+        document.getElementById('mprog').style.display = 'none';
+        document.querySelectorAll('.vstep-item').forEach(function (el) { el.classList.remove('active'); el.classList.add('done'); });
         document.getElementById('ob-success').style.display = 'block';
         lucide.createIcons();
         window.scrollTo({ top: 0, behavior: 'smooth' });
