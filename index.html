@@ -79,6 +79,27 @@
     }
     .nav-link:hover { color: var(--text); }
     .nav-link[aria-current="page"] { color: var(--blue); font-weight: 600; }
+    /* Product dropdown */
+    .nav-dd { position: relative; }
+    .nav-dd-trigger { display: inline-flex; align-items: center; gap: 5px; background: none; border: none; cursor: pointer; font-family: inherit; padding: 0; }
+    .nav-dd-chev { transition: transform 0.25s ease; }
+    .nav-dd:hover .nav-dd-chev, .nav-dd.open .nav-dd-chev { transform: rotate(180deg); }
+    .nav-dd-trigger.nav-active { color: var(--blue); font-weight: 600; }
+    .nav-dd-panel { position: absolute; top: calc(100% + 16px); left: -16px; width: 328px; background: #fff;
+      border: 1px solid var(--border); border-radius: 14px; padding: 8px; z-index: 120;
+      box-shadow: 0 24px 54px -22px rgba(15,23,42,0.3), 0 4px 12px -6px rgba(15,23,42,0.12);
+      opacity: 0; visibility: hidden; transform: translateY(-6px);
+      transition: opacity 0.2s ease, transform 0.28s cubic-bezier(0.22,1,0.36,1), visibility 0.2s; }
+    .nav-dd-panel::before { content: ''; position: absolute; top: -16px; left: 0; right: 0; height: 16px; }
+    .nav-dd:hover .nav-dd-panel, .nav-dd.open .nav-dd-panel { opacity: 1; visibility: visible; transform: translateY(0); }
+    .nav-dd-item { display: flex; align-items: center; gap: 12px; padding: 11px 12px; border-radius: 10px; transition: background 0.15s ease; }
+    .nav-dd-item:hover { background: rgba(15,23,42,0.04); }
+    .nav-dd-ico { width: 36px; height: 36px; border-radius: 9px; background: rgba(15,23,42,0.05); color: #55606F; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: background 0.15s, color 0.15s; }
+    .nav-dd-ico svg { width: 18px; height: 18px; }
+    .nav-dd-item:hover .nav-dd-ico { background: rgba(0,87,255,0.08); color: var(--blue); }
+    .nav-dd-tx { display: flex; flex-direction: column; }
+    .nav-dd-t { font-size: 13.5px; font-weight: 650; color: var(--text); letter-spacing: -0.01em; }
+    .nav-dd-s { font-size: 12px; color: var(--text-muted); margin-top: 1px; }
 
     /* Buttons */
     .btn {
@@ -1060,6 +1081,14 @@
         width:100%; display:flex; align-items:center; gap:6px;
       }
       #navbar-links .nav-link:last-child { border-bottom:none; }
+      /* Product dropdown -> inline accordion inside the mobile menu */
+      .nav-dd { width:100%; border-bottom:1px solid var(--border); }
+      #navbar-links .nav-dd-trigger { justify-content:space-between; width:100%; padding:13px 8px; font-size:15px; border-bottom:none; }
+      .nav-dd-panel { position:static; opacity:1; visibility:visible; transform:none; box-shadow:none; border:none; border-radius:0; padding:0 0 8px 8px; width:100%; max-height:0; overflow:hidden; transition:max-height 0.32s cubic-bezier(0.4,0,0.2,1); }
+      .nav-dd-panel::before { display:none; }
+      .nav-dd.open .nav-dd-panel { max-height:320px; }
+      .nav-dd.open .nav-dd-chev { transform:rotate(180deg); }
+      .nav-dd-item { padding:10px 8px; }
       .mob-only { display:block; }
       #hamburger { display:flex !important; order:2; }
       #navbar-cta { display:none !important; }
@@ -1406,9 +1435,26 @@
     </a>
 
     <div id="navbar-links">
-      <a href="#who-for" class="nav-link" onclick="closeNav()" style="display:inline-flex;align-items:center;gap:4px;">Solutions <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></a>
-      <a href="#faq"              class="nav-link" onclick="closeNav()">FAQ</a>
-      <a href="site/onboarding/"    class="nav-link mob-only" onclick="closeNav()">Get Started</a>
+      <div class="nav-dd" id="nav-dd">
+        <button type="button" class="nav-link nav-dd-trigger" aria-expanded="false" aria-haspopup="true" onclick="toggleProductMenu(event)">Product <svg class="nav-dd-chev" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>
+        <div class="nav-dd-panel">
+          <a href="#workspace" class="nav-dd-item" onclick="closeNav()">
+            <span class="nav-dd-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg></span>
+            <span class="nav-dd-tx"><span class="nav-dd-t">One Managed Workspace</span><span class="nav-dd-s">Everything in one place</span></span>
+          </a>
+          <a href="#who-for" class="nav-dd-item" onclick="closeNav()">
+            <span class="nav-dd-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5h18l-7 8.5V20l-4-2v-4.5z"/></svg></span>
+            <span class="nav-dd-tx"><span class="nav-dd-t">Built for your workflow</span><span class="nav-dd-s">Tuned to your industry</span></span>
+          </a>
+          <a href="#built-to-scale" class="nav-dd-item" onclick="closeNav()">
+            <span class="nav-dd-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 7-7"/><path d="M17 8h4v4"/></svg></span>
+            <span class="nav-dd-tx"><span class="nav-dd-t">Built to scale</span><span class="nav-dd-s">Ready for serious volume</span></span>
+          </a>
+        </div>
+      </div>
+      <a href="#faq" class="nav-link" onclick="closeNav()">FAQ</a>
+      <a href="mailto:contact@flowaify.app" class="nav-link">Contact</a>
+      <a href="site/onboarding/" class="nav-link mob-only" onclick="closeNav()">Get Started</a>
     </div>
 
     <div style="display:flex;align-items:center;gap:12px;">
@@ -1824,93 +1870,90 @@
   </script>
 
   <!-- ─── FOOTER ────────────────────────────────────────────────────────── -->
-  <footer style="background:var(--bg);border-top:1px solid var(--border);padding:64px 60px 0;">
-    <div style="max-width:1200px;margin:0 auto;">
-
-      <!-- 4 columns -->
-      <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1.2fr;gap:48px;padding-bottom:48px;" class="footer-4col">
-
-        <!-- Col 1: Brand -->
-        <div>
-          <a href="#" style="display:flex;align-items:center;gap:10px;text-decoration:none;margin-bottom:14px;">
-            <img src="assets/images/flowaify-logo.webp" alt="" style="width:32px;height:32px;object-fit:contain;" />
-            <span style="font-size:18px;font-weight:800;letter-spacing:-.04em;color:var(--text);">flowaify</span>
-          </a>
-          <p style="font-size:13px;color:var(--text-muted);line-height:1.7;max-width:280px;margin-bottom:20px;">Lead capture, CRM sync, and follow-up automation for inbound-lead businesses.</p>
-          <div style="display:flex;flex-direction:column;gap:10px;">
-            <a href="site/onboarding/" style="display:inline-flex;align-items:center;gap:7px;padding:10px 18px;background:#0F1116;color:white;border-radius:9px;font-size:13px;font-weight:700;text-decoration:none;width:fit-content;">
-              Get Started
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-            </a>
-          </div>
-        </div>
-
-        <!-- Col 2: Pages -->
-        <div>
-          <div style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:16px;">Pages</div>
-          <div style="display:flex;flex-direction:column;gap:10px;">
-            <a href="#" class="nav-link" style="font-size:13.5px;">Home</a>
-            <a href="#who-for" class="nav-link" style="font-size:13.5px;">Workflow Library</a>
-            <a href="#faq" class="nav-link" style="font-size:13.5px;">FAQ</a>
-            <a href="site/onboarding/" class="nav-link" style="font-size:13.5px;">Get Started</a>
-          </div>
-        </div>
-
-        <!-- Col 3: Services -->
-        <div>
-          <div style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:16px;">Services</div>
-          <div style="display:flex;flex-direction:column;gap:10px;">
-            <span style="font-size:13.5px;color:var(--text-soft);">Lead Automation</span>
-            <span style="font-size:13.5px;color:var(--text-soft);">CRM Sync</span>
-            <span style="font-size:13.5px;color:var(--text-soft);">AI Chatbot</span>
-            <span style="font-size:13.5px;color:var(--text-soft);">Follow-Up Systems</span>
-            <span style="font-size:13.5px;color:var(--text-soft);">Dashboard Setup</span>
-          </div>
-        </div>
-
-        <!-- Col 4: Contact -->
-        <div>
-          <div style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:16px;">Contact</div>
-          <div style="display:flex;flex-direction:column;gap:10px;">
-            <a href="mailto:contact@flowaify.app" style="font-size:13.5px;color:var(--blue);text-decoration:none;font-weight:600;">contact@flowaify.app</a>
-            <a href="tel:8333569243" style="font-size:13.5px;color:var(--text-soft);text-decoration:none;">(833) 356-9243</a>
-          </div>
-          <div style="display:flex;gap:10px;margin-top:20px;">
-            <a href="https://linkedin.com/company/flowaify" target="_blank" rel="noopener" style="width:34px;height:34px;border-radius:8px;background:var(--bg-card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--text-muted);text-decoration:none;transition:border-color 0.2s,color 0.2s;" aria-label="LinkedIn" onmouseover="this.style.borderColor='rgba(0,87,255,0.35)';this.style.color='var(--blue)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-muted)'">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
-            </a>
-            <a href="https://instagram.com/flowaify" target="_blank" rel="noopener" style="width:34px;height:34px;border-radius:8px;background:var(--bg-card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--text-muted);text-decoration:none;transition:border-color 0.2s,color 0.2s;" aria-label="Instagram" onmouseover="this.style.borderColor='rgba(0,87,255,0.35)';this.style.color='var(--blue)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-muted)'">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
-            </a>
-            <a href="https://twitter.com/flowaify" target="_blank" rel="noopener" style="width:34px;height:34px;border-radius:8px;background:var(--bg-card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--text-muted);text-decoration:none;transition:border-color 0.2s,color 0.2s;" aria-label="Twitter / X" onmouseover="this.style.borderColor='rgba(0,87,255,0.35)';this.style.color='var(--blue)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-muted)'">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"/></svg>
-            </a>
-          </div>
-        </div>
-
-      </div>
-
-      <!-- Bottom bar -->
-      <div style="border-top:1px solid var(--border);padding:20px 0;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;">
-        <p style="font-size:12px;color:var(--text-muted);">© 2026 Flowaify. All rights reserved.</p>
-        <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap;">
-          <a href="#" style="font-size:12px;color:var(--text-muted);text-decoration:none;">Privacy Policy</a>
-          <a href="#" style="font-size:12px;color:var(--text-muted);text-decoration:none;">Terms of Service</a>
-          <a href="#" style="font-size:12px;color:var(--text-muted);text-decoration:none;">Security</a>
-          <a href="#" style="font-size:12px;color:var(--text-muted);text-decoration:none;">Sitemap</a>
-        </div>
-      </div>
-
-    </div>
-  </footer>
   <style>
-    @media(max-width:900px){
-      .footer-4col { grid-template-columns:1fr 1fr !important; }
+    .site-footer { position: relative; overflow: hidden; background: linear-gradient(180deg, #15171D 0%, #0F1116 100%); color: #C7CCD6; }
+    .site-footer::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.14), transparent); }
+    .foot-wrap { position: relative; z-index: 1; max-width: 1200px; margin: 0 auto; padding: 74px 60px 0; }
+    .foot-cols { display: grid; grid-template-columns: 1.8fr 1fr 1.2fr; gap: 56px; padding-bottom: 54px; }
+    .foot-brand-row { display: inline-flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+    .foot-brand-row img { width: 32px; height: 32px; object-fit: contain; }
+    .foot-brand-row span { font-size: 19px; font-weight: 800; letter-spacing: -0.04em; color: #fff; }
+    .foot-tag { font-size: 13.5px; line-height: 1.7; color: #8B93A1; max-width: 300px; margin-bottom: 22px; }
+    .foot-cta { display: inline-flex; align-items: center; gap: 8px; padding: 11px 20px; border-radius: 10px; background: #fff; color: #0F1116; font-size: 13.5px; font-weight: 700; transition: transform 0.2s, box-shadow 0.2s; }
+    .foot-cta:hover { transform: translateY(-1px); box-shadow: 0 12px 26px -10px rgba(0,0,0,0.55); }
+    .foot-cta svg { width: 13px; height: 13px; }
+    .foot-h { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #6B7280; margin-bottom: 16px; }
+    .foot-links { display: flex; flex-direction: column; gap: 11px; }
+    .foot-links a { font-size: 13.5px; color: #A9B0BC; transition: color 0.18s; width: fit-content; }
+    .foot-links a:hover { color: #fff; }
+    .foot-contact a.email { color: #5B8CFF; font-weight: 600; }
+    .foot-contact a.email:hover { color: #86A9FF; }
+    .foot-social { display: flex; gap: 10px; margin-top: 18px; }
+    .foot-social a { width: 36px; height: 36px; border-radius: 9px; border: 1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.03); display: flex; align-items: center; justify-content: center; color: #A9B0BC; transition: color 0.2s, border-color 0.2s, background 0.2s; }
+    .foot-social a:hover { color: #fff; border-color: rgba(255,255,255,0.28); background: rgba(255,255,255,0.07); }
+    .foot-social a svg { width: 16px; height: 16px; }
+    .foot-wordmark { font-family: 'Montserrat','Plus Jakarta Sans',sans-serif; font-weight: 800; letter-spacing: -0.05em; line-height: 0.86;
+      font-size: clamp(4.2rem, 15.5vw, 13rem); text-align: center; padding: 4px 0 6px; user-select: none; pointer-events: none;
+      color: transparent; background: linear-gradient(180deg, rgba(255,255,255,0.11) 0%, rgba(255,255,255,0.015) 84%); -webkit-background-clip: text; background-clip: text; }
+    .foot-legal { border-top: 1px solid rgba(255,255,255,0.08); padding: 22px 0; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+    .foot-legal p { font-size: 12px; color: #6B7280; }
+    .foot-legal .legal-links { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+    .foot-legal .legal-links a { font-size: 12px; color: #6B7280; transition: color 0.18s; }
+    .foot-legal .legal-links a:hover { color: #A9B0BC; }
+    @media (max-width: 900px) {
+      .foot-wrap { padding: 60px 32px 0; }
+      .foot-cols { grid-template-columns: 1fr 1fr; gap: 40px 32px; }
+      .foot-brand { grid-column: 1 / -1; }
     }
-    @media(max-width:560px){
-      .footer-4col { grid-template-columns:1fr !important; }
+    @media (max-width: 560px) {
+      .foot-wrap { padding: 52px 20px 0; }
+      .foot-cols { grid-template-columns: 1fr; gap: 34px; }
+      .foot-wordmark { font-size: clamp(3rem, 21vw, 5rem); }
+      .foot-legal { flex-direction: column; align-items: flex-start; gap: 12px; }
     }
   </style>
+  <footer class="site-footer">
+    <div class="foot-wrap">
+      <div class="foot-cols">
+        <div class="foot-brand">
+          <a href="/" class="foot-brand-row"><img src="assets/images/flowaify-logo.webp" alt="" onerror="this.style.display='none'" /><span>flowaify</span></a>
+          <p class="foot-tag">Lead capture, CRM sync, and follow-up automation &mdash; one managed workspace for inbound-lead businesses.</p>
+          <a href="site/onboarding/" class="foot-cta">Get Started <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></a>
+        </div>
+        <div>
+          <div class="foot-h">Product</div>
+          <div class="foot-links">
+            <a href="#workspace">One Managed Workspace</a>
+            <a href="#who-for">Built for your workflow</a>
+            <a href="#built-to-scale">Built to scale</a>
+            <a href="#faq">FAQ</a>
+          </div>
+        </div>
+        <div class="foot-contact">
+          <div class="foot-h">Contact</div>
+          <div class="foot-links">
+            <a href="mailto:contact@flowaify.app" class="email">contact@flowaify.app</a>
+            <a href="tel:8333569243">(833) 356-9243</a>
+            <a href="portal.html">My Workspace</a>
+          </div>
+          <div class="foot-social">
+            <a href="https://linkedin.com/company/flowaify" target="_blank" rel="noopener" aria-label="LinkedIn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg></a>
+            <a href="https://instagram.com/flowaify" target="_blank" rel="noopener" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg></a>
+            <a href="https://twitter.com/flowaify" target="_blank" rel="noopener" aria-label="X"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"/></svg></a>
+          </div>
+        </div>
+      </div>
+      <div class="foot-wordmark" aria-hidden="true">flowaify</div>
+      <div class="foot-legal">
+        <p>&copy; 2026 Flowaify. All rights reserved.</p>
+        <div class="legal-links">
+          <a href="#">Privacy</a>
+          <a href="#">Terms</a>
+          <a href="#">Security</a>
+        </div>
+      </div>
+    </div>
+  </footer>
 
 </div><!-- /#page -->
 
@@ -1985,17 +2028,34 @@ function toggleNav() {
     ? '<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>'  // X
     : '<line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>'; // bars
 }
+function closeProductMenu() {
+  var dd = document.getElementById('nav-dd');
+  if (!dd) return;
+  dd.classList.remove('open');
+  var t = dd.querySelector('.nav-dd-trigger');
+  if (t) t.setAttribute('aria-expanded', 'false');
+}
+function toggleProductMenu(e) {
+  e.stopPropagation();
+  var dd = document.getElementById('nav-dd');
+  var open = dd.classList.toggle('open');
+  dd.querySelector('.nav-dd-trigger').setAttribute('aria-expanded', open ? 'true' : 'false');
+}
 function closeNav() {
   var links = document.getElementById('navbar-links');
   var icon  = document.getElementById('ham-icon');
   links.classList.remove('nav-open');
   icon.innerHTML = '<line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>';
+  closeProductMenu();
 }
-// close nav when clicking outside
+// close nav / dropdown when clicking outside
 document.addEventListener('click', function(e) {
   var nav = document.getElementById('navbar');
-  if (!nav.contains(e.target)) closeNav();
+  if (nav && !nav.contains(e.target)) closeNav();
+  var dd = document.getElementById('nav-dd');
+  if (dd && !dd.contains(e.target)) closeProductMenu();
 });
+document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeNav(); });
 
 // ─── NAVBAR SCROLL ───────────────────────────────────────────────────────────
 const navbarCta = document.getElementById('navbar-cta');
@@ -2022,19 +2082,23 @@ updateNavHero();
 })();
 
 // ─── NAV ACTIVE STATE (aria-current) ─────────────────────────────────────────
-(function() {
-  const navAnchors = Array.from(document.querySelectorAll('#navbar-links a.nav-link[href^="#"]'));
-  const targets = navAnchors.map(a => document.querySelector(a.getAttribute('href'))).filter(Boolean);
-  const navObs = new IntersectionObserver(entries => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        navAnchors.forEach(a => a.removeAttribute('aria-current'));
-        const active = navAnchors.find(a => a.getAttribute('href') === '#' + entry.target.id);
-        if (active) active.setAttribute('aria-current', 'page');
-      }
+(function () {
+  var faqLink = document.querySelector('#navbar-links a.nav-link[href="#faq"]');
+  var ddTrigger = document.querySelector('#nav-dd .nav-dd-trigger');
+  var productSecs = ['workspace', 'who-for', 'built-to-scale'];
+  function clearActive() {
+    if (faqLink) faqLink.removeAttribute('aria-current');
+    if (ddTrigger) ddTrigger.classList.remove('nav-active');
+  }
+  var obs = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (!e.isIntersecting) return;
+      clearActive();
+      if (e.target.id === 'faq') { if (faqLink) faqLink.setAttribute('aria-current', 'page'); }
+      else if (productSecs.indexOf(e.target.id) >= 0) { if (ddTrigger) ddTrigger.classList.add('nav-active'); }
     });
   }, { rootMargin: '-50% 0px -50% 0px' });
-  targets.forEach(t => navObs.observe(t));
+  productSecs.concat(['faq']).forEach(function (id) { var el = document.getElementById(id); if (el) obs.observe(el); });
 })();
 
 // ─── BOOT ANIMATION (white dot matrix) ──────────────────────────────────────
