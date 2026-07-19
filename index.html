@@ -53,6 +53,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.14/dist/lenis.min.js"></script>
 
   <style>
 /* ── Design Tokens ── */
@@ -1361,6 +1362,25 @@
       overflow: visible;
     }
 
+    /* ── Scroll layer: smooth scroll + progress + back-to-top ── */
+    html { scroll-behavior: smooth; scroll-padding-top: 82px; }
+    @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+    html.lenis, html.lenis body { height: auto; }
+    .lenis.lenis-smooth { scroll-behavior: auto !important; }
+    .lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
+    .lenis.lenis-stopped { overflow: hidden; }
+    #scroll-progress { position: fixed; top: 0; left: 0; height: 2.5px; width: 100%; transform: scaleX(0); transform-origin: 0 50%;
+      background: linear-gradient(90deg, #0F1116, #0057FF); z-index: 200; pointer-events: none; will-change: transform; }
+    #back-to-top { position: fixed; right: 22px; bottom: 22px; width: 44px; height: 44px; border-radius: 50%;
+      border: 1px solid rgba(255,255,255,0.08); background: #12141A; color: #fff; display: flex; align-items: center; justify-content: center;
+      cursor: pointer; z-index: 150; opacity: 0; transform: translateY(12px) scale(0.9); pointer-events: none;
+      box-shadow: 0 12px 30px -10px rgba(15,23,42,0.5); transition: opacity 0.3s ease, transform 0.35s cubic-bezier(0.22,1,0.36,1), background 0.2s; }
+    #back-to-top.show { opacity: 1; transform: translateY(0) scale(1); pointer-events: auto; }
+    #back-to-top:hover { background: #20242e; transform: translateY(-2px) scale(1.05); }
+    #back-to-top:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
+    @media (prefers-reduced-motion: reduce) { #back-to-top { transition: opacity 0.2s ease; } }
+    @media (max-width: 600px) { #back-to-top { right: 16px; bottom: 16px; width: 42px; height: 42px; } }
+
     /* Respect reduced-motion preference */
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after {
@@ -1460,6 +1480,10 @@
 </head>
 <body>
 <a href="#hero-section" class="skip-link">Skip to main content</a>
+<div id="scroll-progress" aria-hidden="true"></div>
+<button id="back-to-top" aria-label="Back to top" onclick="flowScrollTop()">
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5"/><path d="m5 12 7-7 7 7"/></svg>
+</button>
 
 <!-- ─── PAGE ─────────────────────────────────────────────────────────────── -->
 <div id="page">
@@ -3197,6 +3221,50 @@ updateNavHero();
   requestAnimationFrame(function () { positionConnector(false); });
   window.addEventListener('load', function () { positionConnector(false); });
   window.addEventListener('resize', function () { requestAnimationFrame(function () { positionConnector(false); }); }, { passive: true });
+})();
+</script>
+<script>
+// ─── SCROLL LAYER — progress bar, back-to-top, smooth scroll (Lenis on desktop) ─
+(function () {
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var bar = document.getElementById('scroll-progress');
+  var btt = document.getElementById('back-to-top');
+  var lenis = null;
+
+  if (!reduce && window.matchMedia('(pointer: fine)').matches && window.Lenis) {
+    lenis = new Lenis({ duration: 1.05, smoothWheel: true, easing: function (t) { return Math.min(1, 1.001 - Math.pow(2, -10 * t)); } });
+    (function raf(time) { lenis.raf(time); requestAnimationFrame(raf); })();
+    document.querySelectorAll('a[href^="#"]').forEach(function (a) {
+      a.addEventListener('click', function (e) {
+        var id = a.getAttribute('href');
+        if (!id || id.length < 2) return;
+        var target = document.querySelector(id);
+        if (!target) return;
+        e.preventDefault();
+        lenis.scrollTo(target, { offset: -70 });
+      });
+    });
+  }
+
+  window.flowScrollTop = function () {
+    if (lenis) lenis.scrollTo(0, { duration: 1.1 });
+    else window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' });
+  };
+
+  var ticking = false;
+  function onScroll() {
+    if (ticking) return; ticking = true;
+    requestAnimationFrame(function () {
+      var st = window.scrollY || document.documentElement.scrollTop || 0;
+      var h = document.documentElement.scrollHeight - window.innerHeight;
+      if (bar) bar.style.transform = 'scaleX(' + (h > 0 ? (st / h).toFixed(4) : 0) + ')';
+      if (btt) btt.classList.toggle('show', st > window.innerHeight * 0.9);
+      ticking = false;
+    });
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', onScroll, { passive: true });
+  onScroll();
 })();
 </script>
 </body>
