@@ -218,7 +218,7 @@
 
     /* Left feature list */
     .wf-features { display: flex; flex-direction: column; }
-    .wf-feat { position: relative; display: grid; grid-template-columns: auto 1fr; gap: 15px; align-items: start; padding: 18px 20px; border-radius: 14px;
+    .wf-feat { position: relative; display: grid; grid-template-columns: auto 1fr; gap: 15px; align-items: center; padding: 15px 20px; border-radius: 14px;
       border: none; background: transparent; cursor: pointer; text-align: left; font-family: inherit; width: 100%;
       transition: background 0.3s ease, box-shadow 0.3s ease; }
     .wf-feat:not(:last-child)::after { content: ''; position: absolute; left: 20px; right: 20px; bottom: 0; height: 1px; background: rgba(15,23,42,0.08); transition: opacity 0.3s ease; }
@@ -4883,15 +4883,18 @@ updateNavHero();
     connHalo.setAttribute('cx', x1); connHalo.setAttribute('cy', y1);
   }
   function positionConnector(animate) {
-    if (!connSvg || !preview || !tray) return;
-    if (!window.matchMedia('(min-width: 981px)').matches) { connSvg.classList.remove('on'); connState.y0 = null; return; }
+    if (!connSvg || !tray) return;
+    var desktop = window.matchMedia('(min-width: 981px)').matches;
+    // Vertically centre the workflow list against the dashboard so the connector stays a straight, equal-length line
+    featWrap.style.marginTop = desktop ? Math.max(-32, (tray.offsetHeight - featWrap.offsetHeight) / 2).toFixed(1) + 'px' : '';
+    if (!desktop) { connSvg.classList.remove('on'); connState.y0 = null; return; }
     var active = featWrap.children[state.feat];
     if (!active) { connSvg.classList.remove('on'); return; }
     var x0 = featWrap.offsetLeft + featWrap.offsetWidth;
-    var x1 = preview.offsetLeft;
-    var y0 = active.offsetTop + active.offsetHeight / 2;
+    var x1 = tray.offsetLeft;
+    var y0 = active.offsetTop + active.offsetHeight / 2;   // reflects the centring margin set above
     var trayTop = tray.offsetTop, trayBot = trayTop + tray.offsetHeight;
-    var y1 = Math.max(trayTop + 16, Math.min(trayBot - 16, y0));   // clamp the dashboard end into the tray
+    var y1 = Math.max(trayTop + 12, Math.min(trayBot - 12, y0));
     connSvg.classList.add('on');
     cancelAnimationFrame(connState.raf);
     if (animate === false || connState.y0 == null || reduce) {
