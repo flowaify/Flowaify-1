@@ -1346,26 +1346,47 @@
     }
 
     /* ── Final CTA section ── */
-    #final-cta {
-      padding: 96px 60px;
-      background: var(--bg-surface);
-      text-align: center;
-      position: relative;
-      overflow: hidden;
+    /* ── Final CTA ── */
+    #final-cta { position: relative; overflow: hidden; text-align: center;
+      background: linear-gradient(180deg, #EEF0F4 0%, #E4E7ED 100%); border-top: 1px solid rgba(15,23,42,0.06); padding: 124px 60px; }
+    #final-cta::before { content: ''; position: absolute; inset: 0; pointer-events: none;
+      background: radial-gradient(880px 460px at 50% 16%, rgba(255,255,255,0.92), transparent 66%); }
+    .fcta-inner { position: relative; z-index: 1; max-width: 680px; margin: 0 auto; }
+    .fcta-eyebrow { font-size: 11px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--blue); }
+    .fcta-h2 { font-family: 'Montserrat','Plus Jakarta Sans',sans-serif; font-size: clamp(2.4rem, 4.6vw, 3.55rem); font-weight: 800; letter-spacing: -0.035em; line-height: 1.04; color: #0F172A; margin: 16px 0 20px; text-wrap: balance; }
+    .fcta-sub { font-size: 17px; line-height: 1.7; color: #55606F; max-width: 520px; margin: 0 auto 34px; text-wrap: pretty; }
+    .fcta-actions { display: flex; align-items: center; justify-content: center; gap: 14px; flex-wrap: wrap; }
+    .fcta-note { font-size: 12.5px; color: #8A93A0; margin-top: 22px; }
+    .fcta-note a { color: var(--blue); text-decoration: none; font-weight: 600; }
+    @media (max-width: 768px) { #final-cta { padding: 78px 20px; } }
+
+    /* ── FAQ ── */
+    #faq { position: relative; background: linear-gradient(180deg, #F4F6F9 0%, #EDEFF3 100%); border-top: 1px solid rgba(15,23,42,0.06); padding: 104px 60px; }
+    .faq-wrap { max-width: 1080px; margin: 0 auto; display: grid; grid-template-columns: 0.82fr 1.18fr; gap: 64px; align-items: start; }
+    .faq-head { position: sticky; top: 104px; }
+    .faq-eyebrow { font-size: 11px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--blue); }
+    .faq-h2 { font-family: 'Montserrat','Plus Jakarta Sans',sans-serif; font-size: clamp(1.9rem, 3vw, 2.55rem); font-weight: 700; letter-spacing: -0.03em; line-height: 1.1; color: #0F172A; margin: 14px 0 16px; text-wrap: balance; }
+    .faq-head-note { font-size: 14px; line-height: 1.6; color: #55606F; }
+    .faq-head-note a { color: var(--blue); text-decoration: none; font-weight: 600; }
+    .faq-list { border-top: 1px solid rgba(15,23,42,0.1); }
+    .faq-item { border-bottom: 1px solid rgba(15,23,42,0.1); }
+    .faq-btn { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 22px 4px; background: none; border: none; cursor: pointer; text-align: left; font-family: inherit; }
+    .faq-q { font-size: 16px; font-weight: 650; color: #0F172A; letter-spacing: -0.015em; line-height: 1.35; transition: color 0.2s; }
+    .faq-btn:hover .faq-q { color: var(--blue); }
+    .faq-icon { flex-shrink: 0; width: 26px; height: 26px; border-radius: 50%; border: 1px solid rgba(15,23,42,0.14); display: flex; align-items: center; justify-content: center; color: #55606F;
+      transition: transform 0.35s cubic-bezier(0.22,1,0.36,1), background 0.25s ease, border-color 0.25s ease, color 0.25s ease; }
+    .faq-icon svg { width: 11px; height: 11px; }
+    .faq-item.open .faq-icon { transform: rotate(45deg); background: var(--blue); border-color: var(--blue); color: #fff; }
+    .faq-body { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.4s cubic-bezier(0.4,0,0.2,1); }
+    .faq-item.open .faq-body { grid-template-rows: 1fr; }
+    .faq-body-inner { overflow: hidden; }
+    .faq-a { font-size: 14.5px; line-height: 1.75; color: #55606F; padding: 0 4px 24px; max-width: 92%; }
+    @media (max-width: 860px) {
+      #faq { padding: 74px 24px; }
+      .faq-wrap { grid-template-columns: 1fr; gap: 30px; }
+      .faq-head { position: static; }
     }
-    #final-cta::before {
-      content: '';
-      position: absolute;
-      top: 50%; left: 50%;
-      transform: translate(-50%, -50%);
-      width: 800px; height: 500px;
-      background: radial-gradient(ellipse, rgba(0,87,255,0.07) 0%, transparent 65%);
-      pointer-events: none;
-    }
-    @media(max-width:768px) {
-      #final-cta { padding: 60px 20px !important; }
-      #final-cta h2 { font-size: 36px !important; }
-    }
+    @media (max-width: 620px) { #faq { padding: 60px 18px; } .faq-a { max-width: 100%; } }
   </style>
 </head>
 <body>
@@ -1729,78 +1750,63 @@
 
   <!-- ─── FINAL CTA ──────────────────────────────────────────────────────── -->
   <section id="final-cta">
-    <div style="max-width:680px;margin:0 auto;position:relative;z-index:1;">
-      <div class="reveal">
-        <span class="section-label" style="margin-bottom:16px;display:block;">Ready when you are</span>
-        <h2 data-word-reveal="true" style="font-size:52px;font-weight:800;letter-spacing:-0.05em;color:var(--text);line-height:1.08;margin-bottom:20px;">
-          <span class="word-blur">Start</span> <span class="word-blur">automating</span> <span class="word-blur">today.</span>
-        </h2>
-        <p style="font-size:17px;color:var(--text-muted);line-height:1.75;margin-bottom:36px;max-width:520px;margin-left:auto;margin-right:auto;">
-          No technical work. No complexity. A system that captures every lead and follows up automatically — built for your business in 24 hours.
-        </p>
-        <div style="display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap;">
-          <a href="site/onboarding/" class="btn btn-primary btn-lg" style="display:inline-flex;align-items:center;gap:8px;">
-            Get Started
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-          </a>
-        </div>
-        <p style="font-size:12px;color:var(--text-muted);margin-top:20px;">Questions? <a href="mailto:contact@flowaify.app" style="color:var(--blue);text-decoration:none;font-weight:600;">contact@flowaify.app</a></p>
+    <div class="fcta-inner reveal">
+      <span class="fcta-eyebrow">Ready when you are</span>
+      <h2 class="fcta-h2">Start automating today.</h2>
+      <p class="fcta-sub">No technical work, no complexity. A system that captures every lead and follows up automatically &mdash; built for your business in 24 hours.</p>
+      <div class="fcta-actions">
+        <a href="site/onboarding/" class="btn btn-primary btn-lg" style="display:inline-flex;align-items:center;gap:8px;">
+          Get Started
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </a>
       </div>
+      <p class="fcta-note">Questions? <a href="mailto:contact@flowaify.app">contact@flowaify.app</a></p>
     </div>
   </section>
 
   <!-- ─── FAQ ────────────────────────────────────────────────────────── -->
-  <style>
-    .faq-item { border-bottom:1px solid var(--border); }
-    .faq-btn { width:100%;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:22px 0;background:none;border:none;cursor:pointer;text-align:left; }
-    .faq-q { font-size:16px;font-weight:700;color:var(--text);letter-spacing:-.02em;line-height:1.3; }
-    .faq-icon { flex-shrink:0;width:24px;height:24px;border-radius:50%;background:rgba(0,87,255,0.08);border:1px solid rgba(0,87,255,0.15);display:flex;align-items:center;justify-content:center;transition:transform .25s,background .2s; }
-    .faq-item.open .faq-icon { transform:rotate(45deg);background:rgba(0,87,255,0.15); }
-    .faq-body { overflow:hidden;max-height:0;transition:max-height .35s cubic-bezier(.4,0,.2,1); }
-    .faq-item.open .faq-body { max-height:400px; }
-    .faq-a { font-size:14.5px;color:var(--text-muted);line-height:1.75;padding-bottom:22px; }
-  </style>
-  <section id="faq" style="padding:80px 60px;background:var(--bg);">
-    <div style="max-width:760px;margin:0 auto;">
-      <div class="reveal" style="text-align:center;margin-bottom:56px;">
-        <span class="section-label">FAQ</span>
-        <h2 data-word-reveal="true" style="font-size:38px;font-weight:800;letter-spacing:-.05em;color:var(--text);margin-top:14px;line-height:1.08;"><span class="word-blur">Common</span> <span class="word-blur">questions,</span> <span class="word-blur">straight</span> <span class="word-blur">answers.</span></h2>
+  <section id="faq">
+    <div class="faq-wrap">
+      <div class="faq-head reveal">
+        <span class="faq-eyebrow">FAQ</span>
+        <h2 class="faq-h2">Common questions, straight answers.</h2>
+        <p class="faq-head-note">Still have a question? Email <a href="mailto:contact@flowaify.app">contact@flowaify.app</a> and we&rsquo;ll get back to you.</p>
       </div>
-      <div class="reveal">
+      <div class="faq-list reveal">
         <div class="faq-item">
-          <button class="faq-btn" onclick="toggleFaq(this)">
+          <button class="faq-btn" onclick="toggleFaq(this)" aria-expanded="false">
             <span class="faq-q">How long does setup take?</span>
-            <span class="faq-icon"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="var(--blue)" stroke-width="2" stroke-linecap="round"><line x1="5" y1="1" x2="5" y2="9"/><line x1="1" y1="5" x2="9" y2="5"/></svg></span>
+            <span class="faq-icon"><svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><line x1="5" y1="1" x2="5" y2="9"/><line x1="1" y1="5" x2="9" y2="5"/></svg></span>
           </button>
-          <div class="faq-body"><p class="faq-a">Most systems go live within 7–24 hours. We handle the full build — no technical work required from your team. You'll have an onboarding call to map out exactly what we're building, and we'll keep you updated throughout.</p></div>
+          <div class="faq-body"><div class="faq-body-inner"><p class="faq-a">Most systems go live within 7&ndash;24 hours. We handle the full build &mdash; no technical work required from your team. You&rsquo;ll have an onboarding call to map out exactly what we&rsquo;re building, and we&rsquo;ll keep you updated throughout.</p></div></div>
         </div>
         <div class="faq-item">
-          <button class="faq-btn" onclick="toggleFaq(this)">
+          <button class="faq-btn" onclick="toggleFaq(this)" aria-expanded="false">
             <span class="faq-q">Do you work with our CRM?</span>
-            <span class="faq-icon"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="var(--blue)" stroke-width="2" stroke-linecap="round"><line x1="5" y1="1" x2="5" y2="9"/><line x1="1" y1="5" x2="9" y2="5"/></svg></span>
+            <span class="faq-icon"><svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><line x1="5" y1="1" x2="5" y2="9"/><line x1="1" y1="5" x2="9" y2="5"/></svg></span>
           </button>
-          <div class="faq-body"><p class="faq-a">Yes. We build around your existing stack. We have deep experience with HubSpot, GoHighLevel, Salesforce, and other CRMs. If you don't have a CRM yet, we'll recommend one and set it up for you as part of the build.</p></div>
+          <div class="faq-body"><div class="faq-body-inner"><p class="faq-a">Yes. We build around your existing stack. We have deep experience with HubSpot, GoHighLevel, Salesforce, and other CRMs. If you don&rsquo;t have a CRM yet, we&rsquo;ll recommend one and set it up for you as part of the build.</p></div></div>
         </div>
         <div class="faq-item">
-          <button class="faq-btn" onclick="toggleFaq(this)">
+          <button class="faq-btn" onclick="toggleFaq(this)" aria-expanded="false">
             <span class="faq-q">Can you automate website leads?</span>
-            <span class="faq-icon"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="var(--blue)" stroke-width="2" stroke-linecap="round"><line x1="5" y1="1" x2="5" y2="9"/><line x1="1" y1="5" x2="9" y2="5"/></svg></span>
+            <span class="faq-icon"><svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><line x1="5" y1="1" x2="5" y2="9"/><line x1="1" y1="5" x2="9" y2="5"/></svg></span>
           </button>
-          <div class="faq-body"><p class="faq-a">Absolutely. Whether leads come through a contact form, chat widget, landing page, or ad, we capture them, sync them to your CRM, and trigger an automated response — all within seconds of the form being submitted.</p></div>
+          <div class="faq-body"><div class="faq-body-inner"><p class="faq-a">Absolutely. Whether leads come through a contact form, chat widget, landing page, or ad, we capture them, sync them to your CRM, and trigger an automated response &mdash; all within seconds of the form being submitted.</p></div></div>
         </div>
         <div class="faq-item">
-          <button class="faq-btn" onclick="toggleFaq(this)">
-            <span class="faq-q">Do we own the system after it's built?</span>
-            <span class="faq-icon"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="var(--blue)" stroke-width="2" stroke-linecap="round"><line x1="5" y1="1" x2="5" y2="9"/><line x1="1" y1="5" x2="9" y2="5"/></svg></span>
+          <button class="faq-btn" onclick="toggleFaq(this)" aria-expanded="false">
+            <span class="faq-q">Do we own the system after it&rsquo;s built?</span>
+            <span class="faq-icon"><svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><line x1="5" y1="1" x2="5" y2="9"/><line x1="1" y1="5" x2="9" y2="5"/></svg></span>
           </button>
-          <div class="faq-body"><p class="faq-a">Yes — the system lives in your accounts. You have full access and ownership of every workflow, automation, and integration we build. We can continue to manage and optimize it for you, or hand it off fully. It's your choice.</p></div>
+          <div class="faq-body"><div class="faq-body-inner"><p class="faq-a">Yes &mdash; the system lives in your accounts. You have full access and ownership of every workflow, automation, and integration we build. We can continue to manage and optimize it for you, or hand it off fully. It&rsquo;s your choice.</p></div></div>
         </div>
-        <div class="faq-item" style="border-bottom:none;">
-          <button class="faq-btn" onclick="toggleFaq(this)">
+        <div class="faq-item">
+          <button class="faq-btn" onclick="toggleFaq(this)" aria-expanded="false">
             <span class="faq-q">What happens after launch?</span>
-            <span class="faq-icon"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="var(--blue)" stroke-width="2" stroke-linecap="round"><line x1="5" y1="1" x2="5" y2="9"/><line x1="1" y1="5" x2="9" y2="5"/></svg></span>
+            <span class="faq-icon"><svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><line x1="5" y1="1" x2="5" y2="9"/><line x1="1" y1="5" x2="9" y2="5"/></svg></span>
           </button>
-          <div class="faq-body"><p class="faq-a">After launch, we monitor the system for the first week to make sure everything is running smoothly. From there, we offer ongoing support, monthly optimization reviews, and the ability to add new workflows as your business grows.</p></div>
+          <div class="faq-body"><div class="faq-body-inner"><p class="faq-a">After launch, we monitor the system for the first week to make sure everything is running smoothly. From there, we offer ongoing support, monthly optimization reviews, and the ability to add new workflows as your business grows.</p></div></div>
         </div>
       </div>
     </div>
@@ -1808,13 +1814,14 @@
   <script>
   function toggleFaq(btn) {
     var item = btn.closest('.faq-item');
-    var isOpen = item.classList.contains('open');
-    document.querySelectorAll('.faq-item.open').forEach(function(el){ el.classList.remove('open'); });
-    if (!isOpen) item.classList.add('open');
+    var willOpen = !item.classList.contains('open');
+    document.querySelectorAll('.faq-item.open').forEach(function (el) {
+      el.classList.remove('open');
+      var b = el.querySelector('.faq-btn'); if (b) b.setAttribute('aria-expanded', 'false');
+    });
+    if (willOpen) { item.classList.add('open'); btn.setAttribute('aria-expanded', 'true'); }
   }
   </script>
-
-
 
   <!-- ─── FOOTER ────────────────────────────────────────────────────────── -->
   <footer style="background:var(--bg);border-top:1px solid var(--border);padding:64px 60px 0;">
