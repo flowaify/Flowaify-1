@@ -1386,7 +1386,6 @@
 
     <div id="navbar-links">
       <a href="#who-for" class="nav-link" onclick="closeNav()" style="display:inline-flex;align-items:center;gap:4px;">Solutions <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></a>
-      <a href="#how-it-works"     class="nav-link" onclick="closeNav()">How It Works</a>
       <a href="#faq"              class="nav-link" onclick="closeNav()">FAQ</a>
       <a href="site/onboarding/"    class="nav-link mob-only" onclick="closeNav()">Get Started</a>
     </div>
@@ -1428,7 +1427,7 @@
           </a>
         </div>
 
-        <a id="hero-explore" href="#how-it-works" style="opacity:0;transform:translateY(12px);">Explore the Platform
+        <a id="hero-explore" href="#workspace" style="opacity:0;transform:translateY(12px);">Explore the Platform
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
         </a>
 
@@ -1580,186 +1579,6 @@
             </svg>
           </div>
         </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ─── HOW IT WORKS ─────────────────────────────────────────────────────── -->
-  <style>
-    /* ── How It Works — silver step cards on a dotted field ── */
-    #how-it-works { position: relative; overflow: hidden; background: linear-gradient(180deg, #F1F3F7 0%, #E7EAEF 100%); padding: 100px 0; }
-    #how-it-works::before { content: ''; position: absolute; inset: 0; pointer-events: none;
-      background-image: radial-gradient(rgba(15,23,42,0.11) 1px, transparent 1.5px); background-size: 22px 22px;
-      -webkit-mask-image: linear-gradient(180deg, transparent, #000 8%, #000 92%, transparent);
-              mask-image: linear-gradient(180deg, transparent, #000 8%, #000 92%, transparent); }
-    .hiw2-wrap { position: relative; z-index: 1; max-width: 1080px; margin: 0 auto; padding: 0 40px; }
-    .hiw2-intro { max-width: 720px; margin: 0 auto 50px; text-align: center; }
-    .hiw2-eyebrow { font-size: 11px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--blue); }
-    .hiw2-h2 { font-family: 'Montserrat','Plus Jakarta Sans',sans-serif; font-size: clamp(1.9rem, 2.8vw, 2.55rem); font-weight: 700; letter-spacing: -0.025em; line-height: 1.14; color: #0F172A; margin: 14px 0 0; text-wrap: balance; }
-
-    .hiw2-steps { display: flex; flex-direction: column; gap: 22px; }
-    .hiw2-card { display: grid; grid-template-columns: 1fr 1fr; gap: 44px; align-items: center;
-      background: rgba(255,255,255,0.8); border: 1px solid rgba(15,23,42,0.09); border-radius: 20px; padding: 40px 44px;
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.9), 0 24px 60px -40px rgba(15,23,42,0.28);
-      transition: transform 0.3s cubic-bezier(0.22,1,0.36,1), border-color 0.3s ease, box-shadow 0.3s ease, background 0.3s ease; }
-    .hiw2-card:nth-child(even) .hiw2-text { order: 2; }
-    .hiw2-card:nth-child(even) .hiw2-visual { order: 1; }
-    .hiw2-card:hover { transform: translateY(-3px); border-color: rgba(15,23,42,0.16); background: rgba(255,255,255,0.94);
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.95), 0 34px 72px -38px rgba(15,23,42,0.34); }
-
-    .hiw2-num { font-size: 13px; font-weight: 800; letter-spacing: 0.1em; color: var(--blue); margin-bottom: 14px; }
-    .hiw2-title { font-family: 'Montserrat','Plus Jakarta Sans',sans-serif; font-size: clamp(1.5rem, 2vw, 1.8rem); font-weight: 700; letter-spacing: -0.025em; line-height: 1.16; color: #0F172A; margin-bottom: 14px; }
-    .hiw2-body { font-size: 15px; line-height: 1.68; color: #55606F; margin-bottom: 20px; max-width: 440px; }
-    .hiw2-badge { display: inline-flex; align-items: center; gap: 8px; padding: 8px 15px; border-radius: 100px;
-      background: rgba(0,87,255,0.06); border: 1px solid rgba(0,87,255,0.16); color: #0F172A; font-size: 12.5px; font-weight: 600;
-      transition: background 0.3s ease, border-color 0.3s ease; }
-    .hiw2-badge svg { width: 14px; height: 14px; color: var(--blue); flex-shrink: 0; }
-    .hiw2-card:hover .hiw2-badge { background: rgba(0,87,255,0.09); border-color: rgba(0,87,255,0.24); }
-
-    .hiw2-visual { display: flex; justify-content: center; min-width: 0; }
-    .hiw2-mock { width: 100%; max-width: 340px; background: #fff; border: 1px solid rgba(15,23,42,0.1); border-radius: 14px;
-      box-shadow: 0 14px 34px -22px rgba(15,23,42,0.3); padding: 16px 18px; }
-    .hiw2-mock-head { display: flex; align-items: center; gap: 9px; margin-bottom: 12px; }
-    .hiw2-mock-ico { width: 30px; height: 30px; border-radius: 8px; background: var(--blue); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-    .hiw2-mock-ico svg { width: 15px; height: 15px; color: #fff; }
-    .hiw2-mock-app { font-size: 13px; font-weight: 700; color: #0F172A; }
-    .hiw2-mock-time { font-size: 11px; color: #8A93A0; margin-left: auto; }
-    .hiw2-mock-line { font-size: 13px; color: #0F172A; font-weight: 600; }
-    .hiw2-mock-sub { font-size: 12px; color: #6A7382; margin-top: 3px; }
-    .hiw2-mock-meta { font-size: 11.5px; color: #8A93A0; }
-    .hiw2-mock-flow { font-size: 11.5px; color: var(--blue); font-weight: 600; margin-top: 8px; }
-    .hiw2-mock-divider { height: 1px; background: rgba(15,23,42,0.07); margin: 12px 0; }
-    .hiw2-chip { display: inline-flex; align-items: center; gap: 6px; margin-top: 12px; padding: 5px 10px; border-radius: 7px;
-      background: rgba(34,197,94,0.1); color: #15803D; font-size: 11.5px; font-weight: 700; }
-    .hiw2-chip svg { width: 12px; height: 12px; flex-shrink: 0; }
-    .hiw2-crm-head { display: flex; align-items: center; gap: 6px; margin-bottom: 10px; }
-    .hiw2-crm-dot { width: 8px; height: 8px; border-radius: 50%; }
-    .hiw2-crm-title { font-size: 10.5px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #8A93A0; margin-left: 4px; }
-    .hiw2-row { display: flex; align-items: center; gap: 7px; padding: 9px 0; border-top: 1px solid rgba(15,23,42,0.06); }
-    .hiw2-row-name { font-size: 12.5px; font-weight: 650; color: #0F172A; flex: 1; min-width: 0; }
-    .hiw2-tag { font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 5px; white-space: nowrap; }
-    .hiw2-tag-new { background: rgba(0,87,255,0.1); color: var(--blue); }
-    .hiw2-tag-qual { background: rgba(34,197,94,0.12); color: #16A34A; }
-    .hiw2-tag-fu { background: rgba(245,158,11,0.14); color: #B45309; }
-    .hiw2-tag-booked { background: rgba(15,23,42,0.06); color: #55606F; }
-    .hiw2-row-time { font-size: 11px; color: #8A93A0; }
-    .hiw2-more { font-size: 11.5px; color: var(--blue); font-weight: 600; margin-top: 10px; }
-
-    @media (max-width: 980px) {
-      #how-it-works { padding: 80px 0; }
-      .hiw2-card { grid-template-columns: 1fr; gap: 26px; padding: 32px 28px; }
-      .hiw2-card:nth-child(even) .hiw2-text { order: 1; }
-      .hiw2-card:nth-child(even) .hiw2-visual { order: 2; }
-      .hiw2-body { max-width: none; }
-    }
-    @media (max-width: 620px) {
-      #how-it-works { padding: 60px 0; }
-      .hiw2-wrap { padding: 0 18px; }
-      .hiw2-card { padding: 24px 20px; border-radius: 16px; }
-      .hiw2-intro { margin-bottom: 34px; }
-    }
-  </style>
-  <section id="how-it-works">
-    <div class="hiw2-wrap">
-      <div class="hiw2-intro reveal">
-        <span class="hiw2-eyebrow">How it works</span>
-        <h2 class="hiw2-h2">From first inquiry to booked &mdash; on autopilot.</h2>
-      </div>
-      <div class="hiw2-steps reveal">
-
-        <!-- Step 01 -->
-        <div class="hiw2-card">
-          <div class="hiw2-text">
-            <div class="hiw2-num">01</div>
-            <h3 class="hiw2-title">Every inquiry gets an instant reply.</h3>
-            <p class="hiw2-body">Before a lead form is read by a human, Flowaify has already responded. Under 60 seconds, 24/7. Personalized to their inquiry across every channel.</p>
-            <div class="hiw2-badge">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-              Under 60s response. Day or night.
-            </div>
-          </div>
-          <div class="hiw2-visual">
-            <div class="hiw2-mock">
-              <div class="hiw2-mock-head">
-                <span class="hiw2-mock-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg></span>
-                <span class="hiw2-mock-app">Flowaify</span>
-                <span class="hiw2-mock-time">now</span>
-              </div>
-              <div class="hiw2-mock-line">Lead via Web &mdash; question</div>
-              <div class="hiw2-mock-sub">Interested in pricing</div>
-              <div class="hiw2-mock-flow">Flow: Quote &rarr; Outreach &rarr; SMS &middot; Step 1</div>
-              <div class="hiw2-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Reply sent instantly</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Step 02 -->
-        <div class="hiw2-card">
-          <div class="hiw2-text">
-            <div class="hiw2-num">02</div>
-            <h3 class="hiw2-title">Your pipeline runs itself.</h3>
-            <p class="hiw2-body">Every lead is qualified, tagged, and routed to your CRM automatically. The right follow-up sequence fires at the right time until they book or opt out. Zero manual entry.</p>
-            <div class="hiw2-badge">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-              Multi-channel. Fully sequenced.
-            </div>
-          </div>
-          <div class="hiw2-visual">
-            <div class="hiw2-mock">
-              <div class="hiw2-crm-head">
-                <span class="hiw2-crm-dot" style="background:#22C55E;"></span>
-                <span class="hiw2-crm-dot" style="background:rgba(15,23,42,0.18);"></span>
-                <span class="hiw2-crm-dot" style="background:rgba(15,23,42,0.1);"></span>
-                <span class="hiw2-crm-title">CRM Pipeline</span>
-              </div>
-              <div class="hiw2-row" style="border-top:none;">
-                <span class="hiw2-row-name">Pencil Group</span>
-                <span class="hiw2-tag hiw2-tag-new">New</span>
-                <span class="hiw2-tag hiw2-tag-qual">Qualified</span>
-                <span class="hiw2-row-time">12m</span>
-              </div>
-              <div class="hiw2-row">
-                <span class="hiw2-row-name">Sunbuilt</span>
-                <span class="hiw2-tag hiw2-tag-fu">Follow-Up</span>
-                <span class="hiw2-row-time">32m</span>
-              </div>
-              <div class="hiw2-row">
-                <span class="hiw2-row-name">Reyes LLC</span>
-                <span class="hiw2-tag hiw2-tag-booked">Booked</span>
-                <span class="hiw2-row-time">1h</span>
-              </div>
-              <div class="hiw2-more">+ 24 more opportunities</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Step 03 -->
-        <div class="hiw2-card">
-          <div class="hiw2-text">
-            <div class="hiw2-num">03</div>
-            <h3 class="hiw2-title">Appointments booked. Reviews earned.</h3>
-            <p class="hiw2-body">When it&rsquo;s time to act, Flowaify sends a calendar link. When satisfaction is reached, it requests a review. Every step is tracked in your live dashboard. You see everything. You do nothing.</p>
-            <div class="hiw2-badge">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
-              Booked, confirmed, and followed up.
-            </div>
-          </div>
-          <div class="hiw2-visual">
-            <div class="hiw2-mock">
-              <div class="hiw2-mock-head">
-                <span class="hiw2-mock-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg></span>
-                <span class="hiw2-mock-app">Calendar</span>
-                <span class="hiw2-mock-time">Action needed</span>
-              </div>
-              <div class="hiw2-mock-divider"></div>
-              <div class="hiw2-mock-meta" style="color:var(--blue);font-weight:600;">May 7 &middot; 2:00 PM</div>
-              <div class="hiw2-mock-line" style="margin-top:2px;">Follow-Up Call</div>
-              <div class="hiw2-mock-sub">60 min &middot; Miguel R.</div>
-              <div class="hiw2-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Confirmed. Reminder queued.</div>
-            </div>
-          </div>
-        </div>
-
       </div>
     </div>
   </section>
@@ -2065,8 +1884,7 @@
           <div style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:16px;">Pages</div>
           <div style="display:flex;flex-direction:column;gap:10px;">
             <a href="#" class="nav-link" style="font-size:13.5px;">Home</a>
-            <a href="#how-it-works" class="nav-link" style="font-size:13.5px;">How It Works</a>
-            <a href="#how-it-works" class="nav-link" style="font-size:13.5px;">Workflow Library</a>
+            <a href="#who-for" class="nav-link" style="font-size:13.5px;">Workflow Library</a>
             <a href="#faq" class="nav-link" style="font-size:13.5px;">FAQ</a>
             <a href="site/onboarding/" class="nav-link" style="font-size:13.5px;">Get Started</a>
           </div>
