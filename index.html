@@ -1529,7 +1529,7 @@
   </style>
 </head>
 <body>
-<a href="#hero-section" class="skip-link">Skip to main content</a>
+<a href="#main-content" class="skip-link">Skip to main content</a>
 <div id="scroll-progress" aria-hidden="true"></div>
 <div id="copy-toast" role="status" aria-live="polite"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Copied to clipboard</div>
 <button id="back-to-top" aria-label="Back to top" onclick="flowScrollTop()">
@@ -1584,6 +1584,7 @@
     </div>
   </nav>
 
+  <main id="main-content" tabindex="-1">
   <!-- ─── HERO ───────────────────────────────────────────────────────────── -->
   <section id="hero-section">
     <div class="hero-inner">
@@ -1634,7 +1635,7 @@
         <div class="dash-stack">
           <div class="dash-glow"></div>
           <div class="dash-pos dash-back"><div class="dash-panel">
-            <img src="assets/images/hero-overview-dark.png" alt="Flowaify Overview dashboard" width="1920" height="1080" loading="eager" decoding="async" />
+            <img src="assets/images/hero-overview-dark.png" alt="Flowaify Overview dashboard" width="1920" height="1080" loading="eager" fetchpriority="high" decoding="async" />
           </div></div>
           <div class="dash-pos dash-front"><div class="dash-panel">
             <img src="assets/images/hero-leads-light.png" alt="Flowaify Leads dashboard" width="1920" height="1080" loading="eager" decoding="async" />
@@ -1685,7 +1686,7 @@
       </div>
 
       <div class="ws-frame reveal" style="transition-delay:70ms;">
-        <img src="assets/images/workspace-overview-dark.png" alt="Flowaify Overview dashboard — lead sources, insights, priority leads, team chat, and the Flowy AI assistant in one workspace" loading="lazy" decoding="async">
+        <img src="assets/images/workspace-overview-dark.png" alt="Flowaify Overview dashboard — lead sources, insights, priority leads, team chat, and the Flowy AI assistant in one workspace" width="1920" height="959" loading="lazy" decoding="async">
       </div>
       <div style="text-align:center;margin-top:24px;">
         <button type="button" class="ws-demo-link" data-demo-open>
@@ -1993,6 +1994,8 @@
     if (willOpen) { item.classList.add('open'); btn.setAttribute('aria-expanded', 'true'); }
   }
   </script>
+
+  </main>
 
   <!-- ─── FOOTER ────────────────────────────────────────────────────────── -->
   <style>
