@@ -3,165 +3,181 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Client Intake — Flowaify</title>
+  <title>Get started — Flowaify</title>
+  <meta name="description" content="Tell us about your business and our team will build your Flowaify lead-automation system." />
   <link rel="icon" type="image/png" href="/assets/images/logo-transparent.png" />
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
   <script>emailjs.init('K8h7HdhcJxPejdDHU');</script>
   <style>
-    :root{--blue:#0057FF;--blue-b:#2979FF;--blue-dim:rgba(0,87,255,0.06);--blue-border:rgba(0,87,255,0.14);--green:#059669;--green-dim:rgba(5,150,105,0.08);--border:rgba(15,23,42,0.08);--text:#0f172a;--text-s:rgba(15,23,42,0.68);--text-m:rgba(15,23,42,0.44)}
+    :root{
+      --blue:#0057FF; --ink:#0F172A; --muted:#55606F; --faint:#8A93A0;
+      --border:rgba(15,23,42,0.1); --line:rgba(15,23,42,0.08); --charcoal:#0F1116;
+    }
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-    html,body{font-family:'Plus Jakarta Sans',sans-serif;color:var(--text);font-size:14px;min-height:100%}
-    body{background:radial-gradient(ellipse 900px 600px at 50% -80px,rgba(0,87,255,0.07) 0%,transparent 68%),radial-gradient(ellipse 500px 400px at 15% 90%,rgba(139,92,246,0.04) 0%,transparent 60%),linear-gradient(175deg,#ffffff 0%,#f5f8ff 45%,#edf2ff 100%);min-height:100vh;padding:40px 20px 80px}
+    html{-webkit-text-size-adjust:100%}
+    body{font-family:'Plus Jakarta Sans',sans-serif;color:var(--ink);font-size:14px;-webkit-font-smoothing:antialiased;
+      background:linear-gradient(180deg,#F4F6F9 0%,#E7EAEF 100%);min-height:100vh;display:flex;flex-direction:column}
     a{text-decoration:none;color:inherit}
 
-    .ob-wrap{max-width:600px;margin:0 auto}
-    .ob-header{text-align:center;margin-bottom:40px}
-    .ob-logo{width:40px;height:40px;object-fit:contain;margin-bottom:20px}
-    .ob-title{font-size:28px;font-weight:800;letter-spacing:-0.6px;margin-bottom:8px}
-    .ob-sub{font-size:14px;color:var(--text-s);line-height:1.65}
+    /* Top bar */
+    .ob-top{display:flex;align-items:center;justify-content:space-between;width:100%;max-width:1120px;margin:0 auto;padding:22px 32px}
+    .ob-brand{display:inline-flex;align-items:center;gap:10px}
+    .ob-brand img{width:30px;height:30px;object-fit:contain}
+    .ob-brand span{font-size:17px;font-weight:800;letter-spacing:-0.03em;color:var(--ink)}
+    .ob-top-links{display:inline-flex;align-items:center;gap:8px}
+    .ob-top-link{display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border-radius:9px;font-size:13.5px;font-weight:600;color:var(--muted);transition:color .18s,background .18s}
+    .ob-top-link:hover{color:var(--ink);background:rgba(15,23,42,0.04)}
+    .ob-top-link i{width:14px;height:14px}
+    .ob-top-link.contact{border:1px solid var(--border);color:var(--ink)}
+    .ob-top-link.contact:hover{border-color:rgba(15,23,42,0.2);background:#fff}
 
-    /* Steps */
-    .steps{display:flex;align-items:center;justify-content:center;gap:0;margin-bottom:36px}
-    .step{display:flex;align-items:center;gap:8px}
-    .step-num{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;border:2px solid var(--border);color:var(--text-m);background:#fff;transition:all 0.2s;flex-shrink:0}
-    .step.active .step-num{background:var(--blue);border-color:var(--blue);color:#fff}
-    .step.done .step-num{background:var(--green);border-color:var(--green);color:#fff}
-    .step-label{font-size:11.5px;font-weight:600;color:var(--text-m);transition:color 0.2s}
-    .step.active .step-label{color:var(--blue)}
-    .step.done .step-label{color:var(--green)}
-    .step-line{width:36px;height:2px;background:var(--border);margin:0 4px;flex-shrink:0}
-    .step-line.done{background:var(--green)}
+    /* Main */
+    .ob-main{flex:1;width:100%;max-width:600px;margin:0 auto;padding:20px 20px 72px}
+    .ob-header{text-align:center;margin-bottom:30px}
+    .ob-eyebrow{font-size:11px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:var(--blue)}
+    .ob-title{font-family:'Montserrat','Plus Jakarta Sans',sans-serif;font-size:30px;font-weight:800;letter-spacing:-0.03em;line-height:1.12;color:var(--ink);margin:12px 0 10px}
+    .ob-sub{font-size:14.5px;color:var(--muted);line-height:1.6;max-width:440px;margin:0 auto}
+
+    /* Step tracker */
+    .steps{display:flex;align-items:center;justify-content:center;margin-bottom:26px}
+    .step{display:inline-flex;align-items:center;gap:9px}
+    .step-num{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;border:1.5px solid var(--border);color:var(--faint);background:#fff;transition:all .25s;flex-shrink:0}
+    .step.active .step-num,.step.done .step-num{background:var(--blue);border-color:var(--blue);color:#fff}
+    .step-label{font-size:12px;font-weight:600;color:var(--faint);transition:color .25s;white-space:nowrap}
+    .step.active .step-label,.step.done .step-label{color:var(--ink)}
+    .step-line{width:44px;height:1.5px;background:var(--border);margin:0 12px;transition:background .25s;flex-shrink:0}
+    .step-line.done{background:var(--blue)}
 
     /* Card */
-    .ob-card{background:rgba(255,255,255,0.88);backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,0.78);border-radius:20px;box-shadow:0 4px 20px rgba(0,0,0,0.07),inset 0 1px 0 rgba(255,255,255,0.9);padding:32px}
-
+    .ob-card{background:#fff;border:1px solid var(--border);border-radius:20px;padding:34px 34px 30px;
+      box-shadow:0 30px 70px -42px rgba(15,23,42,0.3),inset 0 1px 0 rgba(255,255,255,0.9)}
     .step-content{display:none}
-    .step-content.active{display:block;animation:fade-up 0.22s ease}
+    .step-content.active{display:block;animation:fade-up .3s cubic-bezier(.22,1,.36,1)}
     @keyframes fade-up{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-
-    .step-title{font-size:18px;font-weight:800;letter-spacing:-0.3px;margin-bottom:4px}
-    .step-desc{font-size:13px;color:var(--text-m);margin-bottom:24px}
+    .step-title{font-family:'Montserrat','Plus Jakarta Sans',sans-serif;font-size:18px;font-weight:700;letter-spacing:-0.02em;color:var(--ink);margin-bottom:5px}
+    .step-desc{font-size:13px;color:var(--muted);line-height:1.55;margin-bottom:22px}
 
     /* Fields */
-    .field{margin-bottom:18px}
+    .field{margin-bottom:16px}
     .field-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-    .field label{display:block;font-size:11.5px;font-weight:700;color:var(--text-m);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.3px}
-    .field input,.field select,.field textarea{width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:13.5px;font-family:inherit;color:var(--text);outline:none;transition:border-color 0.15s,box-shadow 0.15s;background:#fff;resize:vertical}
-    .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(0,87,255,0.08)}
-    .field textarea{min-height:80px}
-    .field-hint{font-size:11px;color:var(--text-m);margin-top:4px}
+    .field label{display:block;font-size:12.5px;font-weight:600;color:var(--ink);letter-spacing:-0.01em;margin-bottom:7px}
+    .field .req{color:var(--blue)}
+    .field input,.field select,.field textarea{width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:11px;font-size:14px;font-family:inherit;color:var(--ink);background:#fff;outline:none;resize:vertical;transition:border-color .15s,box-shadow .15s}
+    .field input::placeholder,.field textarea::placeholder{color:#AEB4BE}
+    .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(0,87,255,0.1)}
+    .field textarea{min-height:92px;line-height:1.55}
+    .field.invalid input,.field.invalid textarea{border-color:#DC2626;box-shadow:0 0 0 3px rgba(220,38,38,0.08)}
+    .field-err{display:none;font-size:11.5px;font-weight:600;color:#DC2626;margin-top:6px}
+    .field.invalid .field-err{display:block}
+    .field-hint{font-size:11.5px;color:var(--faint);margin-top:6px}
 
-    /* Checkbox group */
-    .check-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-    .check-item{display:flex;align-items:center;gap:8px;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;cursor:pointer;transition:all 0.15s;user-select:none}
-    .check-item:hover{border-color:var(--blue-border);background:var(--blue-dim)}
-    .check-item.checked{border-color:var(--blue);background:var(--blue-dim)}
-    .check-item input{display:none}
-    .check-box{width:16px;height:16px;border-radius:4px;border:2px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all 0.15s}
+    /* Checkboxes */
+    .check-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+    .check-item{display:flex;align-items:center;gap:10px;padding:11px 13px;border:1.5px solid var(--border);border-radius:11px;background:#fff;cursor:pointer;user-select:none;transition:border-color .15s,background .15s}
+    .check-item:hover{border-color:rgba(0,87,255,0.28)}
+    .check-item.checked{border-color:var(--blue);background:rgba(0,87,255,0.05)}
+    .check-box{width:18px;height:18px;border-radius:5px;border:1.5px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .15s}
     .check-item.checked .check-box{background:var(--blue);border-color:var(--blue)}
-    .check-item.checked .check-box::after{content:'✓';font-size:10px;color:#fff;font-weight:800}
-    .check-label{font-size:12.5px;font-weight:500;color:var(--text-s)}
+    .check-item.checked .check-box::after{content:'✓';font-size:11px;color:#fff;font-weight:800}
+    .check-label{font-size:13px;font-weight:500;color:var(--muted)}
+    .check-item.checked .check-label{color:var(--ink)}
+
+    /* Review */
+    .review-row{display:flex;justify-content:space-between;gap:18px;padding:11px 0;border-bottom:1px solid var(--line)}
+    .review-row:last-child{border-bottom:none}
+    .review-k{font-size:12.5px;font-weight:600;color:var(--faint);flex-shrink:0}
+    .review-v{font-size:13px;font-weight:500;color:var(--ink);text-align:right}
 
     /* Nav */
-    .ob-nav{display:flex;align-items:center;justify-content:space-between;margin-top:28px}
-    .btn-prev{display:inline-flex;align-items:center;gap:6px;padding:10px 20px;border:1.5px solid var(--border);border-radius:10px;background:transparent;font-size:13px;font-weight:600;color:var(--text-m);cursor:pointer;font-family:inherit;transition:all 0.15s}
-    .btn-prev:hover{border-color:var(--blue-border);color:var(--blue)}
-    .btn-prev i{width:13px;height:13px}
-    .btn-next{display:inline-flex;align-items:center;gap:6px;padding:10px 24px;border:none;border-radius:10px;background:var(--blue);color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 4px 14px rgba(0,87,255,0.28);transition:all 0.18s}
-    .btn-next:hover{background:var(--blue-b);transform:translateY(-1px)}
-    .btn-next i{width:13px;height:13px}
+    .ob-nav{display:flex;align-items:center;justify-content:space-between;margin-top:26px}
+    .btn-prev{display:inline-flex;align-items:center;gap:6px;padding:11px 18px;border:1.5px solid var(--border);border-radius:11px;background:#fff;font-size:13.5px;font-weight:600;color:var(--muted);cursor:pointer;font-family:inherit;transition:all .15s}
+    .btn-prev:hover{border-color:rgba(15,23,42,0.2);color:var(--ink)}
+    .btn-prev i{width:14px;height:14px}
+    .btn-next{display:inline-flex;align-items:center;gap:7px;padding:12px 24px;border:1px solid rgba(255,255,255,0.06);border-radius:11px;background:var(--charcoal);color:#fff;font-size:13.5px;font-weight:650;cursor:pointer;font-family:inherit;box-shadow:0 12px 26px -12px rgba(15,23,42,0.45);transition:background .18s,transform .18s}
+    .btn-next:hover{background:#1b1f28;transform:translateY(-1px)}
+    .btn-next:disabled{opacity:.6;cursor:default;transform:none}
+    .btn-next i{width:14px;height:14px}
+
+    /* Below-card contact option */
+    .ob-foot{text-align:center;margin-top:22px;font-size:13px;color:var(--faint)}
+    .ob-foot a{color:var(--blue);font-weight:600}
 
     /* Success */
-    .ob-success{display:none;text-align:center;padding:16px 0}
-    .ob-success-icon{width:56px;height:56px;border-radius:18px;background:var(--green-dim);display:flex;align-items:center;justify-content:center;margin:0 auto 20px}
-    .ob-success-icon i{width:26px;height:26px;color:var(--green)}
-    .ob-success-title{font-size:22px;font-weight:800;letter-spacing:-0.4px;margin-bottom:8px}
-    .ob-success-sub{font-size:14px;color:var(--text-s);line-height:1.65;max-width:380px;margin:0 auto 28px}
+    .ob-success{display:none;text-align:center;padding:16px 0 8px}
+    .ob-success-icon{width:58px;height:58px;border-radius:18px;background:rgba(5,150,105,0.1);display:flex;align-items:center;justify-content:center;margin:0 auto 20px}
+    .ob-success-icon i{width:28px;height:28px;color:#059669}
+    .ob-success-title{font-family:'Montserrat','Plus Jakarta Sans',sans-serif;font-size:23px;font-weight:800;letter-spacing:-0.02em;color:var(--ink);margin-bottom:10px}
+    .ob-success-sub{font-size:14.5px;color:var(--muted);line-height:1.65;max-width:400px;margin:0 auto 26px}
+    .ob-success-actions{display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap}
+    .btn-home{display:inline-flex;align-items:center;gap:7px;padding:12px 22px;border-radius:11px;background:var(--charcoal);color:#fff;font-size:13.5px;font-weight:650;border:1px solid rgba(255,255,255,0.06)}
+    .btn-ghost{display:inline-flex;align-items:center;gap:6px;padding:12px 20px;border-radius:11px;border:1.5px solid var(--border);color:var(--muted);font-size:13.5px;font-weight:600;background:#fff}
 
-    @media(max-width:540px){.field-row,.check-grid{grid-template-columns:1fr}.step-label{display:none}}
+    @media(max-width:600px){
+      .ob-top{padding:18px 18px}
+      .ob-top-link{padding:8px 10px;font-size:13px}
+      .ob-top-link.back span{display:none}
+      .ob-main{padding:12px 16px 64px}
+      .ob-title{font-size:25px}
+      .ob-card{padding:24px 20px}
+      .field-row,.check-grid{grid-template-columns:1fr}
+      .step-label{display:none}
+      .step-line{width:32px;margin:0 8px}
+    }
   </style>
 </head>
 <body>
-  <div class="ob-wrap">
+  <!-- Top bar: back to website + contact us -->
+  <header class="ob-top">
+    <a class="ob-brand" href="/" aria-label="Back to Flowaify home">
+      <img src="/assets/images/flowaify-logo.webp" alt="" onerror="this.style.display='none'" />
+      <span>Flowaify</span>
+    </a>
+    <nav class="ob-top-links">
+      <a class="ob-top-link back" href="/"><i data-lucide="arrow-left"></i><span>Back to website</span></a>
+      <a class="ob-top-link contact" href="mailto:contact@flowaify.app"><i data-lucide="mail"></i>Contact us</a>
+    </nav>
+  </header>
+
+  <main class="ob-main">
     <div class="ob-header">
-      <img class="ob-logo" src="/assets/images/logo-transparent.png" alt="" onerror="this.style.display='none'" />
-      <div class="ob-title">Let's get you set up</div>
-      <div class="ob-sub">Fill out this form so our team can configure your Flowaify automations. Takes about 3 minutes.</div>
+      <span class="ob-eyebrow">Get started</span>
+      <h1 class="ob-title">Let's build your system.</h1>
+      <p class="ob-sub">A few quick details and our team will design your Flowaify lead-automation setup. Takes about two minutes.</p>
     </div>
 
     <!-- Step tracker -->
     <div class="steps" id="steps-bar">
-      <div class="step active" id="step-ind-1"><div class="step-num">1</div><div class="step-label">Business</div></div>
+      <div class="step active" id="step-ind-1"><div class="step-num">1</div><div class="step-label">Your business</div></div>
       <div class="step-line" id="line-1"></div>
-      <div class="step" id="step-ind-2"><div class="step-num">2</div><div class="step-label">Schedule</div></div>
+      <div class="step" id="step-ind-2"><div class="step-num">2</div><div class="step-label">What you need</div></div>
       <div class="step-line" id="line-2"></div>
-      <div class="step" id="step-ind-3"><div class="step-num">3</div><div class="step-label">Goals</div></div>
-      <div class="step-line" id="line-3"></div>
-      <div class="step" id="step-ind-4"><div class="step-num">4</div><div class="step-label">Review</div></div>
+      <div class="step" id="step-ind-3"><div class="step-num">3</div><div class="step-label">Review</div></div>
     </div>
 
-    <div class="ob-card" id="ob-card">
+    <div class="ob-card">
 
-      <!-- STEP 1: Business Info -->
-      <div class="step-content active" id="sc-1">
-        <div class="step-title">Business Info</div>
-        <div class="step-desc">Tell us about your business so we can personalize your automations.</div>
-        <div class="field"><label>Business Name *</label><input id="f-biz-name" type="text" placeholder="Acme Roofing LLC" /></div>
+      <!-- STEP 1 -->
+      <section class="step-content active" id="sc-1">
+        <div class="step-title">Your business</div>
+        <div class="step-desc">The basics, so we know who we're building for and how to reach you.</div>
+        <div class="field"><label>Business name <span class="req">*</span></label><input id="f-biz-name" type="text" autocomplete="organization" placeholder="Acme Roofing LLC" /><div class="field-err">Please enter your business name.</div></div>
         <div class="field-row">
-          <div class="field"><label>Your Name *</label><input id="f-contact" type="text" placeholder="Jane Smith" /></div>
-          <div class="field"><label>Your Role</label><input id="f-role" type="text" placeholder="Owner" /></div>
+          <div class="field"><label>Your name <span class="req">*</span></label><input id="f-contact" type="text" autocomplete="name" placeholder="Jane Smith" /><div class="field-err">Please enter your name.</div></div>
+          <div class="field"><label>Phone</label><input id="f-phone" type="tel" autocomplete="tel" placeholder="(555) 000-0000" /></div>
         </div>
-        <div class="field-row">
-          <div class="field"><label>Business Email *</label><input id="f-email" type="email" placeholder="you@yourbiz.com" /></div>
-          <div class="field"><label>Phone Number</label><input id="f-phone" type="tel" placeholder="(555) 000-0000" /></div>
-        </div>
-        <div class="field"><label>Industry / Trade</label><input id="f-industry" type="text" placeholder="Roofing, HVAC, Plumbing…" /></div>
-        <div class="field"><label>Service Areas</label><input id="f-areas" type="text" placeholder="Dallas, TX · Fort Worth, TX" /><div class="field-hint">Cities or regions you serve</div></div>
-      </div>
+        <div class="field"><label>Business email <span class="req">*</span></label><input id="f-email" type="email" autocomplete="email" placeholder="you@yourbusiness.com" /><div class="field-err">Please enter a valid email address.</div></div>
+        <div class="field"><label>Industry</label><input id="f-industry" type="text" placeholder="Roofing, HVAC, real estate, med spa…" /></div>
+      </section>
 
-      <!-- STEP 2: Schedule -->
-      <div class="step-content" id="sc-2">
-        <div class="step-title">Your Schedule</div>
-        <div class="step-desc">When do you want automations to run and leads to be followed up?</div>
-        <div class="field-row">
-          <div class="field"><label>Business Hours</label>
-            <select id="f-hours">
-              <option>Mon–Fri, 8am–6pm</option>
-              <option>Mon–Sat, 8am–6pm</option>
-              <option>Mon–Sun, 8am–6pm</option>
-              <option>Custom (we'll reach out)</option>
-            </select>
-          </div>
-          <div class="field"><label>Time Zone</label>
-            <select id="f-tz">
-              <option>Eastern (ET)</option>
-              <option>Central (CT)</option>
-              <option>Mountain (MT)</option>
-              <option>Pacific (PT)</option>
-            </select>
-          </div>
-        </div>
-        <div class="field"><label>Follow-Up Speed</label>
-          <select id="f-followup">
-            <option>Immediately (within 60 seconds)</option>
-            <option>Within 5 minutes</option>
-            <option>Within 15 minutes</option>
-            <option>Within 1 hour</option>
-          </select>
-          <div class="field-hint">How quickly should we contact new leads?</div>
-        </div>
-        <div class="field"><label>Booking / Scheduling Link</label><input id="f-booking" type="url" placeholder="https://calendly.com/yourbusiness" /></div>
-        <div class="field"><label>CRM or Software You Use</label><input id="f-crm" type="text" placeholder="Go High Level, HubSpot, none…" /></div>
-      </div>
-
-      <!-- STEP 3: Goals -->
-      <div class="step-content" id="sc-3">
-        <div class="step-title">Your Goals</div>
-        <div class="step-desc">What do you want Flowaify to help you with most?</div>
+      <!-- STEP 2 -->
+      <section class="step-content" id="sc-2">
+        <div class="step-title">What you need</div>
+        <div class="step-desc">Tell us what you'd like Flowaify to handle. Pick as many as apply.</div>
         <div class="field">
-          <label>Primary Goals (select all that apply)</label>
+          <label>What should we help with?</label>
           <div class="check-grid" id="goals-grid">
             <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-label">Respond to leads faster</div></div>
             <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-label">Book more appointments</div></div>
@@ -171,23 +187,36 @@
             <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-label">Track performance</div></div>
           </div>
         </div>
-        <div class="field"><label>Biggest Challenge Right Now</label><textarea id="f-challenge" placeholder="e.g. Leads come in but we miss them, or follow-ups don't happen consistently…"></textarea></div>
-        <div class="field"><label>Anything else we should know?</label><textarea id="f-notes" placeholder="Optional — share any context, special requests, or questions"></textarea></div>
-      </div>
+        <div class="field-row">
+          <div class="field"><label>Current CRM or tools</label><input id="f-crm" type="text" placeholder="HubSpot, GoHighLevel, none…" /></div>
+          <div class="field"><label>Ideal follow-up speed</label>
+            <select id="f-followup">
+              <option>Immediately (under 60 seconds)</option>
+              <option>Within 5 minutes</option>
+              <option>Within 15 minutes</option>
+              <option>Within the hour</option>
+            </select>
+          </div>
+        </div>
+        <div class="field"><label>Anything else we should know?</label><textarea id="f-challenge" placeholder="Optional — your biggest challenge right now, or any context that would help."></textarea></div>
+      </section>
 
-      <!-- STEP 4: Review -->
-      <div class="step-content" id="sc-4">
-        <div class="step-title">Review &amp; Submit</div>
-        <div class="step-desc">Check your details below, then submit. Our team will reach out within 2 hours.</div>
-        <div id="review-content" style="display:flex;flex-direction:column;gap:10px;margin-bottom:8px"></div>
-      </div>
+      <!-- STEP 3 -->
+      <section class="step-content" id="sc-3">
+        <div class="step-title">Review &amp; submit</div>
+        <div class="step-desc">Quick look before you send. Our team will reach out within a few hours.</div>
+        <div id="review-content"></div>
+      </section>
 
       <!-- Success -->
       <div class="ob-success" id="ob-success">
         <div class="ob-success-icon"><i data-lucide="check"></i></div>
-        <div class="ob-success-title">You're all set!</div>
-        <div class="ob-success-sub">We received your intake form. A Flowaify specialist will reach out to <span id="success-email">you</span> within 2 hours to begin setup.</div>
-        <div style="margin-top:8px;font-size:13px;color:var(--text-m)">Questions? Email us at <a href="mailto:contact@flowaify.app" style="color:var(--blue);font-weight:600;text-decoration:none;">contact@flowaify.app</a></div>
+        <div class="ob-success-title">You're all set.</div>
+        <div class="ob-success-sub">We received your details. A Flowaify specialist will reach out to <span id="success-email">you</span> shortly to begin your setup.</div>
+        <div class="ob-success-actions">
+          <a class="btn-home" href="/"><i data-lucide="arrow-left"></i> Back to website</a>
+          <a class="btn-ghost" href="mailto:contact@flowaify.app"><i data-lucide="mail"></i> Contact us</a>
+        </div>
       </div>
 
       <!-- Nav -->
@@ -196,109 +225,133 @@
         <button class="btn-next" id="btn-next" onclick="nextStep()">Continue <i data-lucide="arrow-right"></i></button>
       </div>
     </div>
-  </div>
+
+    <p class="ob-foot" id="ob-foot">Prefer to talk first? Email <a href="mailto:contact@flowaify.app">contact@flowaify.app</a>.</p>
+  </main>
 
   <script>
-    let currentStep = 1;
-    const totalSteps = 4;
+    var currentStep = 1;
+    var totalSteps = 3;
 
-    function goToStep(n) {
-      document.querySelectorAll('.step-content').forEach(el => el.classList.remove('active'));
+    function setStep(n) {
+      document.querySelectorAll('.step-content').forEach(function (el) { el.classList.remove('active'); });
       document.getElementById('sc-' + n).classList.add('active');
-      for (let i = 1; i <= totalSteps; i++) {
-        const ind = document.getElementById('step-ind-' + i);
-        ind.classList.remove('active','done');
-        if (i < n) ind.classList.add('done');
-        else if (i === n) ind.classList.add('active');
+      for (var i = 1; i <= totalSteps; i++) {
+        var ind = document.getElementById('step-ind-' + i);
+        ind.classList.remove('active', 'done');
+        if (i < n) ind.classList.add('done'); else if (i === n) ind.classList.add('active');
         if (i < totalSteps) {
-          const line = document.getElementById('line-' + i);
+          var line = document.getElementById('line-' + i);
           if (i < n) line.classList.add('done'); else line.classList.remove('done');
         }
       }
       document.getElementById('btn-prev').style.visibility = n > 1 ? 'visible' : 'hidden';
-      document.getElementById('btn-next').textContent = n === totalSteps ? 'Submit' : 'Continue';
-      if (n === totalSteps) { document.getElementById('btn-next').innerHTML = 'Submit <i data-lucide="send"></i>'; buildReview(); }
-      else document.getElementById('btn-next').innerHTML = 'Continue <i data-lucide="arrow-right"></i>';
+      var next = document.getElementById('btn-next');
+      if (n === totalSteps) { next.innerHTML = 'Submit <i data-lucide="send"></i>'; buildReview(); }
+      else { next.innerHTML = 'Continue <i data-lucide="arrow-right"></i>'; }
       lucide.createIcons();
       currentStep = n;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     function nextStep() {
-      if (currentStep < totalSteps) { goToStep(currentStep + 1); }
-      else { submitForm(); }
+      if (!validateStep(currentStep)) return;
+      if (currentStep < totalSteps) setStep(currentStep + 1);
+      else submitForm();
     }
-    function prevStep() { if (currentStep > 1) goToStep(currentStep - 1); }
-
+    function prevStep() { if (currentStep > 1) setStep(currentStep - 1); }
     function toggleCheck(el) { el.classList.toggle('checked'); }
 
-    function buildReview() {
-      const goals = [...document.querySelectorAll('#goals-grid .check-item.checked')].map(el => el.querySelector('.check-label').textContent).join(', ');
-      const rows = [
-        ['Business Name', document.getElementById('f-biz-name').value || '—'],
-        ['Contact', document.getElementById('f-contact').value || '—'],
-        ['Email', document.getElementById('f-email').value || '—'],
-        ['Phone', document.getElementById('f-phone').value || '—'],
-        ['Industry', document.getElementById('f-industry').value || '—'],
-        ['Service Areas', document.getElementById('f-areas').value || '—'],
-        ['Business Hours', document.getElementById('f-hours').value],
-        ['Time Zone', document.getElementById('f-tz').value],
-        ['Follow-Up Speed', document.getElementById('f-followup').value],
-        ['Goals', goals || '—'],
-      ];
-      document.getElementById('review-content').innerHTML = rows.map(([k,v]) =>
-        `<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(15,23,42,0.06);gap:16px">
-          <span style="font-size:12px;font-weight:600;color:rgba(15,23,42,0.44);flex-shrink:0">${k}</span>
-          <span style="font-size:12.5px;color:rgba(15,23,42,0.68);text-align:right">${v}</span>
-        </div>`
-      ).join('');
+    // clear an error the moment the user fixes it
+    document.addEventListener('input', function (e) {
+      var f = e.target.closest && e.target.closest('.field');
+      if (f) f.classList.remove('invalid');
+    });
+
+    function markReq(id) {
+      var el = document.getElementById(id), f = el.closest('.field'), ok = !!el.value.trim();
+      f.classList.toggle('invalid', !ok); return ok;
+    }
+    function markEmail(id) {
+      var el = document.getElementById(id), f = el.closest('.field');
+      var ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(el.value.trim());
+      f.classList.toggle('invalid', !ok); return ok;
+    }
+    function validateStep(n) {
+      if (n !== 1) return true;
+      // run all three so every invalid field is flagged
+      var a = markReq('f-biz-name'), b = markReq('f-contact'), c = markEmail('f-email');
+      return a && b && c;
     }
 
+    function val(id) { return (document.getElementById(id).value || '').trim(); }
+    function goalList() {
+      return [].slice.call(document.querySelectorAll('#goals-grid .check-item.checked'))
+        .map(function (el) { return el.querySelector('.check-label').textContent; }).join(', ');
+    }
+
+    function buildReview() {
+      var rows = [
+        ['Business', val('f-biz-name') || '—'],
+        ['Your name', val('f-contact') || '—'],
+        ['Email', val('f-email') || '—'],
+        ['Phone', val('f-phone') || '—'],
+        ['Industry', val('f-industry') || '—'],
+        ['Goals', goalList() || '—'],
+        ['Current tools', val('f-crm') || '—'],
+        ['Follow-up speed', val('f-followup')],
+      ];
+      document.getElementById('review-content').innerHTML = rows.map(function (r) {
+        return '<div class="review-row"><span class="review-k">' + r[0] + '</span><span class="review-v">' + escapeHtml(r[1]) + '</span></div>';
+      }).join('');
+    }
+    function escapeHtml(t) { return String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
     function submitForm() {
-      const btn = document.getElementById('btn-next');
+      var btn = document.getElementById('btn-next');
       btn.disabled = true;
       btn.innerHTML = 'Sending…';
 
-      const goals = [...document.querySelectorAll('#goals-grid .check-item.checked')]
-        .map(el => el.querySelector('.check-label').textContent).join(', ') || '—';
-
-      const params = {
-        client_name:  document.getElementById('f-contact').value   || '—',
-        client_email: document.getElementById('f-email').value     || '—',
-        biz_name:     document.getElementById('f-biz-name').value  || '—',
-        phone:        document.getElementById('f-phone').value     || '—',
-        role:         document.getElementById('f-role').value      || '—',
-        industry:     document.getElementById('f-industry').value  || '—',
-        areas:        document.getElementById('f-areas').value     || '—',
-        hours:        document.getElementById('f-hours').value     || '—',
-        timezone:     document.getElementById('f-tz').value        || '—',
-        followup:     document.getElementById('f-followup').value  || '—',
-        booking:      document.getElementById('f-booking').value   || '—',
-        crm:          document.getElementById('f-crm').value       || '—',
-        goals:        goals,
-        challenge:    document.getElementById('f-challenge').value || '—',
-        notes:        document.getElementById('f-notes').value     || '—',
+      // Keep every EmailJS param key so both templates still populate; fields we no longer ask for send "—".
+      var params = {
+        client_name:  val('f-contact')  || '—',
+        client_email: val('f-email')    || '—',
+        biz_name:     val('f-biz-name') || '—',
+        phone:        val('f-phone')    || '—',
+        role:         '—',
+        industry:     val('f-industry') || '—',
+        areas:        '—',
+        hours:        '—',
+        timezone:     '—',
+        followup:     val('f-followup') || '—',
+        booking:      '—',
+        crm:          val('f-crm')      || '—',
+        goals:        goalList()        || '—',
+        challenge:    val('f-challenge')|| '—',
+        notes:        val('f-challenge')|| '—',
       };
 
-      const SVC = 'service_aqrvo3f';
-
+      var SVC = 'service_aqrvo3f';
       Promise.all([
         emailjs.send(SVC, 'template_dwwiqs7', params), // client confirmation
         emailjs.send(SVC, 'template_gq3lspb', params), // internal alert
       ])
-      .then(function() {
+      .then(function () {
         document.getElementById('success-email').textContent = params.client_email;
-        document.querySelectorAll('.step-content').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.step-content').forEach(function (el) { el.classList.remove('active'); });
         document.getElementById('ob-nav').style.display = 'none';
         document.getElementById('steps-bar').style.display = 'none';
+        document.getElementById('ob-foot').style.display = 'none';
         document.getElementById('ob-success').style.display = 'block';
         lucide.createIcons();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       })
-      .catch(function(err) {
+      .catch(function (err) {
         console.error('EmailJS error:', err);
         btn.disabled = false;
         btn.innerHTML = 'Submit <i data-lucide="send"></i>';
         lucide.createIcons();
-        alert('Something went wrong sending your form. Please try again or email us at contact@flowaify.app');
+        alert('Something went wrong sending your details. Please try again, or email us at contact@flowaify.app');
       });
     }
 
