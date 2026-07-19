@@ -89,8 +89,8 @@
       border-radius: 10px; padding: 10px 20px;
       transition: transform 0.22s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.22s;
     }
-    .btn-primary { background: var(--blue); color: #fff; }
-    .btn-primary:hover { transform: translateY(-2px); box-shadow: var(--shadow-blue); }
+    .btn-primary { background: #0F1116; color: #fff; border: 1px solid rgba(255,255,255,0.06); }
+    .btn-primary:hover { transform: translateY(-2px); background: #1b1f28; box-shadow: 0 14px 30px -10px rgba(15,23,42,0.5); }
     .btn-primary:active { transform: translateY(0); box-shadow: none; }
     .btn-lg { font-size: 16px; padding: 14px 32px; border-radius: 12px; }
 
@@ -1584,353 +1584,184 @@
     </div>
   </section>
 
-<!-- ─── HOW IT WORKS ─────────────────────────────────────────────────────── -->
-  <!-- ─── HIW Sliding Blue Zone ────────────────────────────────────────────── -->
+  <!-- ─── HOW IT WORKS ─────────────────────────────────────────────────────── -->
   <style>
-    /* Sliding background panel — invisible until JS initialises */
-    .hiw-slide-bg {
-      position: absolute; left: 0; right: 0; top: 0; height: 0;
-      background: var(--blue); z-index: 0; pointer-events: none;
-      opacity: 0;
-      transition: top 0.72s cubic-bezier(0.65,0,0.35,1),
-                  height 0.72s cubic-bezier(0.65,0,0.35,1),
-                  opacity 0.35s ease;
+    /* ── How It Works — silver step cards on a dotted field ── */
+    #how-it-works { position: relative; overflow: hidden; background: linear-gradient(180deg, #F1F3F7 0%, #E7EAEF 100%); padding: 100px 0; }
+    #how-it-works::before { content: ''; position: absolute; inset: 0; pointer-events: none;
+      background-image: radial-gradient(rgba(15,23,42,0.11) 1px, transparent 1.5px); background-size: 22px 22px;
+      -webkit-mask-image: linear-gradient(180deg, transparent, #000 8%, #000 92%, transparent);
+              mask-image: linear-gradient(180deg, transparent, #000 8%, #000 92%, transparent); }
+    .hiw2-wrap { position: relative; z-index: 1; max-width: 1080px; margin: 0 auto; padding: 0 40px; }
+    .hiw2-intro { max-width: 720px; margin: 0 auto 50px; text-align: center; }
+    .hiw2-eyebrow { font-size: 11px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--blue); }
+    .hiw2-h2 { font-family: 'Montserrat','Plus Jakarta Sans',sans-serif; font-size: clamp(1.9rem, 2.8vw, 2.55rem); font-weight: 700; letter-spacing: -0.025em; line-height: 1.14; color: #0F172A; margin: 14px 0 0; text-wrap: balance; }
+
+    .hiw2-steps { display: flex; flex-direction: column; gap: 22px; }
+    .hiw2-card { display: grid; grid-template-columns: 1fr 1fr; gap: 44px; align-items: center;
+      background: rgba(255,255,255,0.8); border: 1px solid rgba(15,23,42,0.09); border-radius: 20px; padding: 40px 44px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.9), 0 24px 60px -40px rgba(15,23,42,0.28);
+      transition: transform 0.3s cubic-bezier(0.22,1,0.36,1), border-color 0.3s ease, box-shadow 0.3s ease, background 0.3s ease; }
+    .hiw2-card:nth-child(even) .hiw2-text { order: 2; }
+    .hiw2-card:nth-child(even) .hiw2-visual { order: 1; }
+    .hiw2-card:hover { transform: translateY(-3px); border-color: rgba(15,23,42,0.16); background: rgba(255,255,255,0.94);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.95), 0 34px 72px -38px rgba(15,23,42,0.34); }
+
+    .hiw2-num { font-size: 13px; font-weight: 800; letter-spacing: 0.1em; color: var(--blue); margin-bottom: 14px; }
+    .hiw2-title { font-family: 'Montserrat','Plus Jakarta Sans',sans-serif; font-size: clamp(1.5rem, 2vw, 1.8rem); font-weight: 700; letter-spacing: -0.025em; line-height: 1.16; color: #0F172A; margin-bottom: 14px; }
+    .hiw2-body { font-size: 15px; line-height: 1.68; color: #55606F; margin-bottom: 20px; max-width: 440px; }
+    .hiw2-badge { display: inline-flex; align-items: center; gap: 8px; padding: 8px 15px; border-radius: 100px;
+      background: rgba(0,87,255,0.06); border: 1px solid rgba(0,87,255,0.16); color: #0F172A; font-size: 12.5px; font-weight: 600;
+      transition: background 0.3s ease, border-color 0.3s ease; }
+    .hiw2-badge svg { width: 14px; height: 14px; color: var(--blue); flex-shrink: 0; }
+    .hiw2-card:hover .hiw2-badge { background: rgba(0,87,255,0.09); border-color: rgba(0,87,255,0.24); }
+
+    .hiw2-visual { display: flex; justify-content: center; min-width: 0; }
+    .hiw2-mock { width: 100%; max-width: 340px; background: #fff; border: 1px solid rgba(15,23,42,0.1); border-radius: 14px;
+      box-shadow: 0 14px 34px -22px rgba(15,23,42,0.3); padding: 16px 18px; }
+    .hiw2-mock-head { display: flex; align-items: center; gap: 9px; margin-bottom: 12px; }
+    .hiw2-mock-ico { width: 30px; height: 30px; border-radius: 8px; background: var(--blue); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .hiw2-mock-ico svg { width: 15px; height: 15px; color: #fff; }
+    .hiw2-mock-app { font-size: 13px; font-weight: 700; color: #0F172A; }
+    .hiw2-mock-time { font-size: 11px; color: #8A93A0; margin-left: auto; }
+    .hiw2-mock-line { font-size: 13px; color: #0F172A; font-weight: 600; }
+    .hiw2-mock-sub { font-size: 12px; color: #6A7382; margin-top: 3px; }
+    .hiw2-mock-meta { font-size: 11.5px; color: #8A93A0; }
+    .hiw2-mock-flow { font-size: 11.5px; color: var(--blue); font-weight: 600; margin-top: 8px; }
+    .hiw2-mock-divider { height: 1px; background: rgba(15,23,42,0.07); margin: 12px 0; }
+    .hiw2-chip { display: inline-flex; align-items: center; gap: 6px; margin-top: 12px; padding: 5px 10px; border-radius: 7px;
+      background: rgba(34,197,94,0.1); color: #15803D; font-size: 11.5px; font-weight: 700; }
+    .hiw2-chip svg { width: 12px; height: 12px; flex-shrink: 0; }
+    .hiw2-crm-head { display: flex; align-items: center; gap: 6px; margin-bottom: 10px; }
+    .hiw2-crm-dot { width: 8px; height: 8px; border-radius: 50%; }
+    .hiw2-crm-title { font-size: 10.5px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #8A93A0; margin-left: 4px; }
+    .hiw2-row { display: flex; align-items: center; gap: 7px; padding: 9px 0; border-top: 1px solid rgba(15,23,42,0.06); }
+    .hiw2-row-name { font-size: 12.5px; font-weight: 650; color: #0F172A; flex: 1; min-width: 0; }
+    .hiw2-tag { font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 5px; white-space: nowrap; }
+    .hiw2-tag-new { background: rgba(0,87,255,0.1); color: var(--blue); }
+    .hiw2-tag-qual { background: rgba(34,197,94,0.12); color: #16A34A; }
+    .hiw2-tag-fu { background: rgba(245,158,11,0.14); color: #B45309; }
+    .hiw2-tag-booked { background: rgba(15,23,42,0.06); color: #55606F; }
+    .hiw2-row-time { font-size: 11px; color: #8A93A0; }
+    .hiw2-more { font-size: 11.5px; color: var(--blue); font-weight: 600; margin-top: 10px; }
+
+    @media (max-width: 980px) {
+      #how-it-works { padding: 80px 0; }
+      .hiw2-card { grid-template-columns: 1fr; gap: 26px; padding: 32px 28px; }
+      .hiw2-card:nth-child(even) .hiw2-text { order: 1; }
+      .hiw2-card:nth-child(even) .hiw2-visual { order: 2; }
+      .hiw2-body { max-width: none; }
     }
-    /* Zones sit above the panel; only go transparent after slider is ready */
-    .hiw-zone { position: relative; z-index: 1; }
-    #how-it-works.slider-ready .hiw-zone-light { background: transparent !important; }
-    #how-it-works.slider-ready .hiw-zone-blue  { background: transparent !important; }
-
-    /* All zone text + mock elements: smooth color transitions */
-    .hiw-zone .hiw-num, .hiw-zone .hiw-stmt, .hiw-zone .hiw-body, .hiw-zone .hiw-pill {
-      transition: color .75s ease, background .75s ease, border-color .75s ease, opacity .75s ease;
-    }
-    .mock-phone, .mock-notif, .mock-badge-live, .mock-crm, .mock-crm-row-new, .mock-crm-row-old,
-    .mock-cal, .mock-cal-event, .mock-cal-confirm, .mock-cal-icon {
-      transition: background .75s ease, border-color .75s ease, box-shadow .75s ease;
-    }
-    .mock-phone-time, .mock-notif-body, .mock-notif-sub, .mock-notif-app, .mock-notif-time,
-    .mock-badge-live-txt, .mock-crm-title, .mock-crm-name, .mock-crm-seq,
-    .mock-cal-label, .mock-cal-sub, .mock-cal-event-time, .mock-cal-event-name,
-    .mock-cal-event-who, .mock-cal-confirm-txt { transition: color .75s ease; }
-    .mock-crm-typing-dot { transition: background .75s ease, opacity .75s ease; }
-
-    /* ── Active zone: white-on-blue text ── */
-    .hiw-zone.hiw-active .hiw-num  { color: rgba(255,255,255,.5); opacity: 1 !important; }
-    .hiw-zone.hiw-active .hiw-stmt { color: #fff; }
-    .hiw-zone.hiw-active .hiw-body { color: rgba(255,255,255,.78); }
-    .hiw-zone.hiw-active .hiw-pill { background: rgba(255,255,255,.14); border-color: rgba(255,255,255,.22); color: #fff; }
-
-    /* Zone 01 active — phone mock on blue */
-    .hiw-zone-light.hiw-active .mock-phone { background: rgba(255,255,255,.12); box-shadow: 0 24px 60px rgba(0,0,0,.3); }
-    .hiw-zone-light.hiw-active .mock-phone-time { color: rgba(255,255,255,.85); }
-    .hiw-zone-light.hiw-active .mock-phone-icon { background: rgba(255,255,255,.2); }
-    .hiw-zone-light.hiw-active .mock-notif { background: rgba(255,255,255,.14); border-color: rgba(255,255,255,.2); }
-    .hiw-zone-light.hiw-active .mock-notif-app,
-    .hiw-zone-light.hiw-active .mock-notif-time { color: rgba(255,255,255,.6); }
-    .hiw-zone-light.hiw-active .mock-notif-body { color: #fff; }
-    .hiw-zone-light.hiw-active .mock-notif-sub  { color: rgba(255,255,255,.55); }
-    .hiw-zone-light.hiw-active .mock-badge-live { background: rgba(255,255,255,.1); }
-    .hiw-zone-light.hiw-active .mock-badge-live-txt { color: rgba(255,255,255,.7); }
-
-    /* Zone 02 NOT active — CRM mock on light bg */
-    .hiw-zone-blue:not(.hiw-active) .hiw-num  { color: var(--blue); opacity: .7; }
-    .hiw-zone-blue:not(.hiw-active) .hiw-stmt { color: var(--text); }
-    .hiw-zone-blue:not(.hiw-active) .hiw-body { color: var(--text-muted); }
-    .hiw-zone-blue:not(.hiw-active) .hiw-pill { background: rgba(0,87,255,.07); border-color: rgba(0,87,255,.18); color: var(--blue); }
-    .hiw-zone-blue:not(.hiw-active) .mock-crm { background: var(--bg-card); border-color: var(--border); }
-    .hiw-zone-blue:not(.hiw-active) .mock-crm-title { color: var(--text-muted); }
-    .hiw-zone-blue:not(.hiw-active) .mock-crm-name { color: var(--text); }
-    .hiw-zone-blue:not(.hiw-active) .mock-crm-name-old { color: var(--text-muted); }
-    .hiw-zone-blue:not(.hiw-active) .mock-crm-seq { color: var(--text-muted); }
-    .hiw-zone-blue:not(.hiw-active) .mock-crm-row-new { background: rgba(0,87,255,.07); border-color: rgba(0,87,255,.18); animation: none !important; }
-    .hiw-zone-blue:not(.hiw-active) .mock-crm-row-old { background: var(--bg-surface); }
-    .hiw-zone-blue:not(.hiw-active) .mock-crm-tag-new { background: rgba(34,197,94,.12); color: #16A34A; }
-    .hiw-zone-blue:not(.hiw-active) .mock-crm-tag-qual { background: rgba(0,87,255,.1); color: var(--blue); }
-    .hiw-zone-blue:not(.hiw-active) .mock-crm-tag-seq { background: rgba(168,85,247,.1); color: #7C3AED; }
-    .hiw-zone-blue:not(.hiw-active) .mock-crm-tag-old { background: var(--bg-surface); color: var(--text-muted); }
-    .hiw-zone-blue:not(.hiw-active) .mock-crm-typing-dot { background: var(--text-muted); opacity: .4; }
-    .hiw-zone-blue:not(.hiw-active) #crm-cursor { visibility: hidden !important; }
-
-    /* Zone 03 active — calendar mock on blue */
-    .hiw-zone.hiw-active .mock-cal { background: rgba(255,255,255,.12); border-color: rgba(255,255,255,.18); box-shadow: 0 20px 48px rgba(0,0,0,.3); }
-    .hiw-zone.hiw-active .mock-cal-icon { background: rgba(255,255,255,.2); }
-    .hiw-zone.hiw-active .mock-cal-label { color: #fff; }
-    .hiw-zone.hiw-active .mock-cal-sub { color: rgba(255,255,255,.6); }
-    .hiw-zone.hiw-active .mock-cal-event { background: rgba(255,255,255,.1); border-color: rgba(255,255,255,.2); }
-    .hiw-zone.hiw-active .mock-cal-event-time { color: rgba(255,255,255,.7); }
-    .hiw-zone.hiw-active .mock-cal-event-name { color: #fff; }
-    .hiw-zone.hiw-active .mock-cal-event-who { color: rgba(255,255,255,.6); }
-    .hiw-zone.hiw-active .mock-cal-confirm { background: rgba(255,255,255,.1); border-color: rgba(255,255,255,.22); }
-    .hiw-zone.hiw-active .mock-cal-confirm-txt { color: rgba(255,255,255,.85); }
-  </style>
-
-  <style>
-    /* ── How It Works zone layout ── */
-    .hiw-zone { display:grid; grid-template-columns:1fr 1fr; align-items:center; gap:64px; padding:80px 60px; }
-    .hiw-zone-reverse { direction:rtl; }
-    .hiw-zone-reverse > * { direction:ltr; }
-    .hiw-num { font-size:11px; font-weight:800; letter-spacing:.18em; text-transform:uppercase; margin-bottom:20px; }
-    .hiw-stmt { font-size:38px; font-weight:900; letter-spacing:-0.04em; line-height:1.05; margin-bottom:20px; }
-    .hiw-body { font-size:16px; line-height:1.8; margin-bottom:28px; }
-    .hiw-pill { display:inline-flex; align-items:center; gap:8px; padding:10px 16px; border-radius:100px; font-size:13px; font-weight:700; }
-
-    /* Zone 01 + 03 — light */
-    .hiw-zone-light { background:var(--bg); }
-    .hiw-zone-light .hiw-num { color:var(--blue); opacity:.7; }
-    .hiw-zone-light .hiw-stmt { color:var(--text); }
-    .hiw-zone-light .hiw-body { color:var(--text-muted); }
-    .hiw-zone-light .hiw-pill { background:rgba(0,87,255,.07); border:1px solid rgba(0,87,255,.18); color:var(--blue); }
-
-    /* Zone 02 — blue band */
-    .hiw-zone-blue { background:var(--blue); }
-    .hiw-zone-blue .hiw-num { color:rgba(255,255,255,.5); }
-    .hiw-zone-blue .hiw-stmt { color:#fff; }
-    .hiw-zone-blue .hiw-body { color:rgba(255,255,255,.78); }
-    .hiw-zone-blue .hiw-pill { background:rgba(255,255,255,.14); border:1px solid rgba(255,255,255,.22); color:#fff; }
-
-    /* Stat strip */
-    .hiw-stats { display:grid; grid-template-columns:repeat(3,1fr); }
-    .hiw-stat { padding:32px 40px; text-align:center; }
-    .hiw-stat-n { font-size:42px; font-weight:900; letter-spacing:-0.055em; line-height:1; margin-bottom:6px; color:var(--text); }
-    .hiw-stat-l { font-size:13px; font-weight:500; color:var(--text-muted); }
-    
-    /* ── CSS UI Mocks ── */
-
-    /* Mock 01: phone notification */
-    .mock-phone {
-      width:240px; margin:0 auto;
-      background:var(--bg-card); border:1px solid var(--border);
-      border-radius:28px; padding:20px 16px; box-shadow:0 24px 60px rgba(0,0,0,.12);
-    }
-        .mock-phone-bar { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
-    .mock-phone-time { font-size:11px; font-weight:700; color:var(--text); }
-    .mock-phone-icons { display:flex; gap:4px; }
-    .mock-phone-icon { width:12px; height:12px; border-radius:50%; background:var(--border); }
-    .mock-notif {
-      background:var(--bg-surface); border:1px solid var(--border);
-      border-radius:14px; padding:12px 14px; margin-bottom:10px;
-    }
-        .mock-notif-head { display:flex; align-items:center; gap:8px; margin-bottom:6px; }
-    .mock-notif-icon { width:22px; height:22px; border-radius:7px; background:var(--blue); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
-    .mock-notif-app { font-size:11px; font-weight:700; color:var(--text); }
-    .mock-notif-time { font-size:10px; color:var(--text-muted); margin-left:auto; }
-    .mock-notif-body { font-size:12px; font-weight:600; color:var(--text); line-height:1.4; margin-bottom:3px; }
-    .mock-notif-sub { font-size:11px; color:var(--text-muted); line-height:1.4; }
-    .mock-badge-live { display:inline-flex; align-items:center; gap:5px; background:rgba(34,197,94,.1); border:1px solid rgba(34,197,94,.25); border-radius:100px; padding:4px 10px; }
-    .mock-badge-live-dot { width:6px; height:6px; border-radius:50%; background:#22C55E; animation:pulse-live 2s infinite; }
-    @keyframes pulse-live { 0%,100%{opacity:1} 50%{opacity:.35} }
-    .mock-badge-live-txt { font-size:10px; font-weight:700; color:#16A34A; }
-    
-    /* Mock 02: CRM row (white-on-blue) */
-    .mock-crm {
-      background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.2);
-      border-radius:16px; padding:18px; overflow:hidden; width:100%; max-width:360px; margin:0 auto;
-    }
-    .mock-crm-header { display:flex; align-items:center; gap:10px; margin-bottom:14px; }
-    .mock-crm-dot { width:8px; height:8px; border-radius:50%; }
-    .mock-crm-title { font-size:11px; font-weight:700; color:rgba(255,255,255,.6); letter-spacing:.06em; text-transform:uppercase; }
-    .mock-crm-row { display:grid; grid-template-columns:1fr auto auto auto; align-items:center; gap:10px; padding:10px 12px; border-radius:9px; margin-bottom:4px; }
-    .mock-crm-row-new { background:rgba(255,255,255,.14); border:1px solid rgba(255,255,255,.22); }
-    .mock-crm-row-old { background:rgba(255,255,255,.05); border:1px solid transparent; }
-    .mock-crm-name { font-size:13px; font-weight:700; color:#fff; }
-    .mock-crm-name-old { color:rgba(255,255,255,.55); }
-    .mock-crm-tag { font-size:10px; font-weight:700; padding:3px 9px; border-radius:100px; }
-    .mock-crm-tag-new { background:rgba(34,197,94,.25); color:#86EFAC; }
-    .mock-crm-tag-qual { background:rgba(0,87,255,.35); color:#93C5FD; }
-    .mock-crm-tag-seq { background:rgba(168,85,247,.25); color:#D8B4FE; }
-    .mock-crm-tag-old { background:rgba(255,255,255,.08); color:rgba(255,255,255,.4); }
-    .mock-crm-seq { font-size:10px; color:rgba(255,255,255,.5); }
-    .mock-crm-typing { display:flex; align-items:center; gap:6px; padding:8px 12px; }
-    .mock-crm-typing-dot { width:5px; height:5px; border-radius:50%; background:rgba(255,255,255,.4); animation:crm-type 1.2s infinite; }
-    .mock-crm-typing-dot:nth-child(2) { animation-delay:.2s; }
-    .mock-crm-typing-dot:nth-child(3) { animation-delay:.4s; }
-    @keyframes crm-type { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-4px)} }
-
-    /* Mock 03: calendar confirmation */
-    .mock-cal {
-      background:var(--bg-card); border:1px solid var(--border);
-      border-radius:18px; padding:20px; width:240px; margin:0 auto;
-      box-shadow:0 20px 48px rgba(0,0,0,.10);
-    }
-        .mock-cal-top { display:flex; align-items:center; gap:8px; margin-bottom:16px; }
-    .mock-cal-icon { width:32px; height:32px; border-radius:9px; background:var(--blue); display:flex; align-items:center; justify-content:center; }
-    .mock-cal-label { font-size:12px; font-weight:800; color:var(--text); }
-    .mock-cal-sub { font-size:11px; color:var(--text-muted); }
-    .mock-cal-event { background:rgba(0,87,255,.08); border:1px solid rgba(0,87,255,.18); border-radius:11px; padding:12px 14px; margin-bottom:10px; }
-        .mock-cal-event-time { font-size:10px; font-weight:700; color:var(--blue); margin-bottom:3px; }
-    .mock-cal-event-name { font-size:13px; font-weight:700; color:var(--text); margin-bottom:2px; }
-    .mock-cal-event-who { font-size:11px; color:var(--text-muted); }
-    .mock-cal-confirm { display:flex; align-items:center; gap:7px; padding:9px 12px; background:rgba(34,197,94,.08); border:1px solid rgba(34,197,94,.2); border-radius:9px; }
-        .mock-cal-confirm-txt { font-size:11.5px; font-weight:700; color:#16A34A; }
-    
-    @media(max-width:768px) {
-      .hiw-zone { grid-template-columns:1fr !important; gap:36px !important; padding:60px 20px !important; }
-      .hiw-zone-reverse { direction:ltr !important; }
-      .hiw-stmt { font-size:28px !important; }
-      .hiw-stats { grid-template-columns:1fr !important; }
-      .hiw-stat { padding:20px 24px !important; border-bottom:1px solid var(--border); }
-      .mock-phone, .mock-cal { width:100%; max-width:260px; }
-      .mock-crm { max-width:100%; }
-    }
-    @media(max-width:480px) {
-      .hiw-zone { padding:48px 16px !important; }
-      .hiw-stmt { font-size:24px !important; }
+    @media (max-width: 620px) {
+      #how-it-works { padding: 60px 0; }
+      .hiw2-wrap { padding: 0 18px; }
+      .hiw2-card { padding: 24px 20px; border-radius: 16px; }
+      .hiw2-intro { margin-bottom: 34px; }
     }
   </style>
-
-  <section id="how-it-works" style="background:var(--bg);overflow:hidden;position:relative;">
-
-    <!-- Zone 01: Instant reply -->
-    <div class="hiw-zone hiw-zone-light reveal">
-      <div>
-        <div class="hiw-num">01</div>
-        <h2 class="hiw-stmt">Every inquiry gets<br/>an instant reply.</h2>
-        <p class="hiw-body">Before a lead form is read by a human, Flowaify has already responded. Under 60 seconds, 24/7. Personalized to their inquiry across every channel.</p>
-        <div class="hiw-pill">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-          Under 60s response. Day or night.
-        </div>
+  <section id="how-it-works">
+    <div class="hiw2-wrap">
+      <div class="hiw2-intro reveal">
+        <span class="hiw2-eyebrow">How it works</span>
+        <h2 class="hiw2-h2">From first inquiry to booked &mdash; on autopilot.</h2>
       </div>
-      <!-- CSS Mock: phone notification -->
-      <div style="display:flex;justify-content:center;align-items:center;padding:20px 0;">
-        <div class="mock-phone">
-          <div class="mock-phone-bar">
-            <span class="mock-phone-time">9:14 AM</span>
-            <div class="mock-phone-icons">
-              <div class="mock-phone-icon"></div>
-              <div class="mock-phone-icon" style="background:var(--blue);opacity:.5;"></div>
-              <div class="mock-phone-icon"></div>
+      <div class="hiw2-steps reveal">
+
+        <!-- Step 01 -->
+        <div class="hiw2-card">
+          <div class="hiw2-text">
+            <div class="hiw2-num">01</div>
+            <h3 class="hiw2-title">Every inquiry gets an instant reply.</h3>
+            <p class="hiw2-body">Before a lead form is read by a human, Flowaify has already responded. Under 60 seconds, 24/7. Personalized to their inquiry across every channel.</p>
+            <div class="hiw2-badge">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              Under 60s response. Day or night.
             </div>
           </div>
-          <div class="mock-notif">
-            <div class="mock-notif-head">
-              <div class="mock-notif-icon">
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+          <div class="hiw2-visual">
+            <div class="hiw2-mock">
+              <div class="hiw2-mock-head">
+                <span class="hiw2-mock-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg></span>
+                <span class="hiw2-mock-app">Flowaify</span>
+                <span class="hiw2-mock-time">now</span>
               </div>
-              <span class="mock-notif-app">Flowaify</span>
-              <span class="mock-notif-time">now</span>
-            </div>
-            <div class="mock-notif-body" id="notif-type-target">New lead responded automatically</div>
-            <div class="mock-notif-sub">Marcus T. &#8212; Website form &#8212; 47s ago</div>
-          </div>
-          <div style="padding:8px 4px;display:flex;justify-content:space-between;align-items:center;">
-            <div class="mock-badge-live">
-              <div class="mock-badge-live-dot"></div>
-              <span class="mock-badge-live-txt">3 active sequences</span>
-            </div>
-            <span style="font-size:10px;color:var(--text-muted);font-weight:600;">Today</span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Zone 02: Pipeline (full blue band) -->
-    <div class="hiw-zone hiw-zone-blue hiw-zone-reverse reveal">
-      <div>
-        <div class="hiw-num">02</div>
-        <h2 class="hiw-stmt">Your pipeline<br/>runs itself.</h2>
-        <p class="hiw-body">Every lead is qualified, tagged, and routed to your CRM automatically. The right follow-up sequence fires at the right time until they book or opt out. Zero manual entry.</p>
-        <div class="hiw-pill">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-          Multi-channel. Fully sequenced.
-        </div>
-      </div>
-      <!-- CSS Mock: CRM row -->
-      <div style="display:flex;justify-content:center;align-items:center;padding:20px 0;">
-        <div class="mock-crm">
-          <div class="mock-crm-header">
-            <div class="mock-crm-dot" style="background:#22C55E;"></div>
-            <div class="mock-crm-dot" style="background:rgba(255,255,255,.3);"></div>
-            <div class="mock-crm-dot" style="background:rgba(255,255,255,.15);"></div>
-            <span class="mock-crm-title">CRM Pipeline</span>
-          </div>
-          <div class="mock-crm-row mock-crm-row-new">
-            <span class="mock-crm-name">Marcus T.</span>
-            <span class="mock-crm-tag mock-crm-tag-new">New</span>
-            <span class="mock-crm-tag mock-crm-tag-qual">Qualified</span>
-            <span class="mock-crm-tag mock-crm-tag-seq">Seq&nbsp;1</span>
-          </div>
-          <div class="mock-crm-row mock-crm-row-old">
-            <span class="mock-crm-name mock-crm-name-old">Sarah K.</span>
-            <span class="mock-crm-tag mock-crm-tag-old">Follow-up</span>
-            <span></span>
-            <span class="mock-crm-seq">Day 3</span>
-          </div>
-          <div class="mock-crm-row mock-crm-row-old">
-            <span class="mock-crm-name mock-crm-name-old">Reyes LLC</span>
-            <span class="mock-crm-tag mock-crm-tag-old">Booked</span>
-            <span></span>
-            <span class="mock-crm-seq">&#8212;</span>
-          </div>
-          <div class="mock-crm-typing">
-            <div class="mock-crm-typing-dot"></div>
-            <div class="mock-crm-typing-dot"></div>
-            <div class="mock-crm-typing-dot"></div>
-            <span style="font-size:10px;color:rgba(255,255,255,.4);margin-left:4px;">routing next lead&#8230;</span>
-          </div>
-          <!-- CSS cursor pointer animation -->
-          <div id="crm-cursor" aria-hidden="true">
-            <svg width="18" height="22" viewBox="0 0 18 22" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M1 1L1 17L5 13L8.5 20L10.5 19L7 12L14 12Z" fill="white" stroke="rgba(0,0,0,0.35)" stroke-width="1.2" stroke-linejoin="round"/>
-            </svg>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Zone 03: Booked + Reviews -->
-    <div class="hiw-zone hiw-zone-light reveal">
-      <div>
-        <div class="hiw-num">03</div>
-        <h2 class="hiw-stmt">Appointments booked.<br/>Reviews earned.</h2>
-        <p class="hiw-body">When the timing is right, Flowaify sends a calendar link. When a job closes, it requests a review. Every step is tracked in your live dashboard. You see everything. You do nothing.</p>
-        <div class="hiw-pill">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
-          Booked, confirmed, and followed up.
-        </div>
-      </div>
-      <!-- CSS Mock: calendar confirmation -->
-      <div style="display:flex;justify-content:center;align-items:center;padding:20px 0;">
-        <div class="mock-cal">
-          <div class="mock-cal-top">
-            <div class="mock-cal-icon">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
-            </div>
-            <div>
-              <div class="mock-cal-label">Calendar</div>
-              <div class="mock-cal-sub">Auto-scheduled</div>
+              <div class="hiw2-mock-line">Lead via Web &mdash; question</div>
+              <div class="hiw2-mock-sub">Interested in pricing</div>
+              <div class="hiw2-mock-flow">Flow: Quote &rarr; Outreach &rarr; SMS &middot; Step 1</div>
+              <div class="hiw2-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Reply sent instantly</div>
             </div>
           </div>
-          <div class="mock-cal-event">
-            <div class="mock-cal-event-time">Tomorrow &#8212; 2:00 PM</div>
-            <div class="mock-cal-event-name">Discovery Call</div>
-            <div class="mock-cal-event-who">Marcus T. + Flowaify</div>
+        </div>
+
+        <!-- Step 02 -->
+        <div class="hiw2-card">
+          <div class="hiw2-text">
+            <div class="hiw2-num">02</div>
+            <h3 class="hiw2-title">Your pipeline runs itself.</h3>
+            <p class="hiw2-body">Every lead is qualified, tagged, and routed to your CRM automatically. The right follow-up sequence fires at the right time until they book or opt out. Zero manual entry.</p>
+            <div class="hiw2-badge">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+              Multi-channel. Fully sequenced.
+            </div>
           </div>
-          <div class="mock-cal-confirm">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#16A34A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle class="cal-check-circle" cx="12" cy="12" r="10"/><polyline class="cal-check-poly" points="16 8 10 14 8 12"/></svg>
-            <span class="mock-cal-confirm-txt">Invite sent. Reminder queued.</span>
+          <div class="hiw2-visual">
+            <div class="hiw2-mock">
+              <div class="hiw2-crm-head">
+                <span class="hiw2-crm-dot" style="background:#22C55E;"></span>
+                <span class="hiw2-crm-dot" style="background:rgba(15,23,42,0.18);"></span>
+                <span class="hiw2-crm-dot" style="background:rgba(15,23,42,0.1);"></span>
+                <span class="hiw2-crm-title">CRM Pipeline</span>
+              </div>
+              <div class="hiw2-row" style="border-top:none;">
+                <span class="hiw2-row-name">Pencil Group</span>
+                <span class="hiw2-tag hiw2-tag-new">New</span>
+                <span class="hiw2-tag hiw2-tag-qual">Qualified</span>
+                <span class="hiw2-row-time">12m</span>
+              </div>
+              <div class="hiw2-row">
+                <span class="hiw2-row-name">Sunbuilt</span>
+                <span class="hiw2-tag hiw2-tag-fu">Follow-Up</span>
+                <span class="hiw2-row-time">32m</span>
+              </div>
+              <div class="hiw2-row">
+                <span class="hiw2-row-name">Reyes LLC</span>
+                <span class="hiw2-tag hiw2-tag-booked">Booked</span>
+                <span class="hiw2-row-time">1h</span>
+              </div>
+              <div class="hiw2-more">+ 24 more opportunities</div>
+            </div>
           </div>
         </div>
+
+        <!-- Step 03 -->
+        <div class="hiw2-card">
+          <div class="hiw2-text">
+            <div class="hiw2-num">03</div>
+            <h3 class="hiw2-title">Appointments booked. Reviews earned.</h3>
+            <p class="hiw2-body">When it&rsquo;s time to act, Flowaify sends a calendar link. When satisfaction is reached, it requests a review. Every step is tracked in your live dashboard. You see everything. You do nothing.</p>
+            <div class="hiw2-badge">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
+              Booked, confirmed, and followed up.
+            </div>
+          </div>
+          <div class="hiw2-visual">
+            <div class="hiw2-mock">
+              <div class="hiw2-mock-head">
+                <span class="hiw2-mock-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg></span>
+                <span class="hiw2-mock-app">Calendar</span>
+                <span class="hiw2-mock-time">Action needed</span>
+              </div>
+              <div class="hiw2-mock-divider"></div>
+              <div class="hiw2-mock-meta" style="color:var(--blue);font-weight:600;">May 7 &middot; 2:00 PM</div>
+              <div class="hiw2-mock-line" style="margin-top:2px;">Follow-Up Call</div>
+              <div class="hiw2-mock-sub">60 min &middot; Miguel R.</div>
+              <div class="hiw2-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Confirmed. Reminder queued.</div>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
-
-    <!-- Stat strip -->
-    <div class="reveal hiw-stats" style="border-top:1px solid var(--border);background:var(--bg-surface);">
-      <div class="hiw-stat" style="border-right:1px solid var(--border);">
-        <div class="hiw-stat-n">60s</div>
-        <div class="hiw-stat-l">Max response time</div>
-      </div>
-      <div class="hiw-stat" style="border-right:1px solid var(--border);">
-        <div class="hiw-stat-n">24 hours</div>
-        <div class="hiw-stat-l">From call to live system</div>
-      </div>
-      <div class="hiw-stat">
-        <div class="hiw-stat-n">24/7</div>
-        <div class="hiw-stat-l">Always on, never manual</div>
-      </div>
-    </div>
-
   </section>
 
   <!-- ─── FAQ ────────────────────────────────────────────────────────── -->
@@ -2014,9 +1845,6 @@
             Get Started
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
           </a>
-          <a href="site/demo/" class="btn btn-lg" style="background:rgba(0,87,255,0.08);border:1.5px solid rgba(0,87,255,0.28);color:var(--blue-soft,#3D82FF);display:inline-flex;align-items:center;gap:8px;font-weight:600;transition:all 0.2s;" onmouseover="this.style.background='rgba(0,87,255,0.14)'" onmouseout="this.style.background='rgba(0,87,255,0.08)'">
-            View Demo Dashboard
-          </a>
         </div>
         <p style="font-size:12px;color:var(--text-muted);margin-top:20px;">Questions? <a href="mailto:contact@flowaify.app" style="color:var(--blue);text-decoration:none;font-weight:600;">contact@flowaify.app</a></p>
       </div>
@@ -2038,12 +1866,9 @@
           </a>
           <p style="font-size:13px;color:var(--text-muted);line-height:1.7;max-width:280px;margin-bottom:20px;">Lead capture, CRM sync, and follow-up automation for inbound-lead businesses.</p>
           <div style="display:flex;flex-direction:column;gap:10px;">
-            <a href="site/onboarding/" style="display:inline-flex;align-items:center;gap:7px;padding:10px 18px;background:var(--blue);color:white;border-radius:9px;font-size:13px;font-weight:700;text-decoration:none;width:fit-content;">
+            <a href="site/onboarding/" style="display:inline-flex;align-items:center;gap:7px;padding:10px 18px;background:#0F1116;color:white;border-radius:9px;font-size:13px;font-weight:700;text-decoration:none;width:fit-content;">
               Get Started
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-            </a>
-            <a href="site/demo/" style="display:inline-flex;align-items:center;gap:7px;padding:10px 18px;border:1.5px solid var(--border);color:var(--text);border-radius:9px;font-size:13px;font-weight:600;text-decoration:none;width:fit-content;">
-              View Demo Dashboard
             </a>
           </div>
         </div>
@@ -2891,95 +2716,7 @@ updateNavHero();
       liveLoop('#manifest-card', tick, 7000);
     })();
 
-    // ── HIW: Blue zone slides between zones (scroll-triggered) ─────────────
-    (function() {
-      var section = document.getElementById('how-it-works');
-      if (!section) return;
 
-      // Insert slider panel as first child
-      var slider = document.createElement('div');
-      slider.className = 'hiw-slide-bg';
-      slider.setAttribute('aria-hidden', 'true');
-      section.insertBefore(slider, section.firstChild);
-
-      var zones = section.querySelectorAll('.hiw-zone');
-      if (!zones.length) return;
-
-      var activeIdx = 0;
-      var cycleId   = null;
-      var initialised = false;
-
-      function snapSlider(idx) {
-        // Position without transition (no visible movement)
-        var zone = zones[idx];
-        slider.style.transition = 'none';
-        slider.style.top    = zone.offsetTop + 'px';
-        slider.style.height = zone.offsetHeight + 'px';
-        void slider.offsetHeight; // force reflow
-        slider.style.transition = '';
-      }
-
-      function updateActive(idx) {
-        zones.forEach(function(z, i) {
-          z.classList.toggle('hiw-active', i === idx);
-        });
-        var cursor = document.getElementById('crm-cursor');
-        if (cursor) cursor.style.visibility = (idx === 1) ? '' : 'hidden';
-      }
-
-      function slideToZone(idx) {
-        var prevIdx = activeIdx;
-        activeIdx = idx;
-
-        // Wrap-around (last → first): fade out, jump, fade in — no long slide
-        if (prevIdx === zones.length - 1 && idx === 0) {
-          slider.style.transition = 'opacity 0.4s ease';
-          slider.style.opacity = '0';
-          setTimeout(function() {
-            snapSlider(idx);
-            updateActive(idx);
-            slider.style.transition = 'opacity 0.4s ease';
-            slider.style.opacity = '1';
-            setTimeout(function() { slider.style.transition = ''; }, 420);
-          }, 410);
-        } else {
-          // Normal slide
-          slider.style.top    = zones[idx].offsetTop + 'px';
-          slider.style.height = zones[idx].offsetHeight + 'px';
-          updateActive(idx);
-        }
-      }
-
-      function init() {
-        if (initialised) return;
-        initialised = true;
-
-        snapSlider(0);
-        updateActive(0);
-        section.classList.add('slider-ready');
-        requestAnimationFrame(function() { slider.style.opacity = '1'; });
-      }
-
-      // Mouse-driven: slide to whichever zone the cursor is in
-      section.addEventListener('mousemove', function(e) {
-        if (!initialised) init();
-        var sectionTop = section.getBoundingClientRect().top + window.pageYOffset;
-        var relY = e.pageY - sectionTop;
-        var best = 0;
-        for (var i = 0; i < zones.length; i++) {
-          if (relY >= zones[i].offsetTop + 60) best = i;
-        }
-        if (best !== activeIdx) slideToZone(best);
-      });
-
-      // Initialise on scroll-into-view (so Zone 01 is active before any mouse)
-      var obs = new IntersectionObserver(function(entries) {
-        if (entries[0].isIntersecting) { init(); obs.disconnect(); }
-      }, { threshold: 0.15 });
-      obs.observe(section);
-
-      window.addEventListener('resize', function() { if (initialised) snapSlider(activeIdx); });
-    })();
 
   })();
   </script>
