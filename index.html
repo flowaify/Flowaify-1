@@ -277,6 +277,44 @@
       .wf-cta { padding: 26px 22px; margin-top: 46px; }
     }
 
+    /* ── One Managed Workspace — product proof ── */
+    #workspace { position: relative; overflow: hidden; background: linear-gradient(180deg, #F1F3F7 0%, #E7EAEF 100%); padding: 104px 0; }
+    #workspace::before { content: ''; position: absolute; inset: 0; pointer-events: none;
+      background: radial-gradient(1100px 620px at 50% 4%, rgba(255,255,255,0.8), transparent 62%); }
+    .ws-wrap { position: relative; z-index: 1; max-width: 1200px; margin: 0 auto; padding: 0 40px; }
+    .ws-intro { max-width: 780px; margin: 0 auto; text-align: center; }
+    .ws-eyebrow { font-size: 11px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--blue); }
+    .ws-h2 { font-family: 'Montserrat','Plus Jakarta Sans',sans-serif; font-size: clamp(1.95rem, 3vw, 2.8rem); font-weight: 700; letter-spacing: -0.025em; line-height: 1.13; color: #0F172A; margin: 16px auto 18px; max-width: 760px; text-wrap: balance; }
+    .ws-sub { font-size: 16.5px; line-height: 1.7; color: #55606F; max-width: 660px; margin: 0 auto; text-wrap: pretty; }
+
+    /* Product frame — clean bezel around the real screenshot */
+    .ws-frame { position: relative; max-width: 1120px; margin: 54px auto 0; padding: 8px; border-radius: 18px;
+      background: rgba(255,255,255,0.7); border: 1px solid rgba(15,23,42,0.1);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.9), 0 48px 90px -46px rgba(15,23,42,0.4), 0 12px 30px -18px rgba(15,23,42,0.18); }
+    .ws-frame img { display: block; width: 100%; height: auto; border-radius: 12px; border: 1px solid rgba(15,23,42,0.16); }
+
+    /* Feature rail — product legend, no boxes */
+    .ws-rail { max-width: 1120px; margin: 46px auto 0; display: grid; grid-template-columns: repeat(8, 1fr); gap: 8px; }
+    .ws-item { position: relative; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 9px; padding: 6px 10px; }
+    .ws-item + .ws-item::before { content: ''; position: absolute; left: -4px; top: 12px; bottom: 12px; width: 1px; background: rgba(15,23,42,0.08); }
+    .ws-ico { width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; color: #7A8494; }
+    .ws-ico svg { width: 22px; height: 22px; }
+    .ws-item:last-child .ws-ico { color: var(--blue); }
+    .ws-label { font-size: 13px; font-weight: 650; color: #0F172A; letter-spacing: -0.01em; }
+    .ws-desc { font-size: 11.5px; line-height: 1.45; color: #6A7382; }
+
+    @media (max-width: 980px) {
+      #workspace { padding: 82px 0; }
+      .ws-rail { grid-template-columns: repeat(4, 1fr); gap: 26px 8px; }
+      .ws-item + .ws-item::before { display: none; }
+    }
+    @media (max-width: 620px) {
+      #workspace { padding: 60px 0; }
+      .ws-wrap { padding: 0 18px; }
+      .ws-frame { margin-top: 38px; padding: 6px; border-radius: 14px; }
+      .ws-rail { grid-template-columns: repeat(2, 1fr); gap: 26px 12px; margin-top: 34px; }
+    }
+
     /* Reveal */
     .reveal {
       opacity: 0; transform: translateY(24px);
@@ -1676,12 +1714,63 @@
     </div>
   </section>
 
+  <!-- ─── ONE MANAGED WORKSPACE — product proof ───────────────────────────── -->
+  <section id="workspace">
+    <div class="ws-wrap">
+      <div class="ws-intro reveal">
+        <span class="ws-eyebrow">One Managed Workspace</span>
+        <h2 class="ws-h2">Everything your lead process needs, connected in one workspace.</h2>
+        <p class="ws-sub">Flowaify brings the moving parts of your lead operation into one managed workspace &mdash; inbox, email and SMS follow-up, team handoffs, calendar activity, reports, invoices, analytics, and an AI agent that learns your system.</p>
+      </div>
+
+      <div class="ws-frame reveal" style="transition-delay:70ms;">
+        <img src="assets/images/workspace-overview-dark.png" alt="Flowaify Overview dashboard — lead sources, insights, priority leads, team chat, and the Flowy AI assistant in one workspace" loading="lazy" decoding="async">
+      </div>
+      <!-- TODO: product demo video slot goes here (under the frame) once recorded -->
+
+      <div class="ws-rail reveal" style="transition-delay:140ms;">
+        <div class="ws-item">
+          <span class="ws-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.5 5h13a1 1 0 0 1 .9.6l3.6 6.4v6a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1v-6l3.6-6.4A1 1 0 0 1 5.5 5Z"/></svg></span>
+          <span class="ws-label">Inbox</span><span class="ws-desc">Capture and manage conversations.</span>
+        </div>
+        <div class="ws-item">
+          <span class="ws-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H8l-4 4V6a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2z"/><path d="M8 9.5h8M8 12.5h5"/></svg></span>
+          <span class="ws-label">Email + SMS</span><span class="ws-desc">Automate follow-up across channels.</span>
+        </div>
+        <div class="ws-item">
+          <span class="ws-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M16 20v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"/><circle cx="9.5" cy="8" r="3.2"/><path d="M21 20v-1.8a4 4 0 0 0-3-3.8"/><path d="M15 4.3a3.2 3.2 0 0 1 0 6.1"/></svg></span>
+          <span class="ws-label">Team</span><span class="ws-desc">Assign, collaborate, and hand off.</span>
+        </div>
+        <div class="ws-item">
+          <span class="ws-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="16" rx="2"/><path d="M3 9.5h18M8 3v3M16 3v3"/></svg></span>
+          <span class="ws-label">Calendar</span><span class="ws-desc">Track activity and appointments.</span>
+        </div>
+        <div class="ws-item">
+          <span class="ws-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h12a1 1 0 0 1 1 1v18l-3-2-2 2-2-2-2 2-2-2-3 2V3a1 1 0 0 1 1-1Z"/><path d="M9 7h6M9 11h6M9 15h4"/></svg></span>
+          <span class="ws-label">Invoices</span><span class="ws-desc">Create and send with ease.</span>
+        </div>
+        <div class="ws-item">
+          <span class="ws-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V4M4 20h16"/><path d="M8 17v-5M13 17V8M18 17v-7"/></svg></span>
+          <span class="ws-label">Reports</span><span class="ws-desc">Measure what matters.</span>
+        </div>
+        <div class="ws-item">
+          <span class="ws-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 7-7"/><path d="M17 8h4v4"/></svg></span>
+          <span class="ws-label">Analytics</span><span class="ws-desc">See trends and drive growth.</span>
+        </div>
+        <div class="ws-item">
+          <span class="ws-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5z"/><path d="M18.5 14.5l.7 2 2 .7-2 .7-.7 2-.7-2-2-.7 2-.7z"/></svg></span>
+          <span class="ws-label">AI Agent</span><span class="ws-desc">Learns your system and helps you act.</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- ─── BUILT FOR YOUR WORKFLOW — industry / workflow showcase ──────────── -->
   <section id="who-for">
     <div class="wf-wrap">
       <div class="wf-intro reveal">
         <span class="wf-eyebrow-top">Built for your workflow</span>
-        <h2 class="wf-h2">One managed platform. Custom-built for the way your business handles leads.</h2>
+        <h2 class="wf-h2">Custom-built for the way your business handles leads.</h2>
         <p class="wf-sub">Flowaify adapts to different industry workflows by helping your team respond faster, follow up consistently, and close more business.</p>
       </div>
 
