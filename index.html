@@ -1764,6 +1764,213 @@
     </div>
   </section>
 
+  <!-- ─── BUILT TO SCALE ──────────────────────────────────────────────────── -->
+  <style>
+    /* ── Built to Scale — capacity + growth graph ── */
+    #built-to-scale { position: relative; overflow: hidden; background: linear-gradient(180deg, #F4F6F9 0%, #E7EAEF 100%); padding: 104px 0; }
+    #built-to-scale::before { content: ''; position: absolute; inset: 0; pointer-events: none;
+      background-image: radial-gradient(rgba(15,23,42,0.09) 1px, transparent 1.4px); background-size: 22px 22px;
+      -webkit-mask-image: linear-gradient(180deg, transparent, #000 6%, #000 94%, transparent);
+              mask-image: linear-gradient(180deg, transparent, #000 6%, #000 94%, transparent); }
+    .bts-wrap { position: relative; z-index: 1; max-width: 1200px; margin: 0 auto; padding: 0 60px; }
+    .bts-top { display: grid; grid-template-columns: 0.92fr 1.08fr; gap: 48px; align-items: center; }
+    .bts-eyebrow { font-size: 11px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--blue); }
+    .bts-h2 { font-family: 'Montserrat','Plus Jakarta Sans',sans-serif; font-size: clamp(2.2rem, 4vw, 3.35rem); font-weight: 800; letter-spacing: -0.03em; line-height: 1.06; color: #0F172A; margin: 16px 0 20px; text-wrap: balance; }
+    .bts-lead { font-size: 16px; font-weight: 600; color: #0F172A; letter-spacing: -0.01em; margin-bottom: 12px; }
+    .bts-body { font-size: 15.5px; line-height: 1.7; color: #55606F; max-width: 460px; text-wrap: pretty; }
+    .bts-graph { position: relative; width: 100%; min-width: 0; }
+    .bts-graph svg { width: 100%; height: auto; display: block; overflow: visible; }
+    #bts-line { fill: none; stroke: url(#bts-stroke); stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+    #bts-area { fill: url(#bts-fill); }
+    .bts-guide { stroke: rgba(15,23,42,0.09); stroke-width: 1; }
+    .bts-node { fill: #fff; stroke: #55606F; stroke-width: 2; }
+    .bts-node-last { stroke: var(--blue); stroke-width: 2.4; }
+
+    .bts-stats { display: grid; grid-template-columns: repeat(5, 1fr); margin-top: 66px; }
+    .bts-stat { position: relative; padding: 0 26px; }
+    .bts-stat:first-child { padding-left: 0; }
+    .bts-stat + .bts-stat::before { content: ''; position: absolute; left: 0; top: 4px; bottom: 4px; width: 1px; background: rgba(15,23,42,0.1); }
+    .bts-stat-ico { width: 34px; height: 34px; border-radius: 9px; background: rgba(15,23,42,0.05); display: flex; align-items: center; justify-content: center; color: #6A7382; margin-bottom: 18px; }
+    .bts-stat-ico svg { width: 18px; height: 18px; }
+    .bts-stat-num { font-family: 'Montserrat','Plus Jakarta Sans',sans-serif; font-size: clamp(1.9rem, 2.6vw, 2.5rem); font-weight: 800; letter-spacing: -0.03em; line-height: 1; color: #0F172A; font-variant-numeric: tabular-nums; }
+    .bts-stat-label { font-size: 13.5px; font-weight: 700; color: #0F172A; letter-spacing: -0.01em; margin: 11px 0 12px; }
+    .bts-stat-desc { font-size: 12.5px; line-height: 1.6; color: #6A7382; padding-top: 12px; border-top: 1px solid rgba(15,23,42,0.08); }
+    .bts-note { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 42px; font-size: 12.5px; line-height: 1.5; color: #8A93A0; text-align: center; }
+    .bts-note svg { width: 14px; height: 14px; color: #97A0AE; flex-shrink: 0; }
+
+    @media (max-width: 980px) {
+      #built-to-scale { padding: 82px 0; }
+      .bts-wrap { padding: 0 32px; }
+      .bts-top { grid-template-columns: 1fr; gap: 34px; }
+      .bts-body { max-width: none; }
+      .bts-stats { grid-template-columns: repeat(3, 1fr); gap: 34px 0; margin-top: 50px; }
+      .bts-stat, .bts-stat:first-child { padding: 0 22px 0 0; }
+      .bts-stat + .bts-stat::before { display: none; }
+    }
+    @media (max-width: 620px) {
+      #built-to-scale { padding: 62px 0; }
+      .bts-wrap { padding: 0 18px; }
+      .bts-stats { grid-template-columns: repeat(2, 1fr); gap: 30px 20px; margin-top: 40px; }
+      .bts-note { text-align: left; justify-content: flex-start; align-items: flex-start; margin-top: 34px; }
+    }
+  </style>
+  <section id="built-to-scale">
+    <div class="bts-wrap">
+      <div class="bts-top">
+        <div class="bts-copy reveal">
+          <span class="bts-eyebrow">Built to scale</span>
+          <h2 class="bts-h2">Built for serious lead volume.</h2>
+          <p class="bts-lead">Ready for more users, clients, messages, and workflows as you grow.</p>
+          <p class="bts-body">Flowaify is designed to support high-volume lead workflows across multiple clients, users, messages, and automations &mdash; without forcing your team to manage the system manually.</p>
+        </div>
+        <div class="bts-graph reveal">
+          <svg viewBox="0 0 560 300" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Illustration of scalable capacity growth">
+            <defs>
+              <linearGradient id="bts-stroke" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0" stop-color="#C7CCD6"/>
+                <stop offset="0.55" stop-color="#7C8593"/>
+                <stop offset="1" stop-color="#0F172A"/>
+              </linearGradient>
+              <linearGradient id="bts-fill" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="rgba(15,23,42,0.11)"/>
+                <stop offset="1" stop-color="rgba(15,23,42,0)"/>
+              </linearGradient>
+            </defs>
+            <g id="bts-guides" opacity="0">
+              <line class="bts-guide"></line>
+              <line class="bts-guide"></line>
+              <line class="bts-guide"></line>
+            </g>
+            <path id="bts-area" opacity="0" d="M 20 268 C 240 262, 430 205, 542 30 L 542 290 L 20 290 Z"></path>
+            <path id="bts-line" d="M 20 268 C 240 262, 430 205, 542 30"></path>
+            <g id="bts-nodes">
+              <circle class="bts-node" r="6" opacity="0"></circle>
+              <circle class="bts-node" r="6" opacity="0"></circle>
+              <circle class="bts-node" r="6" opacity="0"></circle>
+              <circle class="bts-node" r="6" opacity="0"></circle>
+              <circle class="bts-node bts-node-last" r="7" opacity="0"></circle>
+            </g>
+          </svg>
+        </div>
+      </div>
+
+      <div class="bts-stats reveal">
+        <div class="bts-stat">
+          <div class="bts-stat-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 3 7l9 5 9-5-9-5Z"/><path d="m3 12 9 5 9-5"/><path d="m3 17 9 5 9-5"/></svg></div>
+          <div class="bts-stat-num">10M+</div>
+          <div class="bts-stat-label">Monthly system requests supported</div>
+          <div class="bts-stat-desc">High-capacity infrastructure designed to support over 10 million system requests every month.</div>
+        </div>
+        <div class="bts-stat">
+          <div class="bts-stat-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M16 20v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"/><circle cx="9.5" cy="8" r="3.2"/><path d="M21 20v-1.8a4 4 0 0 0-3-3.8"/><path d="M15 4.3a3.2 3.2 0 0 1 0 6.1"/></svg></div>
+          <div class="bts-stat-num">50K</div>
+          <div class="bts-stat-label">Client databases supported</div>
+          <div class="bts-stat-desc">Architecture designed to support up to 50,000 client workspaces with isolated data environments.</div>
+        </div>
+        <div class="bts-stat">
+          <div class="bts-stat-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5.5" rx="8" ry="3"/><path d="M4 5.5v6c0 1.66 3.58 3 8 3s8-1.34 8-3v-6"/><path d="M4 11.5v6c0 1.66 3.58 3 8 3s8-1.34 8-3v-6"/></svg></div>
+          <div class="bts-stat-num">1TB</div>
+          <div class="bts-stat-label">Workspace data capacity</div>
+          <div class="bts-stat-desc">Room to manage workspace data across clients, workflows, activity history, and reporting.</div>
+        </div>
+        <div class="bts-stat">
+          <div class="bts-stat-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
+          <div class="bts-stat-num">10K</div>
+          <div class="bts-stat-label">Service calls per workflow run</div>
+          <div class="bts-stat-desc">Each workflow run can support complex automation paths across connected services.</div>
+        </div>
+        <div class="bts-stat">
+          <div class="bts-stat-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg></div>
+          <div class="bts-stat-num">24/7</div>
+          <div class="bts-stat-label">Lead response coverage</div>
+          <div class="bts-stat-desc">Your system can keep lead response and follow-up active around the clock.</div>
+        </div>
+      </div>
+
+      <div class="bts-note reveal">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/></svg>
+        <span>Capacity depends on connected systems, message providers, CRM limits, and final workspace configuration.</span>
+      </div>
+    </div>
+  </section>
+  <script>
+  // ─── BUILT TO SCALE — scroll-linked growth graph ─────────────────────────────
+  (function () {
+    var section = document.getElementById('built-to-scale');
+    if (!section) return;
+    var line = document.getElementById('bts-line');
+    var area = document.getElementById('bts-area');
+    var guides = document.getElementById('bts-guides');
+    if (!line) return;
+    var nodes = [].slice.call(document.querySelectorAll('#bts-nodes circle'));
+    var guideLines = [].slice.call(guides.querySelectorAll('line'));
+    var fracs = [0.15, 0.4, 0.63, 0.83, 1.0];
+    var baseline = 290;
+    var len = line.getTotalLength();
+    line.style.strokeDasharray = len;
+
+    nodes.forEach(function (n, i) {
+      var pt = line.getPointAtLength(len * fracs[i]);
+      n.setAttribute('cx', pt.x.toFixed(1)); n.setAttribute('cy', pt.y.toFixed(1));
+    });
+    [2, 3, 4].forEach(function (idx, i) {
+      if (!guideLines[i]) return;
+      var pt = line.getPointAtLength(len * fracs[idx]);
+      guideLines[i].setAttribute('x1', pt.x.toFixed(1)); guideLines[i].setAttribute('x2', pt.x.toFixed(1));
+      guideLines[i].setAttribute('y1', baseline); guideLines[i].setAttribute('y2', pt.y.toFixed(1));
+    });
+
+    function clamp(v) { return v < 0 ? 0 : v > 1 ? 1 : v; }
+    function apply(p) {
+      p = clamp(p);
+      line.style.strokeDashoffset = (len * (1 - p)).toFixed(1);
+      area.setAttribute('opacity', Math.min(1, p * 1.25).toFixed(2));
+      guides.setAttribute('opacity', (clamp((p - 0.35) / 0.4) * 0.9).toFixed(2));
+      nodes.forEach(function (n, i) {
+        n.setAttribute('opacity', clamp((p - (fracs[i] - 0.06)) / 0.1).toFixed(2));
+      });
+    }
+
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { apply(1); return; }
+    var ticking = false;
+    function onScroll() {
+      if (ticking) return; ticking = true;
+      requestAnimationFrame(function () {
+        var r = section.getBoundingClientRect();
+        var vh = window.innerHeight || 800;
+        apply((vh * 0.88 - r.top) / (vh * 0.55));
+        ticking = false;
+      });
+    }
+    apply(0);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll, { passive: true });
+    onScroll();
+  })();
+  </script>
+
+  <!-- ─── FINAL CTA ──────────────────────────────────────────────────────── -->
+  <section id="final-cta">
+    <div style="max-width:680px;margin:0 auto;position:relative;z-index:1;">
+      <div class="reveal">
+        <span class="section-label" style="margin-bottom:16px;display:block;">Ready when you are</span>
+        <h2 data-word-reveal="true" style="font-size:52px;font-weight:800;letter-spacing:-0.05em;color:var(--text);line-height:1.08;margin-bottom:20px;">
+          <span class="word-blur">Start</span> <span class="word-blur">automating</span> <span class="word-blur">today.</span>
+        </h2>
+        <p style="font-size:17px;color:var(--text-muted);line-height:1.75;margin-bottom:36px;max-width:520px;margin-left:auto;margin-right:auto;">
+          No technical work. No complexity. A system that captures every lead and follows up automatically — built for your business in 24 hours.
+        </p>
+        <div style="display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap;">
+          <a href="site/onboarding/" class="btn btn-primary btn-lg" style="display:inline-flex;align-items:center;gap:8px;">
+            Get Started
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </a>
+        </div>
+        <p style="font-size:12px;color:var(--text-muted);margin-top:20px;">Questions? <a href="mailto:contact@flowaify.app" style="color:var(--blue);text-decoration:none;font-weight:600;">contact@flowaify.app</a></p>
+      </div>
+    </div>
+  </section>
+
   <!-- ─── FAQ ────────────────────────────────────────────────────────── -->
   <style>
     .faq-item { border-bottom:1px solid var(--border); }
@@ -1829,27 +2036,7 @@
   }
   </script>
 
-  <!-- ─── FINAL CTA ──────────────────────────────────────────────────────── -->
-  <section id="final-cta">
-    <div style="max-width:680px;margin:0 auto;position:relative;z-index:1;">
-      <div class="reveal">
-        <span class="section-label" style="margin-bottom:16px;display:block;">Ready when you are</span>
-        <h2 data-word-reveal="true" style="font-size:52px;font-weight:800;letter-spacing:-0.05em;color:var(--text);line-height:1.08;margin-bottom:20px;">
-          <span class="word-blur">Start</span> <span class="word-blur">automating</span> <span class="word-blur">today.</span>
-        </h2>
-        <p style="font-size:17px;color:var(--text-muted);line-height:1.75;margin-bottom:36px;max-width:520px;margin-left:auto;margin-right:auto;">
-          No technical work. No complexity. A system that captures every lead and follows up automatically — built for your business in 24 hours.
-        </p>
-        <div style="display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap;">
-          <a href="site/onboarding/" class="btn btn-primary btn-lg" style="display:inline-flex;align-items:center;gap:8px;">
-            Get Started
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-          </a>
-        </div>
-        <p style="font-size:12px;color:var(--text-muted);margin-top:20px;">Questions? <a href="mailto:contact@flowaify.app" style="color:var(--blue);text-decoration:none;font-weight:600;">contact@flowaify.app</a></p>
-      </div>
-    </div>
-  </section>
+
 
   <!-- ─── FOOTER ────────────────────────────────────────────────────────── -->
   <footer style="background:var(--bg);border-top:1px solid var(--border);padding:64px 60px 0;">
