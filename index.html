@@ -472,6 +472,22 @@
       -webkit-mask-image: linear-gradient(180deg, transparent, #000 14%, #000 82%, transparent);
               mask-image: linear-gradient(180deg, transparent, #000 14%, #000 82%, transparent);
     }
+    /* signature moment — slow ambient light drifting behind the hero */
+    .hero-aura { position: absolute; inset: 0; z-index: 1; pointer-events: none; overflow: hidden;
+      -webkit-mask-image: radial-gradient(115% 100% at 62% 32%, #000 34%, transparent 78%);
+              mask-image: radial-gradient(115% 100% at 62% 32%, #000 34%, transparent 78%); }
+    .hero-aura::before { content: ''; position: absolute; inset: -25%; will-change: transform;
+      background:
+        radial-gradient(34% 42% at 24% 32%, rgba(0,87,255,0.10), transparent 62%),
+        radial-gradient(32% 38% at 80% 26%, rgba(61,130,255,0.09), transparent 60%),
+        radial-gradient(44% 48% at 60% 78%, rgba(15,23,42,0.055), transparent 66%);
+      filter: blur(26px); animation: heroAura 26s ease-in-out infinite alternate; }
+    @keyframes heroAura {
+      0%   { transform: translate3d(-2%, -1%, 0) scale(1.02); }
+      50%  { transform: translate3d(2.5%, 2%, 0) scale(1.09); }
+      100% { transform: translate3d(-1%, 3%, 0) scale(1.05); }
+    }
+    @media (prefers-reduced-motion: reduce) { .hero-aura::before { animation: none; } }
     .hero-inner {
       position: relative; z-index: 2; max-width: 1400px; margin: 0 auto; width: 100%;
       padding: 0 60px; display: grid; grid-template-columns: 1fr 1.24fr;
@@ -1587,6 +1603,7 @@
   <main id="main-content" tabindex="-1">
   <!-- ─── HERO ───────────────────────────────────────────────────────────── -->
   <section id="hero-section">
+    <div class="hero-aura" aria-hidden="true"></div>
     <div class="hero-inner">
 
       <!-- Left: copy -->
@@ -1912,6 +1929,139 @@
     window.addEventListener('scroll', onScroll, { passive: true });
     window.addEventListener('resize', onScroll, { passive: true });
     onScroll();
+  })();
+  </script>
+
+  <!-- ─── WHY FLOWAIFY — done-for-you comparison ─────────────────────────── -->
+  <style>
+    #why-flowaify { position: relative; background: linear-gradient(180deg, #FBFCFD 0%, #F1F3F7 100%); border-top: 1px solid rgba(15,23,42,0.06); padding: 104px 0; overflow: hidden; }
+    .why-wrap { max-width: 1080px; margin: 0 auto; padding: 0 60px; }
+    .why-intro { text-align: center; max-width: 740px; margin: 0 auto 52px; }
+    .why-eyebrow { font-size: 11px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--blue); }
+    .why-h2 { font-family: 'Montserrat','Plus Jakarta Sans',sans-serif; font-size: clamp(2rem, 3.6vw, 3rem); font-weight: 800; letter-spacing: -0.03em; line-height: 1.08; color: #0F172A; margin: 15px 0 18px; text-wrap: balance; }
+    .why-sub { font-size: 16.5px; line-height: 1.7; color: #55606F; max-width: 620px; margin: 0 auto; text-wrap: pretty; }
+
+    .why-matrix { display: grid; grid-template-columns: minmax(150px, 1.05fr) 1fr 1.18fr; column-gap: 12px; row-gap: 0; max-width: 900px; margin: 0 auto; }
+    .why-c { display: flex; align-items: center; gap: 10px; padding: 16px 22px; min-height: 58px; font-size: 14.5px; line-height: 1.4; }
+    .why-c.why-head { min-height: 78px; flex-direction: column; align-items: flex-start; justify-content: flex-end; gap: 2px; padding-bottom: 15px; }
+    .why-head .why-hname { font-family: 'Montserrat','Plus Jakarta Sans',sans-serif; font-size: 16px; font-weight: 750; letter-spacing: -0.01em; }
+    .why-head .why-htag { font-size: 11.5px; font-weight: 550; }
+
+    /* aspect label column */
+    .why-l { grid-column: 1; padding-left: 2px; padding-right: 14px; font-weight: 650; color: #0F172A; letter-spacing: -0.01em; border-bottom: 1px solid rgba(15,23,42,0.07); }
+    .why-l.why-head, .why-l.why-last { border-bottom: none; }
+
+    /* other-platforms card */
+    .why-o { grid-column: 2; background: rgba(255,255,255,0.72); color: #6A7382; font-weight: 500;
+      border-left: 1px solid rgba(15,23,42,0.08); border-right: 1px solid rgba(15,23,42,0.08); border-bottom: 1px solid rgba(15,23,42,0.07); }
+    .why-o.why-head { border-top: 1px solid rgba(15,23,42,0.08); border-top-left-radius: 16px; border-top-right-radius: 16px; }
+    .why-o.why-head .why-hname { color: #55606F; } .why-o.why-head .why-htag { color: #8A93A0; }
+    .why-o.why-last { border-bottom-left-radius: 16px; border-bottom-right-radius: 16px; }
+    .why-dash { flex-shrink: 0; width: 16px; height: 16px; color: #B4BBC5; }
+
+    /* flowaify card — the elevated one */
+    .why-f { grid-column: 3; position: relative; background: #12141A; color: #EAEEF4; font-weight: 600; letter-spacing: -0.01em; border-bottom: 1px solid rgba(255,255,255,0.07); }
+    .why-f.why-head { border-top-left-radius: 16px; border-top-right-radius: 16px; }
+    .why-f.why-head::before { content: ''; position: absolute; top: 0; left: 22px; right: 22px; height: 3px; border-radius: 0 0 3px 3px; background: linear-gradient(90deg, var(--blue), #5C93FF); }
+    .why-f.why-head .why-hname { color: #FFFFFF; } .why-f.why-head .why-htag { color: #93B4FF; }
+    .why-f.why-last { border-bottom: none; border-bottom-left-radius: 16px; border-bottom-right-radius: 16px; }
+    .why-check { flex-shrink: 0; width: 18px; height: 18px; color: #5C93FF; }
+
+    .why-cta { text-align: center; margin-top: 42px; }
+    .why-cta .why-note { font-size: 13.5px; color: #78818E; margin-top: 15px; }
+
+    /* refined polish — workspace-rail spotlight + stat lift (desktop pointer only) */
+    .ws-item { border-radius: 12px; transition: background .25s ease, transform .28s cubic-bezier(.22,1,.36,1); }
+    @media (pointer: fine) {
+      .ws-item:hover { background: rgba(255,255,255,0.55); transform: translateY(-2px); }
+      .ws-item::after { content: ''; position: absolute; inset: 0; border-radius: inherit; padding: 1.4px;
+        background: radial-gradient(circle 90px at var(--mx,50%) var(--my,50%), rgba(0,87,255,0.65), transparent 62%);
+        -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+        -webkit-mask-composite: xor; mask-composite: exclude; opacity: 0; transition: opacity .3s ease; pointer-events: none; }
+      .ws-item:hover::after { opacity: 1; }
+      .bts-stat .bts-stat-num { transition: transform .35s cubic-bezier(.22,1,.36,1); }
+      .bts-stat:hover .bts-stat-num { transform: translateY(-3px); }
+    }
+
+    @media (max-width: 768px) {
+      #why-flowaify { padding: 72px 0; }
+      .why-wrap { padding: 0 20px; }
+      .why-intro { margin-bottom: 34px; }
+      .why-matrix { grid-template-columns: 1fr 1fr; column-gap: 8px; max-width: 460px; }
+      .why-c.why-head { display: none; }
+      .why-c { min-height: 0; padding: 12px 14px; font-size: 13.5px; }
+      .why-l { grid-column: 1 / -1; padding: 20px 2px 8px; border: none; font-size: 12px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: #8A93A0; }
+      .why-o, .why-f { grid-column: auto; border-radius: 12px !important; margin-bottom: 2px; align-items: flex-start; flex-direction: column; gap: 5px; }
+      .why-o { background: #fff; border: 1px solid rgba(15,23,42,0.09); color: #55606F; }
+      .why-o::before { content: 'Other platforms'; font-size: 9.5px; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: #AEB6C1; }
+      .why-f::before { content: 'Flowaify'; font-size: 9.5px; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: #93B4FF; }
+      .why-dash, .why-check { display: none; }
+    }
+  </style>
+  <section id="why-flowaify">
+    <div class="why-wrap">
+      <div class="why-intro reveal">
+        <span class="why-eyebrow">Why Flowaify</span>
+        <h2 class="why-h2">The features aren&rsquo;t the hard part. Setting them up is &mdash; so we do it for you.</h2>
+        <p class="why-sub">Other platforms hand you the tools and leave you to configure, connect, and maintain the whole thing. Flowaify delivers the finished system and runs it, so your team does none of the technical work.</p>
+      </div>
+
+      <div class="why-matrix reveal" style="transition-delay:80ms;">
+        <!-- header row -->
+        <div class="why-c why-l why-head"></div>
+        <div class="why-c why-o why-head"><span class="why-hname">Other platforms</span><span class="why-htag">You configure it yourself</span></div>
+        <div class="why-c why-f why-head"><span class="why-hname">Flowaify</span><span class="why-htag">Built &amp; run for you</span></div>
+
+        <div class="why-c why-l">Getting set up</div>
+        <div class="why-c why-o"><svg class="why-dash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="6" y1="12" x2="18" y2="12"/></svg>You configure it yourself</div>
+        <div class="why-c why-f"><svg class="why-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>We build the whole system for you</div>
+
+        <div class="why-c why-l">Connecting your tools</div>
+        <div class="why-c why-o"><svg class="why-dash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="6" y1="12" x2="18" y2="12"/></svg>You wire up each integration</div>
+        <div class="why-c why-f"><svg class="why-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Connected and tested for you</div>
+
+        <div class="why-c why-l">Follow-up &amp; automations</div>
+        <div class="why-c why-o"><svg class="why-dash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="6" y1="12" x2="18" y2="12"/></svg>You write and maintain every rule</div>
+        <div class="why-c why-f"><svg class="why-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Built to run automatically, 24/7</div>
+
+        <div class="why-c why-l">Ongoing changes</div>
+        <div class="why-c why-o"><svg class="why-dash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="6" y1="12" x2="18" y2="12"/></svg>You keep it working</div>
+        <div class="why-c why-f"><svg class="why-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>We manage and adjust it for you</div>
+
+        <div class="why-c why-l">Support</div>
+        <div class="why-c why-o"><svg class="why-dash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="6" y1="12" x2="18" y2="12"/></svg>Docs, tickets, on your own</div>
+        <div class="why-c why-f"><svg class="why-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>A team that runs it with you</div>
+
+        <div class="why-c why-l why-last">Time to live</div>
+        <div class="why-c why-o why-last"><svg class="why-dash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="6" y1="12" x2="18" y2="12"/></svg>Weeks of DIY setup</div>
+        <div class="why-c why-f why-last"><svg class="why-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>About 24 hours</div>
+      </div>
+
+      <div class="why-cta reveal" style="transition-delay:140ms;">
+        <a href="site/onboarding/" class="btn btn-primary btn-lg" style="display:inline-flex;align-items:center;gap:8px;">
+          Get your system built
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </a>
+        <p class="why-note">We build it, connect it, and run it &mdash; you never touch the technical side.</p>
+      </div>
+    </div>
+  </section>
+  <script>
+  // ─── Refined polish — cursor spotlight on the workspace rail (desktop pointer only) ──
+  (function () {
+    if (!window.matchMedia || !window.matchMedia('(pointer: fine)').matches) return;
+    document.querySelectorAll('.ws-item').forEach(function (el) {
+      var raf = 0;
+      el.addEventListener('pointermove', function (e) {
+        if (raf) return;
+        raf = requestAnimationFrame(function () {
+          raf = 0;
+          var r = el.getBoundingClientRect();
+          el.style.setProperty('--mx', ((e.clientX - r.left) / r.width * 100).toFixed(1) + '%');
+          el.style.setProperty('--my', ((e.clientY - r.top) / r.height * 100).toFixed(1) + '%');
+        });
+      }, { passive: true });
+    });
   })();
   </script>
 
