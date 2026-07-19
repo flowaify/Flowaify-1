@@ -1400,6 +1400,34 @@
     #copy-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
     #copy-toast svg { width: 14px; height: 14px; color: #22C55E; }
 
+    /* ── Watch-demo link (workspace) ── */
+    .ws-demo-link { display: inline-flex; align-items: center; gap: 9px; background: none; border: none; cursor: pointer; font-family: inherit; font-size: 14px; font-weight: 600; color: #0F172A; transition: color 0.2s; }
+    .ws-demo-link:hover { color: var(--blue); }
+    .ws-demo-play { width: 26px; height: 26px; border-radius: 50%; background: #0F1116; color: #fff; display: flex; align-items: center; justify-content: center; transition: transform 0.2s, background 0.2s; }
+    .ws-demo-link:hover .ws-demo-play { background: var(--blue); transform: scale(1.08); }
+    .ws-demo-play svg { width: 9px; height: 9px; margin-left: 1px; }
+
+    /* ── Demo modal ── */
+    .demo-modal { position: fixed; inset: 0; z-index: 500; display: flex; align-items: center; justify-content: center; padding: 24px; opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s; }
+    .demo-modal.open { opacity: 1; visibility: visible; }
+    .demo-backdrop { position: absolute; inset: 0; background: rgba(15,23,42,0.72); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); }
+    .demo-dialog { position: relative; z-index: 1; width: 100%; max-width: 900px; transform: scale(0.96) translateY(10px); transition: transform 0.4s cubic-bezier(0.22,1,0.36,1); }
+    .demo-modal.open .demo-dialog { transform: none; }
+    .demo-close { position: absolute; top: -46px; right: 0; width: 38px; height: 38px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.16); background: rgba(255,255,255,0.06); color: #fff; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background 0.2s; }
+    .demo-close:hover { background: rgba(255,255,255,0.14); }
+    .demo-close svg { width: 18px; height: 18px; }
+    .demo-frame { position: relative; aspect-ratio: 16 / 9; border-radius: 16px; overflow: hidden; background: #0F1116; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 40px 100px -30px rgba(0,0,0,0.7); }
+    .demo-frame iframe, .demo-frame video { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+    .demo-poster { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.42; }
+    .demo-overlay { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 24px; background: linear-gradient(180deg, rgba(15,17,22,0.15), rgba(15,17,22,0.6)); }
+    .demo-play { width: 64px; height: 64px; border-radius: 50%; background: rgba(255,255,255,0.96); color: #0F1116; display: flex; align-items: center; justify-content: center; margin-bottom: 18px; box-shadow: 0 14px 30px -8px rgba(0,0,0,0.5); }
+    .demo-play svg { width: 22px; height: 22px; margin-left: 3px; }
+    .demo-cap { font-family: 'Montserrat','Plus Jakarta Sans',sans-serif; font-size: 18px; font-weight: 700; letter-spacing: -0.02em; color: #fff; }
+    .demo-sub { font-size: 13.5px; line-height: 1.55; color: rgba(255,255,255,0.72); margin-top: 9px; max-width: 420px; }
+    .demo-sub a { color: #86A9FF; font-weight: 600; }
+    @media (max-width: 600px) { .demo-close { top: -42px; } .demo-cap { font-size: 16px; } }
+    @media (prefers-reduced-motion: reduce) { .demo-dialog { transition: none; } }
+
     /* Respect reduced-motion preference */
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after {
@@ -1576,7 +1604,7 @@
           <a href="site/onboarding/" class="hero-btn-primary">Request a Custom Plan
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
           </a>
-          <a href="site/demo/" class="hero-btn-secondary">
+          <a href="site/demo/" class="hero-btn-secondary" data-demo-open>
             <span class="play"><svg width="9" height="9" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 4 20 12 6 20 6 4"/></svg></span>Watch Demo
           </a>
         </div>
@@ -1659,7 +1687,12 @@
       <div class="ws-frame reveal" style="transition-delay:70ms;">
         <img src="assets/images/workspace-overview-dark.png" alt="Flowaify Overview dashboard — lead sources, insights, priority leads, team chat, and the Flowy AI assistant in one workspace" loading="lazy" decoding="async">
       </div>
-      <!-- TODO: product demo video slot goes here (under the frame) once recorded -->
+      <div style="text-align:center;margin-top:24px;">
+        <button type="button" class="ws-demo-link" data-demo-open>
+          <span class="ws-demo-play"><svg viewBox="0 0 24 24" fill="currentColor"><polygon points="7 4 20 12 7 20 7 4"/></svg></span>
+          Watch a quick demo
+        </button>
+      </div>
 
       <div class="ws-rail reveal" style="transition-delay:140ms;">
         <div class="ws-item">
@@ -3251,6 +3284,61 @@ updateNavHero();
   window.addEventListener('resize', function () { requestAnimationFrame(function () { positionConnector(false); }); }, { passive: true });
 })();
 </script>
+<div id="demo-modal" class="demo-modal" role="dialog" aria-modal="true" aria-label="Flowaify product demo" aria-hidden="true">
+  <div class="demo-backdrop" data-demo-close></div>
+  <div class="demo-dialog">
+    <button type="button" class="demo-close" aria-label="Close demo" data-demo-close><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    <div class="demo-frame">
+      <!-- When the walkthrough video is ready, replace this poster block with an embed, e.g.:
+           <iframe src="https://www.youtube.com/embed/VIDEO_ID?autoplay=1" title="Flowaify demo" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe> -->
+      <img class="demo-poster" src="assets/images/workspace-overview-dark.png" alt="" />
+      <div class="demo-overlay">
+        <div class="demo-play"><svg viewBox="0 0 24 24" fill="currentColor"><polygon points="7 4 20 12 7 20 7 4"/></svg></div>
+        <div class="demo-cap">Product walkthrough</div>
+        <div class="demo-sub">Our full demo video is on the way. Want a live walkthrough now? <a href="mailto:contact@flowaify.app">Email us</a> and we'll show you the system.</div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+// ─── DEMO MODAL ──────────────────────────────────────────────────────────────
+(function () {
+  var modal = document.getElementById('demo-modal');
+  if (!modal) return;
+  var lastFocus = null;
+  function focusables() { return modal.querySelectorAll('button, a[href], [tabindex]:not([tabindex="-1"])'); }
+  function open() {
+    lastFocus = document.activeElement;
+    modal.classList.add('open');
+    modal.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+    if (window.__lenis) window.__lenis.stop();
+    var f = focusables(); if (f.length) f[0].focus();
+  }
+  function close() {
+    modal.classList.remove('open');
+    modal.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+    if (window.__lenis) window.__lenis.start();
+    if (lastFocus && lastFocus.focus) lastFocus.focus();
+  }
+  window.openDemo = open;
+  modal.querySelectorAll('[data-demo-close]').forEach(function (el) { el.addEventListener('click', close); });
+  document.querySelectorAll('[data-demo-open]').forEach(function (el) {
+    el.addEventListener('click', function (e) { e.preventDefault(); open(); });
+  });
+  document.addEventListener('keydown', function (e) {
+    if (!modal.classList.contains('open')) return;
+    if (e.key === 'Escape') { close(); return; }
+    if (e.key === 'Tab') {
+      var f = focusables(); if (!f.length) return;
+      var first = f[0], last = f[f.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    }
+  });
+})();
+</script>
 <script>
 // ─── MICRO-INTERACTIONS — magnetic CTAs + copy-to-clipboard ──────────────────
 (function () {
@@ -3301,6 +3389,7 @@ updateNavHero();
     });
   }
 
+  window.__lenis = lenis;
   window.flowScrollTop = function () {
     if (lenis) lenis.scrollTo(0, { duration: 1.1 });
     else window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' });
