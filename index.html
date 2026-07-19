@@ -1935,15 +1935,20 @@
   <!-- ─── WHY FLOWAIFY — done-for-you comparison ─────────────────────────── -->
   <style>
     #why-flowaify { position: relative; background: linear-gradient(180deg, #FBFCFD 0%, #F1F3F7 100%); border-top: 1px solid rgba(15,23,42,0.06); padding: 108px 0; }
-    .why-wrap { max-width: 1080px; margin: 0 auto; padding: 0 60px; }
+    #why-flowaify::before { content: ''; position: absolute; inset: 0; z-index: 0; pointer-events: none;
+      background-image: linear-gradient(rgba(15,23,42,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(15,23,42,0.05) 1px, transparent 1px);
+      background-size: 48px 48px; background-position: center top;
+      -webkit-mask-image: radial-gradient(130% 82% at 50% 30%, #000 16%, transparent 72%);
+              mask-image: radial-gradient(130% 82% at 50% 30%, #000 16%, transparent 72%); }
+    .why-wrap { position: relative; z-index: 1; max-width: 1080px; margin: 0 auto; padding: 0 60px; }
     .why-intro { text-align: center; max-width: 740px; margin: 0 auto 64px; }
     .why-eyebrow { font-size: 11px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--blue); }
     .why-h2 { font-family: 'Montserrat','Plus Jakarta Sans',sans-serif; font-size: clamp(2rem, 3.6vw, 3rem); font-weight: 800; letter-spacing: -0.03em; line-height: 1.08; color: #0F172A; margin: 15px 0 18px; text-wrap: balance; }
     .why-sub { font-size: 16.5px; line-height: 1.7; color: #55606F; max-width: 620px; margin: 0 auto; text-wrap: pretty; }
 
     /* deterministic grid — header + 6 rows, cells explicitly placed (frees column 3 for the floating card) */
-    .why-matrix { position: relative; display: grid; grid-template-columns: minmax(140px, 1fr) 1fr 1.12fr; grid-template-rows: repeat(7, auto); column-gap: 18px; max-width: 860px; margin: 0 auto; }
-    .why-c { display: flex; align-items: center; gap: 11px; padding: 17px 8px; min-height: 60px; font-size: 14.5px; line-height: 1.4; }
+    .why-matrix { position: relative; display: grid; grid-template-columns: minmax(150px, 0.92fr) 1fr 1.08fr; grid-template-rows: repeat(7, auto); column-gap: 16px; max-width: 880px; margin: 0 auto; }
+    .why-c { display: flex; align-items: center; gap: 11px; padding: 16px 20px; min-height: 62px; font-size: 14.5px; line-height: 1.4; }
     .why-c.why-head { min-height: 68px; flex-direction: column; align-items: flex-start; justify-content: center; gap: 3px; padding-top: 8px; padding-bottom: 14px; }
     .why-head .why-hname { font-family: 'Montserrat','Plus Jakarta Sans',sans-serif; font-size: 16.5px; font-weight: 750; letter-spacing: -0.01em; }
     .why-head .why-htag { font-size: 11.5px; font-weight: 550; }
@@ -1952,10 +1957,12 @@
     .why-l { grid-column: 1; padding-left: 2px; padding-right: 16px; font-weight: 650; color: #0F172A; letter-spacing: -0.01em; border-bottom: 1px solid rgba(15,23,42,0.07); }
     .why-l.why-head, .why-l.why-last { border-bottom: none; }
 
-    /* other-platforms column — plain + muted so it recedes */
-    .why-o { grid-column: 2; color: #99A1AD; font-weight: 500; border-bottom: 1px solid rgba(15,23,42,0.06); }
+    /* other-platforms column — a flat, muted card so it recedes behind Flowaify */
+    .why-o { grid-column: 2; color: #8891A0; font-weight: 500; background: rgba(255,255,255,0.62);
+      border-left: 1px solid rgba(15,23,42,0.07); border-right: 1px solid rgba(15,23,42,0.07); border-bottom: 1px solid rgba(15,23,42,0.06); }
+    .why-o.why-head { border-top: 1px solid rgba(15,23,42,0.07); border-top-left-radius: 16px; border-top-right-radius: 16px; }
     .why-o.why-head .why-hname { color: #6B7481; } .why-o.why-head .why-htag { color: #9AA2AE; }
-    .why-o.why-last { border-bottom: none; }
+    .why-o.why-last { border-bottom-left-radius: 16px; border-bottom-right-radius: 16px; }
     .why-x { flex-shrink: 0; width: 16px; height: 16px; color: #C6CCD4; }
 
     /* flowaify column cells — transparent, sit above the floating card */
@@ -1965,7 +1972,7 @@
     .why-check { flex-shrink: 0; width: 18px; height: 18px; color: #5C93FF; }
 
     /* the floating, badged card behind the flowaify column */
-    .why-flowcard { grid-column: 3; grid-row: 1 / 8; z-index: 0; margin: -20px 0; border-radius: 20px;
+    .why-flowcard { grid-column: 3; grid-row: 1 / 8; z-index: 0; position: relative; margin: -20px 0; border-radius: 20px;
       background: linear-gradient(180deg, #171A21 0%, #0E1015 100%); border: 1px solid rgba(255,255,255,0.06);
       box-shadow: 0 34px 70px -26px rgba(15,23,42,0.55), 0 18px 46px -30px rgba(0,87,255,0.5), inset 0 1px 0 rgba(255,255,255,0.05); }
     .why-flowcard::before { content: 'What you get'; position: absolute; top: 0; left: 50%; transform: translate(-50%,-50%);
