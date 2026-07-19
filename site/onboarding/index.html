@@ -75,8 +75,8 @@
     .mprog-label{font-size:12.5px;font-weight:600;color:var(--muted);margin-top:9px}
 
     /* ── Form card ── */
-    .ob-card{background:#fff;border:1px solid var(--border);border-radius:22px;padding:36px 36px 30px;
-      box-shadow:0 1px 0 rgba(255,255,255,0.9) inset, 0 40px 80px -46px rgba(15,23,42,0.32), 0 8px 24px -18px rgba(15,23,42,0.18)}
+    .ob-card{background:#fff;border:1px solid rgba(15,23,42,0.12);border-radius:16px;padding:36px 36px 30px;
+      box-shadow:0 1px 0 rgba(255,255,255,0.9) inset, 0 22px 48px -30px rgba(15,23,42,0.26), 0 3px 10px -6px rgba(15,23,42,0.1)}
     .step-content{display:none}
     .step-content.active{display:block;animation:fade-up .34s var(--ease)}
     @keyframes fade-up{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
@@ -87,7 +87,7 @@
     .field-row{display:grid;grid-template-columns:1fr 1fr;gap:15px}
     .field label{display:block;font-size:12.5px;font-weight:600;color:var(--ink);letter-spacing:-0.01em;margin-bottom:8px}
     .field .req{color:var(--blue)}
-    .field input,.field select,.field textarea{width:100%;padding:12px 15px;border:1.5px solid var(--border);border-radius:11px;font-size:14px;font-family:inherit;color:var(--ink);background:#fff;outline:none;resize:vertical;transition:border-color .16s,box-shadow .16s}
+    .field input,.field select,.field textarea{width:100%;padding:12px 14px;border:1px solid rgba(15,23,42,0.16);border-radius:8px;font-size:14px;font-family:inherit;color:var(--ink);background:#fff;outline:none;resize:vertical;transition:border-color .16s,box-shadow .16s}
     .field input::placeholder,.field textarea::placeholder{color:#B2B8C2}
     .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3.5px rgba(0,87,255,0.1)}
     .field select{appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2355606F' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:38px}
@@ -97,10 +97,10 @@
     .field.invalid .field-err{display:block}
 
     .check-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-    .check-item{display:flex;align-items:center;gap:11px;padding:12px 14px;border:1.5px solid var(--border);border-radius:12px;background:#fff;cursor:pointer;user-select:none;transition:border-color .16s,background .16s}
+    .check-item{display:flex;align-items:center;gap:11px;padding:12px 14px;border:1px solid rgba(15,23,42,0.16);border-radius:9px;background:#fff;cursor:pointer;user-select:none;transition:border-color .16s,background .16s}
     .check-item:hover{border-color:rgba(0,87,255,0.3)}
     .check-item.checked{border-color:var(--blue);background:rgba(0,87,255,0.045)}
-    .check-box{width:19px;height:19px;border-radius:6px;border:1.5px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .16s}
+    .check-box{width:19px;height:19px;border-radius:5px;border:1.5px solid rgba(15,23,42,0.2);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .16s}
     .check-item.checked .check-box{background:var(--blue);border-color:var(--blue)}
     .check-item.checked .check-box::after{content:'';width:5px;height:9px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg) translateY(-1px)}
     .check-label{font-size:13px;font-weight:500;color:var(--muted)}
@@ -112,10 +112,10 @@
     .review-v{font-size:13px;font-weight:500;color:var(--ink);text-align:right}
 
     .ob-nav{display:flex;align-items:center;justify-content:space-between;margin-top:28px}
-    .btn-prev{display:inline-flex;align-items:center;gap:6px;padding:12px 18px;border:1.5px solid var(--border);border-radius:11px;background:#fff;font-size:13.5px;font-weight:600;color:var(--muted);cursor:pointer;font-family:inherit;transition:all .16s}
+    .btn-prev{display:inline-flex;align-items:center;gap:6px;padding:12px 18px;border:1px solid rgba(15,23,42,0.16);border-radius:9px;background:#fff;font-size:13.5px;font-weight:600;color:var(--muted);cursor:pointer;font-family:inherit;transition:all .16s}
     .btn-prev:hover{border-color:rgba(15,23,42,0.22);color:var(--ink)}
     .btn-prev i{width:14px;height:14px}
-    .btn-next{display:inline-flex;align-items:center;gap:8px;padding:13px 26px;border:1px solid rgba(255,255,255,0.08);border-radius:11px;background:var(--charcoal);color:#fff;font-size:13.5px;font-weight:650;cursor:pointer;font-family:inherit;
+    .btn-next{display:inline-flex;align-items:center;gap:8px;padding:13px 26px;border:1px solid rgba(255,255,255,0.08);border-radius:9px;background:var(--charcoal);color:#fff;font-size:13.5px;font-weight:650;cursor:pointer;font-family:inherit;
       box-shadow:0 14px 28px -14px rgba(15,23,42,0.5);transition:background .2s,transform .2s var(--ease),box-shadow .2s}
     .btn-next:hover{background:#20242e;transform:translateY(-1px);box-shadow:0 18px 34px -16px rgba(15,23,42,0.55)}
     .btn-next:active{transform:translateY(0)}
@@ -131,8 +131,8 @@
     .ob-success-title{font-family:'Montserrat','Plus Jakarta Sans',sans-serif;font-size:23px;font-weight:800;letter-spacing:-0.02em;color:var(--ink);margin-bottom:10px}
     .ob-success-sub{font-size:14.5px;color:var(--muted);line-height:1.65;max-width:420px;margin-bottom:26px}
     .ob-success-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
-    .btn-home{display:inline-flex;align-items:center;gap:7px;padding:12px 22px;border-radius:11px;background:var(--charcoal);color:#fff;font-size:13.5px;font-weight:650;border:1px solid rgba(255,255,255,0.08)}
-    .btn-ghost{display:inline-flex;align-items:center;gap:7px;padding:12px 20px;border-radius:11px;border:1.5px solid var(--border);color:var(--muted);font-size:13.5px;font-weight:600;background:#fff}
+    .btn-home{display:inline-flex;align-items:center;gap:7px;padding:12px 22px;border-radius:9px;background:var(--charcoal);color:#fff;font-size:13.5px;font-weight:650;border:1px solid rgba(255,255,255,0.08)}
+    .btn-ghost{display:inline-flex;align-items:center;gap:7px;padding:12px 20px;border-radius:9px;border:1px solid rgba(15,23,42,0.16);color:var(--muted);font-size:13.5px;font-weight:600;background:#fff}
 
     @media(max-width:900px){
       .ob-top{padding:20px 22px}
