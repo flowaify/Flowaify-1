@@ -1381,6 +1381,25 @@
     @media (prefers-reduced-motion: reduce) { #back-to-top { transition: opacity 0.2s ease; } }
     @media (max-width: 600px) { #back-to-top { right: 16px; bottom: 16px; width: 42px; height: 42px; } }
 
+    /* ── Micro-interactions ── */
+    @media (min-width: 769px) and (pointer: fine) {
+      #navbar-links .nav-link { position: relative; }
+      #navbar-links .nav-link::after { content: ''; position: absolute; left: 0; right: 0; bottom: -6px; height: 2px; border-radius: 2px; background: var(--blue);
+        transform: scaleX(0); transform-origin: left; transition: transform 0.28s cubic-bezier(0.22,1,0.36,1); }
+      #navbar-links .nav-link:hover::after, #navbar-links .nav-link[aria-current="page"]::after, #nav-dd .nav-dd-trigger.nav-active::after { transform: scaleX(1); }
+    }
+    .btn-primary:active, .hero-btn-primary:active, .foot-cta:active { transform: translateY(1px) scale(0.98); }
+    a:focus-visible, button:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; border-radius: 7px; }
+    .copy-btn { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; margin-left: 8px; border-radius: 7px;
+      border: 1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.03); color: #A9B0BC; cursor: pointer; transition: color 0.18s, border-color 0.18s, background 0.18s; }
+    .copy-btn:hover { color: #fff; border-color: rgba(255,255,255,0.28); background: rgba(255,255,255,0.07); }
+    .copy-btn svg { width: 13px; height: 13px; }
+    #copy-toast { position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%) translateY(12px); z-index: 300; display: inline-flex; align-items: center; gap: 8px;
+      background: #12141A; color: #fff; font-size: 13px; font-weight: 600; padding: 10px 16px; border-radius: 10px; box-shadow: 0 16px 36px -12px rgba(0,0,0,0.5);
+      opacity: 0; pointer-events: none; transition: opacity 0.25s ease, transform 0.32s cubic-bezier(0.22,1,0.36,1); }
+    #copy-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    #copy-toast svg { width: 14px; height: 14px; color: #22C55E; }
+
     /* Respect reduced-motion preference */
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after {
@@ -1481,6 +1500,7 @@
 <body>
 <a href="#hero-section" class="skip-link">Skip to main content</a>
 <div id="scroll-progress" aria-hidden="true"></div>
+<div id="copy-toast" role="status" aria-live="polite"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Copied to clipboard</div>
 <button id="back-to-top" aria-label="Back to top" onclick="flowScrollTop()">
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5"/><path d="m5 12 7-7 7 7"/></svg>
 </button>
@@ -1996,7 +2016,7 @@
         <div class="foot-contact">
           <div class="foot-h">Contact</div>
           <div class="foot-links">
-            <a href="mailto:contact@flowaify.app" class="email">contact@flowaify.app</a>
+            <span style="display:inline-flex;align-items:center;"><a href="mailto:contact@flowaify.app" class="email">contact@flowaify.app</a><button type="button" class="copy-btn" data-copy="contact@flowaify.app" aria-label="Copy email address"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button></span>
             <a href="tel:8333569243">(833) 356-9243</a>
             <a href="portal.html">My Workspace</a>
           </div>
@@ -3221,6 +3241,33 @@ updateNavHero();
   requestAnimationFrame(function () { positionConnector(false); });
   window.addEventListener('load', function () { positionConnector(false); });
   window.addEventListener('resize', function () { requestAnimationFrame(function () { positionConnector(false); }); }, { passive: true });
+})();
+</script>
+<script>
+// ─── MICRO-INTERACTIONS — magnetic CTAs + copy-to-clipboard ──────────────────
+(function () {
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (!reduce && window.matchMedia('(pointer: fine)').matches) {
+    document.querySelectorAll('.hero-btn-primary, #navbar-cta, #final-cta .btn-primary, .foot-cta').forEach(function (el) {
+      el.addEventListener('pointermove', function (e) {
+        var r = el.getBoundingClientRect();
+        var mx = (e.clientX - (r.left + r.width / 2)) * 0.22;
+        var my = (e.clientY - (r.top + r.height / 2)) * 0.3;
+        el.style.transform = 'translate(' + mx.toFixed(1) + 'px,' + my.toFixed(1) + 'px)';
+      });
+      el.addEventListener('pointerleave', function () { el.style.transform = ''; });
+    });
+  }
+  var toast = document.getElementById('copy-toast'), toastT = null;
+  function showToast() { if (!toast) return; toast.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(function () { toast.classList.remove('show'); }, 1600); }
+  document.querySelectorAll('[data-copy]').forEach(function (btn) {
+    btn.addEventListener('click', function (e) {
+      e.preventDefault();
+      var txt = btn.getAttribute('data-copy');
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(showToast, showToast);
+      else showToast();
+    });
+  });
 })();
 </script>
 <script>
