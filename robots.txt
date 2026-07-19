@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /app.html
+Disallow: /portal.html
+Disallow: /invoice.html
+Disallow: /report.html
+
+Sitemap: https://flowaify.app/sitemap.xml
