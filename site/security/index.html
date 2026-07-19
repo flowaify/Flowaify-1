@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Security — Flowaify</title>
+  <meta name="description" content="How Flowaify protects the information entrusted to us." />
+  <link rel="icon" type="image/png" href="/assets/images/logo-transparent.png" />
+  <link rel="canonical" href="https://flowaify.app/site/security/" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root{--blue:#0057FF;--ink:#0F172A;--muted:#55606F;--faint:#8A93A0;--border:rgba(15,23,42,0.1);}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;color:var(--ink);background:linear-gradient(180deg,#F4F6F9 0%,#E7EAEF 100%);min-height:100dvh;-webkit-font-smoothing:antialiased}
+    a{color:inherit;text-decoration:none}
+    .lg-top{display:flex;align-items:center;justify-content:space-between;max-width:1080px;margin:0 auto;padding:22px 32px}
+    .lg-brand{display:inline-flex;align-items:center;gap:10px}
+    .lg-brand img{width:30px;height:30px;object-fit:contain}
+    .lg-brand span{font-size:17px;font-weight:800;letter-spacing:-.035em;color:var(--ink)}
+    .lg-links{display:inline-flex;align-items:center;gap:8px}
+    .lg-link{display:inline-flex;align-items:center;gap:6px;padding:9px 13px;border-radius:10px;font-size:13.5px;font-weight:600;color:var(--muted);transition:color .18s,background .18s,border-color .18s}
+    .lg-link:hover{color:var(--ink);background:rgba(15,23,42,.045)}
+    .lg-link.solid{border:1px solid var(--border);color:var(--ink);background:rgba(255,255,255,.6)}
+    .lg-link svg{width:14px;height:14px}
+    .lg-main{max-width:760px;margin:0 auto;padding:36px 24px 80px}
+    .lg-head{border-bottom:1px solid var(--border);padding-bottom:28px;margin-bottom:36px}
+    .lg-eyebrow{font-size:11px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--blue)}
+    .lg-title{font-family:'Montserrat','Plus Jakarta Sans',sans-serif;font-size:clamp(2rem,4vw,2.7rem);font-weight:800;letter-spacing:-.03em;line-height:1.1;color:var(--ink);margin:12px 0 12px}
+    .lg-updated{font-size:13px;color:var(--faint)}
+    .lg-body h2{font-family:'Montserrat','Plus Jakarta Sans',sans-serif;font-size:18px;font-weight:700;letter-spacing:-.02em;color:var(--ink);margin:34px 0 12px}
+    .lg-body h2:first-child{margin-top:0}
+    .lg-body p{font-size:15px;line-height:1.75;color:var(--muted);margin-bottom:14px}
+    .lg-body ul{margin:0 0 16px;padding-left:20px}
+    .lg-body li{font-size:15px;line-height:1.7;color:var(--muted);margin-bottom:8px}
+    .lg-body a{color:var(--blue);font-weight:600}
+    .lg-body strong{color:var(--ink);font-weight:650}
+    .lg-foot{border-top:1px solid var(--border);max-width:1080px;margin:0 auto;padding:26px 32px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+    .lg-foot p{font-size:12.5px;color:var(--faint)}
+    .lg-foot .fl{display:flex;gap:18px;flex-wrap:wrap}
+    .lg-foot .fl a{font-size:12.5px;color:var(--muted);font-weight:600}
+    .lg-foot .fl a:hover{color:var(--ink)}
+    @media(max-width:560px){.lg-top{padding:18px 18px}.lg-link.back span{display:none}.lg-main{padding:24px 18px 64px}.lg-foot{padding:22px 18px}}
+  </style>
+</head>
+<body>
+  <header class="lg-top">
+    <a class="lg-brand" href="/" aria-label="Flowaify home"><img src="/assets/images/flowaify-logo.webp" alt="" onerror="this.style.display='none'" /><span>Flowaify</span></a>
+    <nav class="lg-links">
+      <a class="lg-link back" href="/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg><span>Back to website</span></a>
+      <a class="lg-link solid" href="mailto:contact@flowaify.app"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg>Contact</a>
+    </nav>
+  </header>
+  <main class="lg-main">
+    <div class="lg-head">
+      <span class="lg-eyebrow">Legal</span>
+      <h1 class="lg-title">Security</h1>
+      <p class="lg-updated">Last updated: July 19, 2026</p>
+    </div>
+    <div class="lg-body">
+      <p>Security is central to how we build and run lead systems. This page summarizes the practices we follow to protect information entrusted to <strong>Flowaify</strong>.</p>
+      <h2>Our approach</h2>
+      <p>We aim to collect only what we need, limit who can access it, and rely on reputable providers for infrastructure and data processing.</p>
+      <h2>Data in transit and at rest</h2>
+      <p>Our website and forms are served over HTTPS, so information you submit is encrypted in transit. Credentials and connection secrets used to run your automations are stored using access-controlled, encrypted storage.</p>
+      <h2>Access controls</h2>
+      <p>Access to client systems and data is limited to team members who need it to deliver your service, protected by authentication and least-privilege principles. We remove access when it is no longer required.</p>
+      <h2>Third-party providers</h2>
+      <p>Your system connects to tools you choose — such as your CRM, email, and messaging providers. Data flows through those platforms under their own security programs. We integrate using scoped access wherever possible.</p>
+      <h2>Your account security</h2>
+      <p>Because the systems we build live in your accounts, your own security settings matter. We recommend strong, unique passwords and enabling multi-factor authentication on every connected tool.</p>
+      <h2>Incident response</h2>
+      <p>If we become aware of a security incident affecting your data, we will investigate promptly and notify affected clients as required by applicable law.</p>
+      <h2>Reporting a vulnerability</h2>
+      <p>If you believe you have found a security issue, please email <a href="mailto:contact@flowaify.app">contact@flowaify.app</a> with details. We appreciate responsible disclosure and will respond as quickly as we can.</p>
+      <h2>Contact</h2>
+      <p>Security questions? Email <a href="mailto:contact@flowaify.app">contact@flowaify.app</a>.</p>
+    </div>
+  </main>
+  <footer class="lg-foot">
+    <p>&copy; 2026 Flowaify. All rights reserved.</p>
+    <div class="fl">
+      <a href="/site/privacy/">Privacy</a>
+      <a href="/site/terms/">Terms</a>
+      <a href="/site/security/">Security</a>
+      <a href="/">Home</a>
+    </div>
+  </footer>
+</body>
+</html>
