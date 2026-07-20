@@ -1993,6 +1993,43 @@
       .hiw-rail-fg { stroke-dashoffset: 0 !important; }
     }
 
+    /* ── ambient elevation: cycling spotlight + progress fill (starts after entrance via .playing) ── */
+    .hiw-rail-fg { transition: stroke-dashoffset .65s cubic-bezier(.22,1,.36,1); }
+    /* once playing, badges use a snappy, delay-free transition for the active cycle + hover */
+    .hiw-timeline.playing .hiw-badge {
+      transition: scale .45s cubic-bezier(.34,1.56,.64,1), translate .38s cubic-bezier(.22,1,.36,1),
+                  box-shadow .42s cubic-bezier(.22,1,.36,1), border-color .35s ease; }
+    .hiw-step.active .hiw-badge {
+      scale: 1.09; translate: 0 -6px; border-color: var(--blue);
+      box-shadow: 0 0 0 6px rgba(0,87,255,0.12), 0 24px 48px -14px rgba(0,87,255,0.5), inset 0 1px 0 rgba(255,255,255,0.95); }
+    .hiw-step.active .hiw-badge svg { color: var(--blue-mid); }
+    .hiw-num { transition: scale .4s cubic-bezier(.34,1.56,.64,1); }
+    .hiw-step.active .hiw-num { scale: 1.12; }
+
+    /* number-chip ping — an expanding ring fires as each step becomes active */
+    .hiw-num::after { content: ''; position: absolute; inset: -1px; border-radius: inherit; border: 2px solid var(--blue); opacity: 0; pointer-events: none; }
+    .hiw-step.active .hiw-num::after { animation: hiwPing 1s cubic-bezier(.22,1,.36,1); }
+    @keyframes hiwPing { from { scale: 1; opacity: .7; } to { scale: 2.6; opacity: 0; } }
+
+    /* perpetual icon micro-loops (skipped entirely under reduced motion) */
+    @media (prefers-reduced-motion: no-preference) {
+      .hiw-ic-node { transform-box: fill-box; transform-origin: center; animation: hiwNode 2.6s ease-in-out infinite; }
+      .hiw-ic-node:nth-of-type(2) { animation-delay: .4s; }
+      .hiw-ic-node:nth-of-type(3) { animation-delay: .8s; }
+      @keyframes hiwNode { 0%, 100% { opacity: .4; } 50% { opacity: 1; } }
+
+      .hiw-ic-knob { transform-box: fill-box; transform-origin: center; animation: hiwKnob 3.2s ease-in-out infinite; }
+      .hiw-ic-knob.k2 { animation-delay: .55s; animation-duration: 2.8s; }
+      .hiw-ic-knob.k3 { animation-delay: 1.05s; }
+      @keyframes hiwKnob { 0%, 100% { translate: -2.4px 0; } 50% { translate: 2.4px 0; } }
+
+      .hiw-ic-check { stroke-dasharray: 12; animation: hiwCheck 3.4s ease-in-out infinite; }
+      @keyframes hiwCheck { 0% { stroke-dashoffset: 12; } 22%, 100% { stroke-dashoffset: 0; } }
+
+      .hiw-ic-bolt { transform-box: fill-box; transform-origin: center; animation: hiwBolt 2.4s ease-in-out infinite; }
+      @keyframes hiwBolt { 0%, 100% { opacity: .55; scale: .95; } 50% { opacity: 1; scale: 1.05; } }
+    }
+
     .why-cta { text-align: center; margin-top: 42px; }
     .why-cta .why-note { font-size: 13.5px; color: #78818E; margin-top: 15px; }
 
@@ -2041,7 +2078,7 @@
         <div class="hiw-step" style="--step:0;">
           <div class="hiw-badge">
             <span class="hiw-num">1</span>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="2.4"/><circle cx="6" cy="12" r="2.4"/><circle cx="18" cy="19" r="2.4"/><line x1="8.1" y1="10.8" x2="15.9" y2="6.2"/><line x1="8.1" y1="13.2" x2="15.9" y2="17.8"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle class="hiw-ic-node" cx="18" cy="5" r="2.4"/><circle class="hiw-ic-node" cx="6" cy="12" r="2.4"/><circle class="hiw-ic-node" cx="18" cy="19" r="2.4"/><line x1="8.1" y1="10.8" x2="15.9" y2="6.2"/><line x1="8.1" y1="13.2" x2="15.9" y2="17.8"/></svg>
           </div>
           <h3 class="hiw-title">Share access</h3>
           <p class="hiw-desc">Tell us about your business and connect your tools. One short onboarding &mdash; no technical setup on your side.</p>
@@ -2050,7 +2087,7 @@
         <div class="hiw-step" style="--step:1;">
           <div class="hiw-badge">
             <span class="hiw-num">2</span>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/><circle cx="9" cy="7" r="2.2" fill="#fff"/><circle cx="15" cy="12" r="2.2" fill="#fff"/><circle cx="8" cy="17" r="2.2" fill="#fff"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/><circle class="hiw-ic-knob k1" cx="9" cy="7" r="2.2" fill="#fff"/><circle class="hiw-ic-knob k2" cx="15" cy="12" r="2.2" fill="#fff"/><circle class="hiw-ic-knob k3" cx="8" cy="17" r="2.2" fill="#fff"/></svg>
           </div>
           <h3 class="hiw-title">We build your system</h3>
           <p class="hiw-desc">We configure your workspace, wire up every integration, and set up your follow-ups and automations.</p>
@@ -2059,7 +2096,7 @@
         <div class="hiw-step" style="--step:2;">
           <div class="hiw-badge">
             <span class="hiw-num">3</span>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4.4-3 7.6-7 9-4-1.4-7-4.6-7-9V6l7-3z"/><polyline points="9 11.8 11.2 14 15 9.6"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4.4-3 7.6-7 9-4-1.4-7-4.6-7-9V6l7-3z"/><polyline class="hiw-ic-check" points="9 11.8 11.2 14 15 9.6"/></svg>
           </div>
           <h3 class="hiw-title">We test everything</h3>
           <p class="hiw-desc">Every lead path, message, and automation is connected and tested before anything goes live.</p>
@@ -2068,7 +2105,7 @@
         <div class="hiw-step" style="--step:3;">
           <div class="hiw-badge">
             <span class="hiw-num">4</span>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 4 14 11 14 10 22 19 10 12 10 13 2"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polygon class="hiw-ic-bolt" points="13 2 4 14 11 14 10 22 19 10 12 10 13 2"/></svg>
           </div>
           <h3 class="hiw-title">You go live</h3>
           <p class="hiw-desc">Your system is live in about <span class="hiw-24">24 hours</span>. We manage and adjust it for you as you grow.</p>
@@ -2084,7 +2121,7 @@
   // ─── Refined polish — cursor spotlight on the workspace rail (desktop pointer only) ──
   (function () {
     if (!window.matchMedia || !window.matchMedia('(pointer: fine)').matches) return;
-    document.querySelectorAll('.ws-item, .hiw-badge').forEach(function (el) {
+    document.querySelectorAll('.ws-item').forEach(function (el) {
       var raf = 0;
       el.addEventListener('pointermove', function (e) {
         if (raf) return;
@@ -2095,6 +2132,23 @@
           el.style.setProperty('--my', ((e.clientY - r.top) / r.height * 100).toFixed(1) + '%');
         });
       }, { passive: true });
+    });
+
+    // Why-Flowaify badges: cursor spotlight + magnetic pull toward the pointer
+    document.querySelectorAll('#why-flowaify .hiw-badge').forEach(function (el) {
+      var raf = 0;
+      el.addEventListener('pointermove', function (e) {
+        if (raf) return;
+        raf = requestAnimationFrame(function () {
+          raf = 0;
+          var r = el.getBoundingClientRect();
+          var px = (e.clientX - r.left) / r.width, py = (e.clientY - r.top) / r.height;
+          el.style.setProperty('--mx', (px * 100).toFixed(1) + '%');
+          el.style.setProperty('--my', (py * 100).toFixed(1) + '%');
+          el.style.translate = ((px - 0.5) * 12).toFixed(1) + 'px ' + (((py - 0.5) * 12) - 5).toFixed(1) + 'px';
+        });
+      }, { passive: true });
+      el.addEventListener('pointerleave', function () { el.style.translate = ''; });
     });
   })();
 
@@ -2109,30 +2163,59 @@
     io.observe(t);
   })();
 
-  // ─── Why Flowaify — scroll-linked connecting line (mirrors the Built-to-Scale growth line) ──
+  // ─── Why Flowaify — cycling spotlight + progress line (lively, always-playing) ──
   (function () {
+    var timeline = document.querySelector('#why-flowaify .hiw-timeline');
     var section = document.getElementById('why-flowaify');
     var line = document.getElementById('hiw-line');
-    if (!section || !line) return;
-    var len = line.getTotalLength();
-    line.style.strokeDasharray = len;
-    function clamp(v) { return v < 0 ? 0 : v > 1 ? 1 : v; }
-    function apply(p) { p = clamp(p); line.style.strokeDashoffset = (len * (1 - p)).toFixed(1); }
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { apply(1); return; }
-    apply(0);
-    var ticking = false;
-    function onScroll() {
-      if (ticking) return; ticking = true;
-      requestAnimationFrame(function () {
-        var r = section.getBoundingClientRect();
-        var vh = window.innerHeight || 800;
-        apply((vh - r.top - 110) / (r.height * 0.78));
-        ticking = false;
-      });
+    if (!timeline || !section) return;
+    var steps = Array.prototype.slice.call(timeline.querySelectorAll('.hiw-step'));
+    if (!steps.length) return;
+
+    var len = 0;
+    if (line) { len = line.getTotalLength(); line.style.strokeDasharray = len; line.style.strokeDashoffset = len; }
+    function fillTo(idx) {
+      if (!line || !len) return;
+      var frac = (idx + 0.5) / steps.length;          // fill the connector up to the active badge's centre
+      line.style.strokeDashoffset = (len * (1 - frac)).toFixed(1);
     }
-    window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', onScroll, { passive: true });
-    onScroll();
+
+    // reduced motion: no cycling — show a static, fully-drawn connector
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      steps.forEach(function (s) { s.classList.remove('active'); });
+      if (line) line.style.strokeDashoffset = 0;
+      return;
+    }
+
+    var i = 0, timer = null, started = false;
+    function tick() {
+      steps.forEach(function (s, idx) { s.classList.toggle('active', idx === i); });
+      fillTo(i);
+      i = (i + 1) % steps.length;
+    }
+    function start() {
+      if (timer) return;
+      timeline.classList.add('playing');
+      tick();
+      timer = setInterval(tick, 1250);
+    }
+    function stop() { if (timer) { clearInterval(timer); timer = null; } }
+
+    // only play while the section is on-screen (and not on a hidden tab)
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting && !document.hidden) {
+          if (!started) { started = true; setTimeout(function () { if (!document.hidden) start(); }, 1100); }
+          else start();
+        } else { stop(); }
+      });
+    }, { threshold: 0.25 });
+    io.observe(section);
+
+    document.addEventListener('visibilitychange', function () {
+      if (document.hidden) stop();
+      else if (started) start();
+    });
   })();
   </script>
 
