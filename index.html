@@ -1791,7 +1791,7 @@
   <!-- ─── TRY IT YOURSELF — immersive live lead-flow ─────────────────────────── -->
   <style>
     #try-it { position: relative; overflow: hidden; padding: 104px 0 100px;
-      background: linear-gradient(180deg,#F6F8FA 0%, #EBEEF2 60%, #E6E9EE 100%);
+      background: radial-gradient(42% 46% at 77% 24%, rgba(174,186,203,0.42), transparent 72%), radial-gradient(40% 46% at 24% 70%, rgba(198,205,217,0.36), transparent 72%), radial-gradient(32% 40% at 58% 98%, rgba(150,164,186,0.28), transparent 70%), linear-gradient(180deg,#F3F5F9 0%, #E8EBF0 58%, #E2E6EC 100%);
       border-top: 1px solid rgba(20,30,45,0.06); border-bottom: 1px solid rgba(20,30,45,0.06);
       --tf-ink:#1B2330; --tf-ink2:#586273; --tf-ink3:#949CA9; --tf-line:#E3E7EC; --tf-line2:rgba(20,30,45,0.09);
       --tf-graph:#2B323D; --tf-graph2:#404a58; --tf-silver:#AEB6C1; --tf-mist:#F3F5F8; --tf-panel:#FFFFFF;
@@ -1841,7 +1841,9 @@
     .tf-flow::before { content:''; position:absolute; left:50px; right:50px; top:18px; height:2px; z-index:0;
       background: repeating-linear-gradient(90deg, var(--tf-silver) 0 4px, transparent 4px 9px); opacity:.6; }
     .tf-flow-fill { position:absolute; left:50px; top:18px; height:2px; z-index:0; width:0; background:linear-gradient(90deg,var(--tf-graph2),var(--tf-graph)); border-radius:2px; transition:width .5s cubic-bezier(.4,0,.12,1); }
-    .tf-node { position:relative; z-index:1; display:flex; flex-direction:column; align-items:center; gap:8px; cursor:pointer; width:76px; background:none; border:none; font-family:inherit; padding:0; }
+    .tf-node { position:relative; z-index:1; display:flex; flex-direction:column; align-items:center; gap:8px; cursor:default; width:76px; background:none; border:none; font-family:inherit; padding:0; }
+    .tf-flow.ran .tf-node { cursor:pointer; }
+    .tf-flow:not(.ran) .tf-node .tf-ndot { opacity:.72; }
     .tf-ndot { width:34px; height:34px; border-radius:50%; background:#fff; border:1.5px solid var(--tf-line); display:grid; place-items:center; color:var(--tf-ink3);
       box-shadow:0 4px 10px -5px rgba(20,30,45,0.22); transition:background .3s, border-color .3s, color .3s, transform .3s, box-shadow .3s; }
     .tf-ndot svg { width:16px; height:16px; }
@@ -1856,11 +1858,10 @@
     .tf-node:focus-visible .tf-ndot { outline:2px solid var(--tf-graph); outline-offset:2px; }
 
     /* focal area — real components float, no frame */
-    .tf-focus { position: relative; min-height: 470px; }
-    .tf-focus-item { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%) translateY(12px); width:100%; max-width:460px; opacity:0; pointer-events:none;
+    .tf-focus { position: relative; min-height: 478px; }
+    .tf-focus-item { position:absolute; left:50%; top:0; transform:translateX(-50%) translateY(12px); width:100%; max-width:460px; opacity:0; pointer-events:none;
       transition:opacity .5s ease, transform .5s cubic-bezier(.22,1,.36,1); }
-    .tf-focus-item.active { opacity:1; transform:translate(-50%,-50%); pointer-events:auto; }
-    .tf-focus-item .tf-scr-label { position:absolute; top:-26px; left:0; right:0; }
+    .tf-focus-item.active { opacity:1; transform:translateX(-50%); pointer-events:auto; }
     .tf-float { background:var(--tf-panel); border-radius:16px; box-shadow:0 40px 70px -34px rgba(20,30,45,0.4), 0 6px 16px -10px rgba(20,30,45,0.22); overflow:hidden; }
     .tf-scr-label { font-size:10px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--tf-ink3); text-align:center; margin-bottom:12px; }
 
@@ -1966,7 +1967,7 @@
       --amber:#b45309; --amber-dim:rgba(180,83,9,0.07); --text:#111827; --text-m:#6b7280; --text-s:#374151;
       --border:#e5e7eb; --input-bg:#f9fafb; --input-border:#d1d5db; --r-input:6px; }
     .ti-dash .lead-avatar { width:26px; height:26px; border-radius:8px; color:#fff; font-size:10px; font-weight:650; letter-spacing:0.02em; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0; }
-    .ti-dash .badge { display:inline-flex; align-items:center; padding:2px 7px; border-radius:3px; font-size:10px; font-weight:600; white-space:nowrap; text-transform:uppercase; letter-spacing:0.3px; }
+    .ti-dash .badge { position:static !important; box-shadow:none !important; display:inline-flex; align-items:center; padding:2px 7px; border-radius:3px; font-size:10px; font-weight:600; white-space:nowrap; text-transform:uppercase; letter-spacing:0.3px; animation:none !important; }
     .ti-dash .b-high { background:var(--red-dim); color:var(--red); border:1px solid rgba(220,38,38,0.18); }
     .ti-dash .b-med { background:var(--amber-dim); color:var(--amber); border:1px solid rgba(180,83,9,0.18); }
     .ti-dash .b-low { background:var(--blue-dim); color:var(--blue); border:1px solid rgba(0,87,255,0.16); }
@@ -1997,7 +1998,7 @@
 
     @media (max-width: 940px) {
       .tf-stage { grid-template-columns: 1fr; gap: 26px; }
-      .tf-focus { min-height: 452px; }
+      .tf-focus { min-height: 470px; }
     }
     @media (max-width: 768px) {
       #try-it { padding: 74px 0; } .tf-wrap { padding: 0 16px; }
@@ -2010,9 +2011,9 @@
 
     /* ── clear-glass surfaces with silver reflections (replaces the flat cards) ── */
     .tf-form, .tf-float, .ti-dash { position: relative; overflow: hidden;
-      background: rgba(255,255,255,0.46) !important; -webkit-backdrop-filter: blur(18px) saturate(1.15); backdrop-filter: blur(18px) saturate(1.15);
-      border: 1px solid rgba(255,255,255,0.6) !important;
-      box-shadow: 0 38px 66px -34px rgba(20,30,45,0.36), inset 0 1px 0 rgba(255,255,255,0.9), inset 0 0 0 1px rgba(172,182,196,0.16) !important; }
+      background: rgba(255,255,255,0.34) !important; -webkit-backdrop-filter: blur(24px) saturate(1.4); backdrop-filter: blur(24px) saturate(1.4);
+      border: 1px solid rgba(255,255,255,0.75) !important;
+      box-shadow: 0 42px 74px -34px rgba(20,30,45,0.42), inset 0 1.5px 0.5px rgba(255,255,255,0.98), inset 0 0 0 1px rgba(255,255,255,0.45), inset 0 -34px 56px -34px rgba(110,124,146,0.28) !important; }
     .tf-form::before, .tf-float::before, .ti-dash::before { content:''; position:absolute; inset:0; pointer-events:none; z-index:0;
       background: linear-gradient(122deg, rgba(255,255,255,0.62) 0%, rgba(255,255,255,0) 28%, rgba(255,255,255,0) 62%, rgba(188,197,210,0.44) 100%); }
     .tf-form::after, .tf-float::after, .ti-dash::after { content:''; position:absolute; top:-40%; bottom:-40%; left:-8%; width:34%; pointer-events:none; z-index:0; transform:rotate(19deg);
@@ -2195,7 +2196,7 @@
     function renderLeadCard() {
       var el = document.getElementById('ti-lead-card'); if (!el) return;
       var name = DATA.name, r = [];
-      r.push('<div class="lp-head">' + dAvatar(name) + '<div style="flex:1;min-width:0;"><div class="lp-name">' + dEsc(name) + '</div><div class="lp-meta">Website form · Added today</div></div><div style="display:flex;align-items:center;gap:9px;flex-shrink:0;">' + dBadge('HOT') + '<span class="score-ring" style="border-color:var(--red);">' + dScore(name) + '</span></div></div>');
+      r.push('<div class="lp-head">' + dAvatar(name) + '<div style="flex:1;min-width:0;"><div class="lp-name">' + dEsc(name) + '</div><div class="lp-meta">Website form · Added today</div><div style="margin-top:7px;display:flex;align-items:center;gap:8px;">' + dBadge('HOT') + '<span class="score-ring" style="border-color:var(--red);">' + dScore(name) + '</span></div></div></div>');
       r.push('<div class="lp-sec"><div class="lp-sec-label">Contact</div><div class="detail-row"><span class="dk">Email</span><span class="dv" style="color:var(--blue);">' + dEsc(DATA.email) + '</span></div><div class="detail-row"><span class="dk">Phone</span><span class="dv" style="color:var(--blue);">' + dEsc(DATA.phone) + '</span></div></div>');
       r.push('<div class="lp-sec"><div class="lp-sec-label">Set Status</div><div class="status-picker">' + ['HOT', 'WARM', 'COLD', 'BOOKED'].map(function (s) { var a = (s === 'HOT' ? ' active' : ''); return '<span class="status-chip sc-' + s.toLowerCase() + a + '">' + s + '</span>'; }).join('') + '</div></div>');
       r.push('<div class="lp-sec"><div class="lp-sec-label">AI Summary</div><div style="font-size:12px;color:var(--text-s);line-height:1.6;">' + dEsc(DATA.summary) + '</div></div>');
@@ -2258,7 +2259,7 @@
       fillEmailInstant(); animScore(0, true); bookSlot(true); countKpis(0, true);
       ready.classList.add('gone'); showItem(1); finishBtn();
     }
-    function finishBtn() { running = false; hasRun = true; runBtn.disabled = false; runLabel.textContent = 'Run again'; }
+    function finishBtn() { running = false; hasRun = true; runBtn.disabled = false; runLabel.textContent = 'Run again'; var f = document.getElementById('ti-rail'); if (f) f.classList.add('ran'); }
 
     function run() {
       runId++; var id = runId; clearTimers(); reset(); readForm(); fill();
@@ -2278,8 +2279,7 @@
     runBtn.addEventListener('click', run);
     steps.forEach(function (s) {
       s.addEventListener('click', function () {
-        if (running) return;
-        if (!hasRun) { readForm(); fill(); ready.classList.add('gone'); }
+        if (running || !hasRun) return;
         var i = +s.getAttribute('data-i'); showItem(i);
         steps.forEach(function (x) { x.classList.toggle('on', x === s); });
         if (i === 2) fillEmailInstant(); else if (i === 3) animScore(0, true); else if (i === 5) bookSlot(true); else if (i === 6) countKpis(0, true);
