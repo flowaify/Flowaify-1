@@ -1788,197 +1788,182 @@
     </div>
   </section>
 
-  <!-- ─── TRY IT YOURSELF — live lead-workflow simulator ─────────────────────── -->
+  <!-- ─── TRY IT YOURSELF — immersive live lead-flow ─────────────────────────── -->
   <style>
-    #try-it { position: relative; padding: 100px 0 96px; background: linear-gradient(180deg,#F5F7FB 0%, #EDF0F5 100%); border-top: 1px solid rgba(15,23,42,0.06); border-bottom: 1px solid rgba(15,23,42,0.06);
-      --ti-blue:#0057FF; --ti-blue-dim:rgba(0,87,255,0.10); --ti-red:#DC2626; --ti-red-dim:rgba(220,38,38,0.10);
-      --ti-green:#16A34A; --ti-green-dim:rgba(22,163,74,0.11); --ti-purple:#7C3AED; --ti-purple-dim:rgba(124,58,237,0.10);
-      --ti-amber:#D97706; --ti-teal:#0D9488;
-      --ti-ink:#0F172A; --ti-ink2:#475569; --ti-ink3:#94A3B8; --ti-line:#E7EBF0; --ti-card:#FFFFFF; }
-    .ti-wrap { position: relative; z-index: 1; max-width: 1200px; margin: 0 auto; padding: 0 40px; }
-    .ti-intro { text-align: center; max-width: 720px; margin: 0 auto 42px; }
-    .ti-eyebrow { font-size: 11px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ti-blue); }
-    .ti-h2 { font-family:'Montserrat','Plus Jakarta Sans',sans-serif; font-size: clamp(2rem,3.6vw,3rem); font-weight: 800; letter-spacing: -0.03em; line-height: 1.06; color: var(--ti-ink); margin: 13px 0 15px; text-wrap: balance; }
-    .ti-sub { font-size: 16px; line-height: 1.7; color: var(--ti-ink2); max-width: 580px; margin: 0 auto; text-wrap: pretty; }
+    #try-it { position: relative; overflow: hidden; padding: 104px 0 100px;
+      background: linear-gradient(180deg,#F6F8FA 0%, #EBEEF2 60%, #E6E9EE 100%);
+      border-top: 1px solid rgba(20,30,45,0.06); border-bottom: 1px solid rgba(20,30,45,0.06);
+      --tf-ink:#1B2330; --tf-ink2:#586273; --tf-ink3:#949CA9; --tf-line:#E3E7EC; --tf-line2:rgba(20,30,45,0.09);
+      --tf-graph:#2B323D; --tf-graph2:#404a58; --tf-silver:#AEB6C1; --tf-mist:#F3F5F8; --tf-panel:#FFFFFF;
+      --tf-green:#16A34A; --tf-green-dim:rgba(22,163,74,0.12); --tf-red:#DC2626; --tf-red-dim:rgba(220,38,38,0.10); --tf-amber:#D97706; }
+    #try-it::before { content:''; position:absolute; inset:0; z-index:0; pointer-events:none;
+      background-image: radial-gradient(rgba(20,30,45,0.05) 1px, transparent 1.4px); background-size: 24px 24px;
+      -webkit-mask-image: radial-gradient(130% 80% at 50% 16%, #000 14%, transparent 78%); mask-image: radial-gradient(130% 80% at 50% 16%, #000 14%, transparent 78%); }
+    #try-it::after { content:''; position:absolute; inset:0; z-index:0; pointer-events:none;
+      background: radial-gradient(60% 40% at 50% -6%, rgba(255,255,255,0.7), transparent 60%); mix-blend-mode:soft-light; }
+    .tf-wrap { position: relative; z-index: 1; max-width: 1200px; margin: 0 auto; padding: 0 40px; }
+    .tf-intro { text-align: center; max-width: 720px; margin: 0 auto 44px; }
+    .tf-eyebrow { font-size: 11px; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase; color: var(--tf-ink3); }
+    .tf-h2 { font-family:'Montserrat','Plus Jakarta Sans',sans-serif; font-size: clamp(2rem,3.6vw,3rem); font-weight: 800; letter-spacing: -0.03em; line-height: 1.05; color: var(--tf-ink); margin: 13px 0 15px; text-wrap: balance; }
+    .tf-sub { font-size: 16px; line-height: 1.7; color: var(--tf-ink2); max-width: 560px; margin: 0 auto; text-wrap: pretty; }
 
-    .ti-stage { display: grid; grid-template-columns: 340px 1fr; gap: 22px; align-items: start; }
+    .tf-stage { display: grid; grid-template-columns: 296px 1fr; gap: 34px; align-items: start; }
 
-    /* ── the website form ── */
-    .ti-form { background: var(--ti-card); border: 1px solid var(--ti-line); border-radius: 18px; padding: 20px; box-shadow: 0 18px 40px -28px rgba(15,23,42,0.35), 0 2px 6px -3px rgba(15,23,42,0.12); }
-    .ti-form-head { display:flex; align-items:center; gap:11px; padding-bottom:15px; margin-bottom:15px; border-bottom:1px solid var(--ti-line); }
-    .ti-form-glyph { width:34px; height:34px; border-radius:9px; display:grid; place-items:center; background:var(--ti-blue-dim); color:var(--ti-blue); flex:0 0 auto; }
-    .ti-form-glyph svg { width:18px; height:18px; }
-    .ti-form-title { font-size:14px; font-weight:700; color:var(--ti-ink); }
-    .ti-form-sub { font-size:11.5px; color:var(--ti-ink3); }
-    .ti-field { display:block; margin-bottom:11px; }
-    .ti-field > span { display:block; font-size:11px; font-weight:600; color:var(--ti-ink2); margin-bottom:5px; }
-    .ti-field input, .ti-field select, .ti-field textarea { width:100%; box-sizing:border-box; font-family:inherit; font-size:13px; color:var(--ti-ink);
-      padding:9px 11px; border:1px solid var(--ti-line); border-radius:9px; background:#FBFCFE; outline:none; transition:border-color .18s, box-shadow .18s; resize:none; }
-    .ti-field input:focus, .ti-field select:focus, .ti-field textarea:focus { border-color:var(--ti-blue); box-shadow:0 0 0 3px var(--ti-blue-dim); }
-    .ti-run { width:100%; margin-top:6px; display:inline-flex; align-items:center; justify-content:center; gap:8px; font-family:inherit; font-size:14px; font-weight:700; color:#fff; cursor:pointer;
-      padding:12px 16px; border:none; border-radius:11px; background:linear-gradient(180deg,#1a6bff,#0057FF); box-shadow:0 10px 22px -8px rgba(0,87,255,0.55); transition:transform .2s, box-shadow .2s, filter .2s; }
-    .ti-run svg { width:16px; height:16px; }
-    .ti-run:hover:not(:disabled) { transform:translateY(-1px); box-shadow:0 14px 28px -8px rgba(0,87,255,0.6); }
-    .ti-run:active:not(:disabled) { transform:translateY(0); }
-    .ti-run:disabled { filter:grayscale(.3) opacity(.75); cursor:default; }
-    .ti-note { display:flex; align-items:center; gap:6px; justify-content:center; font-size:11px; color:var(--ti-ink3); margin-top:12px; }
-    .ti-note svg { width:12px; height:12px; }
+    /* ── input (de-boxed, floating) ── */
+    .tf-form { position: relative; background: var(--tf-panel); border-radius: 18px; padding: 22px;
+      box-shadow: 0 34px 60px -34px rgba(20,30,45,0.34), 0 3px 8px -4px rgba(20,30,45,0.10); }
+    .tf-form-head { display:flex; align-items:center; gap:10px; padding-bottom:14px; margin-bottom:15px; border-bottom:1px solid var(--tf-line); }
+    .tf-form-glyph { width:32px; height:32px; border-radius:9px; display:grid; place-items:center; background:var(--tf-mist); color:var(--tf-ink2); flex:0 0 auto; }
+    .tf-form-glyph svg { width:17px; height:17px; }
+    .tf-form-title { font-size:13.5px; font-weight:700; color:var(--tf-ink); }
+    .tf-form-sub { font-size:11px; color:var(--tf-ink3); }
+    .tf-field { display:block; margin-bottom:12px; }
+    .tf-field > span { display:block; font-size:11px; font-weight:600; color:var(--tf-ink2); margin-bottom:5px; }
+    .tf-field input, .tf-field select, .tf-field textarea { width:100%; box-sizing:border-box; font-family:inherit; font-size:13px; color:var(--tf-ink);
+      padding:9px 11px; border:1px solid var(--tf-line); border-radius:9px; background:#FCFDFE; outline:none; resize:none; transition:border-color .18s, box-shadow .18s; }
+    .tf-field input:focus, .tf-field select:focus, .tf-field textarea:focus { border-color:var(--tf-graph); box-shadow:0 0 0 3px rgba(43,50,61,0.10); }
+    .tf-run { width:100%; margin-top:4px; display:inline-flex; align-items:center; justify-content:center; gap:9px; font-family:inherit; font-size:14px; font-weight:700; color:#F4F6F8; cursor:pointer;
+      padding:12px 16px; border:none; border-radius:12px; background:linear-gradient(180deg,#3A424E,#2A313B); box-shadow:0 12px 24px -10px rgba(20,30,45,0.5), inset 0 1px 0 rgba(255,255,255,0.10); transition:transform .2s, box-shadow .2s, filter .2s; }
+    .tf-run svg { width:15px; height:15px; }
+    .tf-run .tf-run-ic { width:22px; height:22px; border-radius:50%; background:rgba(255,255,255,0.14); display:grid; place-items:center; }
+    .tf-run:hover:not(:disabled) { transform:translateY(-1px); box-shadow:0 18px 30px -10px rgba(20,30,45,0.55), inset 0 1px 0 rgba(255,255,255,0.12); }
+    .tf-run:active:not(:disabled) { transform:translateY(0); }
+    .tf-run:disabled { filter:opacity(.7); cursor:default; }
+    .tf-note { display:flex; align-items:center; gap:6px; justify-content:center; font-size:11px; color:var(--tf-ink3); margin-top:12px; }
+    .tf-note svg { width:12px; height:12px; }
 
-    /* ── run panel: step rail + dashboard viewport ── */
-    .ti-run-panel { display:grid; grid-template-columns: 218px 1fr; gap:18px; align-items:start; }
-    .ti-rail { display:flex; flex-direction:column; gap:3px; }
-    .ti-step { display:flex; align-items:center; gap:10px; padding:10px 11px; border-radius:11px; cursor:pointer; border:1px solid transparent; background:transparent; text-align:left; font-family:inherit; width:100%;
-      transition:background .25s, border-color .25s, box-shadow .25s; }
-    .ti-si { width:28px; height:28px; flex:0 0 auto; border-radius:8px; display:grid; place-items:center; background:#E9EDF3; color:var(--ti-ink3); transition:background .3s, color .3s; }
-    .ti-si svg { width:15px; height:15px; }
-    .ti-sl { flex:1 1 auto; font-size:12.5px; font-weight:600; color:var(--ti-ink3); line-height:1.25; transition:color .3s; }
-    .ti-time { font-size:10.5px; font-weight:700; color:var(--ti-ink3); font-variant-numeric:tabular-nums; opacity:0; transition:opacity .3s; }
-    .ti-step.done .ti-si { background:var(--ti-green-dim); color:var(--ti-green); }
-    .ti-step.done .ti-sl { color:var(--ti-ink); }
-    .ti-step.done .ti-time { opacity:1; }
-    .ti-step.on { background:var(--ti-card); border-color:var(--ti-line); box-shadow:0 6px 16px -8px rgba(15,23,42,0.28); }
-    .ti-step.on .ti-si { background:var(--ti-blue); color:#fff; }
-    .ti-step.on .ti-sl { color:var(--ti-ink); }
-    .ti-step.on .ti-time { opacity:1; color:var(--ti-blue); }
+    /* ── canvas ── */
+    .tf-canvas { position: relative; }
+    .tf-canvas-timer { position:absolute; top:-2px; right:0; z-index:3; font-size:12px; font-weight:800; color:var(--tf-ink); font-variant-numeric:tabular-nums; background:rgba(255,255,255,0.85); padding:4px 11px; border-radius:100px; box-shadow:0 4px 12px -6px rgba(20,30,45,0.3); }
 
-    .ti-view { background:var(--ti-card); border:1px solid var(--ti-line); border-radius:16px; overflow:hidden; box-shadow:0 24px 50px -30px rgba(15,23,42,0.45), 0 3px 8px -4px rgba(15,23,42,0.14); }
-    .ti-view-chrome { display:flex; align-items:center; gap:6px; padding:10px 14px; background:#F7F9FC; border-bottom:1px solid var(--ti-line); }
-    .ti-view-chrome .d { width:9px; height:9px; border-radius:50%; background:#D8DEE7; }
-    .ti-view-chrome .d:nth-child(1){ background:#F0A9A0; } .ti-view-chrome .d:nth-child(2){ background:#F2CE93; } .ti-view-chrome .d:nth-child(3){ background:#A7D9A9; }
-    .ti-view-url { margin-left:8px; font-size:11px; color:var(--ti-ink3); font-weight:600; }
-    .ti-view-timer { margin-left:auto; font-size:12px; font-weight:800; color:var(--ti-ink); font-variant-numeric:tabular-nums; background:#EEF2F7; padding:3px 9px; border-radius:100px; }
-    .ti-view-body { position:relative; min-height:344px; padding:18px; }
-    .ti-screen { position:absolute; inset:18px; opacity:0; transform:translateY(8px) scale(.99); pointer-events:none; transition:opacity .45s ease, transform .45s cubic-bezier(.22,1,.36,1); }
-    .ti-screen.active { opacity:1; transform:none; pointer-events:auto; }
-    .ti-scr-label { font-size:10.5px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--ti-ink3); margin-bottom:11px; }
+    /* flow spine (de-boxed connected path) */
+    .tf-flow { position: relative; display:flex; align-items:flex-start; justify-content:space-between; padding: 4px 12px 0; margin-bottom: 26px; }
+    .tf-flow::before { content:''; position:absolute; left:26px; right:26px; top:18px; height:2px; z-index:0;
+      background: repeating-linear-gradient(90deg, var(--tf-silver) 0 4px, transparent 4px 9px); opacity:.6; }
+    .tf-flow-fill { position:absolute; left:26px; top:18px; height:2px; z-index:0; width:0; background:linear-gradient(90deg,var(--tf-graph2),var(--tf-graph)); border-radius:2px; transition:width .5s cubic-bezier(.4,0,.12,1); }
+    .tf-node { position:relative; z-index:1; display:flex; flex-direction:column; align-items:center; gap:8px; cursor:pointer; width:76px; background:none; border:none; font-family:inherit; padding:0; }
+    .tf-ndot { width:34px; height:34px; border-radius:50%; background:#fff; border:1.5px solid var(--tf-line); display:grid; place-items:center; color:var(--tf-ink3);
+      box-shadow:0 4px 10px -5px rgba(20,30,45,0.22); transition:background .3s, border-color .3s, color .3s, transform .3s, box-shadow .3s; }
+    .tf-ndot svg { width:16px; height:16px; }
+    .tf-nlabel { font-size:9.5px; font-weight:650; line-height:1.2; text-align:center; color:var(--tf-ink3); transition:color .3s; }
+    .tf-ntime { font-size:9px; font-weight:700; color:var(--tf-ink3); font-variant-numeric:tabular-nums; opacity:0; transition:opacity .3s; height:0; }
+    .tf-node.done .tf-ndot { background:var(--tf-graph); border-color:var(--tf-graph); color:#fff; }
+    .tf-node.done .tf-nlabel { color:var(--tf-ink2); }
+    .tf-node.done .tf-ntime { opacity:1; height:auto; }
+    .tf-node.on .tf-ndot { background:var(--tf-ink); border-color:var(--tf-ink); color:#fff; transform:scale(1.12); box-shadow:0 8px 18px -6px rgba(20,30,45,0.5); }
+    .tf-node.on .tf-nlabel { color:var(--tf-ink); }
+    .tf-node.on .tf-ntime { opacity:1; height:auto; color:var(--tf-ink); }
+    .tf-node:focus-visible .tf-ndot { outline:2px solid var(--tf-graph); outline-offset:2px; }
 
-    /* shared atoms */
-    .ti-av { width:38px; height:38px; border-radius:50%; flex:0 0 auto; display:grid; place-items:center; font-size:14px; font-weight:800; color:#fff; letter-spacing:.02em; }
-    .ti-av.sm { width:26px; height:26px; font-size:11px; }
-    .ti-badge { display:inline-flex; align-items:center; gap:4px; font-size:10.5px; font-weight:700; padding:3px 9px; border-radius:100px; }
-    .ti-badge svg { width:11px; height:11px; }
-    .ti-b-new { color:var(--ti-blue); background:var(--ti-blue-dim); }
-    .ti-b-hot { color:var(--ti-red); background:var(--ti-red-dim); }
-    .ti-b-intent { color:var(--ti-purple); background:var(--ti-purple-dim); }
+    /* focal area — real components float, no frame */
+    .tf-focus { position: relative; min-height: 446px; }
+    .tf-focus-item { position:absolute; left:50%; top:0; transform:translateX(-50%) translateY(12px); width:100%; max-width:456px; opacity:0; pointer-events:none;
+      transition:opacity .5s ease, transform .5s cubic-bezier(.22,1,.36,1); }
+    .tf-focus-item.active { opacity:1; transform:translateX(-50%); pointer-events:auto; }
+    .tf-float { background:var(--tf-panel); border-radius:16px; box-shadow:0 40px 70px -34px rgba(20,30,45,0.4), 0 6px 16px -10px rgba(20,30,45,0.22); overflow:hidden; }
+    .tf-scr-label { font-size:10px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--tf-ink3); text-align:center; margin-bottom:12px; }
 
-    /* screen 0 — request */
-    .ti-req { border:1px solid var(--ti-line); border-radius:12px; overflow:hidden; }
-    .ti-req-top { display:flex; align-items:center; gap:9px; padding:11px 13px; background:var(--ti-blue-dim); color:var(--ti-blue); font-size:12.5px; font-weight:700; }
-    .ti-req-top svg { width:16px; height:16px; }
-    .ti-req-row { display:flex; padding:9px 13px; border-top:1px solid var(--ti-line); font-size:12.5px; }
-    .ti-req-k { width:74px; flex:0 0 auto; color:var(--ti-ink3); font-weight:600; }
-    .ti-req-v { color:var(--ti-ink); font-weight:600; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-    .ti-req-msg { padding:11px 13px; border-top:1px solid var(--ti-line); font-size:12.5px; line-height:1.55; color:var(--ti-ink2); background:#FBFCFE; }
+    .tf-ready { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); display:flex; flex-direction:column; align-items:center; gap:13px; text-align:center; transition:opacity .4s; }
+    .tf-ready.gone { opacity:0; pointer-events:none; }
+    .tf-ready-orb { width:54px; height:54px; border-radius:50%; display:grid; place-items:center; color:#fff; background:linear-gradient(150deg,#3A424E,#2A313B); box-shadow:0 16px 30px -10px rgba(20,30,45,0.45); animation:tfPulse 2.6s ease-in-out infinite; }
+    .tf-ready-orb svg { width:24px; height:24px; }
+    @keyframes tfPulse { 0%,100%{ transform:scale(1);} 50%{ transform:scale(1.07);} }
+    .tf-ready-t { font-size:14px; font-weight:700; color:var(--tf-ink); }
+    .tf-ready-s { font-size:12.5px; color:var(--tf-ink3); max-width:250px; }
 
-    /* screen 1 — lead card */
-    .ti-lead-top { display:flex; align-items:center; gap:12px; margin-bottom:13px; }
-    .ti-lead-name { font-size:16px; font-weight:750; color:var(--ti-ink); letter-spacing:-0.01em; }
-    .ti-lead-meta { font-size:12px; color:var(--ti-ink3); margin-top:2px; }
-    .ti-lead-top .ti-badge { margin-left:auto; }
-    .ti-lead-contact { display:flex; flex-wrap:wrap; gap:8px 16px; padding:11px 0; border-top:1px solid var(--ti-line); border-bottom:1px solid var(--ti-line); font-size:12px; color:var(--ti-ink2); }
-    .ti-lead-contact span { display:inline-flex; align-items:center; gap:6px; }
-    .ti-lead-contact svg { width:14px; height:14px; color:var(--ti-ink3); }
-    .ti-summary { margin-top:13px; background:var(--ti-purple-dim); border:1px solid rgba(124,58,237,0.16); border-radius:11px; padding:12px 13px; }
-    .ti-summary-head { display:flex; align-items:center; gap:6px; font-size:11px; font-weight:800; letter-spacing:.04em; text-transform:uppercase; color:var(--ti-purple); margin-bottom:6px; }
-    .ti-summary-head svg { width:13px; height:13px; }
-    .ti-summary p { font-size:12.5px; line-height:1.6; color:var(--ti-ink2); }
+    /* neutral component atoms (recreations — no blue) */
+    .tf-c { padding:15px 16px; }
+    .tf-c-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+    .tf-c-title { font-size:11.5px; font-weight:700; color:var(--tf-ink2); }
+    .tf-pill { display:inline-flex; align-items:center; gap:5px; font-size:10px; font-weight:700; padding:3px 9px; border-radius:100px; }
+    .tf-pill svg { width:11px; height:11px; }
+    .tf-pill-ok { color:var(--tf-green); background:var(--tf-green-dim); }
+    .tf-pill-neutral { color:var(--tf-ink2); background:var(--tf-mist); }
+    .tf-row { display:flex; align-items:center; gap:10px; padding:9px 11px; border-radius:10px; background:#FBFCFD; box-shadow:inset 0 0 0 1px var(--tf-line2); }
+    .tf-row + .tf-row { margin-top:7px; }
+    .tf-logo { flex:0 0 auto; width:24px; height:24px; border-radius:7px; display:grid; place-items:center; font-size:10px; font-weight:800; color:#4A515C; background:linear-gradient(150deg,#F1F3F6,#D9DEE5); }
+    .tf-logo svg { width:14px; height:14px; color:var(--tf-ink2); }
+    .tf-lm { flex:1 1 auto; min-width:0; }
+    .tf-ln { font-size:12.5px; font-weight:650; color:var(--tf-ink); line-height:1.2; }
+    .tf-ls { font-size:10.5px; color:var(--tf-ink3); }
+    .tf-stat { flex:0 0 auto; display:inline-flex; align-items:center; gap:5px; font-size:10px; font-weight:700; padding:4px 9px; border-radius:100px; color:var(--tf-green); background:var(--tf-green-dim); }
+    .tf-stat svg { width:11px; height:11px; }
+    .tf-kd { padding:9px 11px; font-size:12.5px; }
+    .tf-kd-k { width:70px; display:inline-block; color:var(--tf-ink3); font-weight:600; }
+    .tf-kd-v { color:var(--tf-ink); font-weight:600; }
 
-    /* screen 2 — flowy email */
-    .ti-flowy-head { display:flex; align-items:center; gap:9px; margin-bottom:12px; }
-    .ti-flowy-badge { display:inline-flex; align-items:center; gap:6px; font-size:12px; font-weight:800; color:var(--ti-purple); background:var(--ti-purple-dim); padding:5px 11px; border-radius:100px; }
-    .ti-flowy-badge svg { width:14px; height:14px; }
-    .ti-flowy-status { font-size:12px; font-weight:600; color:var(--ti-ink3); }
-    .ti-flowy-status.sent { color:var(--ti-green); }
-    .ti-email { border:1px solid var(--ti-line); border-radius:12px; overflow:hidden; }
-    .ti-email-row { display:flex; gap:8px; padding:9px 13px; border-bottom:1px solid var(--ti-line); font-size:12.5px; }
-    .ti-email-k { width:52px; flex:0 0 auto; color:var(--ti-ink3); font-weight:600; }
-    .ti-email-v { color:var(--ti-ink); font-weight:600; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-    .ti-email-body { padding:13px; font-size:12.5px; line-height:1.65; color:var(--ti-ink2); white-space:pre-wrap; min-height:96px; }
-    .ti-email-body .cur { display:inline-block; width:1.5px; height:14px; background:var(--ti-blue); vertical-align:-2px; animation:tiCaret .8s step-end infinite; }
-    @keyframes tiCaret { 50% { opacity:0; } }
-    .ti-email-foot { display:flex; align-items:center; padding:10px 13px; border-top:1px solid var(--ti-line); background:#FBFCFE; }
-    .ti-email-sent { display:inline-flex; align-items:center; gap:6px; font-size:11.5px; font-weight:700; color:var(--ti-green); opacity:0; transition:opacity .35s; }
-    .ti-email-sent.show { opacity:1; }
-    .ti-email-sent svg { width:13px; height:13px; }
+    /* email */
+    .tf-flowy { display:flex; align-items:center; gap:9px; margin-bottom:12px; }
+    .tf-flowy-b { display:inline-flex; align-items:center; gap:6px; font-size:12px; font-weight:800; color:var(--tf-ink); background:var(--tf-mist); padding:5px 11px; border-radius:100px; }
+    .tf-flowy-b svg { width:14px; height:14px; }
+    .tf-flowy-s { font-size:12px; font-weight:600; color:var(--tf-ink3); }
+    .tf-flowy-s.sent { color:var(--tf-green); }
+    .tf-mail { border-radius:11px; box-shadow:inset 0 0 0 1px var(--tf-line2); overflow:hidden; }
+    .tf-mail-r { display:flex; gap:8px; padding:8px 12px; box-shadow:inset 0 -1px 0 var(--tf-line2); font-size:12px; }
+    .tf-mail-k { width:50px; color:var(--tf-ink3); font-weight:600; }
+    .tf-mail-v { color:var(--tf-ink); font-weight:600; }
+    .tf-mail-body { padding:12px; font-size:12.5px; line-height:1.6; color:var(--tf-ink2); white-space:pre-wrap; min-height:92px; }
+    .tf-mail-body .cur { display:inline-block; width:1.5px; height:13px; background:var(--tf-graph); vertical-align:-2px; animation:tfCaret .8s step-end infinite; }
+    @keyframes tfCaret { 50%{ opacity:0; } }
+    .tf-mail-foot { padding:9px 12px; box-shadow:inset 0 1px 0 var(--tf-line2); }
+    .tf-mail-sent { display:inline-flex; align-items:center; gap:6px; font-size:11px; font-weight:700; color:var(--tf-green); opacity:0; transition:opacity .35s; }
+    .tf-mail-sent.show { opacity:1; }
+    .tf-mail-sent svg { width:12px; height:12px; }
 
-    /* screen 3 — classification */
-    .ti-class-name { display:flex; align-items:center; gap:10px; font-size:14px; font-weight:700; color:var(--ti-ink); margin-bottom:16px; }
-    .ti-gauge { display:flex; align-items:center; gap:14px; margin-bottom:16px; }
-    .ti-gauge-track { flex:1 1 auto; height:12px; border-radius:100px; background:#EDF0F5; overflow:hidden; }
-    .ti-gauge-track > i { display:block; height:100%; width:0%; border-radius:100px; background:linear-gradient(90deg,var(--ti-amber),var(--ti-red)); transition:width 1s cubic-bezier(.3,0,.1,1); }
-    .ti-gauge-num { font-family:'Montserrat',sans-serif; font-size:22px; font-weight:800; color:var(--ti-ink); font-variant-numeric:tabular-nums; }
-    .ti-gauge-num small { font-size:13px; color:var(--ti-ink3); font-weight:700; }
-    .ti-class-badges { display:flex; gap:8px; margin-bottom:12px; }
-    .ti-class-note { font-size:12.5px; color:var(--ti-ink2); }
+    /* score */
+    .tf-score-name { display:flex; align-items:center; gap:10px; font-size:14px; font-weight:700; color:var(--tf-ink); margin-bottom:16px; }
+    .tf-gauge { display:flex; align-items:center; gap:14px; margin-bottom:15px; }
+    .tf-gauge-tr { flex:1 1 auto; height:12px; border-radius:100px; background:#EBEEF2; overflow:hidden; }
+    .tf-gauge-tr > i { display:block; height:100%; width:0%; border-radius:100px; background:linear-gradient(90deg,var(--tf-amber),var(--tf-red)); transition:width 1s cubic-bezier(.3,0,.1,1); }
+    .tf-gauge-n { font-family:'Montserrat',sans-serif; font-size:22px; font-weight:800; color:var(--tf-ink); font-variant-numeric:tabular-nums; }
+    .tf-gauge-n small { font-size:13px; color:var(--tf-ink3); }
+    .tf-score-badges { display:flex; gap:8px; margin-bottom:12px; }
+    .tf-badge-hot { color:var(--tf-red); background:var(--tf-red-dim); display:inline-flex; align-items:center; gap:5px; font-size:10.5px; font-weight:700; padding:4px 9px; border-radius:100px; }
+    .tf-badge-hot svg { width:11px; height:11px; }
+    .tf-badge-int { color:var(--tf-ink2); background:var(--tf-mist); font-size:10.5px; font-weight:700; padding:4px 9px; border-radius:100px; }
+    .tf-score-note { font-size:12.5px; color:var(--tf-ink2); }
 
-    /* screen 4 — team task */
-    .ti-task-card { display:flex; align-items:center; gap:11px; padding:13px; border:1px solid var(--ti-line); border-radius:12px; margin-bottom:13px; }
-    .ti-task-check { width:30px; height:30px; flex:0 0 auto; border-radius:8px; display:grid; place-items:center; background:var(--ti-blue-dim); color:var(--ti-blue); }
-    .ti-task-check svg { width:17px; height:17px; }
-    .ti-task-title { font-size:14px; font-weight:700; color:var(--ti-ink); }
-    .ti-task-sub { font-size:12px; color:var(--ti-ink3); margin-top:2px; }
-    .ti-task-assign { display:flex; align-items:center; gap:9px; padding:11px 13px; border:1px solid var(--ti-line); border-radius:12px; background:#FBFCFE; }
-    .ti-assign-label { font-size:11.5px; color:var(--ti-ink3); font-weight:600; }
-    .ti-assign-name { font-size:13px; font-weight:700; color:var(--ti-ink); }
-    .ti-assign-role { font-size:11px; color:var(--ti-ink3); margin-left:auto; }
-    .ti-task-due { margin-top:11px; font-size:12px; color:var(--ti-ink2); display:flex; align-items:center; gap:7px; }
-    .ti-task-due svg { width:14px; height:14px; color:var(--ti-green); }
+    /* task */
+    .tf-task-check { width:30px; height:30px; border-radius:8px; display:grid; place-items:center; background:var(--tf-mist); color:var(--tf-ink); flex:0 0 auto; }
+    .tf-task-check svg { width:17px; height:17px; }
+    .tf-assign { display:flex; align-items:center; gap:9px; padding:11px; border-radius:11px; box-shadow:inset 0 0 0 1px var(--tf-line2); background:#FBFCFD; margin-top:11px; }
+    .tf-assign-av { width:26px; height:26px; border-radius:50%; display:grid; place-items:center; font-size:11px; font-weight:800; color:#fff; background:#0D9488; }
+    .tf-assign-l { font-size:11px; color:var(--tf-ink3); font-weight:600; }
+    .tf-assign-n { font-size:13px; font-weight:700; color:var(--tf-ink); }
+    .tf-assign-r { font-size:11px; color:var(--tf-ink3); margin-left:auto; }
+    .tf-due { margin-top:11px; font-size:12px; color:var(--tf-ink2); display:flex; align-items:center; gap:7px; }
+    .tf-due svg { width:14px; height:14px; color:var(--tf-green); }
 
-    /* screen 5 — calendar */
-    .ti-cal-head { font-size:13px; font-weight:700; color:var(--ti-ink); margin-bottom:12px; }
-    .ti-slot { display:flex; align-items:center; gap:12px; padding:11px 13px; border-radius:10px; margin-bottom:8px; border:1px solid var(--ti-line); font-size:12.5px; }
-    .ti-slot-time { font-weight:700; color:var(--ti-ink3); width:66px; flex:0 0 auto; }
-    .ti-slot.dim { opacity:.7; }
-    .ti-slot.dim .ti-slot-empty { color:var(--ti-ink3); }
-    .ti-slot.booked { border-color:var(--ti-blue); background:var(--ti-blue-dim); opacity:0; transform:translateY(6px); transition:opacity .5s, transform .5s cubic-bezier(.22,1,.36,1); }
-    .ti-slot.booked.in { opacity:1; transform:none; }
-    .ti-slot.booked .ti-slot-time { color:var(--ti-blue); }
-    .ti-slot-title { font-weight:700; color:var(--ti-ink); }
-    .ti-slot-tag { margin-left:auto; font-size:10.5px; font-weight:700; color:var(--ti-blue); }
+    /* calendar */
+    .tf-cal-h { font-size:13px; font-weight:700; color:var(--tf-ink); margin-bottom:12px; }
+    .tf-slot { display:flex; align-items:center; gap:12px; padding:11px 12px; border-radius:10px; margin-bottom:8px; box-shadow:inset 0 0 0 1px var(--tf-line2); font-size:12.5px; }
+    .tf-slot-t { font-weight:700; color:var(--tf-ink3); width:64px; flex:0 0 auto; }
+    .tf-slot.dim .tf-slot-e { color:var(--tf-ink3); }
+    .tf-slot.book { box-shadow:inset 0 0 0 1.5px var(--tf-graph); background:var(--tf-mist); opacity:0; transform:translateY(6px); transition:opacity .5s, transform .5s cubic-bezier(.22,1,.36,1); }
+    .tf-slot.book.in { opacity:1; transform:none; }
+    .tf-slot.book .tf-slot-t { color:var(--tf-ink); }
+    .tf-slot-n { font-weight:700; color:var(--tf-ink); }
+    .tf-slot-tag { margin-left:auto; font-size:10px; font-weight:700; color:var(--tf-ink2); }
 
-    /* screen 6 — kpis */
-    .ti-kpis { display:grid; grid-template-columns:1fr 1fr; gap:11px; margin-bottom:14px; }
-    .ti-kpi { padding:13px; border:1px solid var(--ti-line); border-radius:12px; background:#FBFCFE; }
-    .ti-kpi-num { font-family:'Montserrat',sans-serif; font-size:24px; font-weight:800; color:var(--ti-ink); letter-spacing:-0.02em; font-variant-numeric:tabular-nums; line-height:1; }
-    .ti-kpi-label { font-size:11.5px; color:var(--ti-ink3); margin-top:4px; }
-    .ti-done { display:flex; align-items:center; justify-content:center; gap:8px; font-size:13px; font-weight:700; color:var(--ti-green); }
-    .ti-done svg { width:16px; height:16px; }
-
-    /* ready overlay (before first run) */
-    .ti-ready { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; text-align:center; padding:20px; background:var(--ti-card); transition:opacity .4s; }
-    .ti-ready.gone { opacity:0; pointer-events:none; }
-    .ti-ready-orb { width:52px; height:52px; border-radius:50%; display:grid; place-items:center; color:#fff; background:linear-gradient(150deg,#1a6bff,#0057FF); box-shadow:0 12px 26px -8px rgba(0,87,255,0.5); animation:tiPulse 2.4s ease-in-out infinite; }
-    .ti-ready-orb svg { width:24px; height:24px; }
-    @keyframes tiPulse { 0%,100%{ transform:scale(1); box-shadow:0 12px 26px -8px rgba(0,87,255,0.5);} 50%{ transform:scale(1.06); box-shadow:0 16px 32px -8px rgba(0,87,255,0.65);} }
-    .ti-ready-t { font-size:14px; font-weight:700; color:var(--ti-ink); }
-    .ti-ready-s { font-size:12.5px; color:var(--ti-ink3); max-width:240px; }
+    /* kpis */
+    .tf-kpis { display:grid; grid-template-columns:1fr 1fr; gap:11px; margin-bottom:14px; }
+    .tf-kpi { padding:13px; border-radius:12px; box-shadow:inset 0 0 0 1px var(--tf-line2); background:#FBFCFD; }
+    .tf-kpi-n { font-family:'Montserrat',sans-serif; font-size:24px; font-weight:800; color:var(--tf-ink); letter-spacing:-0.02em; font-variant-numeric:tabular-nums; line-height:1; }
+    .tf-kpi-l { font-size:11.5px; color:var(--tf-ink3); margin-top:4px; }
+    .tf-done { display:flex; align-items:center; justify-content:center; gap:8px; font-size:13px; font-weight:700; color:var(--tf-green); }
+    .tf-done svg { width:16px; height:16px; }
 
     @media (prefers-reduced-motion: reduce) {
-      .ti-screen { transition:none; } .ti-ready-orb { animation:none; } .ti-email-body .cur { display:none; }
-      .ti-gauge-track > i, .ti-slot.booked { transition:none; }
+      .tf-focus-item { transition:none; } .tf-ready-orb { animation:none; } .tf-mail-body .cur { display:none; }
+      .tf-gauge-tr > i, .tf-slot.book, .tf-flow-fill { transition:none; }
     }
-
-    @media (max-width: 940px) {
-      .ti-stage { grid-template-columns: 1fr; }
-      .ti-form { max-width:none; }
-      .ti-run-panel { grid-template-columns: 1fr; }
-      .ti-rail { flex-direction:row; overflow-x:auto; gap:6px; padding-bottom:4px; scrollbar-width:none; }
-      .ti-rail::-webkit-scrollbar { display:none; }
-      .ti-step { flex:0 0 auto; flex-direction:column; align-items:center; gap:6px; width:96px; text-align:center; padding:10px 8px; }
-      .ti-sl { font-size:10.5px; } .ti-time { position:static; }
-    }
-    @media (max-width: 768px) { #try-it { padding:74px 0; } .ti-wrap { padding:0 16px; } .ti-view-body { min-height:360px; } }
-    @media (max-width: 480px) { .ti-kpis { grid-template-columns:1fr; } }
 
     /* ══ REAL dashboard code, scoped: lead-profile card (ported verbatim from app.html) ══ */
-    #try-it .ti-view-body { min-height: 384px; }
-    #try-it .ti-screen[data-s="1"] { display:flex; flex-direction:column; }
-    .ti-dash { flex:1 1 auto; min-height:0; overflow-y:auto; background:#fff; border:1px solid #e5e7eb; border-radius:10px;
+    .ti-dash { background:#fff; border-radius:14px; box-shadow:0 40px 70px -34px rgba(20,30,45,0.4), 0 6px 16px -10px rgba(20,30,45,0.22); overflow:hidden;
       --blue:#0050e6; --blue-b:#0041c4; --blue-border:rgba(0,80,230,0.28); --blue-dim:rgba(0,80,230,0.07);
       --green:#059669; --green-dim:rgba(5,150,105,0.08); --red:#dc2626; --red-dim:rgba(220,38,38,0.07);
       --amber:#b45309; --amber-dim:rgba(180,83,9,0.07); --text:#111827; --text-m:#6b7280; --text-s:#374151;
       --border:#e5e7eb; --input-bg:#f9fafb; --input-border:#d1d5db; --r-input:6px; }
-    .ti-dash::-webkit-scrollbar { width:6px; } .ti-dash::-webkit-scrollbar-thumb { background:#d1d5db; border-radius:6px; }
     .ti-dash .lead-avatar { width:26px; height:26px; border-radius:8px; color:#fff; font-size:10px; font-weight:650; letter-spacing:0.02em; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0; }
     .ti-dash .badge { display:inline-flex; align-items:center; padding:2px 7px; border-radius:3px; font-size:10px; font-weight:600; white-space:nowrap; text-transform:uppercase; letter-spacing:0.3px; }
     .ti-dash .b-high { background:var(--red-dim); color:var(--red); border:1px solid rgba(220,38,38,0.18); }
@@ -1986,19 +1971,19 @@
     .ti-dash .b-low { background:var(--blue-dim); color:var(--blue); border:1px solid rgba(0,87,255,0.16); }
     .ti-dash .b-conn { background:var(--green-dim); color:var(--green); border:1px solid rgba(5,150,105,.18); }
     .ti-dash .score-ring { width:30px; height:30px; border-radius:50%; border:2px solid var(--border); display:inline-flex; align-items:center; justify-content:center; font-size:10.5px; font-weight:700; color:var(--text); font-variant-numeric:tabular-nums; }
-    .ti-dash .lp-head { padding:16px 16px 12px; display:flex; align-items:flex-start; gap:11px; }
+    .ti-dash .lp-head { padding:15px 16px 11px; display:flex; align-items:flex-start; gap:11px; }
     .ti-dash .lp-name { font-size:15px; font-weight:800; color:var(--text); line-height:1.2; }
     .ti-dash .lp-meta { font-size:11px; color:var(--text-m); margin-top:3px; }
-    .ti-dash .lp-sec { padding:11px 16px; border-top:1px solid var(--border); }
-    .ti-dash .lp-sec-label { font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-m); margin-bottom:8px; }
+    .ti-dash .lp-sec { padding:10px 16px; border-top:1px solid var(--border); }
+    .ti-dash .lp-sec-label { font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-m); margin-bottom:7px; }
     .ti-dash .lp-actions { display:flex; flex-direction:column; gap:7px; }
-    .ti-dash .lp-act-btn { display:flex; align-items:center; gap:9px; padding:9px 12px; border:1px solid var(--border); border-radius:var(--r-input); background:transparent; font-size:12px; font-weight:600; color:var(--text); font-family:inherit; }
+    .ti-dash .lp-act-btn { display:flex; align-items:center; gap:9px; padding:8px 12px; border:1px solid var(--border); border-radius:var(--r-input); background:transparent; font-size:12px; font-weight:600; color:var(--text); font-family:inherit; }
     .ti-dash .lp-act-btn svg { width:14px; height:14px; color:var(--blue); flex-shrink:0; }
-    .ti-dash .lp-tl-item { display:flex; gap:10px; padding:4px 0; }
+    .ti-dash .lp-tl-item { display:flex; gap:10px; padding:3px 0; }
     .ti-dash .lp-tl-dot { width:7px; height:7px; border-radius:50%; background:var(--blue); margin-top:5px; flex-shrink:0; }
     .ti-dash .lp-tl-text { font-size:12px; color:var(--text-s); line-height:1.45; }
     .ti-dash .lp-tl-time { font-size:10.5px; color:var(--text-m); }
-    .ti-dash .detail-row { display:flex; justify-content:space-between; padding:7px 0; border-bottom:1px solid var(--border); }
+    .ti-dash .detail-row { display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px solid var(--border); }
     .ti-dash .detail-row:last-child { border-bottom:none; }
     .ti-dash .dk { font-size:11px; color:var(--text-m); }
     .ti-dash .dv { font-size:12px; font-weight:600; color:var(--text-s); }
@@ -2008,128 +1993,122 @@
     .ti-dash .status-chip.sc-warm.active { background:var(--amber-dim); color:#d97706; border-color:rgba(217,119,6,0.4); }
     .ti-dash .status-chip.sc-cold.active { background:var(--blue-dim); color:var(--blue); border-color:rgba(0,87,255,0.35); }
     .ti-dash .status-chip.sc-booked.active { background:var(--green-dim); color:var(--green); border-color:rgba(5,150,105,0.4); }
+
+    @media (max-width: 940px) {
+      .tf-stage { grid-template-columns: 1fr; gap: 26px; }
+      .tf-focus { min-height: 430px; }
+    }
+    @media (max-width: 768px) {
+      #try-it { padding: 74px 0; } .tf-wrap { padding: 0 16px; }
+      .tf-flow { overflow-x:auto; justify-content:flex-start; gap:8px; scrollbar-width:none; padding-bottom:6px; }
+      .tf-flow::-webkit-scrollbar { display:none; } .tf-flow::before, .tf-flow-fill { display:none; }
+      .tf-node { flex:0 0 auto; }
+      .tf-focus-item { max-width:none; }
+      .tf-canvas-timer { position:static; display:inline-block; margin-bottom:12px; }
+    }
   </style>
   <section id="try-it">
-    <div class="ti-wrap">
-      <div class="ti-intro reveal">
-        <span class="ti-eyebrow">See it in action</span>
-        <h2 class="ti-h2">Watch a lead move through your system.</h2>
-        <p class="ti-sub">Fill in a request the way one of your leads would, hit run, and watch Flowaify capture, respond, qualify, assign, and book it &mdash; in seconds.</p>
+    <div class="tf-wrap">
+      <div class="tf-intro reveal">
+        <span class="tf-eyebrow">See it in action</span>
+        <h2 class="tf-h2">Watch a lead move through your system.</h2>
+        <p class="tf-sub">Enter a request the way one of your leads would, hit run, and watch it flow through your live dashboard &mdash; captured, answered, qualified, assigned, and booked in seconds.</p>
       </div>
 
-      <div class="ti-stage reveal" style="transition-delay:80ms;">
-        <!-- the website form -->
-        <form class="ti-form" onsubmit="return false;" autocomplete="off">
-          <div class="ti-form-head">
-            <span class="ti-form-glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18"/></svg></span>
-            <div><div class="ti-form-title">New consultation request</div><div class="ti-form-sub">yourbusiness.com/contact</div></div>
+      <div class="tf-stage reveal" style="transition-delay:80ms;">
+        <form class="tf-form" onsubmit="return false;" autocomplete="off">
+          <div class="tf-form-head">
+            <span class="tf-form-glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18"/></svg></span>
+            <div><div class="tf-form-title">New consultation request</div><div class="tf-form-sub">yourbusiness.com/contact</div></div>
           </div>
-          <label class="ti-field"><span>Full name</span><input id="ti-name" type="text" value="Jordan Blake" maxlength="40"></label>
-          <label class="ti-field"><span>Email</span><input id="ti-email" type="text" value="jordan@email.com" maxlength="50"></label>
-          <label class="ti-field"><span>Phone</span><input id="ti-phone" type="text" value="(555) 012-3948" maxlength="24"></label>
-          <label class="ti-field"><span>What can we help with?</span>
+          <label class="tf-field"><span>Full name</span><input id="ti-name" type="text" value="Jordan Blake" maxlength="40"></label>
+          <label class="tf-field"><span>Email</span><input id="ti-email" type="text" value="jordan@email.com" maxlength="50"></label>
+          <label class="tf-field"><span>Phone</span><input id="ti-phone" type="text" value="(555) 012-3948" maxlength="24"></label>
+          <label class="tf-field"><span>What can we help with?</span>
             <select id="ti-service"><option>New consultation</option><option>Book an appointment</option><option>Request a quote</option><option>General enquiry</option></select></label>
-          <label class="ti-field"><span>Message</span><textarea id="ti-msg" rows="2" maxlength="140">Hi, I'd like to book a consultation this week if possible.</textarea></label>
-          <button class="ti-run" id="ti-run" type="button"><svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M8 5v14l11-7z"/></svg><span id="ti-run-label">Run workflow</span></button>
-          <div class="ti-note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>Live simulation &mdash; no real emails are sent.</div>
+          <label class="tf-field"><span>Message</span><textarea id="ti-msg" rows="2" maxlength="140">Hi, I'd like to book a consultation this week if possible.</textarea></label>
+          <button class="tf-run" id="ti-run" type="button"><span class="tf-run-ic"><svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M8 5v14l11-7z"/></svg></span><span id="ti-run-label">Run workflow</span></button>
+          <div class="tf-note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>Live simulation &mdash; no real emails are sent.</div>
         </form>
 
-        <!-- run panel -->
-        <div class="ti-run-panel">
-          <div class="ti-rail" id="ti-rail">
-            <button class="ti-step" type="button" data-i="0"><span class="ti-si"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v12H5.5L4 17.5z"/><path d="M8 9h8M8 12h5"/></svg></span><span class="ti-sl">New consultation request</span><span class="ti-time"></span></button>
-            <button class="ti-step" type="button" data-i="1"><span class="ti-si"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M4 20a5 5 0 0 1 10 0M18 8v6M15 11h6"/></svg></span><span class="ti-sl">Contact created in CRM</span><span class="ti-time"></span></button>
-            <button class="ti-step" type="button" data-i="2"><span class="ti-si"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 4L3 11l6 2 2 6z"/><path d="M21 4L9 13"/></svg></span><span class="ti-sl">Personalized response sent</span><span class="ti-time"></span></button>
-            <button class="ti-step" type="button" data-i="3"><span class="ti-si"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c1 3-1 4-1 6a3 3 0 0 0 6 0c0-1 0-2-1-3 2 1 4 4 4 7a7 7 0 0 1-14 0c0-4 3-6 6-10z"/></svg></span><span class="ti-sl">Classified high intent</span><span class="ti-time"></span></button>
-            <button class="ti-step" type="button" data-i="4"><span class="ti-si"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 20a5.5 5.5 0 0 1 11 0"/><path d="M16 12l2 2 4-4"/></svg></span><span class="ti-sl">Assigned to team member</span><span class="ti-time"></span></button>
-            <button class="ti-step" type="button" data-i="5"><span class="ti-si"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="17" rx="2"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/><path d="M9 15l2 2 4-4"/></svg></span><span class="ti-sl">Appointment booked</span><span class="ti-time"></span></button>
-            <button class="ti-step" type="button" data-i="6"><span class="ti-si"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="8" height="10" rx="1.5"/><rect x="13" y="3" width="8" height="6" rx="1.5"/><rect x="13" y="12" width="8" height="9" rx="1.5"/><rect x="3" y="16" width="8" height="5" rx="1.5"/></svg></span><span class="ti-sl">Dashboard updated</span><span class="ti-time"></span></button>
+        <div class="tf-canvas">
+          <span class="tf-canvas-timer" id="ti-timer">0.0s</span>
+          <div class="tf-flow" id="ti-rail">
+            <div class="tf-flow-fill" id="ti-flow-fill"></div>
+            <button class="tf-node" type="button" data-i="0"><span class="tf-ndot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v12H5.5L4 17.5z"/><path d="M8 9h8M8 12h5"/></svg></span><span class="tf-nlabel">Request</span><span class="tf-ntime"></span></button>
+            <button class="tf-node" type="button" data-i="1"><span class="tf-ndot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M4 20a5 5 0 0 1 10 0M18 8v6M15 11h6"/></svg></span><span class="tf-nlabel">Contact</span><span class="tf-ntime"></span></button>
+            <button class="tf-node" type="button" data-i="2"><span class="tf-ndot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 4L3 11l6 2 2 6z"/><path d="M21 4L9 13"/></svg></span><span class="tf-nlabel">Reply</span><span class="tf-ntime"></span></button>
+            <button class="tf-node" type="button" data-i="3"><span class="tf-ndot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c1 3-1 4-1 6a3 3 0 0 0 6 0c0-1 0-2-1-3 2 1 4 4 4 7a7 7 0 0 1-14 0c0-4 3-6 6-10z"/></svg></span><span class="tf-nlabel">Qualified</span><span class="tf-ntime"></span></button>
+            <button class="tf-node" type="button" data-i="4"><span class="tf-ndot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 20a5.5 5.5 0 0 1 11 0"/><path d="M16 12l2 2 4-4"/></svg></span><span class="tf-nlabel">Assigned</span><span class="tf-ntime"></span></button>
+            <button class="tf-node" type="button" data-i="5"><span class="tf-ndot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="17" rx="2"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/><path d="M9 15l2 2 4-4"/></svg></span><span class="tf-nlabel">Booked</span><span class="tf-ntime"></span></button>
+            <button class="tf-node" type="button" data-i="6"><span class="tf-ndot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="8" height="10" rx="1.5"/><rect x="13" y="3" width="8" height="6" rx="1.5"/><rect x="13" y="12" width="8" height="9" rx="1.5"/><rect x="3" y="16" width="8" height="5" rx="1.5"/></svg></span><span class="tf-nlabel">Updated</span><span class="tf-ntime"></span></button>
           </div>
 
-          <div class="ti-view">
-            <div class="ti-view-chrome"><span class="d"></span><span class="d"></span><span class="d"></span><span class="ti-view-url">app.flowaify.app</span><span class="ti-view-timer" id="ti-timer">0.0s</span></div>
-            <div class="ti-view-body" id="ti-view-body">
-
-              <div class="ti-ready" id="ti-ready">
-                <div class="ti-ready-orb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3l14 9-14 9z"/></svg></div>
-                <div class="ti-ready-t">Ready when you are</div>
-                <div class="ti-ready-s">Hit <b>Run workflow</b> to watch this lead flow through your dashboard.</div>
-              </div>
-
-              <!-- 0: request -->
-              <div class="ti-screen" data-s="0">
-                <div class="ti-scr-label">Incoming request</div>
-                <div class="ti-req">
-                  <div class="ti-req-top"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v14H4z"/><path d="M4 7l8 6 8-6"/></svg>New form submission</div>
-                  <div class="ti-req-row"><span class="ti-req-k">Name</span><span class="ti-req-v" data-f="name"></span></div>
-                  <div class="ti-req-row"><span class="ti-req-k">Email</span><span class="ti-req-v" data-f="email"></span></div>
-                  <div class="ti-req-row"><span class="ti-req-k">Phone</span><span class="ti-req-v" data-f="phone"></span></div>
-                  <div class="ti-req-row"><span class="ti-req-k">Interest</span><span class="ti-req-v" data-f="service"></span></div>
-                  <div class="ti-req-msg" data-f="msg"></div>
-                </div>
-              </div>
-
-              <!-- 1: contact created — REAL dashboard lead-profile code (ported from selectLead) -->
-              <div class="ti-screen" data-s="1">
-                <div class="ti-scr-label">Contact · CRM · Lead Profile</div>
-                <div class="ti-dash" id="ti-lead-card"></div>
-              </div>
-
-              <!-- 2: flowy email -->
-              <div class="ti-screen" data-s="2">
-                <div class="ti-flowy-head"><span class="ti-flowy-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.8 4.7L18 9l-4.2 1.3L12 15l-1.8-4.7L6 9l4.2-1.3z"/></svg>Flowy</span><span class="ti-flowy-status" id="ti-flowy-status">Crafting a reply&hellip;</span></div>
-                <div class="ti-email">
-                  <div class="ti-email-row"><span class="ti-email-k">To</span><span class="ti-email-v" data-f="email"></span></div>
-                  <div class="ti-email-row"><span class="ti-email-k">Subject</span><span class="ti-email-v" data-f="subject"></span></div>
-                  <div class="ti-email-body" id="ti-email-body"></div>
-                  <div class="ti-email-foot"><span class="ti-email-sent" id="ti-email-sent"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Sent &middot; via Microsoft 365</span></div>
-                </div>
-              </div>
-
-              <!-- 3: classification -->
-              <div class="ti-screen" data-s="3">
-                <div class="ti-scr-label">Lead scoring</div>
-                <div class="ti-class-name"><span class="ti-av sm" data-f="avatar"></span><span data-f="name"></span></div>
-                <div class="ti-gauge">
-                  <div class="ti-gauge-track"><i id="ti-gauge-fill"></i></div>
-                  <div class="ti-gauge-num"><span id="ti-score">0</span><small>/100</small></div>
-                </div>
-                <div class="ti-class-badges"><span class="ti-badge ti-b-hot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c1 3-1 4-1 6a3 3 0 0 0 6 0c0-1 0-2-1-3 2 1 4 4 4 7a7 7 0 0 1-14 0c0-4 3-6 6-10z"/></svg>HOT</span><span class="ti-badge ti-b-intent">High intent</span></div>
-                <div class="ti-class-note">Ready to book &middot; recommend a response within the hour.</div>
-              </div>
-
-              <!-- 4: team task -->
-              <div class="ti-screen" data-s="4">
-                <div class="ti-scr-label">Team · task assigned</div>
-                <div class="ti-task-card">
-                  <span class="ti-task-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
-                  <div><div class="ti-task-title">Call <span data-f="first"></span></div><div class="ti-task-sub"><span data-f="service"></span> &middot; high priority</div></div>
-                </div>
-                <div class="ti-task-assign"><span class="ti-assign-label">Assigned to</span><span class="ti-av sm" style="background:#0D9488;">MC</span><span class="ti-assign-name">Maria Chen</span><span class="ti-assign-role">Client Success</span></div>
-                <div class="ti-task-due"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Due today &middot; reminder set</div>
-              </div>
-
-              <!-- 5: calendar -->
-              <div class="ti-screen" data-s="5">
-                <div class="ti-cal-head">Tuesday &middot; this week</div>
-                <div class="ti-slot dim"><span class="ti-slot-time">1:30 PM</span><span class="ti-slot-empty">Available</span></div>
-                <div class="ti-slot booked" id="ti-slot"><span class="ti-slot-time">2:30 PM</span><span class="ti-slot-title"><span data-f="first"></span> &middot; <span data-f="service"></span></span><span class="ti-slot-tag">Booked</span></div>
-                <div class="ti-slot dim"><span class="ti-slot-time">3:30 PM</span><span class="ti-slot-empty">Available</span></div>
-              </div>
-
-              <!-- 6: kpis -->
-              <div class="ti-screen" data-s="6">
-                <div class="ti-scr-label">Overview · updated live</div>
-                <div class="ti-kpis">
-                  <div class="ti-kpi"><div class="ti-kpi-num" data-count="1">0</div><div class="ti-kpi-label">New lead today</div></div>
-                  <div class="ti-kpi"><div class="ti-kpi-num" data-count="42" data-suffix="s">0</div><div class="ti-kpi-label">Response time</div></div>
-                  <div class="ti-kpi"><div class="ti-kpi-num" data-count="1">0</div><div class="ti-kpi-label">Appointment booked</div></div>
-                  <div class="ti-kpi"><div class="ti-kpi-num" data-count="5">0</div><div class="ti-kpi-label">Follow-ups queued</div></div>
-                </div>
-                <div class="ti-done"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Captured to booked &mdash; handled automatically.</div>
-              </div>
-
+          <div class="tf-focus" id="ti-view-body">
+            <div class="tf-ready" id="ti-ready">
+              <div class="tf-ready-orb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3l14 9-14 9z"/></svg></div>
+              <div class="tf-ready-t">Ready when you are</div>
+              <div class="tf-ready-s">Hit <b>Run workflow</b> to watch this lead flow through your dashboard.</div>
             </div>
+
+            <!-- 0 request -->
+            <div class="tf-focus-item" data-s="0"><div class="tf-scr-label">Incoming request</div><div class="tf-float tf-c">
+              <div class="tf-c-head"><span class="tf-c-title">New form submission</span><span class="tf-pill tf-pill-neutral">Website</span></div>
+              <div class="tf-kd"><span class="tf-kd-k">Name</span><span class="tf-kd-v" data-f="name"></span></div>
+              <div class="tf-kd"><span class="tf-kd-k">Email</span><span class="tf-kd-v" data-f="email"></span></div>
+              <div class="tf-kd"><span class="tf-kd-k">Phone</span><span class="tf-kd-v" data-f="phone"></span></div>
+              <div class="tf-kd"><span class="tf-kd-k">Interest</span><span class="tf-kd-v" data-f="service"></span></div>
+              <div class="tf-kd" style="color:var(--tf-ink2);line-height:1.5;" data-f="msg"></div>
+            </div></div>
+
+            <!-- 1 real lead card -->
+            <div class="tf-focus-item" data-s="1"><div class="tf-scr-label">Contact · CRM · Lead Profile</div><div class="ti-dash" id="ti-lead-card"></div></div>
+
+            <!-- 2 flowy email -->
+            <div class="tf-focus-item" data-s="2"><div class="tf-scr-label">Flowy · personalized reply</div><div class="tf-float tf-c">
+              <div class="tf-flowy"><span class="tf-flowy-b"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.8 4.7L18 9l-4.2 1.3L12 15l-1.8-4.7L6 9l4.2-1.3z"/></svg>Flowy</span><span class="tf-flowy-s" id="ti-flowy-status">Crafting a reply&hellip;</span></div>
+              <div class="tf-mail">
+                <div class="tf-mail-r"><span class="tf-mail-k">To</span><span class="tf-mail-v" data-f="email"></span></div>
+                <div class="tf-mail-r"><span class="tf-mail-k">Subject</span><span class="tf-mail-v" data-f="subject"></span></div>
+                <div class="tf-mail-body" id="ti-email-body"></div>
+                <div class="tf-mail-foot"><span class="tf-mail-sent" id="ti-email-sent"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Sent &middot; via Microsoft 365</span></div>
+              </div>
+            </div></div>
+
+            <!-- 3 score -->
+            <div class="tf-focus-item" data-s="3"><div class="tf-scr-label">Lead scoring</div><div class="tf-float tf-c">
+              <div class="tf-score-name"><span class="ti-av-mini" data-f="avatar" style="width:26px;height:26px;border-radius:50%;display:inline-grid;place-items:center;color:#fff;font-size:11px;font-weight:800;"></span><span data-f="name"></span></div>
+              <div class="tf-gauge"><div class="tf-gauge-tr"><i id="ti-gauge-fill"></i></div><div class="tf-gauge-n"><span id="ti-score">0</span><small>/100</small></div></div>
+              <div class="tf-score-badges"><span class="tf-badge-hot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c1 3-1 4-1 6a3 3 0 0 0 6 0c0-1 0-2-1-3 2 1 4 4 4 7a7 7 0 0 1-14 0c0-4 3-6 6-10z"/></svg>HOT</span><span class="tf-badge-int">High intent</span></div>
+              <div class="tf-score-note">Ready to book &middot; recommend a response within the hour.</div>
+            </div></div>
+
+            <!-- 4 task -->
+            <div class="tf-focus-item" data-s="4"><div class="tf-scr-label">Team · task assigned</div><div class="tf-float tf-c">
+              <div class="tf-row"><span class="tf-task-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span><div class="tf-lm"><div class="tf-ln">Call <span data-f="first"></span></div><div class="tf-ls"><span data-f="service"></span> &middot; high priority</div></div></div>
+              <div class="tf-assign"><span class="tf-assign-l">Assigned to</span><span class="tf-assign-av">MC</span><span class="tf-assign-n">Maria Chen</span><span class="tf-assign-r">Client Success</span></div>
+              <div class="tf-due"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Due today &middot; reminder set</div>
+            </div></div>
+
+            <!-- 5 calendar -->
+            <div class="tf-focus-item" data-s="5"><div class="tf-scr-label">Calendar · appointment booked</div><div class="tf-float tf-c">
+              <div class="tf-cal-h">Tuesday &middot; this week</div>
+              <div class="tf-slot dim"><span class="tf-slot-t">1:30 PM</span><span class="tf-slot-e">Available</span></div>
+              <div class="tf-slot book" id="ti-slot"><span class="tf-slot-t">2:30 PM</span><span class="tf-slot-n"><span data-f="first"></span> &middot; <span data-f="service"></span></span><span class="tf-slot-tag">Booked</span></div>
+              <div class="tf-slot dim"><span class="tf-slot-t">3:30 PM</span><span class="tf-slot-e">Available</span></div>
+            </div></div>
+
+            <!-- 6 kpis -->
+            <div class="tf-focus-item" data-s="6"><div class="tf-scr-label">Overview · updated live</div><div class="tf-float tf-c">
+              <div class="tf-kpis">
+                <div class="tf-kpi"><div class="tf-kpi-n" data-count="1">0</div><div class="tf-kpi-l">New lead today</div></div>
+                <div class="tf-kpi"><div class="tf-kpi-n" data-count="42" data-suffix="s">0</div><div class="tf-kpi-l">Response time</div></div>
+                <div class="tf-kpi"><div class="tf-kpi-n" data-count="1">0</div><div class="tf-kpi-l">Appointment booked</div></div>
+                <div class="tf-kpi"><div class="tf-kpi-n" data-count="5">0</div><div class="tf-kpi-l">Follow-ups queued</div></div>
+              </div>
+              <div class="tf-done"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Captured to booked &mdash; handled automatically.</div>
+            </div></div>
+
           </div>
         </div>
       </div>
@@ -2141,9 +2120,9 @@
     if (!section) return;
     var runBtn = document.getElementById('ti-run');
     var runLabel = document.getElementById('ti-run-label');
-    var rail = document.getElementById('ti-rail');
-    var steps = Array.prototype.slice.call(rail.querySelectorAll('.ti-step'));
-    var screens = Array.prototype.slice.call(section.querySelectorAll('.ti-screen'));
+    var steps = Array.prototype.slice.call(section.querySelectorAll('.tf-node'));
+    var items = Array.prototype.slice.call(section.querySelectorAll('.tf-focus-item'));
+    var flowFill = document.getElementById('ti-flow-fill');
     var ready = document.getElementById('ti-ready');
     var timerEl = document.getElementById('ti-timer');
     var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -2152,27 +2131,21 @@
     var timers = [], runId = 0, rafId = 0, running = false, hasRun = false;
 
     function val(id, d) { var el = document.getElementById(id); var v = el && el.value != null ? el.value.trim() : ''; return v || d; }
-    function cap(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : s; }
-    function initials(name) {
-      var p = name.split(/\s+/).filter(Boolean);
-      return ((p[0] ? p[0][0] : '') + (p[1] ? p[1][0] : (p[0] && p[0][1] ? p[0][1] : ''))).toUpperCase() || 'L';
-    }
-    var AVCOL = ['#0057FF', '#7C3AED', '#0D9488', '#D97706', '#DC2626', '#2563EB'];
-    function avColor(s) { var h = 0; for (var i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0; return AVCOL[h % AVCOL.length]; }
+    function initials(name) { var p = name.split(/\s+/).filter(Boolean); return ((p[0] ? p[0][0] : '') + (p[1] ? p[1][0] : (p[0] && p[0][1] ? p[0][1] : ''))).toUpperCase() || 'L'; }
+    var AVCOL = ['#334155', '#0D9488', '#7C3AED', '#B45309', '#DC2626', '#0050e6'];
+    function avColor(s) { var h = 0, i; for (i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0; return AVCOL[h % AVCOL.length]; }
 
     var DATA = {};
     function readForm() {
       var name = val('ti-name', 'Jordan Blake');
       var service = val('ti-service', 'New consultation');
-      var msg = val('ti-msg', "Hi, I'd like to book a consultation this week if possible.");
       var first = name.split(/\s+/)[0] || name;
       var svcLow = service.toLowerCase();
       DATA = {
         name: name, first: first, email: val('ti-email', 'jordan@email.com'), phone: val('ti-phone', '(555) 012-3948'),
-        service: service, msg: msg, avatar: initials(name), avatarColor: avColor(name),
-        subject: 'Re: your ' + svcLow + ' request',
+        service: service, msg: val('ti-msg', "Hi, I'd like to book a consultation this week if possible."),
+        avatar: initials(name), avatarColor: avColor(name), subject: 'Re: your ' + svcLow + ' request',
         summary: first + ' submitted a ' + svcLow + ' request through your website and wants to move quickly. Warm, high-intent — best to respond right away.',
-        email: val('ti-email', 'jordan@email.com'),
         body: 'Hi ' + first + ',\n\nThanks for reaching out about your ' + svcLow + " — I'd be glad to help. Are you free for a quick call this week? I have a couple of times open on Tuesday.\n\nJust reply here or grab a slot and we'll take care of the rest.\n\nTalk soon,\nThe team"
       };
     }
@@ -2188,19 +2161,8 @@
     /* ── real dashboard code, ported verbatim from pages/dashboard/dashboard.js ── */
     function dEsc(v) { if (v == null || v === '') return '—'; return String(v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
     var D_HUES = [212, 262, 152, 22, 340, 190, 48, 288];
-    function dAvatar(name) {
-      var n = String(name || '?'), h = 0, i;
-      for (i = 0; i < n.length; i++) h = (h * 31 + n.charCodeAt(i)) >>> 0;
-      var hue = D_HUES[h % D_HUES.length];
-      var ini = n.split(/\s+/).slice(0, 2).map(function (w) { return w.charAt(0); }).join('').toUpperCase() || '?';
-      return '<span class="lead-avatar" style="background:hsl(' + hue + ',62%,45%);">' + dEsc(ini) + '</span>';
-    }
-    function dBadge(status) {
-      var s = String(status || '').toUpperCase(), cls = 'b-muted';
-      if (s.indexOf('HOT') !== -1) cls = 'b-high'; else if (s.indexOf('WARM') !== -1) cls = 'b-med';
-      else if (s.indexOf('BOOK') !== -1) cls = 'b-conn'; else if (s.indexOf('COLD') !== -1) cls = 'b-low';
-      return '<span class="badge ' + cls + '">' + dEsc(status) + '</span>';
-    }
+    function dAvatar(name) { var n = String(name || '?'), h = 0, i; for (i = 0; i < n.length; i++) h = (h * 31 + n.charCodeAt(i)) >>> 0; var hue = D_HUES[h % D_HUES.length]; var ini = n.split(/\s+/).slice(0, 2).map(function (w) { return w.charAt(0); }).join('').toUpperCase() || '?'; return '<span class="lead-avatar" style="background:hsl(' + hue + ',62%,45%);">' + dEsc(ini) + '</span>'; }
+    function dBadge(status) { var s = String(status || '').toUpperCase(), cls = 'b-muted'; if (s.indexOf('HOT') !== -1) cls = 'b-high'; else if (s.indexOf('WARM') !== -1) cls = 'b-med'; else if (s.indexOf('BOOK') !== -1) cls = 'b-conn'; else if (s.indexOf('COLD') !== -1) cls = 'b-low'; return '<span class="badge ' + cls + '">' + dEsc(status) + '</span>'; }
     function dScore(name) { var h = 0, str = String(name || ''), i; for (i = 0; i < str.length; i++) h = ((h * 31) + str.charCodeAt(i)) & 0x7fffffff; return 85 + (h % 11); }
     function renderLeadCard() {
       var el = document.getElementById('ti-lead-card'); if (!el) return;
@@ -2214,123 +2176,75 @@
       el.innerHTML = r.join('');
     }
 
-    function clearTimers() { timers.forEach(clearTimeout); timers = []; if (rafId) cancelAnimationFrame(rafId), rafId = 0; }
-    function at(ms, fn) { timers.push(setTimeout(fn, ms)); }
+    function clearTimers() { timers.forEach(clearTimeout); timers = []; if (rafId) { cancelAnimationFrame(rafId); rafId = 0; } }
 
-    function showScreen(i) {
-      screens.forEach(function (s) { s.classList.toggle('active', +s.getAttribute('data-s') === i); });
-    }
+    function showItem(i) { items.forEach(function (s) { s.classList.toggle('active', +s.getAttribute('data-s') === i); }); }
+    function setFlow(i) { if (flowFill && steps.length > 1) flowFill.style.width = (i / (steps.length - 1) * 100) + '%'; }
     function activate(i, done) {
-      steps.forEach(function (s) {
-        var si = +s.getAttribute('data-i');
-        s.classList.toggle('on', si === i && !done);
-        if (si === i && done) s.classList.add('done');
-      });
-      var st = steps[i]; if (st) { var t = st.querySelector('.ti-time'); if (t) t.textContent = (TIMES[i] / 1000).toFixed(1) + 's'; }
+      steps.forEach(function (s) { var si = +s.getAttribute('data-i'); s.classList.toggle('on', si === i && !done); if (si === i && done) s.classList.add('done'); });
+      var st = steps[i]; if (st) { var t = st.querySelector('.tf-ntime'); if (t) t.textContent = (TIMES[i] / 1000).toFixed(1) + 's'; }
+      setFlow(i);
     }
 
     function typeEmail(id) {
-      var body = document.getElementById('ti-email-body');
-      var status = document.getElementById('ti-flowy-status');
-      var sent = document.getElementById('ti-email-sent');
-      if (!body) return;
-      var txt = DATA.body, k = 0;
+      var body = document.getElementById('ti-email-body'), status = document.getElementById('ti-flowy-status'), sent = document.getElementById('ti-email-sent');
+      if (!body) return; var txt = DATA.body, k = 0;
       body.textContent = ''; sent.classList.remove('show'); status.classList.remove('sent'); status.innerHTML = 'Crafting a reply&hellip;';
       var cur = document.createElement('span'); cur.className = 'cur';
-      function tick() {
-        if (id !== runId) return;
-        k += Math.max(1, Math.round(txt.length / 34));
-        body.textContent = txt.slice(0, k);
-        body.appendChild(cur);
-        if (k < txt.length) timers.push(setTimeout(tick, 22));
-        else { if (cur.parentNode) cur.parentNode.removeChild(cur); status.textContent = 'Sent'; status.classList.add('sent'); sent.classList.add('show'); }
-      }
+      function tick() { if (id !== runId) return; k += Math.max(1, Math.round(txt.length / 34)); body.textContent = txt.slice(0, k); body.appendChild(cur); if (k < txt.length) timers.push(setTimeout(tick, 22)); else { if (cur.parentNode) cur.parentNode.removeChild(cur); status.textContent = 'Sent'; status.classList.add('sent'); sent.classList.add('show'); } }
       tick();
     }
-    function fillEmailInstant() {
-      var body = document.getElementById('ti-email-body'); if (body) body.textContent = DATA.body;
-      var status = document.getElementById('ti-flowy-status'); if (status) { status.textContent = 'Sent'; status.classList.add('sent'); }
-      var sent = document.getElementById('ti-email-sent'); if (sent) sent.classList.add('show');
-    }
+    function fillEmailInstant() { var b = document.getElementById('ti-email-body'); if (b) b.textContent = DATA.body; var s = document.getElementById('ti-flowy-status'); if (s) { s.textContent = 'Sent'; s.classList.add('sent'); } var se = document.getElementById('ti-email-sent'); if (se) se.classList.add('show'); }
     function animScore(id, instant) {
-      var fillEl = document.getElementById('ti-gauge-fill'), numEl = document.getElementById('ti-score'), target = 92;
-      if (instant) { if (fillEl) fillEl.style.width = target + '%'; if (numEl) numEl.textContent = target; return; }
-      if (fillEl) fillEl.style.width = '0%';
-      timers.push(setTimeout(function () { if (id === runId && fillEl) fillEl.style.width = target + '%'; }, 60));
-      var start = null;
-      function step(ts) { if (id !== runId) return; if (!start) start = ts; var p = Math.min(1, (ts - start) / 900); if (numEl) numEl.textContent = Math.round(target * p); if (p < 1) rafId = requestAnimationFrame(step); }
-      rafId = requestAnimationFrame(step);
+      var f = document.getElementById('ti-gauge-fill'), n = document.getElementById('ti-score'), target = 92;
+      if (instant) { if (f) f.style.width = target + '%'; if (n) n.textContent = target; return; }
+      if (f) f.style.width = '0%'; timers.push(setTimeout(function () { if (id === runId && f) f.style.width = target + '%'; }, 60));
+      var start = null; function step(ts) { if (id !== runId) return; if (!start) start = ts; var p = Math.min(1, (ts - start) / 900); if (n) n.textContent = Math.round(target * p); if (p < 1) rafId = requestAnimationFrame(step); } rafId = requestAnimationFrame(step);
     }
     function bookSlot(instant) { var s = document.getElementById('ti-slot'); if (s) { if (instant) s.classList.add('in'); else timers.push(setTimeout(function () { s.classList.add('in'); }, 80)); } }
     function countKpis(id, instant) {
-      section.querySelectorAll('#try-it .ti-screen[data-s="6"] .ti-kpi-num').forEach(function (el) {
+      section.querySelectorAll('.tf-kpi-n').forEach(function (el) {
         var target = +el.getAttribute('data-count') || 0, suf = el.getAttribute('data-suffix') || '';
         if (instant) { el.textContent = target + suf; return; }
-        var start = null;
-        function step(ts) { if (id !== runId) return; if (!start) start = ts; var p = Math.min(1, (ts - start) / 700); el.textContent = Math.round(target * p) + suf; if (p < 1) requestAnimationFrame(step); }
-        requestAnimationFrame(step);
+        var start = null; function step(ts) { if (id !== runId) return; if (!start) start = ts; var p = Math.min(1, (ts - start) / 700); el.textContent = Math.round(target * p) + suf; if (p < 1) requestAnimationFrame(step); } requestAnimationFrame(step);
       });
     }
 
     function reset() {
-      steps.forEach(function (s) { s.classList.remove('on', 'done'); var t = s.querySelector('.ti-time'); if (t) t.textContent = ''; });
+      steps.forEach(function (s) { s.classList.remove('on', 'done'); var t = s.querySelector('.tf-ntime'); if (t) t.textContent = ''; });
+      if (flowFill) flowFill.style.width = '0%';
       timerEl.textContent = '0.0s';
       var b = document.getElementById('ti-email-body'); if (b) b.textContent = '';
       var sent = document.getElementById('ti-email-sent'); if (sent) sent.classList.remove('show');
-      var fillEl = document.getElementById('ti-gauge-fill'); if (fillEl) fillEl.style.width = '0%';
+      var f = document.getElementById('ti-gauge-fill'); if (f) f.style.width = '0%';
       var sc = document.getElementById('ti-score'); if (sc) sc.textContent = '0';
       var slot = document.getElementById('ti-slot'); if (slot) slot.classList.remove('in');
     }
+    function runTimer(id) { var start = performance.now(); function step(ts) { if (id !== runId) return; var e = Math.min(END, ts - start); timerEl.textContent = (e / 1000).toFixed(1) + 's'; if (e < END) rafId = requestAnimationFrame(step); } rafId = requestAnimationFrame(step); }
 
-    function runTimer(id) {
-      var start = performance.now();
-      function step(ts) {
-        if (id !== runId) return;
-        var e = Math.min(END, ts - start);
-        timerEl.textContent = (e / 1000).toFixed(1) + 's';
-        if (e < END) rafId = requestAnimationFrame(step);
-      }
-      rafId = requestAnimationFrame(step);
-    }
-
-    var STEP_ANIM = [
-      function () {},
-      function () {},
-      function (id) { typeEmail(id); },
-      function (id) { animScore(id); },
-      function () {},
-      function () { bookSlot(); },
-      function (id) { countKpis(id); }
-    ];
+    var STEP_ANIM = [function () {}, function () {}, function (id) { typeEmail(id); }, function (id) { animScore(id); }, function () {}, function () { bookSlot(); }, function (id) { countKpis(id); }];
 
     function finalize() {
-      // reduced-motion / instant end-state: all steps done, show everything assembled
-      steps.forEach(function (s, i) { s.classList.remove('on'); s.classList.add('done'); var t = s.querySelector('.ti-time'); if (t) t.textContent = (TIMES[i] / 1000).toFixed(1) + 's'; });
-      timerEl.textContent = (END / 1000).toFixed(1) + 's';
+      steps.forEach(function (s, i) { s.classList.remove('on'); s.classList.add('done'); var t = s.querySelector('.tf-ntime'); if (t) t.textContent = (TIMES[i] / 1000).toFixed(1) + 's'; });
+      setFlow(steps.length - 1); timerEl.textContent = (END / 1000).toFixed(1) + 's';
       fillEmailInstant(); animScore(0, true); bookSlot(true); countKpis(0, true);
-      ready.classList.add('gone'); showScreen(1);
-      finishBtn();
+      ready.classList.add('gone'); showItem(1); finishBtn();
     }
     function finishBtn() { running = false; hasRun = true; runBtn.disabled = false; runLabel.textContent = 'Run again'; }
 
     function run() {
-      runId++; var id = runId;
-      clearTimers(); reset();
-      readForm(); fill();
-      running = true; runBtn.disabled = true; runLabel.textContent = 'Running…';
-      ready.classList.add('gone');
+      runId++; var id = runId; clearTimers(); reset(); readForm(); fill();
+      running = true; runBtn.disabled = true; runLabel.textContent = 'Running…'; ready.classList.add('gone');
       if (reduce) { finalize(); return; }
       runTimer(id);
       TIMES.forEach(function (ms, i) {
-        at(ms, function () {
+        timers.push(setTimeout(function () {
           if (id !== runId) return;
-          // mark previous done
           if (i > 0) { var pv = steps[i - 1]; if (pv) { pv.classList.remove('on'); pv.classList.add('done'); } }
-          showScreen(i); activate(i, false);
-          STEP_ANIM[i](id);
-        });
+          showItem(i); activate(i, false); STEP_ANIM[i](id);
+        }, ms));
       });
-      at(END, function () { if (id !== runId) return; var last = steps[steps.length - 1]; if (last) { last.classList.remove('on'); last.classList.add('done'); } finishBtn(); });
+      timers.push(setTimeout(function () { if (id !== runId) return; var last = steps[steps.length - 1]; if (last) { last.classList.remove('on'); last.classList.add('done'); } finishBtn(); }, END));
     }
 
     runBtn.addEventListener('click', run);
@@ -2338,15 +2252,12 @@
       s.addEventListener('click', function () {
         if (running) return;
         if (!hasRun) { readForm(); fill(); ready.classList.add('gone'); }
-        var i = +s.getAttribute('data-i');
-        showScreen(i);
+        var i = +s.getAttribute('data-i'); showItem(i);
         steps.forEach(function (x) { x.classList.toggle('on', x === s); });
-        // populate that screen's animated bits to final state so it reads correctly when jumped to
         if (i === 2) fillEmailInstant(); else if (i === 3) animScore(0, true); else if (i === 5) bookSlot(true); else if (i === 6) countKpis(0, true);
       });
     });
 
-    // pre-fill data so the request/lead screens are correct even before first run
     readForm(); fill();
   })();
   </script>
