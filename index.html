@@ -1856,10 +1856,11 @@
     .tf-node:focus-visible .tf-ndot { outline:2px solid var(--tf-graph); outline-offset:2px; }
 
     /* focal area — real components float, no frame */
-    .tf-focus { position: relative; min-height: 344px; }
-    .tf-focus-item { position:absolute; left:50%; top:0; transform:translateX(-50%) translateY(12px); width:100%; max-width:456px; opacity:0; pointer-events:none;
+    .tf-focus { position: relative; min-height: 470px; }
+    .tf-focus-item { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%) translateY(12px); width:100%; max-width:460px; opacity:0; pointer-events:none;
       transition:opacity .5s ease, transform .5s cubic-bezier(.22,1,.36,1); }
-    .tf-focus-item.active { opacity:1; transform:translateX(-50%); pointer-events:auto; }
+    .tf-focus-item.active { opacity:1; transform:translate(-50%,-50%); pointer-events:auto; }
+    .tf-focus-item .tf-scr-label { position:absolute; top:-26px; left:0; right:0; }
     .tf-float { background:var(--tf-panel); border-radius:16px; box-shadow:0 40px 70px -34px rgba(20,30,45,0.4), 0 6px 16px -10px rgba(20,30,45,0.22); overflow:hidden; }
     .tf-scr-label { font-size:10px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--tf-ink3); text-align:center; margin-bottom:12px; }
 
@@ -1996,7 +1997,7 @@
 
     @media (max-width: 940px) {
       .tf-stage { grid-template-columns: 1fr; gap: 26px; }
-      .tf-focus { min-height: 330px; }
+      .tf-focus { min-height: 452px; }
     }
     @media (max-width: 768px) {
       #try-it { padding: 74px 0; } .tf-wrap { padding: 0 16px; }
@@ -2017,7 +2018,10 @@
     .tf-form::after, .tf-float::after, .ti-dash::after { content:''; position:absolute; top:-40%; bottom:-40%; left:-8%; width:34%; pointer-events:none; z-index:0; transform:rotate(19deg);
       background: linear-gradient(90deg, transparent, rgba(255,255,255,0.55), transparent); opacity:.5; }
     .tf-form > *, .tf-float > *, .ti-dash > * { position: relative; z-index: 1; }
-    @media (prefers-reduced-motion: no-preference) { }
+    @media (prefers-reduced-motion: no-preference) {
+      .tf-form::after, .tf-float::after, .ti-dash::after { animation: tfSheen 8s cubic-bezier(.4,0,.2,1) infinite; }
+      @keyframes tfSheen { 0%, 8% { transform: rotate(19deg) translateX(-70%); } 46%, 100% { transform: rotate(19deg) translateX(380%); } }
+    }
   </style>
   <section id="try-it">
     <div class="tf-wrap">
@@ -2183,6 +2187,8 @@
       r.push('<div class="lp-sec"><div class="lp-sec-label">Contact</div><div class="detail-row"><span class="dk">Email</span><span class="dv" style="color:var(--blue);">' + dEsc(DATA.email) + '</span></div><div class="detail-row"><span class="dk">Phone</span><span class="dv" style="color:var(--blue);">' + dEsc(DATA.phone) + '</span></div></div>');
       r.push('<div class="lp-sec"><div class="lp-sec-label">Set Status</div><div class="status-picker">' + ['HOT', 'WARM', 'COLD', 'BOOKED'].map(function (s) { var a = (s === 'HOT' ? ' active' : ''); return '<span class="status-chip sc-' + s.toLowerCase() + a + '">' + s + '</span>'; }).join('') + '</div></div>');
       r.push('<div class="lp-sec"><div class="lp-sec-label">AI Summary</div><div style="font-size:12px;color:var(--text-s);line-height:1.6;">' + dEsc(DATA.summary) + '</div></div>');
+      r.push('<div class="lp-sec"><div class="lp-sec-label">Next Best Action</div><div class="lp-actions"><span class="lp-act-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 4L3 11l6 2 2 6z"/><path d="M21 4L9 13"/></svg>Send follow-up</span><span class="lp-act-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="17" rx="2"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/><path d="M9 15l2 2 4-4"/></svg>Mark booked</span></div></div>');
+      r.push('<div class="lp-sec"><div class="lp-sec-label">Activity Timeline</div><div class="lp-tl-item"><div class="lp-tl-dot"></div><div><div class="lp-tl-text">Created in CRM</div><div class="lp-tl-time">Just now</div></div></div><div class="lp-tl-item"><div class="lp-tl-dot"></div><div><div class="lp-tl-text">Synced to Flowaify</div><div class="lp-tl-time">Live</div></div></div></div>');
       el.innerHTML = r.join('');
     }
 
