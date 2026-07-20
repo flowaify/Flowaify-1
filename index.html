@@ -1788,6 +1788,512 @@
     </div>
   </section>
 
+  <!-- ─── TRY IT YOURSELF — live lead-workflow simulator ─────────────────────── -->
+  <style>
+    #try-it { position: relative; padding: 100px 0 96px; background: linear-gradient(180deg,#F5F7FB 0%, #EDF0F5 100%); border-top: 1px solid rgba(15,23,42,0.06); border-bottom: 1px solid rgba(15,23,42,0.06);
+      --ti-blue:#0057FF; --ti-blue-dim:rgba(0,87,255,0.10); --ti-red:#DC2626; --ti-red-dim:rgba(220,38,38,0.10);
+      --ti-green:#16A34A; --ti-green-dim:rgba(22,163,74,0.11); --ti-purple:#7C3AED; --ti-purple-dim:rgba(124,58,237,0.10);
+      --ti-amber:#D97706; --ti-teal:#0D9488;
+      --ti-ink:#0F172A; --ti-ink2:#475569; --ti-ink3:#94A3B8; --ti-line:#E7EBF0; --ti-card:#FFFFFF; }
+    .ti-wrap { position: relative; z-index: 1; max-width: 1200px; margin: 0 auto; padding: 0 40px; }
+    .ti-intro { text-align: center; max-width: 720px; margin: 0 auto 42px; }
+    .ti-eyebrow { font-size: 11px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ti-blue); }
+    .ti-h2 { font-family:'Montserrat','Plus Jakarta Sans',sans-serif; font-size: clamp(2rem,3.6vw,3rem); font-weight: 800; letter-spacing: -0.03em; line-height: 1.06; color: var(--ti-ink); margin: 13px 0 15px; text-wrap: balance; }
+    .ti-sub { font-size: 16px; line-height: 1.7; color: var(--ti-ink2); max-width: 580px; margin: 0 auto; text-wrap: pretty; }
+
+    .ti-stage { display: grid; grid-template-columns: 340px 1fr; gap: 22px; align-items: start; }
+
+    /* ── the website form ── */
+    .ti-form { background: var(--ti-card); border: 1px solid var(--ti-line); border-radius: 18px; padding: 20px; box-shadow: 0 18px 40px -28px rgba(15,23,42,0.35), 0 2px 6px -3px rgba(15,23,42,0.12); }
+    .ti-form-head { display:flex; align-items:center; gap:11px; padding-bottom:15px; margin-bottom:15px; border-bottom:1px solid var(--ti-line); }
+    .ti-form-glyph { width:34px; height:34px; border-radius:9px; display:grid; place-items:center; background:var(--ti-blue-dim); color:var(--ti-blue); flex:0 0 auto; }
+    .ti-form-glyph svg { width:18px; height:18px; }
+    .ti-form-title { font-size:14px; font-weight:700; color:var(--ti-ink); }
+    .ti-form-sub { font-size:11.5px; color:var(--ti-ink3); }
+    .ti-field { display:block; margin-bottom:11px; }
+    .ti-field > span { display:block; font-size:11px; font-weight:600; color:var(--ti-ink2); margin-bottom:5px; }
+    .ti-field input, .ti-field select, .ti-field textarea { width:100%; box-sizing:border-box; font-family:inherit; font-size:13px; color:var(--ti-ink);
+      padding:9px 11px; border:1px solid var(--ti-line); border-radius:9px; background:#FBFCFE; outline:none; transition:border-color .18s, box-shadow .18s; resize:none; }
+    .ti-field input:focus, .ti-field select:focus, .ti-field textarea:focus { border-color:var(--ti-blue); box-shadow:0 0 0 3px var(--ti-blue-dim); }
+    .ti-run { width:100%; margin-top:6px; display:inline-flex; align-items:center; justify-content:center; gap:8px; font-family:inherit; font-size:14px; font-weight:700; color:#fff; cursor:pointer;
+      padding:12px 16px; border:none; border-radius:11px; background:linear-gradient(180deg,#1a6bff,#0057FF); box-shadow:0 10px 22px -8px rgba(0,87,255,0.55); transition:transform .2s, box-shadow .2s, filter .2s; }
+    .ti-run svg { width:16px; height:16px; }
+    .ti-run:hover:not(:disabled) { transform:translateY(-1px); box-shadow:0 14px 28px -8px rgba(0,87,255,0.6); }
+    .ti-run:active:not(:disabled) { transform:translateY(0); }
+    .ti-run:disabled { filter:grayscale(.3) opacity(.75); cursor:default; }
+    .ti-note { display:flex; align-items:center; gap:6px; justify-content:center; font-size:11px; color:var(--ti-ink3); margin-top:12px; }
+    .ti-note svg { width:12px; height:12px; }
+
+    /* ── run panel: step rail + dashboard viewport ── */
+    .ti-run-panel { display:grid; grid-template-columns: 218px 1fr; gap:18px; align-items:start; }
+    .ti-rail { display:flex; flex-direction:column; gap:3px; }
+    .ti-step { display:flex; align-items:center; gap:10px; padding:10px 11px; border-radius:11px; cursor:pointer; border:1px solid transparent; background:transparent; text-align:left; font-family:inherit; width:100%;
+      transition:background .25s, border-color .25s, box-shadow .25s; }
+    .ti-si { width:28px; height:28px; flex:0 0 auto; border-radius:8px; display:grid; place-items:center; background:#E9EDF3; color:var(--ti-ink3); transition:background .3s, color .3s; }
+    .ti-si svg { width:15px; height:15px; }
+    .ti-sl { flex:1 1 auto; font-size:12.5px; font-weight:600; color:var(--ti-ink3); line-height:1.25; transition:color .3s; }
+    .ti-time { font-size:10.5px; font-weight:700; color:var(--ti-ink3); font-variant-numeric:tabular-nums; opacity:0; transition:opacity .3s; }
+    .ti-step.done .ti-si { background:var(--ti-green-dim); color:var(--ti-green); }
+    .ti-step.done .ti-sl { color:var(--ti-ink); }
+    .ti-step.done .ti-time { opacity:1; }
+    .ti-step.on { background:var(--ti-card); border-color:var(--ti-line); box-shadow:0 6px 16px -8px rgba(15,23,42,0.28); }
+    .ti-step.on .ti-si { background:var(--ti-blue); color:#fff; }
+    .ti-step.on .ti-sl { color:var(--ti-ink); }
+    .ti-step.on .ti-time { opacity:1; color:var(--ti-blue); }
+
+    .ti-view { background:var(--ti-card); border:1px solid var(--ti-line); border-radius:16px; overflow:hidden; box-shadow:0 24px 50px -30px rgba(15,23,42,0.45), 0 3px 8px -4px rgba(15,23,42,0.14); }
+    .ti-view-chrome { display:flex; align-items:center; gap:6px; padding:10px 14px; background:#F7F9FC; border-bottom:1px solid var(--ti-line); }
+    .ti-view-chrome .d { width:9px; height:9px; border-radius:50%; background:#D8DEE7; }
+    .ti-view-chrome .d:nth-child(1){ background:#F0A9A0; } .ti-view-chrome .d:nth-child(2){ background:#F2CE93; } .ti-view-chrome .d:nth-child(3){ background:#A7D9A9; }
+    .ti-view-url { margin-left:8px; font-size:11px; color:var(--ti-ink3); font-weight:600; }
+    .ti-view-timer { margin-left:auto; font-size:12px; font-weight:800; color:var(--ti-ink); font-variant-numeric:tabular-nums; background:#EEF2F7; padding:3px 9px; border-radius:100px; }
+    .ti-view-body { position:relative; min-height:344px; padding:18px; }
+    .ti-screen { position:absolute; inset:18px; opacity:0; transform:translateY(8px) scale(.99); pointer-events:none; transition:opacity .45s ease, transform .45s cubic-bezier(.22,1,.36,1); }
+    .ti-screen.active { opacity:1; transform:none; pointer-events:auto; }
+    .ti-scr-label { font-size:10.5px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--ti-ink3); margin-bottom:11px; }
+
+    /* shared atoms */
+    .ti-av { width:38px; height:38px; border-radius:50%; flex:0 0 auto; display:grid; place-items:center; font-size:14px; font-weight:800; color:#fff; letter-spacing:.02em; }
+    .ti-av.sm { width:26px; height:26px; font-size:11px; }
+    .ti-badge { display:inline-flex; align-items:center; gap:4px; font-size:10.5px; font-weight:700; padding:3px 9px; border-radius:100px; }
+    .ti-badge svg { width:11px; height:11px; }
+    .ti-b-new { color:var(--ti-blue); background:var(--ti-blue-dim); }
+    .ti-b-hot { color:var(--ti-red); background:var(--ti-red-dim); }
+    .ti-b-intent { color:var(--ti-purple); background:var(--ti-purple-dim); }
+
+    /* screen 0 — request */
+    .ti-req { border:1px solid var(--ti-line); border-radius:12px; overflow:hidden; }
+    .ti-req-top { display:flex; align-items:center; gap:9px; padding:11px 13px; background:var(--ti-blue-dim); color:var(--ti-blue); font-size:12.5px; font-weight:700; }
+    .ti-req-top svg { width:16px; height:16px; }
+    .ti-req-row { display:flex; padding:9px 13px; border-top:1px solid var(--ti-line); font-size:12.5px; }
+    .ti-req-k { width:74px; flex:0 0 auto; color:var(--ti-ink3); font-weight:600; }
+    .ti-req-v { color:var(--ti-ink); font-weight:600; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .ti-req-msg { padding:11px 13px; border-top:1px solid var(--ti-line); font-size:12.5px; line-height:1.55; color:var(--ti-ink2); background:#FBFCFE; }
+
+    /* screen 1 — lead card */
+    .ti-lead-top { display:flex; align-items:center; gap:12px; margin-bottom:13px; }
+    .ti-lead-name { font-size:16px; font-weight:750; color:var(--ti-ink); letter-spacing:-0.01em; }
+    .ti-lead-meta { font-size:12px; color:var(--ti-ink3); margin-top:2px; }
+    .ti-lead-top .ti-badge { margin-left:auto; }
+    .ti-lead-contact { display:flex; flex-wrap:wrap; gap:8px 16px; padding:11px 0; border-top:1px solid var(--ti-line); border-bottom:1px solid var(--ti-line); font-size:12px; color:var(--ti-ink2); }
+    .ti-lead-contact span { display:inline-flex; align-items:center; gap:6px; }
+    .ti-lead-contact svg { width:14px; height:14px; color:var(--ti-ink3); }
+    .ti-summary { margin-top:13px; background:var(--ti-purple-dim); border:1px solid rgba(124,58,237,0.16); border-radius:11px; padding:12px 13px; }
+    .ti-summary-head { display:flex; align-items:center; gap:6px; font-size:11px; font-weight:800; letter-spacing:.04em; text-transform:uppercase; color:var(--ti-purple); margin-bottom:6px; }
+    .ti-summary-head svg { width:13px; height:13px; }
+    .ti-summary p { font-size:12.5px; line-height:1.6; color:var(--ti-ink2); }
+
+    /* screen 2 — flowy email */
+    .ti-flowy-head { display:flex; align-items:center; gap:9px; margin-bottom:12px; }
+    .ti-flowy-badge { display:inline-flex; align-items:center; gap:6px; font-size:12px; font-weight:800; color:var(--ti-purple); background:var(--ti-purple-dim); padding:5px 11px; border-radius:100px; }
+    .ti-flowy-badge svg { width:14px; height:14px; }
+    .ti-flowy-status { font-size:12px; font-weight:600; color:var(--ti-ink3); }
+    .ti-flowy-status.sent { color:var(--ti-green); }
+    .ti-email { border:1px solid var(--ti-line); border-radius:12px; overflow:hidden; }
+    .ti-email-row { display:flex; gap:8px; padding:9px 13px; border-bottom:1px solid var(--ti-line); font-size:12.5px; }
+    .ti-email-k { width:52px; flex:0 0 auto; color:var(--ti-ink3); font-weight:600; }
+    .ti-email-v { color:var(--ti-ink); font-weight:600; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .ti-email-body { padding:13px; font-size:12.5px; line-height:1.65; color:var(--ti-ink2); white-space:pre-wrap; min-height:96px; }
+    .ti-email-body .cur { display:inline-block; width:1.5px; height:14px; background:var(--ti-blue); vertical-align:-2px; animation:tiCaret .8s step-end infinite; }
+    @keyframes tiCaret { 50% { opacity:0; } }
+    .ti-email-foot { display:flex; align-items:center; padding:10px 13px; border-top:1px solid var(--ti-line); background:#FBFCFE; }
+    .ti-email-sent { display:inline-flex; align-items:center; gap:6px; font-size:11.5px; font-weight:700; color:var(--ti-green); opacity:0; transition:opacity .35s; }
+    .ti-email-sent.show { opacity:1; }
+    .ti-email-sent svg { width:13px; height:13px; }
+
+    /* screen 3 — classification */
+    .ti-class-name { display:flex; align-items:center; gap:10px; font-size:14px; font-weight:700; color:var(--ti-ink); margin-bottom:16px; }
+    .ti-gauge { display:flex; align-items:center; gap:14px; margin-bottom:16px; }
+    .ti-gauge-track { flex:1 1 auto; height:12px; border-radius:100px; background:#EDF0F5; overflow:hidden; }
+    .ti-gauge-track > i { display:block; height:100%; width:0%; border-radius:100px; background:linear-gradient(90deg,var(--ti-amber),var(--ti-red)); transition:width 1s cubic-bezier(.3,0,.1,1); }
+    .ti-gauge-num { font-family:'Montserrat',sans-serif; font-size:22px; font-weight:800; color:var(--ti-ink); font-variant-numeric:tabular-nums; }
+    .ti-gauge-num small { font-size:13px; color:var(--ti-ink3); font-weight:700; }
+    .ti-class-badges { display:flex; gap:8px; margin-bottom:12px; }
+    .ti-class-note { font-size:12.5px; color:var(--ti-ink2); }
+
+    /* screen 4 — team task */
+    .ti-task-card { display:flex; align-items:center; gap:11px; padding:13px; border:1px solid var(--ti-line); border-radius:12px; margin-bottom:13px; }
+    .ti-task-check { width:30px; height:30px; flex:0 0 auto; border-radius:8px; display:grid; place-items:center; background:var(--ti-blue-dim); color:var(--ti-blue); }
+    .ti-task-check svg { width:17px; height:17px; }
+    .ti-task-title { font-size:14px; font-weight:700; color:var(--ti-ink); }
+    .ti-task-sub { font-size:12px; color:var(--ti-ink3); margin-top:2px; }
+    .ti-task-assign { display:flex; align-items:center; gap:9px; padding:11px 13px; border:1px solid var(--ti-line); border-radius:12px; background:#FBFCFE; }
+    .ti-assign-label { font-size:11.5px; color:var(--ti-ink3); font-weight:600; }
+    .ti-assign-name { font-size:13px; font-weight:700; color:var(--ti-ink); }
+    .ti-assign-role { font-size:11px; color:var(--ti-ink3); margin-left:auto; }
+    .ti-task-due { margin-top:11px; font-size:12px; color:var(--ti-ink2); display:flex; align-items:center; gap:7px; }
+    .ti-task-due svg { width:14px; height:14px; color:var(--ti-green); }
+
+    /* screen 5 — calendar */
+    .ti-cal-head { font-size:13px; font-weight:700; color:var(--ti-ink); margin-bottom:12px; }
+    .ti-slot { display:flex; align-items:center; gap:12px; padding:11px 13px; border-radius:10px; margin-bottom:8px; border:1px solid var(--ti-line); font-size:12.5px; }
+    .ti-slot-time { font-weight:700; color:var(--ti-ink3); width:66px; flex:0 0 auto; }
+    .ti-slot.dim { opacity:.7; }
+    .ti-slot.dim .ti-slot-empty { color:var(--ti-ink3); }
+    .ti-slot.booked { border-color:var(--ti-blue); background:var(--ti-blue-dim); opacity:0; transform:translateY(6px); transition:opacity .5s, transform .5s cubic-bezier(.22,1,.36,1); }
+    .ti-slot.booked.in { opacity:1; transform:none; }
+    .ti-slot.booked .ti-slot-time { color:var(--ti-blue); }
+    .ti-slot-title { font-weight:700; color:var(--ti-ink); }
+    .ti-slot-tag { margin-left:auto; font-size:10.5px; font-weight:700; color:var(--ti-blue); }
+
+    /* screen 6 — kpis */
+    .ti-kpis { display:grid; grid-template-columns:1fr 1fr; gap:11px; margin-bottom:14px; }
+    .ti-kpi { padding:13px; border:1px solid var(--ti-line); border-radius:12px; background:#FBFCFE; }
+    .ti-kpi-num { font-family:'Montserrat',sans-serif; font-size:24px; font-weight:800; color:var(--ti-ink); letter-spacing:-0.02em; font-variant-numeric:tabular-nums; line-height:1; }
+    .ti-kpi-label { font-size:11.5px; color:var(--ti-ink3); margin-top:4px; }
+    .ti-done { display:flex; align-items:center; justify-content:center; gap:8px; font-size:13px; font-weight:700; color:var(--ti-green); }
+    .ti-done svg { width:16px; height:16px; }
+
+    /* ready overlay (before first run) */
+    .ti-ready { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; text-align:center; padding:20px; background:var(--ti-card); transition:opacity .4s; }
+    .ti-ready.gone { opacity:0; pointer-events:none; }
+    .ti-ready-orb { width:52px; height:52px; border-radius:50%; display:grid; place-items:center; color:#fff; background:linear-gradient(150deg,#1a6bff,#0057FF); box-shadow:0 12px 26px -8px rgba(0,87,255,0.5); animation:tiPulse 2.4s ease-in-out infinite; }
+    .ti-ready-orb svg { width:24px; height:24px; }
+    @keyframes tiPulse { 0%,100%{ transform:scale(1); box-shadow:0 12px 26px -8px rgba(0,87,255,0.5);} 50%{ transform:scale(1.06); box-shadow:0 16px 32px -8px rgba(0,87,255,0.65);} }
+    .ti-ready-t { font-size:14px; font-weight:700; color:var(--ti-ink); }
+    .ti-ready-s { font-size:12.5px; color:var(--ti-ink3); max-width:240px; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .ti-screen { transition:none; } .ti-ready-orb { animation:none; } .ti-email-body .cur { display:none; }
+      .ti-gauge-track > i, .ti-slot.booked { transition:none; }
+    }
+
+    @media (max-width: 940px) {
+      .ti-stage { grid-template-columns: 1fr; }
+      .ti-form { max-width:none; }
+      .ti-run-panel { grid-template-columns: 1fr; }
+      .ti-rail { flex-direction:row; overflow-x:auto; gap:6px; padding-bottom:4px; scrollbar-width:none; }
+      .ti-rail::-webkit-scrollbar { display:none; }
+      .ti-step { flex:0 0 auto; flex-direction:column; align-items:center; gap:6px; width:96px; text-align:center; padding:10px 8px; }
+      .ti-sl { font-size:10.5px; } .ti-time { position:static; }
+    }
+    @media (max-width: 768px) { #try-it { padding:74px 0; } .ti-wrap { padding:0 16px; } .ti-view-body { min-height:360px; } }
+    @media (max-width: 480px) { .ti-kpis { grid-template-columns:1fr; } }
+  </style>
+  <section id="try-it">
+    <div class="ti-wrap">
+      <div class="ti-intro reveal">
+        <span class="ti-eyebrow">See it in action</span>
+        <h2 class="ti-h2">Watch a lead move through your system.</h2>
+        <p class="ti-sub">Fill in a request the way one of your leads would, hit run, and watch Flowaify capture, respond, qualify, assign, and book it &mdash; in seconds.</p>
+      </div>
+
+      <div class="ti-stage reveal" style="transition-delay:80ms;">
+        <!-- the website form -->
+        <form class="ti-form" onsubmit="return false;" autocomplete="off">
+          <div class="ti-form-head">
+            <span class="ti-form-glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18"/></svg></span>
+            <div><div class="ti-form-title">New consultation request</div><div class="ti-form-sub">yourbusiness.com/contact</div></div>
+          </div>
+          <label class="ti-field"><span>Full name</span><input id="ti-name" type="text" value="Jordan Blake" maxlength="40"></label>
+          <label class="ti-field"><span>Email</span><input id="ti-email" type="text" value="jordan@email.com" maxlength="50"></label>
+          <label class="ti-field"><span>Phone</span><input id="ti-phone" type="text" value="(555) 012-3948" maxlength="24"></label>
+          <label class="ti-field"><span>What can we help with?</span>
+            <select id="ti-service"><option>New consultation</option><option>Book an appointment</option><option>Request a quote</option><option>General enquiry</option></select></label>
+          <label class="ti-field"><span>Message</span><textarea id="ti-msg" rows="2" maxlength="140">Hi, I'd like to book a consultation this week if possible.</textarea></label>
+          <button class="ti-run" id="ti-run" type="button"><svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M8 5v14l11-7z"/></svg><span id="ti-run-label">Run workflow</span></button>
+          <div class="ti-note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>Live simulation &mdash; no real emails are sent.</div>
+        </form>
+
+        <!-- run panel -->
+        <div class="ti-run-panel">
+          <div class="ti-rail" id="ti-rail">
+            <button class="ti-step" type="button" data-i="0"><span class="ti-si"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v12H5.5L4 17.5z"/><path d="M8 9h8M8 12h5"/></svg></span><span class="ti-sl">New consultation request</span><span class="ti-time"></span></button>
+            <button class="ti-step" type="button" data-i="1"><span class="ti-si"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M4 20a5 5 0 0 1 10 0M18 8v6M15 11h6"/></svg></span><span class="ti-sl">Contact created in CRM</span><span class="ti-time"></span></button>
+            <button class="ti-step" type="button" data-i="2"><span class="ti-si"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 4L3 11l6 2 2 6z"/><path d="M21 4L9 13"/></svg></span><span class="ti-sl">Personalized response sent</span><span class="ti-time"></span></button>
+            <button class="ti-step" type="button" data-i="3"><span class="ti-si"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c1 3-1 4-1 6a3 3 0 0 0 6 0c0-1 0-2-1-3 2 1 4 4 4 7a7 7 0 0 1-14 0c0-4 3-6 6-10z"/></svg></span><span class="ti-sl">Classified high intent</span><span class="ti-time"></span></button>
+            <button class="ti-step" type="button" data-i="4"><span class="ti-si"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 20a5.5 5.5 0 0 1 11 0"/><path d="M16 12l2 2 4-4"/></svg></span><span class="ti-sl">Assigned to team member</span><span class="ti-time"></span></button>
+            <button class="ti-step" type="button" data-i="5"><span class="ti-si"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="17" rx="2"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/><path d="M9 15l2 2 4-4"/></svg></span><span class="ti-sl">Appointment booked</span><span class="ti-time"></span></button>
+            <button class="ti-step" type="button" data-i="6"><span class="ti-si"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="8" height="10" rx="1.5"/><rect x="13" y="3" width="8" height="6" rx="1.5"/><rect x="13" y="12" width="8" height="9" rx="1.5"/><rect x="3" y="16" width="8" height="5" rx="1.5"/></svg></span><span class="ti-sl">Dashboard updated</span><span class="ti-time"></span></button>
+          </div>
+
+          <div class="ti-view">
+            <div class="ti-view-chrome"><span class="d"></span><span class="d"></span><span class="d"></span><span class="ti-view-url">app.flowaify.app</span><span class="ti-view-timer" id="ti-timer">0.0s</span></div>
+            <div class="ti-view-body" id="ti-view-body">
+
+              <div class="ti-ready" id="ti-ready">
+                <div class="ti-ready-orb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3l14 9-14 9z"/></svg></div>
+                <div class="ti-ready-t">Ready when you are</div>
+                <div class="ti-ready-s">Hit <b>Run workflow</b> to watch this lead flow through your dashboard.</div>
+              </div>
+
+              <!-- 0: request -->
+              <div class="ti-screen" data-s="0">
+                <div class="ti-scr-label">Incoming request</div>
+                <div class="ti-req">
+                  <div class="ti-req-top"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v14H4z"/><path d="M4 7l8 6 8-6"/></svg>New form submission</div>
+                  <div class="ti-req-row"><span class="ti-req-k">Name</span><span class="ti-req-v" data-f="name"></span></div>
+                  <div class="ti-req-row"><span class="ti-req-k">Email</span><span class="ti-req-v" data-f="email"></span></div>
+                  <div class="ti-req-row"><span class="ti-req-k">Phone</span><span class="ti-req-v" data-f="phone"></span></div>
+                  <div class="ti-req-row"><span class="ti-req-k">Interest</span><span class="ti-req-v" data-f="service"></span></div>
+                  <div class="ti-req-msg" data-f="msg"></div>
+                </div>
+              </div>
+
+              <!-- 1: lead card -->
+              <div class="ti-screen" data-s="1">
+                <div class="ti-scr-label">Contact · CRM</div>
+                <div class="ti-lead-top">
+                  <span class="ti-av" data-f="avatar"></span>
+                  <div><div class="ti-lead-name" data-f="name"></div><div class="ti-lead-meta"><span data-f="service"></span> &middot; Website form</div></div>
+                  <span class="ti-badge ti-b-new">New lead</span>
+                </div>
+                <div class="ti-lead-contact">
+                  <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg><span data-f="email"></span></span>
+                  <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h4l1.5 5-2 1.4a11 11 0 0 0 5 5l1.4-2 5 1.5v4a1 1 0 0 1-1 1A17 17 0 0 1 4 5a1 1 0 0 1 1-1z"/></svg><span data-f="phone"></span></span>
+                </div>
+                <div class="ti-summary">
+                  <div class="ti-summary-head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.8 4.7L18 9l-4.2 1.3L12 15l-1.8-4.7L6 9l4.2-1.3z"/></svg>AI Summary</div>
+                  <p data-f="summary"></p>
+                </div>
+              </div>
+
+              <!-- 2: flowy email -->
+              <div class="ti-screen" data-s="2">
+                <div class="ti-flowy-head"><span class="ti-flowy-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.8 4.7L18 9l-4.2 1.3L12 15l-1.8-4.7L6 9l4.2-1.3z"/></svg>Flowy</span><span class="ti-flowy-status" id="ti-flowy-status">Crafting a reply&hellip;</span></div>
+                <div class="ti-email">
+                  <div class="ti-email-row"><span class="ti-email-k">To</span><span class="ti-email-v" data-f="email"></span></div>
+                  <div class="ti-email-row"><span class="ti-email-k">Subject</span><span class="ti-email-v" data-f="subject"></span></div>
+                  <div class="ti-email-body" id="ti-email-body"></div>
+                  <div class="ti-email-foot"><span class="ti-email-sent" id="ti-email-sent"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Sent &middot; via Microsoft 365</span></div>
+                </div>
+              </div>
+
+              <!-- 3: classification -->
+              <div class="ti-screen" data-s="3">
+                <div class="ti-scr-label">Lead scoring</div>
+                <div class="ti-class-name"><span class="ti-av sm" data-f="avatar"></span><span data-f="name"></span></div>
+                <div class="ti-gauge">
+                  <div class="ti-gauge-track"><i id="ti-gauge-fill"></i></div>
+                  <div class="ti-gauge-num"><span id="ti-score">0</span><small>/100</small></div>
+                </div>
+                <div class="ti-class-badges"><span class="ti-badge ti-b-hot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c1 3-1 4-1 6a3 3 0 0 0 6 0c0-1 0-2-1-3 2 1 4 4 4 7a7 7 0 0 1-14 0c0-4 3-6 6-10z"/></svg>HOT</span><span class="ti-badge ti-b-intent">High intent</span></div>
+                <div class="ti-class-note">Ready to book &middot; recommend a response within the hour.</div>
+              </div>
+
+              <!-- 4: team task -->
+              <div class="ti-screen" data-s="4">
+                <div class="ti-scr-label">Team · task assigned</div>
+                <div class="ti-task-card">
+                  <span class="ti-task-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+                  <div><div class="ti-task-title">Call <span data-f="first"></span></div><div class="ti-task-sub"><span data-f="service"></span> &middot; high priority</div></div>
+                </div>
+                <div class="ti-task-assign"><span class="ti-assign-label">Assigned to</span><span class="ti-av sm" style="background:#0D9488;">MC</span><span class="ti-assign-name">Maria Chen</span><span class="ti-assign-role">Client Success</span></div>
+                <div class="ti-task-due"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Due today &middot; reminder set</div>
+              </div>
+
+              <!-- 5: calendar -->
+              <div class="ti-screen" data-s="5">
+                <div class="ti-cal-head">Tuesday &middot; this week</div>
+                <div class="ti-slot dim"><span class="ti-slot-time">1:30 PM</span><span class="ti-slot-empty">Available</span></div>
+                <div class="ti-slot booked" id="ti-slot"><span class="ti-slot-time">2:30 PM</span><span class="ti-slot-title"><span data-f="first"></span> &middot; <span data-f="service"></span></span><span class="ti-slot-tag">Booked</span></div>
+                <div class="ti-slot dim"><span class="ti-slot-time">3:30 PM</span><span class="ti-slot-empty">Available</span></div>
+              </div>
+
+              <!-- 6: kpis -->
+              <div class="ti-screen" data-s="6">
+                <div class="ti-scr-label">Overview · updated live</div>
+                <div class="ti-kpis">
+                  <div class="ti-kpi"><div class="ti-kpi-num" data-count="1">0</div><div class="ti-kpi-label">New lead today</div></div>
+                  <div class="ti-kpi"><div class="ti-kpi-num" data-count="42" data-suffix="s">0</div><div class="ti-kpi-label">Response time</div></div>
+                  <div class="ti-kpi"><div class="ti-kpi-num" data-count="1">0</div><div class="ti-kpi-label">Appointment booked</div></div>
+                  <div class="ti-kpi"><div class="ti-kpi-num" data-count="5">0</div><div class="ti-kpi-label">Follow-ups queued</div></div>
+                </div>
+                <div class="ti-done"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Captured to booked &mdash; handled automatically.</div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <script>
+  (function () {
+    var section = document.getElementById('try-it');
+    if (!section) return;
+    var runBtn = document.getElementById('ti-run');
+    var runLabel = document.getElementById('ti-run-label');
+    var rail = document.getElementById('ti-rail');
+    var steps = Array.prototype.slice.call(rail.querySelectorAll('.ti-step'));
+    var screens = Array.prototype.slice.call(section.querySelectorAll('.ti-screen'));
+    var ready = document.getElementById('ti-ready');
+    var timerEl = document.getElementById('ti-timer');
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var TIMES = [0, 500, 1100, 1900, 2500, 3100, 3700];
+    var END = 4100;
+    var timers = [], runId = 0, rafId = 0, running = false, hasRun = false;
+
+    function val(id, d) { var el = document.getElementById(id); var v = el && el.value != null ? el.value.trim() : ''; return v || d; }
+    function cap(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : s; }
+    function initials(name) {
+      var p = name.split(/\s+/).filter(Boolean);
+      return ((p[0] ? p[0][0] : '') + (p[1] ? p[1][0] : (p[0] && p[0][1] ? p[0][1] : ''))).toUpperCase() || 'L';
+    }
+    var AVCOL = ['#0057FF', '#7C3AED', '#0D9488', '#D97706', '#DC2626', '#2563EB'];
+    function avColor(s) { var h = 0; for (var i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0; return AVCOL[h % AVCOL.length]; }
+
+    var DATA = {};
+    function readForm() {
+      var name = val('ti-name', 'Jordan Blake');
+      var service = val('ti-service', 'New consultation');
+      var msg = val('ti-msg', "Hi, I'd like to book a consultation this week if possible.");
+      var first = name.split(/\s+/)[0] || name;
+      var svcLow = service.toLowerCase();
+      DATA = {
+        name: name, first: first, email: val('ti-email', 'jordan@email.com'), phone: val('ti-phone', '(555) 012-3948'),
+        service: service, msg: msg, avatar: initials(name), avatarColor: avColor(name),
+        subject: 'Re: your ' + svcLow + ' request',
+        summary: first + ' submitted a ' + svcLow + ' request through your website and wants to move quickly. Warm, high-intent — best to respond right away.',
+        email: val('ti-email', 'jordan@email.com'),
+        body: 'Hi ' + first + ',\n\nThanks for reaching out about your ' + svcLow + " — I'd be glad to help. Are you free for a quick call this week? I have a couple of times open on Tuesday.\n\nJust reply here or grab a slot and we'll take care of the rest.\n\nTalk soon,\nThe team"
+      };
+    }
+    function fill() {
+      section.querySelectorAll('[data-f]').forEach(function (el) {
+        var k = el.getAttribute('data-f');
+        if (k === 'avatar') { el.textContent = DATA.avatar; el.style.background = DATA.avatarColor; }
+        else if (DATA[k] != null) el.textContent = DATA[k];
+      });
+    }
+
+    function clearTimers() { timers.forEach(clearTimeout); timers = []; if (rafId) cancelAnimationFrame(rafId), rafId = 0; }
+    function at(ms, fn) { timers.push(setTimeout(fn, ms)); }
+
+    function showScreen(i) {
+      screens.forEach(function (s) { s.classList.toggle('active', +s.getAttribute('data-s') === i); });
+    }
+    function activate(i, done) {
+      steps.forEach(function (s) {
+        var si = +s.getAttribute('data-i');
+        s.classList.toggle('on', si === i && !done);
+        if (si === i && done) s.classList.add('done');
+      });
+      var st = steps[i]; if (st) { var t = st.querySelector('.ti-time'); if (t) t.textContent = (TIMES[i] / 1000).toFixed(1) + 's'; }
+    }
+
+    function typeEmail(id) {
+      var body = document.getElementById('ti-email-body');
+      var status = document.getElementById('ti-flowy-status');
+      var sent = document.getElementById('ti-email-sent');
+      if (!body) return;
+      var txt = DATA.body, k = 0;
+      body.textContent = ''; sent.classList.remove('show'); status.classList.remove('sent'); status.innerHTML = 'Crafting a reply&hellip;';
+      var cur = document.createElement('span'); cur.className = 'cur';
+      function tick() {
+        if (id !== runId) return;
+        k += Math.max(1, Math.round(txt.length / 34));
+        body.textContent = txt.slice(0, k);
+        body.appendChild(cur);
+        if (k < txt.length) timers.push(setTimeout(tick, 22));
+        else { if (cur.parentNode) cur.parentNode.removeChild(cur); status.textContent = 'Sent'; status.classList.add('sent'); sent.classList.add('show'); }
+      }
+      tick();
+    }
+    function fillEmailInstant() {
+      var body = document.getElementById('ti-email-body'); if (body) body.textContent = DATA.body;
+      var status = document.getElementById('ti-flowy-status'); if (status) { status.textContent = 'Sent'; status.classList.add('sent'); }
+      var sent = document.getElementById('ti-email-sent'); if (sent) sent.classList.add('show');
+    }
+    function animScore(id, instant) {
+      var fillEl = document.getElementById('ti-gauge-fill'), numEl = document.getElementById('ti-score'), target = 92;
+      if (instant) { if (fillEl) fillEl.style.width = target + '%'; if (numEl) numEl.textContent = target; return; }
+      if (fillEl) fillEl.style.width = '0%';
+      timers.push(setTimeout(function () { if (id === runId && fillEl) fillEl.style.width = target + '%'; }, 60));
+      var start = null;
+      function step(ts) { if (id !== runId) return; if (!start) start = ts; var p = Math.min(1, (ts - start) / 900); if (numEl) numEl.textContent = Math.round(target * p); if (p < 1) rafId = requestAnimationFrame(step); }
+      rafId = requestAnimationFrame(step);
+    }
+    function bookSlot(instant) { var s = document.getElementById('ti-slot'); if (s) { if (instant) s.classList.add('in'); else timers.push(setTimeout(function () { s.classList.add('in'); }, 80)); } }
+    function countKpis(id, instant) {
+      section.querySelectorAll('#try-it .ti-screen[data-s="6"] .ti-kpi-num').forEach(function (el) {
+        var target = +el.getAttribute('data-count') || 0, suf = el.getAttribute('data-suffix') || '';
+        if (instant) { el.textContent = target + suf; return; }
+        var start = null;
+        function step(ts) { if (id !== runId) return; if (!start) start = ts; var p = Math.min(1, (ts - start) / 700); el.textContent = Math.round(target * p) + suf; if (p < 1) requestAnimationFrame(step); }
+        requestAnimationFrame(step);
+      });
+    }
+
+    function reset() {
+      steps.forEach(function (s) { s.classList.remove('on', 'done'); var t = s.querySelector('.ti-time'); if (t) t.textContent = ''; });
+      timerEl.textContent = '0.0s';
+      var b = document.getElementById('ti-email-body'); if (b) b.textContent = '';
+      var sent = document.getElementById('ti-email-sent'); if (sent) sent.classList.remove('show');
+      var fillEl = document.getElementById('ti-gauge-fill'); if (fillEl) fillEl.style.width = '0%';
+      var sc = document.getElementById('ti-score'); if (sc) sc.textContent = '0';
+      var slot = document.getElementById('ti-slot'); if (slot) slot.classList.remove('in');
+    }
+
+    function runTimer(id) {
+      var start = performance.now();
+      function step(ts) {
+        if (id !== runId) return;
+        var e = Math.min(END, ts - start);
+        timerEl.textContent = (e / 1000).toFixed(1) + 's';
+        if (e < END) rafId = requestAnimationFrame(step);
+      }
+      rafId = requestAnimationFrame(step);
+    }
+
+    var STEP_ANIM = [
+      function () {},
+      function () {},
+      function (id) { typeEmail(id); },
+      function (id) { animScore(id); },
+      function () {},
+      function () { bookSlot(); },
+      function (id) { countKpis(id); }
+    ];
+
+    function finalize() {
+      // reduced-motion / instant end-state: all steps done, show everything assembled
+      steps.forEach(function (s, i) { s.classList.remove('on'); s.classList.add('done'); var t = s.querySelector('.ti-time'); if (t) t.textContent = (TIMES[i] / 1000).toFixed(1) + 's'; });
+      timerEl.textContent = (END / 1000).toFixed(1) + 's';
+      fillEmailInstant(); animScore(0, true); bookSlot(true); countKpis(0, true);
+      ready.classList.add('gone'); showScreen(1);
+      finishBtn();
+    }
+    function finishBtn() { running = false; hasRun = true; runBtn.disabled = false; runLabel.textContent = 'Run again'; }
+
+    function run() {
+      runId++; var id = runId;
+      clearTimers(); reset();
+      readForm(); fill();
+      running = true; runBtn.disabled = true; runLabel.textContent = 'Running…';
+      ready.classList.add('gone');
+      if (reduce) { finalize(); return; }
+      runTimer(id);
+      TIMES.forEach(function (ms, i) {
+        at(ms, function () {
+          if (id !== runId) return;
+          // mark previous done
+          if (i > 0) { var pv = steps[i - 1]; if (pv) { pv.classList.remove('on'); pv.classList.add('done'); } }
+          showScreen(i); activate(i, false);
+          STEP_ANIM[i](id);
+        });
+      });
+      at(END, function () { if (id !== runId) return; var last = steps[steps.length - 1]; if (last) { last.classList.remove('on'); last.classList.add('done'); } finishBtn(); });
+    }
+
+    runBtn.addEventListener('click', run);
+    steps.forEach(function (s) {
+      s.addEventListener('click', function () {
+        if (running) return;
+        if (!hasRun) { readForm(); fill(); ready.classList.add('gone'); }
+        var i = +s.getAttribute('data-i');
+        showScreen(i);
+        steps.forEach(function (x) { x.classList.toggle('on', x === s); });
+        // populate that screen's animated bits to final state so it reads correctly when jumped to
+        if (i === 2) fillEmailInstant(); else if (i === 3) animScore(0, true); else if (i === 5) bookSlot(true); else if (i === 6) countKpis(0, true);
+      });
+    });
+
+    // pre-fill data so the request/lead screens are correct even before first run
+    readForm(); fill();
+  })();
+  </script>
+
   <!-- ─── BUILT TO SCALE ──────────────────────────────────────────────────── -->
   <style>
     /* ── Built to Scale — capacity + growth graph ── */
