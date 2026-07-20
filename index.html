@@ -2178,8 +2178,8 @@
     var ready = document.getElementById('ti-ready');
     var timerEl = document.getElementById('ti-timer');
     var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    var TIMES = [0, 500, 1100, 1900, 2500, 3100, 3700];
-    var END = 4100;
+    var TIMES = [0, 900, 2000, 4300, 5100, 5900, 6700];
+    var END = 7100;
     var timers = [], runId = 0, rafId = 0, running = false, hasRun = false;
 
     function val(id, d) { var el = document.getElementById(id); var v = el && el.value != null ? el.value.trim() : ''; return v || d; }
@@ -2245,11 +2245,22 @@
 
     function typeEmail(id) {
       var body = document.getElementById('ti-email-body'), status = document.getElementById('ti-flowy-status'), sent = document.getElementById('ti-email-sent');
-      if (!body) return; var txt = DATA.body, k = 0;
-      body.textContent = ''; sent.classList.remove('show'); status.classList.remove('sent'); status.innerHTML = 'Crafting a reply&hellip;';
-      var cur = document.createElement('span'); cur.className = 'cur';
-      function tick() { if (id !== runId) return; k += Math.max(1, Math.round(txt.length / 34)); body.textContent = txt.slice(0, k); body.appendChild(cur); if (k < txt.length) timers.push(setTimeout(tick, 22)); else { if (cur.parentNode) cur.parentNode.removeChild(cur); status.textContent = 'Sent'; status.classList.add('sent'); sent.classList.add('show'); } }
-      tick();
+      if (!body) return;
+      body.textContent = ''; sent.classList.remove('show'); status.classList.remove('sent'); status.textContent = 'Reading the request…';
+      timers.push(setTimeout(function () {
+        if (id !== runId) return;
+        status.textContent = 'Writing a reply…';
+        var txt = DATA.body, k = 0, cur = document.createElement('span'); cur.className = 'cur';
+        (function tick() {
+          if (id !== runId) return;
+          k += Math.max(1, Math.round(txt.length / 48));
+          body.textContent = txt.slice(0, k); body.appendChild(cur);
+          if (k < txt.length) { timers.push(setTimeout(tick, 27)); return; }
+          if (cur.parentNode) cur.parentNode.removeChild(cur);
+          status.textContent = 'Reviewing the reply…';
+          timers.push(setTimeout(function () { if (id !== runId) return; status.textContent = 'Sent'; status.classList.add('sent'); sent.classList.add('show'); }, 520));
+        })();
+      }, 520));
     }
     function fillEmailInstant() { var b = document.getElementById('ti-email-body'); if (b) b.textContent = DATA.body; var s = document.getElementById('ti-flowy-status'); if (s) { s.textContent = 'Sent'; s.classList.add('sent'); } var se = document.getElementById('ti-email-sent'); if (se) se.classList.add('show'); }
     function animScore(id, instant) {
