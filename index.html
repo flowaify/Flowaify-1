@@ -2220,6 +2220,7 @@
         else if (DATA[k] != null) el.textContent = DATA[k];
       });
       renderLeadCard();
+      lockStageHeight();
     }
 
     /* ── real dashboard code, ported verbatim from pages/dashboard/dashboard.js ── */
@@ -2244,8 +2245,11 @@
 
     function showItem(i) {
       items.forEach(function (s) { s.classList.toggle('active', +s.getAttribute('data-s') === i); });
-      var el = section.querySelector('.tf-focus-item[data-s="' + i + '"]'), fe = document.getElementById('ti-view-body');
-      if (el && fe) fe.style.height = el.offsetHeight + 'px';
+    }
+    function lockStageHeight() {
+      var fe = document.getElementById('ti-view-body'); if (!fe) return;
+      var max = 0; items.forEach(function (s) { var h = s.offsetHeight; if (h > max) max = h; });
+      if (max) fe.style.height = max + 'px';
     }
     function setFlow(i) { if (flowFill && steps.length > 1) flowFill.style.width = 'calc((100% - 100px) * ' + (i / (steps.length - 1)) + ')'; }
     function activate(i, done) {
@@ -2409,8 +2413,9 @@
         el.addEventListener('pointerleave', function () { el.style.setProperty('--rx', '0deg'); el.style.setProperty('--ry', '0deg'); });
       });
     }
-    window.addEventListener('resize', function () { var a = section.querySelector('.tf-focus-item.active'), fe = document.getElementById('ti-view-body'); if (a && fe) fe.style.height = a.offsetHeight + 'px'; }, { passive: true });
-    readForm(); fill();
+    window.addEventListener('resize', lockStageHeight, { passive: true });
+    window.addEventListener('load', lockStageHeight);
+    readForm(); fill(); lockStageHeight();
   })();
   </script>
 
