@@ -2045,7 +2045,6 @@
     #ti-flowy-status.sent { color:var(--green) !important; }
     #ti-email-sent.show { opacity:1 !important; }
     #ti-email-body .cur { display:inline-block; width:1.5px; height:13px; background:var(--text-m); vertical-align:-2px; animation:tfCaret .8s step-end infinite; }
-    #ti-slot.in { opacity:1 !important; transform:none !important; }
     @media (prefers-reduced-motion: no-preference) { .ti-dash .state-pill.live .sp-dot { animation: tfPulse 1.6s ease-in-out infinite; } }
 
     /* ── ambient life + energy pulse + connector beam + grid glow ── */
@@ -2057,6 +2056,8 @@
       background:linear-gradient(180deg, var(--tf-graph2) 0%, rgba(64,74,88,0.35) 55%, transparent 100%); box-shadow:0 0 8px 1px rgba(43,50,61,0.22);
       transition:opacity .45s ease, left .55s cubic-bezier(.22,1,.36,1); }
     .tf-canvas.live .tf-beam { opacity:.7; }
+    .tf-tl-r { opacity:0; transform:translateY(4px); transition:opacity .35s ease, transform .35s cubic-bezier(.22,1,.36,1); }
+    .tf-tl-r.show { opacity:1; transform:none; }
     @media (prefers-reduced-motion: no-preference) {
       .tf-focus-item.active { animation: tfFloat 5.5s ease-in-out infinite; }
       @keyframes tfFloat { 0%,100% { transform: translateX(-50%) translateY(0); } 50% { transform: translateX(-50%) translateY(-7px); } }
@@ -2123,10 +2124,10 @@
             </div>
 
             <!-- 0 request — dashboard new-lead -->
-            <div class="tf-focus-item" data-s="0"><div class="tf-scr-label">Leads · new submission</div><div class="ti-dash">
-              <div class="lp-head"><span class="badge b-low" style="align-self:center;">New</span><div style="flex:1;min-width:0;"><div class="lp-name" data-f="name"></div><div class="lp-meta">New form submission · just now</div></div></div>
-              <div class="lp-sec"><div class="lp-sec-label">Submission</div><div class="detail-row"><span class="dk">Email</span><span class="dv" data-f="email"></span></div><div class="detail-row"><span class="dk">Phone</span><span class="dv" data-f="phone"></span></div><div class="detail-row"><span class="dk">Interest</span><span class="dv" data-f="service"></span></div></div>
-              <div class="lp-sec"><div class="lp-sec-label">Message</div><div style="font-size:12px;color:var(--text-s);line-height:1.6;" data-f="msg"></div></div>
+            <div class="tf-focus-item" data-s="0"><div class="tf-scr-label">Leads · new submission</div><div class="ti-dash" id="ti-request">
+              <div class="lp-head"><span class="badge b-low" style="align-self:center;">New</span><div style="flex:1;min-width:0;"><div class="lp-name" data-rf="name"></div><div class="lp-meta">New form submission · just now</div></div></div>
+              <div class="lp-sec"><div class="lp-sec-label">Submission</div><div class="detail-row"><span class="dk">Email</span><span class="dv" data-rf="email"></span></div><div class="detail-row"><span class="dk">Phone</span><span class="dv" data-rf="phone"></span></div><div class="detail-row"><span class="dk">Interest</span><span class="dv" data-rf="service"></span></div></div>
+              <div class="lp-sec"><div class="lp-sec-label">Message</div><div style="font-size:12px;color:var(--text-s);line-height:1.6;" data-rf="msg"></div></div>
               <div class="lp-sec"><div class="lp-sec-label">Source</div><div class="dk">yourbusiness.com/contact</div></div>
             </div></div>
 
@@ -2149,18 +2150,16 @@
 
             <!-- 4 task -->
             <div class="tf-focus-item" data-s="4"><div class="tf-scr-label">Team · task assigned</div><div class="ti-dash">
-              <div class="lp-sec" style="border-top:none;"><div class="lp-sec-label">New task</div><div style="display:flex;align-items:center;justify-content:space-between;gap:8px;"><span style="font-size:13.5px;font-weight:700;color:var(--text);">Call <span data-f="first"></span></span><span class="badge b-high">High priority</span></div><div class="dk" style="margin-top:4px;"><span data-f="service"></span> · follow up today</div></div>
-              <div class="lp-sec"><div class="lp-sec-label">Assigned to</div><div style="display:flex;align-items:center;gap:9px;"><span class="lead-avatar" style="background:hsl(168,58%,40%);">MC</span><div><div class="dv">Maria Chen</div><div class="dk">Client Success</div></div></div></div>
+              <div class="lp-sec" style="border-top:none;"><div class="lp-sec-label" style="display:flex;justify-content:space-between;gap:8px;"><span>New task</span><span id="ti-assign-status" style="color:var(--text-m);text-transform:none;letter-spacing:0;font-weight:600;">Matching to the best rep&hellip;</span></div><div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:2px;"><span style="font-size:13.5px;font-weight:700;color:var(--text);">Call <span data-f="first"></span></span><span class="badge b-high">High priority</span></div><div class="dk" style="margin-top:4px;"><span data-f="service"></span> · follow up today</div></div>
+              <div class="lp-sec"><div class="lp-sec-label">Assigned to</div><div style="display:flex;align-items:center;gap:9px;"><span class="lead-avatar" id="ti-assign-av" style="background:hsl(168,58%,40%);">MC</span><div><div class="dv" id="ti-assign-name">Maria Chen</div><div class="dk" id="ti-assign-role">Client Success</div></div></div></div>
               <div class="lp-sec"><div class="lp-tl-item"><div class="lp-tl-dot"></div><div><div class="lp-tl-text">Reminder set &middot; due today</div></div></div></div>
             </div></div>
 
             <!-- 5 calendar -->
-            <div class="tf-focus-item" data-s="5"><div class="tf-scr-label">Calendar · appointment booked</div><div class="ti-dash">
-              <div class="lp-sec" style="border-top:none;"><div class="lp-sec-label">Tuesday · this week</div>
-                <div class="detail-row" style="opacity:.55;"><span class="dk">1:30 PM</span><span class="dk">Available</span></div>
-                <div id="ti-slot" style="display:flex;justify-content:space-between;align-items:center;padding:10px 11px;margin:7px 0;border-radius:7px;background:var(--blue-dim);border:1px solid var(--blue);opacity:0;transform:translateY(6px);transition:opacity .5s,transform .5s cubic-bezier(.22,1,.36,1);"><div><div style="font-size:12.5px;font-weight:700;color:var(--blue);">2:30 PM</div><div class="dk"><span data-f="first"></span> · <span data-f="service"></span></div></div><span class="badge b-low">Booked</span></div>
-                <div class="detail-row" style="opacity:.55;"><span class="dk">3:30 PM</span><span class="dk">Available</span></div>
-              </div>
+            <div class="tf-focus-item" data-s="5"><div class="tf-scr-label">Calendar · booking</div><div class="ti-dash">
+              <div class="lp-head"><span class="badge b-low" id="ti-book-badge" style="align-self:center;">Finding a time…</span><div style="flex:1;min-width:0;"><div class="lp-name">Tuesday</div><div class="lp-meta">this week · calendar</div></div></div>
+              <div class="lp-sec" style="text-align:center;padding:22px 16px 20px;"><div id="ti-book-time" style="font-family:'Montserrat','Plus Jakarta Sans',sans-serif;font-size:34px;font-weight:800;color:var(--text);letter-spacing:-0.02em;font-variant-numeric:tabular-nums;line-height:1;">&mdash;</div><div class="dk" style="margin-top:6px;"><span data-f="first"></span> · <span data-f="service"></span></div></div>
+              <div class="lp-sec" id="ti-slot" style="opacity:0;transform:translateY(6px);transition:opacity .5s ease,transform .5s cubic-bezier(.22,1,.36,1);"><div style="display:flex;align-items:center;justify-content:center;gap:8px;color:var(--green);font-weight:700;font-size:13px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px;"><rect x="3" y="4.5" width="18" height="17" rx="2"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/><path d="M9 15l2 2 4-4"/></svg>Appointment booked</div></div>
             </div></div>
 
             <!-- 6 kpis — real stat-cards -->
@@ -2191,8 +2190,8 @@
     var ready = document.getElementById('ti-ready');
     var timerEl = document.getElementById('ti-timer');
     var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    var TIMES = [0, 900, 2000, 4300, 5100, 5900, 6700];
-    var END = 7100;
+    var TIMES = [0, 1100, 2300, 4500, 5700, 6900, 8400];
+    var END = 9500;
     var timers = [], runId = 0, rafId = 0, running = false, hasRun = false;
 
     function val(id, d) { var el = document.getElementById(id); var v = el && el.value != null ? el.value.trim() : ''; return v || d; }
@@ -2235,9 +2234,9 @@
       r.push('<div class="lp-head">' + dAvatar(name) + '<div style="flex:1;min-width:0;"><div class="lp-name">' + dEsc(name) + '</div><div class="lp-meta">Website form · Added today</div><div style="margin-top:7px;display:flex;align-items:center;gap:8px;">' + dBadge('HOT') + '<span class="score-ring" style="border-color:var(--red);">' + dScore(name) + '</span></div></div></div>');
       r.push('<div class="lp-sec"><div class="lp-sec-label">Contact</div><div class="detail-row"><span class="dk">Email</span><span class="dv" style="color:var(--blue);">' + dEsc(DATA.email) + '</span></div><div class="detail-row"><span class="dk">Phone</span><span class="dv" style="color:var(--blue);">' + dEsc(DATA.phone) + '</span></div></div>');
       r.push('<div class="lp-sec"><div class="lp-sec-label">Set Status</div><div class="status-picker">' + ['HOT', 'WARM', 'COLD', 'BOOKED'].map(function (s) { var a = (s === 'HOT' ? ' active' : ''); return '<span class="status-chip sc-' + s.toLowerCase() + a + '">' + s + '</span>'; }).join('') + '</div></div>');
-      r.push('<div class="lp-sec"><div class="lp-sec-label">AI Summary</div><div style="font-size:12px;color:var(--text-s);line-height:1.6;">' + dEsc(DATA.summary) + '</div></div>');
+      r.push('<div class="lp-sec"><div class="lp-sec-label">AI Summary</div><div style="font-size:12px;color:var(--text-s);line-height:1.6;"><span id="ti-lp-sum"></span></div></div>');
       r.push('<div class="lp-sec"><div class="lp-sec-label">Next Best Action</div><div class="lp-actions"><span class="lp-act-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 4L3 11l6 2 2 6z"/><path d="M21 4L9 13"/></svg>Send follow-up</span><span class="lp-act-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="17" rx="2"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/><path d="M9 15l2 2 4-4"/></svg>Mark booked</span></div></div>');
-      r.push('<div class="lp-sec"><div class="lp-sec-label">Activity Timeline</div><div class="lp-tl-item"><div class="lp-tl-dot"></div><div><div class="lp-tl-text">Created in CRM</div><div class="lp-tl-time">Just now</div></div></div><div class="lp-tl-item"><div class="lp-tl-dot"></div><div><div class="lp-tl-text">Synced to Flowaify</div><div class="lp-tl-time">Live</div></div></div></div>');
+      r.push('<div class="lp-sec"><div class="lp-sec-label">Activity Timeline</div><div class="lp-tl-item tf-tl-r"><div class="lp-tl-dot"></div><div><div class="lp-tl-text">Created in CRM</div><div class="lp-tl-time">Just now</div></div></div><div class="lp-tl-item tf-tl-r"><div class="lp-tl-dot"></div><div><div class="lp-tl-text">Synced to Flowaify</div><div class="lp-tl-time">Live</div></div></div></div>');
       el.innerHTML = r.join('');
     }
 
@@ -2283,7 +2282,6 @@
       if (f) f.style.width = '0%'; timers.push(setTimeout(function () { if (id === runId && f) f.style.width = target + '%'; }, 60));
       var start = null; function step(ts) { if (id !== runId) return; if (!start) start = ts; var p = Math.min(1, (ts - start) / 900); if (n) n.textContent = Math.round(target * p); if (p < 1) rafId = requestAnimationFrame(step); } rafId = requestAnimationFrame(step);
     }
-    function bookSlot(instant) { var s = document.getElementById('ti-slot'); if (s) { if (instant) s.classList.add('in'); else timers.push(setTimeout(function () { s.classList.add('in'); }, 80)); } }
     function countKpis(id, instant) {
       section.querySelectorAll('[data-count]').forEach(function (el) {
         var target = +el.getAttribute('data-count') || 0, suf = el.getAttribute('data-suffix') || '';
@@ -2291,6 +2289,53 @@
         var start = null; function step(ts) { if (id !== runId) return; if (!start) start = ts; var p = Math.min(1, (ts - start) / 700); el.textContent = Math.round(target * p) + suf; if (p < 1) requestAnimationFrame(step); } requestAnimationFrame(step);
       });
     }
+
+    /* ── per-step "work" animations ── */
+    function typeInto(el, txt, id, chunk, cb) {
+      if (!el) { if (cb) cb(); return; }
+      txt = String(txt || ''); var k = 0;
+      (function t() { if (id !== runId) return; k += Math.max(1, Math.round(txt.length / (chunk || 9))); el.textContent = txt.slice(0, k); if (k < txt.length) { timers.push(setTimeout(t, 28)); } else if (cb) cb(); })();
+    }
+    function animRequest(id) {
+      var box = document.getElementById('ti-request'); if (!box) return;
+      var order = ['name', 'email', 'phone', 'service', 'msg'], d = 80;
+      order.forEach(function (key) { var el = box.querySelector('[data-rf="' + key + '"]'); if (el) el.textContent = ''; });
+      order.forEach(function (key) { var el = box.querySelector('[data-rf="' + key + '"]'); if (!el) return; timers.push(setTimeout(function () { if (id !== runId) return; typeInto(el, DATA[key], id, 6); }, d)); d += 220; });
+    }
+    function instantRequest() { var box = document.getElementById('ti-request'); if (!box) return; ['name', 'email', 'phone', 'service', 'msg'].forEach(function (key) { var el = box.querySelector('[data-rf="' + key + '"]'); if (el) el.textContent = DATA[key]; }); }
+    function animContact(id) {
+      var sum = document.getElementById('ti-lp-sum'), tls = section.querySelectorAll('#ti-lead-card .tf-tl-r');
+      tls.forEach(function (t) { t.classList.remove('show'); }); if (sum) sum.textContent = '';
+      typeInto(sum, DATA.summary, id, 7, function () { tls.forEach(function (t, idx) { timers.push(setTimeout(function () { if (id !== runId) return; t.classList.add('show'); }, 130 + idx * 300)); }); });
+    }
+    function instantContact() { var sum = document.getElementById('ti-lp-sum'); if (sum) sum.textContent = DATA.summary; section.querySelectorAll('#ti-lead-card .tf-tl-r').forEach(function (t) { t.classList.add('show'); }); }
+    var ASSIGNEES = [{ n: 'Alex Rivera', i: 'AR', c: '#7C3AED', r: 'Sales' }, { n: 'Priya Nair', i: 'PN', c: '#0D9488', r: 'Success' }, { n: 'Devon Cole', i: 'DC', c: '#B45309', r: 'Support' }, { n: 'Maria Chen', i: 'MC', c: '#0D9488', r: 'Client Success' }];
+    function setAssignee(a) { var av = document.getElementById('ti-assign-av'), nm = document.getElementById('ti-assign-name'), rl = document.getElementById('ti-assign-role'); if (av) { av.textContent = a.i; av.style.background = a.c; } if (nm) nm.textContent = a.n; if (rl) rl.textContent = a.r; }
+    function animAssign(id) {
+      var st = document.getElementById('ti-assign-status'); if (st) st.textContent = 'Matching to the best rep…';
+      var seq = [0, 1, 2, 0, 1, 3, 2, 3], i = 0;
+      function step() {
+        if (id !== runId) return; setAssignee(ASSIGNEES[seq[i]]);
+        if (i >= seq.length - 1) { setAssignee(ASSIGNEES[3]); if (st) st.textContent = 'Assigned'; return; }
+        var iv = 90 + i * i * 3; i++; timers.push(setTimeout(step, iv));
+      }
+      step();
+    }
+    function instantAssign() { setAssignee(ASSIGNEES[3]); var st = document.getElementById('ti-assign-status'); if (st) st.textContent = 'Assigned'; }
+    function animBook(id) {
+      var timeEl = document.getElementById('ti-book-time'), slot = document.getElementById('ti-slot'), badge = document.getElementById('ti-book-badge');
+      if (!timeEl) return;
+      var times = ['9:00 AM', '9:30 AM', '10:00 AM', '10:30 AM', '11:00 AM', '11:30 AM', '12:00 PM', '1:00 PM', '1:30 PM', '2:00 PM', '2:30 PM'];
+      if (slot) { slot.style.opacity = '0'; slot.style.transform = 'translateY(6px)'; } if (badge) badge.textContent = 'Finding a time…';
+      timeEl.style.color = 'var(--text)'; var i = 0;
+      function step() {
+        if (id !== runId) return; timeEl.textContent = times[i];
+        if (i >= times.length - 1) { if (slot) { slot.style.opacity = '1'; slot.style.transform = 'none'; } if (badge) badge.textContent = 'Booked'; timeEl.style.color = 'var(--green)'; return; }
+        var iv = 45 + i * i * 2.4; i++; timers.push(setTimeout(step, iv));
+      }
+      step();
+    }
+    function instantBook() { var timeEl = document.getElementById('ti-book-time'), slot = document.getElementById('ti-slot'), badge = document.getElementById('ti-book-badge'); if (timeEl) { timeEl.textContent = '2:30 PM'; timeEl.style.color = 'var(--green)'; } if (slot) { slot.style.opacity = '1'; slot.style.transform = 'none'; } if (badge) badge.textContent = 'Booked'; }
 
     function reset() {
       steps.forEach(function (s) { s.classList.remove('on', 'done'); var t = s.querySelector('.tf-ntime'); if (t) t.textContent = ''; });
@@ -2300,16 +2345,22 @@
       var sent = document.getElementById('ti-email-sent'); if (sent) sent.classList.remove('show');
       var f = document.getElementById('ti-gauge-fill'); if (f) f.style.width = '0%';
       var sc = document.getElementById('ti-score'); if (sc) sc.textContent = '0';
-      var slot = document.getElementById('ti-slot'); if (slot) slot.classList.remove('in');
+      var rq = document.getElementById('ti-request'); if (rq) rq.querySelectorAll('[data-rf]').forEach(function (el) { el.textContent = ''; });
+      var sum = document.getElementById('ti-lp-sum'); if (sum) sum.textContent = '';
+      section.querySelectorAll('#ti-lead-card .tf-tl-r').forEach(function (t) { t.classList.remove('show'); });
+      setAssignee(ASSIGNEES[3]); var ast = document.getElementById('ti-assign-status'); if (ast) ast.textContent = 'Matching to the best rep…';
+      var timeEl = document.getElementById('ti-book-time'); if (timeEl) { timeEl.textContent = '—'; timeEl.style.color = 'var(--text)'; }
+      var badge = document.getElementById('ti-book-badge'); if (badge) badge.textContent = 'Finding a time…';
+      var slot = document.getElementById('ti-slot'); if (slot) { slot.style.opacity = '0'; slot.style.transform = 'translateY(6px)'; }
     }
     function runTimer(id) { var start = performance.now(); function step(ts) { if (id !== runId) return; var e = Math.min(END, ts - start); timerEl.textContent = (e / 1000).toFixed(1) + 's'; if (e < END) rafId = requestAnimationFrame(step); } rafId = requestAnimationFrame(step); }
 
-    var STEP_ANIM = [function () {}, function () {}, function (id) { typeEmail(id); }, function (id) { animScore(id); }, function () {}, function () { bookSlot(); }, function (id) { countKpis(id); }];
+    var STEP_ANIM = [function (id) { animRequest(id); }, function (id) { animContact(id); }, function (id) { typeEmail(id); }, function (id) { animScore(id); }, function (id) { animAssign(id); }, function (id) { animBook(id); }, function (id) { countKpis(id); }];
 
     function finalize() {
       steps.forEach(function (s, i) { s.classList.remove('on'); s.classList.add('done'); var t = s.querySelector('.tf-ntime'); if (t) t.textContent = (TIMES[i] / 1000).toFixed(1) + 's'; });
       setFlow(steps.length - 1); timerEl.textContent = (END / 1000).toFixed(1) + 's';
-      fillEmailInstant(); animScore(0, true); bookSlot(true); countKpis(0, true);
+      instantRequest(); instantContact(); fillEmailInstant(); animScore(0, true); instantAssign(); instantBook(); countKpis(0, true);
       ready.classList.add('gone'); showItem(1); finishBtn();
     }
     function finishBtn() { running = false; hasRun = true; runBtn.disabled = false; runLabel.textContent = 'Run again'; var f = document.getElementById('ti-rail'); if (f) f.classList.add('ran'); }
@@ -2336,7 +2387,7 @@
         if (running || !hasRun) return;
         var i = +s.getAttribute('data-i'); showItem(i);
         steps.forEach(function (x) { x.classList.toggle('on', x === s); });
-        if (i === 2) fillEmailInstant(); else if (i === 3) animScore(0, true); else if (i === 5) bookSlot(true); else if (i === 6) countKpis(0, true);
+        if (i === 0) instantRequest(); else if (i === 1) instantContact(); else if (i === 2) fillEmailInstant(); else if (i === 3) animScore(0, true); else if (i === 4) instantAssign(); else if (i === 5) instantBook(); else if (i === 6) countKpis(0, true);
       });
     });
 
