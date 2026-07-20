@@ -2022,6 +2022,24 @@
       .tf-form::after, .tf-float::after, .ti-dash::after { animation: tfSheen 8s cubic-bezier(.4,0,.2,1) infinite; }
       @keyframes tfSheen { 0%, 8% { transform: rotate(19deg) translateX(-70%); } 46%, 100% { transform: rotate(19deg) translateX(380%); } }
     }
+
+    /* ── real dashboard atoms for the remaining steps (stat-cards, state pills, glyphs) ── */
+    .ti-dash .stat-card { padding:10px 13px; display:flex; flex-direction:column; gap:5px; background:rgba(255,255,255,0.6); border:1px solid var(--border); border-radius:9px; }
+    .ti-dash .stat-top { display:flex; align-items:center; justify-content:space-between; gap:8px; min-height:15px; }
+    .ti-dash .stat-val { font-weight:700; color:var(--text); letter-spacing:-0.8px; line-height:1.05; font-variant-numeric:tabular-nums; font-size:24px; }
+    .ti-dash .stat-label { font-size:10px; color:var(--text-m); font-weight:600; text-transform:uppercase; letter-spacing:0.6px; display:flex; align-items:center; gap:6px; }
+    .ti-dash .stat-hint { font-size:10px; color:var(--text-m); opacity:0.75; }
+    .ti-dash .kpi-glyph { width:15px; height:15px; flex-shrink:0; }
+    .ti-dash .kg-blue{ color:var(--blue); } .ti-dash .kg-green{ color:var(--green); } .ti-dash .kg-amber{ color:#d97706; } .ti-dash .kg-purple{ color:#7c3aed; }
+    .ti-dash .state-pill { display:inline-flex; align-items:center; gap:5px; font-size:10px; font-weight:600; padding:2px 7px; border-radius:3px; background:var(--green-dim); color:var(--green); border:1px solid rgba(5,150,105,.16); }
+    .ti-dash .state-pill .sp-dot { width:5px; height:5px; border-radius:50%; background:var(--green); }
+    .ti-dash .stat-delta { display:inline-flex; align-items:center; gap:4px; font-size:11px; font-weight:600; }
+    .ti-dash .delta-up { color:var(--green); }
+    #ti-flowy-status.sent { color:var(--green) !important; }
+    #ti-email-sent.show { opacity:1 !important; }
+    #ti-email-body .cur { display:inline-block; width:1.5px; height:13px; background:var(--text-m); vertical-align:-2px; animation:tfCaret .8s step-end infinite; }
+    #ti-slot.in { opacity:1 !important; transform:none !important; }
+    @media (prefers-reduced-motion: no-preference) { .ti-dash .state-pill.live .sp-dot { animation: tfPulse 1.6s ease-in-out infinite; } }
   </style>
   <section id="try-it">
     <div class="tf-wrap">
@@ -2067,62 +2085,56 @@
               <div class="tf-ready-s">Hit <b>Run workflow</b> to watch this lead flow through your dashboard.</div>
             </div>
 
-            <!-- 0 request -->
-            <div class="tf-focus-item" data-s="0"><div class="tf-scr-label">Incoming request</div><div class="tf-float tf-c">
-              <div class="tf-c-head"><span class="tf-c-title">New form submission</span><span class="tf-pill tf-pill-neutral">Website</span></div>
-              <div class="tf-kd"><span class="tf-kd-k">Name</span><span class="tf-kd-v" data-f="name"></span></div>
-              <div class="tf-kd"><span class="tf-kd-k">Email</span><span class="tf-kd-v" data-f="email"></span></div>
-              <div class="tf-kd"><span class="tf-kd-k">Phone</span><span class="tf-kd-v" data-f="phone"></span></div>
-              <div class="tf-kd"><span class="tf-kd-k">Interest</span><span class="tf-kd-v" data-f="service"></span></div>
-              <div class="tf-kd" style="color:var(--tf-ink2);line-height:1.5;" data-f="msg"></div>
+            <!-- 0 request — dashboard new-lead -->
+            <div class="tf-focus-item" data-s="0"><div class="tf-scr-label">Leads · new submission</div><div class="ti-dash">
+              <div class="lp-head"><span class="badge b-low" style="align-self:center;">New</span><div style="flex:1;min-width:0;"><div class="lp-name" data-f="name"></div><div class="lp-meta">New form submission · just now</div></div></div>
+              <div class="lp-sec"><div class="lp-sec-label">Submission</div><div class="detail-row"><span class="dk">Email</span><span class="dv" data-f="email"></span></div><div class="detail-row"><span class="dk">Phone</span><span class="dv" data-f="phone"></span></div><div class="detail-row"><span class="dk">Interest</span><span class="dv" data-f="service"></span></div></div>
+              <div class="lp-sec"><div class="lp-sec-label">Message</div><div style="font-size:12px;color:var(--text-s);line-height:1.6;" data-f="msg"></div></div>
+              <div class="lp-sec"><div class="lp-sec-label">Source</div><div class="dk">yourbusiness.com/contact</div></div>
             </div></div>
 
             <!-- 1 real lead card -->
             <div class="tf-focus-item" data-s="1"><div class="tf-scr-label">Contact · CRM · Lead Profile</div><div class="ti-dash" id="ti-lead-card"></div></div>
 
             <!-- 2 flowy email -->
-            <div class="tf-focus-item" data-s="2"><div class="tf-scr-label">Flowy · personalized reply</div><div class="tf-float tf-c">
-              <div class="tf-flowy"><span class="tf-flowy-b"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.8 4.7L18 9l-4.2 1.3L12 15l-1.8-4.7L6 9l4.2-1.3z"/></svg>Flowy</span><span class="tf-flowy-s" id="ti-flowy-status">Crafting a reply&hellip;</span></div>
-              <div class="tf-mail">
-                <div class="tf-mail-r"><span class="tf-mail-k">To</span><span class="tf-mail-v" data-f="email"></span></div>
-                <div class="tf-mail-r"><span class="tf-mail-k">Subject</span><span class="tf-mail-v" data-f="subject"></span></div>
-                <div class="tf-mail-body" id="ti-email-body"></div>
-                <div class="tf-mail-foot"><span class="tf-mail-sent" id="ti-email-sent"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Sent &middot; via Microsoft 365</span></div>
-              </div>
+            <div class="tf-focus-item" data-s="2"><div class="tf-scr-label">Inbox · Flowy reply</div><div class="ti-dash">
+              <div class="lp-head"><span class="badge" style="align-self:center;background:rgba(124,58,237,.09);color:#7c3aed;border:1px solid rgba(124,58,237,.2);">&#10022; Flowy</span><div style="flex:1;min-width:0;"><div class="lp-name" style="font-size:13px;">Personalized reply</div><div class="lp-meta" id="ti-flowy-status">Crafting a reply&hellip;</div></div></div>
+              <div class="lp-sec"><div class="detail-row"><span class="dk">To</span><span class="dv" data-f="email"></span></div><div class="detail-row"><span class="dk">Subject</span><span class="dv" data-f="subject"></span></div></div>
+              <div class="lp-sec"><div id="ti-email-body" style="font-size:12px;color:var(--text-s);line-height:1.6;white-space:pre-wrap;min-height:92px;"></div><div id="ti-email-sent" class="stat-delta delta-up" style="opacity:0;margin-top:8px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px;"><polyline points="20 6 9 17 4 12"/></svg>Sent · via Microsoft 365</div></div>
             </div></div>
 
             <!-- 3 score -->
-            <div class="tf-focus-item" data-s="3"><div class="tf-scr-label">Lead scoring</div><div class="tf-float tf-c">
-              <div class="tf-score-name"><span class="ti-av-mini" data-f="avatar" style="width:26px;height:26px;border-radius:50%;display:inline-grid;place-items:center;color:#fff;font-size:11px;font-weight:800;"></span><span data-f="name"></span></div>
-              <div class="tf-gauge"><div class="tf-gauge-tr"><i id="ti-gauge-fill"></i></div><div class="tf-gauge-n"><span id="ti-score">0</span><small>/100</small></div></div>
-              <div class="tf-score-badges"><span class="tf-badge-hot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c1 3-1 4-1 6a3 3 0 0 0 6 0c0-1 0-2-1-3 2 1 4 4 4 7a7 7 0 0 1-14 0c0-4 3-6 6-10z"/></svg>HOT</span><span class="tf-badge-int">High intent</span></div>
-              <div class="tf-score-note">Ready to book &middot; recommend a response within the hour.</div>
+            <div class="tf-focus-item" data-s="3"><div class="tf-scr-label">Lead scoring</div><div class="ti-dash">
+              <div class="lp-head"><span class="lead-avatar" data-f="avatar"></span><div style="flex:1;min-width:0;"><div class="lp-name" data-f="name"></div><div class="lp-meta">Qualifying lead</div></div><span class="score-ring" style="border-color:var(--red);width:46px;height:46px;font-size:15px;"><span id="ti-score">0</span></span></div>
+              <div class="lp-sec"><div class="lp-sec-label">Intent</div><div style="display:flex;gap:8px;"><span class="badge b-high">HOT</span><span class="badge b-low">High intent</span></div><div style="height:8px;border-radius:100px;background:var(--border);overflow:hidden;margin-top:11px;"><i id="ti-gauge-fill" style="display:block;height:100%;width:0;border-radius:100px;background:linear-gradient(90deg,#d97706,var(--red));transition:width 1s cubic-bezier(.3,0,.1,1);"></i></div></div>
+              <div class="lp-sec"><div style="font-size:12px;color:var(--text-s);line-height:1.6;">Ready to book &mdash; recommend responding within the hour.</div></div>
             </div></div>
 
             <!-- 4 task -->
-            <div class="tf-focus-item" data-s="4"><div class="tf-scr-label">Team · task assigned</div><div class="tf-float tf-c">
-              <div class="tf-row"><span class="tf-task-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span><div class="tf-lm"><div class="tf-ln">Call <span data-f="first"></span></div><div class="tf-ls"><span data-f="service"></span> &middot; high priority</div></div></div>
-              <div class="tf-assign"><span class="tf-assign-l">Assigned to</span><span class="tf-assign-av">MC</span><span class="tf-assign-n">Maria Chen</span><span class="tf-assign-r">Client Success</span></div>
-              <div class="tf-due"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Due today &middot; reminder set</div>
+            <div class="tf-focus-item" data-s="4"><div class="tf-scr-label">Team · task assigned</div><div class="ti-dash">
+              <div class="lp-sec" style="border-top:none;"><div class="lp-sec-label">New task</div><div style="display:flex;align-items:center;justify-content:space-between;gap:8px;"><span style="font-size:13.5px;font-weight:700;color:var(--text);">Call <span data-f="first"></span></span><span class="badge b-high">High priority</span></div><div class="dk" style="margin-top:4px;"><span data-f="service"></span> · follow up today</div></div>
+              <div class="lp-sec"><div class="lp-sec-label">Assigned to</div><div style="display:flex;align-items:center;gap:9px;"><span class="lead-avatar" style="background:hsl(168,58%,40%);">MC</span><div><div class="dv">Maria Chen</div><div class="dk">Client Success</div></div></div></div>
+              <div class="lp-sec"><div class="lp-tl-item"><div class="lp-tl-dot"></div><div><div class="lp-tl-text">Reminder set &middot; due today</div></div></div></div>
             </div></div>
 
             <!-- 5 calendar -->
-            <div class="tf-focus-item" data-s="5"><div class="tf-scr-label">Calendar · appointment booked</div><div class="tf-float tf-c">
-              <div class="tf-cal-h">Tuesday &middot; this week</div>
-              <div class="tf-slot dim"><span class="tf-slot-t">1:30 PM</span><span class="tf-slot-e">Available</span></div>
-              <div class="tf-slot book" id="ti-slot"><span class="tf-slot-t">2:30 PM</span><span class="tf-slot-n"><span data-f="first"></span> &middot; <span data-f="service"></span></span><span class="tf-slot-tag">Booked</span></div>
-              <div class="tf-slot dim"><span class="tf-slot-t">3:30 PM</span><span class="tf-slot-e">Available</span></div>
+            <div class="tf-focus-item" data-s="5"><div class="tf-scr-label">Calendar · appointment booked</div><div class="ti-dash">
+              <div class="lp-sec" style="border-top:none;"><div class="lp-sec-label">Tuesday · this week</div>
+                <div class="detail-row" style="opacity:.55;"><span class="dk">1:30 PM</span><span class="dk">Available</span></div>
+                <div id="ti-slot" style="display:flex;justify-content:space-between;align-items:center;padding:10px 11px;margin:7px 0;border-radius:7px;background:var(--blue-dim);border:1px solid var(--blue);opacity:0;transform:translateY(6px);transition:opacity .5s,transform .5s cubic-bezier(.22,1,.36,1);"><div><div style="font-size:12.5px;font-weight:700;color:var(--blue);">2:30 PM</div><div class="dk"><span data-f="first"></span> · <span data-f="service"></span></div></div><span class="badge b-low">Booked</span></div>
+                <div class="detail-row" style="opacity:.55;"><span class="dk">3:30 PM</span><span class="dk">Available</span></div>
+              </div>
             </div></div>
 
-            <!-- 6 kpis -->
-            <div class="tf-focus-item" data-s="6"><div class="tf-scr-label">Overview · updated live</div><div class="tf-float tf-c">
-              <div class="tf-kpis">
-                <div class="tf-kpi"><div class="tf-kpi-n" data-count="1">0</div><div class="tf-kpi-l">New lead today</div></div>
-                <div class="tf-kpi"><div class="tf-kpi-n" data-count="42" data-suffix="s">0</div><div class="tf-kpi-l">Response time</div></div>
-                <div class="tf-kpi"><div class="tf-kpi-n" data-count="1">0</div><div class="tf-kpi-l">Appointment booked</div></div>
-                <div class="tf-kpi"><div class="tf-kpi-n" data-count="5">0</div><div class="tf-kpi-l">Follow-ups queued</div></div>
+            <!-- 6 kpis — real stat-cards -->
+            <div class="tf-focus-item" data-s="6"><div class="tf-scr-label">Overview · updated live</div><div class="ti-dash" style="padding:14px;">
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                <div class="stat-card"><div class="stat-top"><div class="stat-label"><svg class="kpi-glyph kg-blue" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20a6 6 0 0 1 12 0"/><circle cx="10" cy="8" r="3.4"/><path d="M18.5 8v5M16 10.5h5"/></svg>New leads</div><span class="state-pill live"><span class="sp-dot"></span>Live</span></div><div class="stat-val"><span data-count="1">0</span></div><div class="stat-hint">today</div></div>
+                <div class="stat-card"><div class="stat-top"><div class="stat-label"><svg class="kpi-glyph kg-green" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Response</div></div><div class="stat-val"><span data-count="42" data-suffix="s">0</span></div><div class="stat-hint">avg speed-to-lead</div></div>
+                <div class="stat-card"><div class="stat-top"><div class="stat-label"><svg class="kpi-glyph kg-purple" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="17" rx="2"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/></svg>Booked</div></div><div class="stat-val"><span data-count="1">0</span></div><div class="stat-hint">appointment</div></div>
+                <div class="stat-card"><div class="stat-top"><div class="stat-label"><svg class="kpi-glyph kg-amber" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M17 2l4 4-4 4"/><path d="M20 6H9a4 4 0 0 0-4 4v1"/><path d="M7 22l-4-4 4-4"/><path d="M4 18h11a4 4 0 0 0 4-4v-1"/></svg>Follow-ups</div></div><div class="stat-val"><span data-count="5">0</span></div><div class="stat-hint">queued</div></div>
               </div>
-              <div class="tf-done"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Captured to booked &mdash; handled automatically.</div>
+              <div class="stat-delta delta-up" style="justify-content:center;margin-top:12px;font-size:12px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;"><polyline points="20 6 9 17 4 12"/></svg>Captured to booked &mdash; handled automatically.</div>
             </div></div>
 
           </div>
@@ -2219,7 +2231,7 @@
     }
     function bookSlot(instant) { var s = document.getElementById('ti-slot'); if (s) { if (instant) s.classList.add('in'); else timers.push(setTimeout(function () { s.classList.add('in'); }, 80)); } }
     function countKpis(id, instant) {
-      section.querySelectorAll('.tf-kpi-n').forEach(function (el) {
+      section.querySelectorAll('[data-count]').forEach(function (el) {
         var target = +el.getAttribute('data-count') || 0, suf = el.getAttribute('data-suffix') || '';
         if (instant) { el.textContent = target + suf; return; }
         var start = null; function step(ts) { if (id !== runId) return; if (!start) start = ts; var p = Math.min(1, (ts - start) / 700); el.textContent = Math.round(target * p) + suf; if (p < 1) requestAnimationFrame(step); } requestAnimationFrame(step);
