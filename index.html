@@ -1838,9 +1838,9 @@
 
     /* flow spine (de-boxed connected path) */
     .tf-flow { position: relative; display:flex; align-items:flex-start; justify-content:space-between; padding: 4px 12px 0; margin-bottom: 26px; }
-    .tf-flow::before { content:''; position:absolute; left:26px; right:26px; top:18px; height:2px; z-index:0;
+    .tf-flow::before { content:''; position:absolute; left:50px; right:50px; top:18px; height:2px; z-index:0;
       background: repeating-linear-gradient(90deg, var(--tf-silver) 0 4px, transparent 4px 9px); opacity:.6; }
-    .tf-flow-fill { position:absolute; left:26px; top:18px; height:2px; z-index:0; width:0; background:linear-gradient(90deg,var(--tf-graph2),var(--tf-graph)); border-radius:2px; transition:width .5s cubic-bezier(.4,0,.12,1); }
+    .tf-flow-fill { position:absolute; left:50px; top:18px; height:2px; z-index:0; width:0; background:linear-gradient(90deg,var(--tf-graph2),var(--tf-graph)); border-radius:2px; transition:width .5s cubic-bezier(.4,0,.12,1); }
     .tf-node { position:relative; z-index:1; display:flex; flex-direction:column; align-items:center; gap:8px; cursor:pointer; width:76px; background:none; border:none; font-family:inherit; padding:0; }
     .tf-ndot { width:34px; height:34px; border-radius:50%; background:#fff; border:1.5px solid var(--tf-line); display:grid; place-items:center; color:var(--tf-ink3);
       box-shadow:0 4px 10px -5px rgba(20,30,45,0.22); transition:background .3s, border-color .3s, color .3s, transform .3s, box-shadow .3s; }
@@ -1856,7 +1856,7 @@
     .tf-node:focus-visible .tf-ndot { outline:2px solid var(--tf-graph); outline-offset:2px; }
 
     /* focal area — real components float, no frame */
-    .tf-focus { position: relative; min-height: 446px; }
+    .tf-focus { position: relative; min-height: 344px; }
     .tf-focus-item { position:absolute; left:50%; top:0; transform:translateX(-50%) translateY(12px); width:100%; max-width:456px; opacity:0; pointer-events:none;
       transition:opacity .5s ease, transform .5s cubic-bezier(.22,1,.36,1); }
     .tf-focus-item.active { opacity:1; transform:translateX(-50%); pointer-events:auto; }
@@ -1996,7 +1996,7 @@
 
     @media (max-width: 940px) {
       .tf-stage { grid-template-columns: 1fr; gap: 26px; }
-      .tf-focus { min-height: 430px; }
+      .tf-focus { min-height: 330px; }
     }
     @media (max-width: 768px) {
       #try-it { padding: 74px 0; } .tf-wrap { padding: 0 16px; }
@@ -2006,6 +2006,18 @@
       .tf-focus-item { max-width:none; }
       .tf-canvas-timer { position:static; display:inline-block; margin-bottom:12px; }
     }
+
+    /* ── clear-glass surfaces with silver reflections (replaces the flat cards) ── */
+    .tf-form, .tf-float, .ti-dash { position: relative; overflow: hidden;
+      background: rgba(255,255,255,0.46) !important; -webkit-backdrop-filter: blur(18px) saturate(1.15); backdrop-filter: blur(18px) saturate(1.15);
+      border: 1px solid rgba(255,255,255,0.6) !important;
+      box-shadow: 0 38px 66px -34px rgba(20,30,45,0.36), inset 0 1px 0 rgba(255,255,255,0.9), inset 0 0 0 1px rgba(172,182,196,0.16) !important; }
+    .tf-form::before, .tf-float::before, .ti-dash::before { content:''; position:absolute; inset:0; pointer-events:none; z-index:0;
+      background: linear-gradient(122deg, rgba(255,255,255,0.62) 0%, rgba(255,255,255,0) 28%, rgba(255,255,255,0) 62%, rgba(188,197,210,0.44) 100%); }
+    .tf-form::after, .tf-float::after, .ti-dash::after { content:''; position:absolute; top:-40%; bottom:-40%; left:-8%; width:34%; pointer-events:none; z-index:0; transform:rotate(19deg);
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.55), transparent); opacity:.5; }
+    .tf-form > *, .tf-float > *, .ti-dash > * { position: relative; z-index: 1; }
+    @media (prefers-reduced-motion: no-preference) { }
   </style>
   <section id="try-it">
     <div class="tf-wrap">
@@ -2167,19 +2179,17 @@
     function renderLeadCard() {
       var el = document.getElementById('ti-lead-card'); if (!el) return;
       var name = DATA.name, r = [];
-      r.push('<div class="lp-head">' + dAvatar(name) + '<div style="flex:1;min-width:0;"><div class="lp-name">' + dEsc(name) + '</div><div class="lp-meta">Website form · Added today</div><div style="margin-top:7px;display:flex;align-items:center;gap:8px;">' + dBadge('HOT') + '<span class="score-ring" style="border-color:var(--red);">' + dScore(name) + '</span></div></div></div>');
+      r.push('<div class="lp-head">' + dAvatar(name) + '<div style="flex:1;min-width:0;"><div class="lp-name">' + dEsc(name) + '</div><div class="lp-meta">Website form · Added today</div></div><div style="display:flex;align-items:center;gap:9px;flex-shrink:0;">' + dBadge('HOT') + '<span class="score-ring" style="border-color:var(--red);">' + dScore(name) + '</span></div></div>');
       r.push('<div class="lp-sec"><div class="lp-sec-label">Contact</div><div class="detail-row"><span class="dk">Email</span><span class="dv" style="color:var(--blue);">' + dEsc(DATA.email) + '</span></div><div class="detail-row"><span class="dk">Phone</span><span class="dv" style="color:var(--blue);">' + dEsc(DATA.phone) + '</span></div></div>');
       r.push('<div class="lp-sec"><div class="lp-sec-label">Set Status</div><div class="status-picker">' + ['HOT', 'WARM', 'COLD', 'BOOKED'].map(function (s) { var a = (s === 'HOT' ? ' active' : ''); return '<span class="status-chip sc-' + s.toLowerCase() + a + '">' + s + '</span>'; }).join('') + '</div></div>');
       r.push('<div class="lp-sec"><div class="lp-sec-label">AI Summary</div><div style="font-size:12px;color:var(--text-s);line-height:1.6;">' + dEsc(DATA.summary) + '</div></div>');
-      r.push('<div class="lp-sec"><div class="lp-sec-label">Next Best Action</div><div class="lp-actions"><span class="lp-act-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 4L3 11l6 2 2 6z"/><path d="M21 4L9 13"/></svg>Send follow-up</span><span class="lp-act-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="17" rx="2"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/><path d="M9 15l2 2 4-4"/></svg>Mark booked</span></div></div>');
-      r.push('<div class="lp-sec"><div class="lp-sec-label">Activity Timeline</div><div class="lp-tl-item"><div class="lp-tl-dot"></div><div><div class="lp-tl-text">Created in CRM</div><div class="lp-tl-time">Just now</div></div></div><div class="lp-tl-item"><div class="lp-tl-dot"></div><div><div class="lp-tl-text">Synced to Flowaify</div><div class="lp-tl-time">Live</div></div></div></div>');
       el.innerHTML = r.join('');
     }
 
     function clearTimers() { timers.forEach(clearTimeout); timers = []; if (rafId) { cancelAnimationFrame(rafId); rafId = 0; } }
 
     function showItem(i) { items.forEach(function (s) { s.classList.toggle('active', +s.getAttribute('data-s') === i); }); }
-    function setFlow(i) { if (flowFill && steps.length > 1) flowFill.style.width = (i / (steps.length - 1) * 100) + '%'; }
+    function setFlow(i) { if (flowFill && steps.length > 1) flowFill.style.width = 'calc((100% - 100px) * ' + (i / (steps.length - 1)) + ')'; }
     function activate(i, done) {
       steps.forEach(function (s) { var si = +s.getAttribute('data-i'); s.classList.toggle('on', si === i && !done); if (si === i && done) s.classList.add('done'); });
       var st = steps[i]; if (st) { var t = st.querySelector('.tf-ntime'); if (t) t.textContent = (TIMES[i] / 1000).toFixed(1) + 's'; }
