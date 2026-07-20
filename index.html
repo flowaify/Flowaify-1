@@ -1969,6 +1969,45 @@
     }
     @media (max-width: 768px) { #try-it { padding:74px 0; } .ti-wrap { padding:0 16px; } .ti-view-body { min-height:360px; } }
     @media (max-width: 480px) { .ti-kpis { grid-template-columns:1fr; } }
+
+    /* ══ REAL dashboard code, scoped: lead-profile card (ported verbatim from app.html) ══ */
+    #try-it .ti-view-body { min-height: 384px; }
+    #try-it .ti-screen[data-s="1"] { display:flex; flex-direction:column; }
+    .ti-dash { flex:1 1 auto; min-height:0; overflow-y:auto; background:#fff; border:1px solid #e5e7eb; border-radius:10px;
+      --blue:#0050e6; --blue-b:#0041c4; --blue-border:rgba(0,80,230,0.28); --blue-dim:rgba(0,80,230,0.07);
+      --green:#059669; --green-dim:rgba(5,150,105,0.08); --red:#dc2626; --red-dim:rgba(220,38,38,0.07);
+      --amber:#b45309; --amber-dim:rgba(180,83,9,0.07); --text:#111827; --text-m:#6b7280; --text-s:#374151;
+      --border:#e5e7eb; --input-bg:#f9fafb; --input-border:#d1d5db; --r-input:6px; }
+    .ti-dash::-webkit-scrollbar { width:6px; } .ti-dash::-webkit-scrollbar-thumb { background:#d1d5db; border-radius:6px; }
+    .ti-dash .lead-avatar { width:26px; height:26px; border-radius:8px; color:#fff; font-size:10px; font-weight:650; letter-spacing:0.02em; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0; }
+    .ti-dash .badge { display:inline-flex; align-items:center; padding:2px 7px; border-radius:3px; font-size:10px; font-weight:600; white-space:nowrap; text-transform:uppercase; letter-spacing:0.3px; }
+    .ti-dash .b-high { background:var(--red-dim); color:var(--red); border:1px solid rgba(220,38,38,0.18); }
+    .ti-dash .b-med { background:var(--amber-dim); color:var(--amber); border:1px solid rgba(180,83,9,0.18); }
+    .ti-dash .b-low { background:var(--blue-dim); color:var(--blue); border:1px solid rgba(0,87,255,0.16); }
+    .ti-dash .b-conn { background:var(--green-dim); color:var(--green); border:1px solid rgba(5,150,105,.18); }
+    .ti-dash .score-ring { width:30px; height:30px; border-radius:50%; border:2px solid var(--border); display:inline-flex; align-items:center; justify-content:center; font-size:10.5px; font-weight:700; color:var(--text); font-variant-numeric:tabular-nums; }
+    .ti-dash .lp-head { padding:16px 16px 12px; display:flex; align-items:flex-start; gap:11px; }
+    .ti-dash .lp-name { font-size:15px; font-weight:800; color:var(--text); line-height:1.2; }
+    .ti-dash .lp-meta { font-size:11px; color:var(--text-m); margin-top:3px; }
+    .ti-dash .lp-sec { padding:11px 16px; border-top:1px solid var(--border); }
+    .ti-dash .lp-sec-label { font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-m); margin-bottom:8px; }
+    .ti-dash .lp-actions { display:flex; flex-direction:column; gap:7px; }
+    .ti-dash .lp-act-btn { display:flex; align-items:center; gap:9px; padding:9px 12px; border:1px solid var(--border); border-radius:var(--r-input); background:transparent; font-size:12px; font-weight:600; color:var(--text); font-family:inherit; }
+    .ti-dash .lp-act-btn svg { width:14px; height:14px; color:var(--blue); flex-shrink:0; }
+    .ti-dash .lp-tl-item { display:flex; gap:10px; padding:4px 0; }
+    .ti-dash .lp-tl-dot { width:7px; height:7px; border-radius:50%; background:var(--blue); margin-top:5px; flex-shrink:0; }
+    .ti-dash .lp-tl-text { font-size:12px; color:var(--text-s); line-height:1.45; }
+    .ti-dash .lp-tl-time { font-size:10.5px; color:var(--text-m); }
+    .ti-dash .detail-row { display:flex; justify-content:space-between; padding:7px 0; border-bottom:1px solid var(--border); }
+    .ti-dash .detail-row:last-child { border-bottom:none; }
+    .ti-dash .dk { font-size:11px; color:var(--text-m); }
+    .ti-dash .dv { font-size:12px; font-weight:600; color:var(--text-s); }
+    .ti-dash .status-picker { display:flex; gap:6px; flex-wrap:wrap; }
+    .ti-dash .status-chip { border:1px solid var(--input-border); background:transparent; border-radius:var(--r-input); font-family:inherit; font-size:10.5px; font-weight:650; letter-spacing:0.05em; padding:5px 10px; color:var(--text-m); }
+    .ti-dash .status-chip.sc-hot.active { background:var(--red-dim); color:var(--red); border-color:rgba(220,38,38,0.4); }
+    .ti-dash .status-chip.sc-warm.active { background:var(--amber-dim); color:#d97706; border-color:rgba(217,119,6,0.4); }
+    .ti-dash .status-chip.sc-cold.active { background:var(--blue-dim); color:var(--blue); border-color:rgba(0,87,255,0.35); }
+    .ti-dash .status-chip.sc-booked.active { background:var(--green-dim); color:var(--green); border-color:rgba(5,150,105,0.4); }
   </style>
   <section id="try-it">
     <div class="ti-wrap">
@@ -2030,22 +2069,10 @@
                 </div>
               </div>
 
-              <!-- 1: lead card -->
+              <!-- 1: contact created — REAL dashboard lead-profile code (ported from selectLead) -->
               <div class="ti-screen" data-s="1">
-                <div class="ti-scr-label">Contact · CRM</div>
-                <div class="ti-lead-top">
-                  <span class="ti-av" data-f="avatar"></span>
-                  <div><div class="ti-lead-name" data-f="name"></div><div class="ti-lead-meta"><span data-f="service"></span> &middot; Website form</div></div>
-                  <span class="ti-badge ti-b-new">New lead</span>
-                </div>
-                <div class="ti-lead-contact">
-                  <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg><span data-f="email"></span></span>
-                  <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h4l1.5 5-2 1.4a11 11 0 0 0 5 5l1.4-2 5 1.5v4a1 1 0 0 1-1 1A17 17 0 0 1 4 5a1 1 0 0 1 1-1z"/></svg><span data-f="phone"></span></span>
-                </div>
-                <div class="ti-summary">
-                  <div class="ti-summary-head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.8 4.7L18 9l-4.2 1.3L12 15l-1.8-4.7L6 9l4.2-1.3z"/></svg>AI Summary</div>
-                  <p data-f="summary"></p>
-                </div>
+                <div class="ti-scr-label">Contact · CRM · Lead Profile</div>
+                <div class="ti-dash" id="ti-lead-card"></div>
               </div>
 
               <!-- 2: flowy email -->
@@ -2155,6 +2182,36 @@
         if (k === 'avatar') { el.textContent = DATA.avatar; el.style.background = DATA.avatarColor; }
         else if (DATA[k] != null) el.textContent = DATA[k];
       });
+      renderLeadCard();
+    }
+
+    /* ── real dashboard code, ported verbatim from pages/dashboard/dashboard.js ── */
+    function dEsc(v) { if (v == null || v === '') return '—'; return String(v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+    var D_HUES = [212, 262, 152, 22, 340, 190, 48, 288];
+    function dAvatar(name) {
+      var n = String(name || '?'), h = 0, i;
+      for (i = 0; i < n.length; i++) h = (h * 31 + n.charCodeAt(i)) >>> 0;
+      var hue = D_HUES[h % D_HUES.length];
+      var ini = n.split(/\s+/).slice(0, 2).map(function (w) { return w.charAt(0); }).join('').toUpperCase() || '?';
+      return '<span class="lead-avatar" style="background:hsl(' + hue + ',62%,45%);">' + dEsc(ini) + '</span>';
+    }
+    function dBadge(status) {
+      var s = String(status || '').toUpperCase(), cls = 'b-muted';
+      if (s.indexOf('HOT') !== -1) cls = 'b-high'; else if (s.indexOf('WARM') !== -1) cls = 'b-med';
+      else if (s.indexOf('BOOK') !== -1) cls = 'b-conn'; else if (s.indexOf('COLD') !== -1) cls = 'b-low';
+      return '<span class="badge ' + cls + '">' + dEsc(status) + '</span>';
+    }
+    function dScore(name) { var h = 0, str = String(name || ''), i; for (i = 0; i < str.length; i++) h = ((h * 31) + str.charCodeAt(i)) & 0x7fffffff; return 85 + (h % 11); }
+    function renderLeadCard() {
+      var el = document.getElementById('ti-lead-card'); if (!el) return;
+      var name = DATA.name, r = [];
+      r.push('<div class="lp-head">' + dAvatar(name) + '<div style="flex:1;min-width:0;"><div class="lp-name">' + dEsc(name) + '</div><div class="lp-meta">Website form · Added today</div><div style="margin-top:7px;display:flex;align-items:center;gap:8px;">' + dBadge('HOT') + '<span class="score-ring" style="border-color:var(--red);">' + dScore(name) + '</span></div></div></div>');
+      r.push('<div class="lp-sec"><div class="lp-sec-label">Contact</div><div class="detail-row"><span class="dk">Email</span><span class="dv" style="color:var(--blue);">' + dEsc(DATA.email) + '</span></div><div class="detail-row"><span class="dk">Phone</span><span class="dv" style="color:var(--blue);">' + dEsc(DATA.phone) + '</span></div></div>');
+      r.push('<div class="lp-sec"><div class="lp-sec-label">Set Status</div><div class="status-picker">' + ['HOT', 'WARM', 'COLD', 'BOOKED'].map(function (s) { var a = (s === 'HOT' ? ' active' : ''); return '<span class="status-chip sc-' + s.toLowerCase() + a + '">' + s + '</span>'; }).join('') + '</div></div>');
+      r.push('<div class="lp-sec"><div class="lp-sec-label">AI Summary</div><div style="font-size:12px;color:var(--text-s);line-height:1.6;">' + dEsc(DATA.summary) + '</div></div>');
+      r.push('<div class="lp-sec"><div class="lp-sec-label">Next Best Action</div><div class="lp-actions"><span class="lp-act-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 4L3 11l6 2 2 6z"/><path d="M21 4L9 13"/></svg>Send follow-up</span><span class="lp-act-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="17" rx="2"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/><path d="M9 15l2 2 4-4"/></svg>Mark booked</span></div></div>');
+      r.push('<div class="lp-sec"><div class="lp-sec-label">Activity Timeline</div><div class="lp-tl-item"><div class="lp-tl-dot"></div><div><div class="lp-tl-text">Created in CRM</div><div class="lp-tl-time">Just now</div></div></div><div class="lp-tl-item"><div class="lp-tl-dot"></div><div><div class="lp-tl-text">Synced to Flowaify</div><div class="lp-tl-time">Live</div></div></div></div>');
+      el.innerHTML = r.join('');
     }
 
     function clearTimers() { timers.forEach(clearTimeout); timers = []; if (rafId) cancelAnimationFrame(rafId), rafId = 0; }
