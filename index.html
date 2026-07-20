@@ -2063,6 +2063,19 @@
       .tf-flow-fill::after { animation: tfPulseDot 1.3s ease-in-out infinite; }
       @keyframes tfPulseDot { 0%,100% { box-shadow: 0 0 0 4px rgba(43,50,61,0.10), 0 0 12px 2px rgba(43,50,61,0.42); } 50% { box-shadow: 0 0 0 7px rgba(43,50,61,0.05), 0 0 20px 5px rgba(43,50,61,0.55); } }
     }
+
+    /* ── mobile polish: calm the heavy FX, tighten spacing ── */
+    @media (max-width: 768px) {
+      .tf-focus-item.active { animation: none; }
+      .tf-form, .tf-float, .ti-dash { -webkit-backdrop-filter: blur(14px) saturate(1.2); backdrop-filter: blur(14px) saturate(1.2); transform: none !important; }
+      .tf-glow { width: 300px; height: 300px; top: 54%; }
+      .tf-form { padding: 18px; }
+      .tf-node { width: 68px; }
+      .tf-nlabel { font-size: 9px; }
+      .tf-intro { margin-bottom: 30px; }
+      .tf-stage { gap: 22px; }
+    }
+    @media (max-width: 420px) { .tf-node { width: 60px; } .tf-ndot { width: 30px; height: 30px; } .tf-ndot svg { width: 14px; height: 14px; } }
   </style>
   <section id="try-it">
     <div class="tf-wrap">
@@ -2239,7 +2252,8 @@
     function activate(i, done) {
       steps.forEach(function (s) { var si = +s.getAttribute('data-i'); s.classList.toggle('on', si === i && !done); if (si === i && done) s.classList.add('done'); });
       var st = steps[i]; if (st) { var t = st.querySelector('.tf-ntime'); if (t) t.textContent = (TIMES[i] / 1000).toFixed(1) + 's'; }
-      var beam = section.querySelector('.tf-beam'); if (beam && st) beam.style.left = (st.offsetLeft + st.offsetWidth / 2 - 1) + 'px';
+      var flow = st ? st.parentNode : null;
+      if (flow && flow.scrollWidth > flow.clientWidth + 4) { try { flow.scrollTo({ left: st.offsetLeft - (flow.clientWidth - st.offsetWidth) / 2, behavior: 'smooth' }); } catch (e) {} }
       setFlow(i);
     }
 
