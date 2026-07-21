@@ -120,27 +120,80 @@
     }
     .nav-link:hover { color: var(--text); }
     .nav-link[aria-current="page"] { color: var(--blue); font-weight: 600; }
-    /* Product dropdown */
-    .nav-dd { position: relative; }
-    .nav-dd-trigger { display: inline-flex; align-items: center; gap: 5px; background: none; border: none; cursor: pointer; font-family: inherit; padding: 0; }
-    .nav-dd-chev { transition: transform 0.25s ease; }
-    .nav-dd:hover .nav-dd-chev, .nav-dd.open .nav-dd-chev { transform: rotate(180deg); }
+    /* Nothing in the header is ever underlined. */
+    #navbar a, #navbar a:hover { text-decoration: none; }
+
+    /* ── Mega dropdowns ─────────────────────────────────────────────────────
+       Each .nav-dd is a full-height column, so its panel hangs from the navbar
+       edge while staying anchored to its own trigger's left edge. */
+    .nav-dd { position: relative; align-self: stretch; display: flex; align-items: center; }
+    .nav-dd-trigger { display: inline-flex; align-items: center; gap: 6px; background: none; border: none; cursor: pointer;
+      font-family: inherit; padding: 8px 14px; margin: 0 -6px; border-radius: 10px; color: var(--text-soft);
+      font-size: 14px; font-weight: 500; letter-spacing: -0.01em; transition: background 0.18s ease, color 0.18s ease; }
+    .nav-dd-trigger:hover { color: var(--text); background: rgba(15,23,42,0.045); }
+    .nav-dd.open .nav-dd-trigger { color: var(--text); background: rgba(15,23,42,0.06); }
+    .nav-dd-chev { transition: transform 0.32s cubic-bezier(0.22,1,0.36,1); opacity: 0.65; }
+    .nav-dd.open .nav-dd-chev { transform: rotate(180deg); opacity: 0.9; }
     .nav-dd-trigger.nav-active { color: var(--blue); font-weight: 600; }
-    .nav-dd-panel { position: absolute; top: calc(100% + 16px); left: -16px; width: 328px; background: #fff;
-      border: 1px solid var(--border); border-radius: 14px; padding: 8px; z-index: 120;
-      box-shadow: 0 24px 54px -22px rgba(15,23,42,0.3), 0 4px 12px -6px rgba(15,23,42,0.12);
-      opacity: 0; visibility: hidden; transform: translateY(-6px);
-      transition: opacity 0.2s ease, transform 0.28s cubic-bezier(0.22,1,0.36,1), visibility 0.2s; }
-    .nav-dd-panel::before { content: ''; position: absolute; top: -16px; left: 0; right: 0; height: 16px; }
-    .nav-dd:hover .nav-dd-panel, .nav-dd.open .nav-dd-panel { opacity: 1; visibility: visible; transform: translateY(0); }
-    .nav-dd-item { display: flex; align-items: center; gap: 12px; padding: 11px 12px; border-radius: 10px; transition: background 0.15s ease; }
-    .nav-dd-item:hover { background: rgba(15,23,42,0.04); }
-    .nav-dd-ico { width: 36px; height: 36px; border-radius: 9px; background: rgba(15,23,42,0.05); color: #55606F; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: background 0.15s, color 0.15s; }
-    .nav-dd-ico svg { width: 18px; height: 18px; }
-    .nav-dd-item:hover .nav-dd-ico { background: rgba(0,87,255,0.08); color: var(--blue); }
-    .nav-dd-tx { display: flex; flex-direction: column; }
-    .nav-dd-t { font-size: 13.5px; font-weight: 650; color: var(--text); letter-spacing: -0.01em; }
-    .nav-dd-s { font-size: 12px; color: var(--text-muted); margin-top: 1px; }
+
+    .nav-dd-panel { position: absolute; top: calc(100% + 8px); left: -6px;
+      width: max-content; max-width: calc(100vw - 48px); background: #fff;
+      border: 1px solid rgba(15,23,42,0.09); border-radius: 14px; padding: 14px; z-index: 120;
+      box-shadow: 0 1px 2px rgba(15,23,42,0.04), 0 18px 44px -18px rgba(15,23,42,0.22), 0 40px 80px -40px rgba(15,23,42,0.18);
+      transform-origin: top left;
+      opacity: 0; visibility: hidden; pointer-events: none;
+      transform: translateY(-6px) scale(0.985);
+      transition: opacity 0.19s ease, transform 0.3s cubic-bezier(0.22,1,0.36,1), visibility 0.19s; }
+    /* invisible bridge so the diagonal trip from trigger to panel never drops hover */
+    .nav-dd-panel::before { content: ''; position: absolute; top: -14px; left: 0; right: 0; height: 14px; }
+    .nav-dd.open .nav-dd-panel { opacity: 1; visibility: visible; transform: none; pointer-events: auto; }
+
+    /* Swapping between menus: no re-entry motion, just a fast cross-fade. */
+    #navbar-links.dd-switching .nav-dd-panel { transition: opacity 0.13s ease, visibility 0.13s; transform: none; }
+
+    /* Contents rise in behind the panel — skipped while swapping. */
+    @keyframes navItemIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: none; } }
+    .nav-dd.open .nav-mega-group, .nav-dd.open .nav-mega-rail { animation: navItemIn 0.34s cubic-bezier(0.22,1,0.36,1) both; }
+    .nav-dd.open .nav-mega-cols > .nav-mega-group:nth-child(2) { animation-delay: 0.045s; }
+    .nav-dd.open .nav-mega-rail { animation-delay: 0.075s; }
+    #navbar-links.dd-switching .nav-mega-group,
+    #navbar-links.dd-switching .nav-mega-rail { animation: none; }
+
+    /* panel body: content columns + an optional divided rail on the right */
+    .nav-mega { display: flex; align-items: stretch; gap: 10px; }
+    .nav-mega-cols { display: grid; grid-template-columns: repeat(var(--nav-cols, 2), minmax(272px, 1fr)); gap: 4px 14px; }
+    .nav-mega-rail { flex-shrink: 0; width: 208px; padding: 2px 0 8px 26px; margin-left: 14px; border-left: 1px solid rgba(15,23,42,0.08); }
+    .nav-mega-group { padding: 2px 0 8px; }
+    .nav-mega-label { display: block; padding: 4px 12px 10px; font-size: 11px; font-weight: 550;
+      letter-spacing: 0.085em; text-transform: uppercase; color: #98A2B3; }
+    .nav-mega-rail .nav-mega-label { padding-left: 0; }
+
+    .nav-dd-item { display: flex; align-items: center; gap: 13px; padding: 8px 12px; border-radius: 10px;
+      transition: background 0.16s ease; }
+    .nav-dd-item:hover { background: rgba(15,23,42,0.035); }
+    /* Attio-style glyph tile: white card with a hairline edge, not a grey chip */
+    .nav-dd-ico { width: 38px; height: 38px; border-radius: 10px; background: #fff;
+      border: 1px solid rgba(15,23,42,0.1); box-shadow: 0 1px 2px rgba(15,23,42,0.05);
+      color: #3D4655; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+      transition: border-color 0.16s, color 0.16s, box-shadow 0.16s, transform 0.16s; }
+    .nav-dd-ico svg { width: 19px; height: 19px; stroke-width: 1.5; }
+    .nav-dd-item:hover .nav-dd-ico { border-color: rgba(0,87,255,0.32); color: var(--blue);
+      box-shadow: 0 2px 6px -1px rgba(0,87,255,0.16); transform: translateY(-1px); }
+    .nav-dd-tx { display: flex; flex-direction: column; min-width: 0; }
+    .nav-dd-t { font-size: 13.5px; font-weight: 600; color: var(--text); letter-spacing: -0.012em; display: flex; align-items: center; gap: 7px; }
+    .nav-dd-s { font-size: 12.5px; color: #7A8698; margin-top: 2px; letter-spacing: -0.005em; }
+    .nav-dd-tag { font-size: 9.5px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+      padding: 2px 6px; border-radius: 5px; background: rgba(0,87,255,0.09); color: var(--blue); }
+
+    /* rail rows: plain text links, no icon tile */
+    .nav-rail-item { display: block; padding: 9px 0; font-size: 13.5px; font-weight: 500; color: #4B5563;
+      letter-spacing: -0.01em; transition: color 0.15s ease; }
+    .nav-rail-item:hover { color: var(--blue); }
+
+    @media (prefers-reduced-motion: reduce) {
+      .nav-dd-panel { transition: opacity 0.12s ease, visibility 0.12s; transform: none; }
+      .nav-dd.open .nav-mega-group, .nav-dd.open .nav-mega-rail { animation: none; }
+    }
 
     /* Buttons */
     .btn {
@@ -1084,7 +1137,16 @@
        MOBILE RESPONSIVE  (≤768px tablet/phone,  ≤480px small phone)
     ────────────────────────────────────────────────────────────────────────── */
     .mob-only { display:none; }
-    #navbar-links { display:flex; align-items:center; gap:36px; }
+    /* Links sit beside the logo (not centred) — margin-right:auto pushes the
+       action buttons to the far right. Stretched so panels hang off the navbar. */
+    #navbar-links { display:flex; align-items:center; align-self:stretch; gap:26px;
+      position:relative; margin-left:44px; margin-right:auto; }
+
+    /* Keep mega panels inside the viewport on narrower desktops */
+    @media(max-width:1180px) {
+      .nav-mega-cols { grid-template-columns: repeat(var(--nav-cols,2), minmax(228px,1fr)); }
+      .nav-mega-rail { width:178px; padding-left:18px; margin-left:8px; }
+    }
 
     /* ── Tablet (769–1024px) ── */
     @media(max-width:1024px) {
@@ -1138,14 +1200,27 @@
         width:100%; display:flex; align-items:center; gap:6px;
       }
       #navbar-links .nav-link:last-child { border-bottom:none; }
-      /* Product dropdown -> inline accordion inside the mobile menu */
-      .nav-dd { width:100%; border-bottom:1px solid var(--border); }
-      #navbar-links .nav-dd-trigger { justify-content:space-between; width:100%; padding:13px 8px; font-size:15px; border-bottom:none; }
-      .nav-dd-panel { position:static; opacity:1; visibility:visible; transform:none; box-shadow:none; border:none; border-radius:0; padding:0 0 8px 8px; width:100%; max-height:0; overflow:hidden; transition:max-height 0.32s cubic-bezier(0.4,0,0.2,1); }
+      /* Dropdowns -> inline accordions inside the mobile menu */
+      #navbar-links { max-height:calc(100vh - 60px); overflow-y:auto; -webkit-overflow-scrolling:touch; }
+      .nav-dd { position:static; display:block; align-self:auto; width:100%; border-bottom:1px solid var(--border); }
+      #navbar-links { margin-left:0; margin-right:0; }
+      #navbar-links .nav-dd-trigger { justify-content:space-between; width:100%; padding:13px 8px; margin:0; font-size:15px; border-radius:0; background:none; }
+      #navbar-links .nav-dd-trigger:hover, #navbar-links .nav-dd.open .nav-dd-trigger { background:none; }
+      .nav-dd-panel { position:static; opacity:1; visibility:visible; pointer-events:auto; transform:none; box-shadow:none;
+        border:none; border-radius:0; padding:0 0 4px 8px; width:100%; max-width:none;
+        max-height:0; overflow:hidden; transition:max-height 0.36s cubic-bezier(0.4,0,0.2,1); }
       .nav-dd-panel::before { display:none; }
-      .nav-dd.open .nav-dd-panel { max-height:320px; }
+      .nav-dd.open .nav-dd-panel { max-height:1200px; }
       .nav-dd.open .nav-dd-chev { transform:rotate(180deg); }
       .nav-dd-item { padding:10px 8px; }
+      /* stack the mega columns + rail vertically */
+      .nav-mega { flex-direction:column; gap:0; }
+      .nav-mega-cols { grid-template-columns:1fr; gap:0; }
+      .nav-mega-rail { width:100%; padding-left:0; margin-left:0; border-left:none;
+        border-top:1px solid var(--border); padding-top:6px; margin-top:4px; }
+      .nav-mega-group { padding:2px 0 6px; }
+      .nav-mega-label { padding:8px 8px 4px; }
+      .nav-rail-item { padding:10px 8px; }
       .mob-only { display:block; }
       #hamburger { display:flex !important; order:2; }
       #navbar-cta { display:none !important; }
@@ -1398,11 +1473,12 @@
     @media (max-width: 600px) { #back-to-top { right: 16px; bottom: 16px; width: 42px; height: 42px; } }
 
     /* ── Micro-interactions ── */
+    /* Nav links get a soft pill on hover — never an underline. */
     @media (min-width: 769px) and (pointer: fine) {
-      #navbar-links .nav-link { position: relative; }
-      #navbar-links .nav-link::after { content: ''; position: absolute; left: 0; right: 0; bottom: -6px; height: 2px; border-radius: 2px; background: var(--blue);
-        transform: scaleX(0); transform-origin: left; transition: transform 0.28s cubic-bezier(0.22,1,0.36,1); }
-      #navbar-links .nav-link:hover::after, #navbar-links .nav-link[aria-current="page"]::after, #nav-dd .nav-dd-trigger.nav-active::after { transform: scaleX(1); }
+      #navbar-links .nav-link { padding: 8px 13px; margin: 0 -5px; border-radius: 10px;
+        transition: color 0.18s ease, background 0.18s ease; }
+      #navbar-links .nav-link:hover { background: rgba(15,23,42,0.045); }
+      #navbar-links .nav-link[aria-current="page"] { background: rgba(0,87,255,0.07); }
     }
     .btn-primary:active, .hero-btn-primary:active, .foot-cta:active { transform: translateY(1px) scale(0.98); }
     a:focus-visible, button:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; border-radius: 7px; }
@@ -1566,25 +1642,136 @@
     </a>
 
     <div id="navbar-links">
-      <div class="nav-dd" id="nav-dd">
-        <button type="button" class="nav-link nav-dd-trigger" aria-expanded="false" aria-haspopup="true" onclick="toggleProductMenu(event)">Product <svg class="nav-dd-chev" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>
+
+      <!-- ── PLATFORM ── -->
+      <div class="nav-dd" id="nav-dd" data-dd="platform">
+        <button type="button" class="nav-dd-trigger" aria-expanded="false" aria-haspopup="true">Platform <svg class="nav-dd-chev" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>
         <div class="nav-dd-panel">
-          <a href="#workspace" class="nav-dd-item" onclick="closeNav()">
-            <span class="nav-dd-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg></span>
-            <span class="nav-dd-tx"><span class="nav-dd-t">One Managed Workspace</span><span class="nav-dd-s">Everything in one place</span></span>
-          </a>
-          <a href="#who-for" class="nav-dd-item" onclick="closeNav()">
-            <span class="nav-dd-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5h18l-7 8.5V20l-4-2v-4.5z"/></svg></span>
-            <span class="nav-dd-tx"><span class="nav-dd-t">Built for your workflow</span><span class="nav-dd-s">Tuned to your industry</span></span>
-          </a>
-          <a href="#built-to-scale" class="nav-dd-item" onclick="closeNav()">
-            <span class="nav-dd-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 7-7"/><path d="M17 8h4v4"/></svg></span>
-            <span class="nav-dd-tx"><span class="nav-dd-t">Built to scale</span><span class="nav-dd-s">Ready for serious volume</span></span>
-          </a>
+          <div class="nav-mega" style="--nav-cols:2;">
+            <div class="nav-mega-cols">
+
+              <div class="nav-mega-group">
+                <span class="nav-mega-label">The platform</span>
+                <a href="#workspace" class="nav-dd-item" onclick="closeNav()">
+                  <span class="nav-dd-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg></span>
+                  <span class="nav-dd-tx"><span class="nav-dd-t">One Managed Workspace</span><span class="nav-dd-s">Everything in one place</span></span>
+                </a>
+                <a href="#who-for" class="nav-dd-item" onclick="closeNav()">
+                  <span class="nav-dd-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5h18l-7 8.5V20l-4-2v-4.5z"/></svg></span>
+                  <span class="nav-dd-tx"><span class="nav-dd-t">Built for your workflow</span><span class="nav-dd-s">Tuned to your industry</span></span>
+                </a>
+                <a href="#built-to-scale" class="nav-dd-item" onclick="closeNav()">
+                  <span class="nav-dd-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 7-7"/><path d="M17 8h4v4"/></svg></span>
+                  <span class="nav-dd-tx"><span class="nav-dd-t">Built to scale</span><span class="nav-dd-s">Ready for enterprise volume</span></span>
+                </a>
+              </div>
+
+              <div class="nav-mega-group">
+                <span class="nav-mega-label">Product</span>
+                <a href="app.html" class="nav-dd-item">
+                  <span class="nav-dd-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg></span>
+                  <span class="nav-dd-tx"><span class="nav-dd-t">Dashboard <span class="nav-dd-tag">Live</span></span><span class="nav-dd-s">Your command center</span></span>
+                </a>
+                <a href="portal.html" class="nav-dd-item">
+                  <span class="nav-dd-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></svg></span>
+                  <span class="nav-dd-tx"><span class="nav-dd-t">Workspace <span class="nav-dd-tag">Live</span></span><span class="nav-dd-s">Your client-facing portal</span></span>
+                </a>
+                <a href="#try-it" class="nav-dd-item" onclick="closeNav()">
+                  <span class="nav-dd-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><polyline points="13 2 4 14 12 14 11 22 20 10 12 10 13 2"/></svg></span>
+                  <span class="nav-dd-tx"><span class="nav-dd-t">See it in action</span><span class="nav-dd-s">Run a live lead through it</span></span>
+                </a>
+              </div>
+
+            </div>
+
+            <div class="nav-mega-rail">
+              <span class="nav-mega-label">Get started</span>
+              <a href="site/onboarding/" class="nav-rail-item">Start your setup</a>
+              <a href="site/demo/" class="nav-rail-item" data-demo-open onclick="closeNav()">Watch the demo video</a>
+              <a href="mailto:contact@flowaify.app" class="nav-rail-item">Email us</a>
+              <a href="site/auth0-login/" class="nav-rail-item">Sign in</a>
+            </div>
+          </div>
         </div>
       </div>
-      <a href="#faq" class="nav-link" onclick="closeNav()">FAQ</a>
-      <a href="mailto:contact@flowaify.app" class="nav-link">Contact</a>
+
+      <!-- ── RESOURCES ── -->
+      <div class="nav-dd" data-dd="resources">
+        <button type="button" class="nav-dd-trigger" aria-expanded="false" aria-haspopup="true">Resources <svg class="nav-dd-chev" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>
+        <div class="nav-dd-panel">
+          <div class="nav-mega" style="--nav-cols:2;">
+            <div class="nav-mega-cols">
+
+              <div class="nav-mega-group">
+                <span class="nav-mega-label">Learn</span>
+                <a href="#why-flowaify" class="nav-dd-item" onclick="closeNav()">
+                  <span class="nav-dd-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="4.5" cy="6" r="1.6"/><circle cx="4.5" cy="12" r="1.6"/><circle cx="4.5" cy="18" r="1.6"/><line x1="9.5" y1="6" x2="20" y2="6"/><line x1="9.5" y1="12" x2="20" y2="12"/><line x1="9.5" y1="18" x2="20" y2="18"/></svg></span>
+                  <span class="nav-dd-tx"><span class="nav-dd-t">How you get set up</span><span class="nav-dd-s">From access to live system</span></span>
+                </a>
+                <a href="#faq" class="nav-dd-item" onclick="closeNav()">
+                  <span class="nav-dd-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.3 9.4a2.8 2.8 0 1 1 3.4 3.2c-.6.2-.9.7-.9 1.3v.3"/><line x1="12" y1="17.4" x2="12" y2="17.5"/></svg></span>
+                  <span class="nav-dd-tx"><span class="nav-dd-t">FAQ</span><span class="nav-dd-s">Answers to common questions</span></span>
+                </a>
+                <a href="site/changelog/" class="nav-dd-item">
+                  <span class="nav-dd-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11v2a1 1 0 0 0 1 1h3l5 4V6L7 10H4a1 1 0 0 0-1 1z"/><path d="M16.5 9.2a4 4 0 0 1 0 5.6"/></svg></span>
+                  <span class="nav-dd-tx"><span class="nav-dd-t">What's new</span><span class="nav-dd-s">Latest platform updates</span></span>
+                </a>
+              </div>
+
+              <div class="nav-mega-group">
+                <span class="nav-mega-label">See it</span>
+                <a href="site/demo/" class="nav-dd-item" data-demo-open onclick="closeNav()">
+                  <span class="nav-dd-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polygon points="10.2 8.2 16 12 10.2 15.8" fill="currentColor" stroke="none"/></svg></span>
+                  <span class="nav-dd-tx"><span class="nav-dd-t">Demo video</span><span class="nav-dd-s">Watch the full walkthrough</span></span>
+                </a>
+                <a href="#try-it" class="nav-dd-item" onclick="closeNav()">
+                  <span class="nav-dd-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3l14 8-6 1.8L10.4 19z"/></svg></span>
+                  <span class="nav-dd-tx"><span class="nav-dd-t">Try it live</span><span class="nav-dd-s">Send a lead through the flow</span></span>
+                </a>
+              </div>
+
+            </div>
+
+            <div class="nav-mega-rail">
+              <span class="nav-mega-label">Legal &amp; trust</span>
+              <a href="site/privacy/" class="nav-rail-item">Privacy Policy</a>
+              <a href="site/terms/" class="nav-rail-item">Terms of Service</a>
+              <a href="site/security/" class="nav-rail-item">Security</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── COMPANY ── -->
+      <div class="nav-dd" data-dd="company">
+        <button type="button" class="nav-dd-trigger" aria-expanded="false" aria-haspopup="true">Company <svg class="nav-dd-chev" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>
+        <div class="nav-dd-panel">
+          <div class="nav-mega" style="--nav-cols:1;">
+            <div class="nav-mega-cols">
+              <div class="nav-mega-group">
+                <span class="nav-mega-label">Company</span>
+                <a href="site/team/" class="nav-dd-item">
+                  <span class="nav-dd-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M16 19v-1.5a3.5 3.5 0 0 0-3.5-3.5h-5A3.5 3.5 0 0 0 4 17.5V19"/><circle cx="10" cy="8" r="3.2"/><path d="M20 19v-1.4a3.5 3.5 0 0 0-2.6-3.4"/><path d="M15.4 5.2a3.2 3.2 0 0 1 0 5.6"/></svg></span>
+                  <span class="nav-dd-tx"><span class="nav-dd-t">Team</span><span class="nav-dd-s">The people behind Flowaify</span></span>
+                </a>
+                <a href="mailto:contact@flowaify.app" class="nav-dd-item">
+                  <span class="nav-dd-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3.5 6.5L12 13l8.5-6.5"/></svg></span>
+                  <span class="nav-dd-tx"><span class="nav-dd-t">Contact us</span><span class="nav-dd-s">Talk to a real person</span></span>
+                </a>
+                <a href="site/changelog/" class="nav-dd-item">
+                  <span class="nav-dd-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11v2a1 1 0 0 0 1 1h3l5 4V6L7 10H4a1 1 0 0 0-1 1z"/><path d="M16.5 9.2a4 4 0 0 1 0 5.6"/></svg></span>
+                  <span class="nav-dd-tx"><span class="nav-dd-t">What's new</span><span class="nav-dd-s">Latest platform updates</span></span>
+                </a>
+                <a href="site/security/" class="nav-dd-item">
+                  <span class="nav-dd-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7.5 3v5.5c0 4.4-3 8-7.5 9.5-4.5-1.5-7.5-5.1-7.5-9.5V6z"/><polyline points="9.2 12 11.3 14.1 15 10.4"/></svg></span>
+                  <span class="nav-dd-tx"><span class="nav-dd-t">Security</span><span class="nav-dd-s">How we protect your data</span></span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <a href="site/onboarding/" class="nav-link mob-only" onclick="closeNav()">Get Started</a>
     </div>
 
@@ -1754,7 +1941,7 @@
     <div class="wf-wrap">
       <div class="wf-intro reveal">
         <span class="wf-eyebrow-top">Built for your workflow</span>
-        <h2 class="wf-h2">Custom-built for the way your business handles leads.</h2>
+        <h2 class="wf-h2">Custom-built for the way your business operates.</h2>
         <p class="wf-sub">Flowaify adapts to different industry workflows by helping your team respond faster, follow up consistently, and close more business.</p>
       </div>
 
@@ -2469,7 +2656,7 @@
       <div class="bts-top">
         <div class="bts-copy reveal">
           <span class="bts-eyebrow">Built to scale</span>
-          <h2 class="bts-h2">Built for serious lead volume.</h2>
+          <h2 class="bts-h2">Built for enterprise-level scale.</h2>
           <p class="bts-lead">Ready for more users, clients, messages, and workflows as you grow.</p>
           <p class="bts-body">Flowaify is designed to support high-volume lead workflows across multiple clients, users, messages, and automations &mdash; without forcing your team to manage the system manually.</p>
         </div>
@@ -2746,7 +2933,7 @@
     <div class="wf-wrap">
       <div class="wf-intro reveal">
         <span class="wf-eyebrow">Built for you, end to end</span>
-        <h2 class="wf-h2">From first access to lasting impact.</h2>
+        <h2 class="wf-h2">How you get set up.</h2>
         <p class="wf-sub">We handle the setup, build the right system, and keep it running &mdash; so your team can stay focused on what matters.</p>
       </div>
 
@@ -3248,32 +3435,73 @@ function toggleNav() {
     ? '<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>'  // X
     : '<line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>'; // bars
 }
-function closeProductMenu() {
-  var dd = document.getElementById('nav-dd');
-  if (!dd) return;
-  dd.classList.remove('open');
-  var t = dd.querySelector('.nav-dd-trigger');
-  if (t) t.setAttribute('aria-expanded', 'false');
-}
-function toggleProductMenu(e) {
-  e.stopPropagation();
-  var dd = document.getElementById('nav-dd');
-  var open = dd.classList.toggle('open');
-  dd.querySelector('.nav-dd-trigger').setAttribute('aria-expanded', open ? 'true' : 'false');
-}
+// ─── MEGA DROPDOWNS ──────────────────────────────────────────────────────────
+// Desktop: hover-intent open with a short close delay, so sliding between
+// triggers swaps panels instantly but a diagonal move to the panel forgives.
+// Mobile: the same markup behaves as one-at-a-time accordions.
+var navDD = (function () {
+  var dds = Array.prototype.slice.call(document.querySelectorAll('.nav-dd'));
+  var links = document.getElementById('navbar-links');
+  var closeTimer = null, switchTimer = null;
+  var desktop = function () { return window.matchMedia('(min-width: 769px) and (pointer: fine)').matches; };
+
+  function setOpen(dd, open) {
+    dd.classList.toggle('open', open);
+    var t = dd.querySelector('.nav-dd-trigger');
+    if (t) t.setAttribute('aria-expanded', open ? 'true' : 'false');
+  }
+  function anyOpen() {
+    return dds.some(function (d) { return d.classList.contains('open'); });
+  }
+  function closeAll() {
+    clearTimeout(closeTimer); clearTimeout(switchTimer);
+    dds.forEach(function (dd) { setOpen(dd, false); });
+    if (links) links.classList.remove('dd-switching');
+  }
+  function open(dd) {
+    clearTimeout(closeTimer);
+    // Going straight from one open menu to another reads as a swap, not a
+    // fresh open — flag it so the panel cross-fades instead of re-animating.
+    if (links && desktop() && anyOpen() && !dd.classList.contains('open')) {
+      clearTimeout(switchTimer);
+      links.classList.add('dd-switching');
+      switchTimer = setTimeout(function () { links.classList.remove('dd-switching'); }, 220);
+    }
+    dds.forEach(function (d) { setOpen(d, d === dd); });
+  }
+
+  dds.forEach(function (dd) {
+    var trigger = dd.querySelector('.nav-dd-trigger');
+
+    if (trigger) {
+      trigger.addEventListener('click', function (e) {
+        e.stopPropagation();
+        if (dd.classList.contains('open')) closeAll(); else open(dd);
+      });
+    }
+
+    dd.addEventListener('mouseenter', function () { if (desktop()) open(dd); });
+    dd.addEventListener('mouseleave', function () {
+      if (!desktop()) return;
+      clearTimeout(closeTimer);
+      closeTimer = setTimeout(closeAll, 140);
+    });
+  });
+
+  return { closeAll: closeAll };
+})();
+function closeProductMenu() { navDD.closeAll(); }
 function closeNav() {
   var links = document.getElementById('navbar-links');
   var icon  = document.getElementById('ham-icon');
   links.classList.remove('nav-open');
   icon.innerHTML = '<line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>';
-  closeProductMenu();
+  navDD.closeAll();
 }
-// close nav / dropdown when clicking outside
+// close nav / dropdowns when clicking outside
 document.addEventListener('click', function(e) {
   var nav = document.getElementById('navbar');
   if (nav && !nav.contains(e.target)) closeNav();
-  var dd = document.getElementById('nav-dd');
-  if (dd && !dd.contains(e.target)) closeProductMenu();
 });
 document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeNav(); });
 
@@ -3303,22 +3531,28 @@ updateNavHero();
 
 // ─── NAV ACTIVE STATE (aria-current) ─────────────────────────────────────────
 (function () {
-  var faqLink = document.querySelector('#navbar-links a.nav-link[href="#faq"]');
-  var ddTrigger = document.querySelector('#nav-dd .nav-dd-trigger');
-  var productSecs = ['workspace', 'who-for', 'built-to-scale'];
+  // section id -> which top-level trigger lights up while it's on screen
+  var SECTION_MENU = {
+    'workspace': 'platform', 'who-for': 'platform', 'built-to-scale': 'platform', 'try-it': 'platform',
+    'why-flowaify': 'resources', 'faq': 'resources'
+  };
+  var triggers = {};
+  document.querySelectorAll('#navbar-links .nav-dd').forEach(function (dd) {
+    var t = dd.querySelector('.nav-dd-trigger');
+    if (t && dd.dataset.dd) triggers[dd.dataset.dd] = t;
+  });
   function clearActive() {
-    if (faqLink) faqLink.removeAttribute('aria-current');
-    if (ddTrigger) ddTrigger.classList.remove('nav-active');
+    Object.keys(triggers).forEach(function (k) { triggers[k].classList.remove('nav-active'); });
   }
   var obs = new IntersectionObserver(function (entries) {
     entries.forEach(function (e) {
       if (!e.isIntersecting) return;
       clearActive();
-      if (e.target.id === 'faq') { if (faqLink) faqLink.setAttribute('aria-current', 'page'); }
-      else if (productSecs.indexOf(e.target.id) >= 0) { if (ddTrigger) ddTrigger.classList.add('nav-active'); }
+      var t = triggers[SECTION_MENU[e.target.id]];
+      if (t) t.classList.add('nav-active');
     });
   }, { rootMargin: '-50% 0px -50% 0px' });
-  productSecs.concat(['faq']).forEach(function (id) { var el = document.getElementById(id); if (el) obs.observe(el); });
+  Object.keys(SECTION_MENU).forEach(function (id) { var el = document.getElementById(id); if (el) obs.observe(el); });
 })();
 
 // ─── BOOT ANIMATION (white dot matrix) ──────────────────────────────────────
